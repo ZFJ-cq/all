@@ -1,0 +1,553 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>完全平方公式 · 几何证明实验室 | (a+b)² = a²+2ab+b²</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: radial-gradient(circle at 10% 20%, #0e1f2c, #030c14);
+            font-family: 'Segoe UI', 'Poppins', 'Roboto', system-ui, sans-serif;
+            min-height: 100vh;
+            padding: 24px 20px;
+            color: #eef4ff;
+        }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .title-area {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+        h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #f3da8b, #f5b042);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.3px;
+        }
+        .sub {
+            color: #9cc6e5;
+            font-size: 0.85rem;
+            border-bottom: 1px solid #3a7892;
+            display: inline-block;
+            padding-bottom: 5px;
+        }
+
+        /* 左右布局 */
+        .lab-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            align-items: stretch;
+        }
+
+        /* 左侧画布区 */
+        .canvas-area {
+            flex: 2;
+            min-width: 320px;
+            background: rgba(8, 35, 52, 0.7);
+            backdrop-filter: blur(8px);
+            border-radius: 36px;
+            border: 1px solid rgba(70, 170, 210, 0.5);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .canvas-wrapper {
+            background: #041722;
+            border-radius: 28px;
+            padding: 8px;
+            box-shadow: inset 0 0 10px rgba(0,200,255,0.1), 0 12px 25px rgba(0,0,0,0.4);
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            background: #0e2634;
+            border-radius: 24px;
+            cursor: pointer;
+        }
+        .formula-preview {
+            background: #0b2e3f;
+            border-radius: 28px;
+            padding: 14px;
+            text-align: center;
+            font-size: 1rem;
+            border: 1px solid #4f8daa;
+        }
+
+        /* 右侧控制区 */
+        .control-area {
+            flex: 1.2;
+            min-width: 280px;
+            background: rgba(18, 55, 75, 0.8);
+            backdrop-filter: blur(12px);
+            border-radius: 36px;
+            border: 1px solid rgba(100, 190, 230, 0.5);
+            padding: 22px 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .param-card {
+            background: rgba(0, 32, 48, 0.7);
+            border-radius: 28px;
+            padding: 18px;
+            border: 1px solid #3282a2;
+        }
+        .param-title {
+            font-weight: 600;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            color: #ffdb8e;
+        }
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        .slider-group span {
+            width: 70px;
+            font-size: 0.85rem;
+        }
+        input[type="range"] {
+            flex: 2;
+            min-width: 120px;
+            height: 4px;
+            border-radius: 6px;
+            background: #316e8a;
+            -webkit-appearance: none;
+        }
+        input[type="range"]:focus {
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            width: 16px;
+            height: 16px;
+            background: #ffbc5e;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 4px #ffaa33;
+            border: none;
+        }
+        .num-input {
+            width: 75px;
+            background: #042231;
+            border: 1px solid #368eb0;
+            border-radius: 40px;
+            padding: 6px 8px;
+            color: white;
+            text-align: center;
+            font-family: monospace;
+        }
+        .option-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 8px;
+        }
+        .check-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        button {
+            background: linear-gradient(105deg, #2d7ca0, #195e7e);
+            border: none;
+            padding: 10px 0;
+            border-radius: 60px;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.85rem;
+            margin-top: 8px;
+        }
+        button.primary {
+            background: linear-gradient(105deg, #e1982e, #c06e17);
+        }
+        button:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.05);
+        }
+        .value-show {
+            font-size: 0.8rem;
+            background: #072e3f;
+            border-radius: 20px;
+            padding: 8px;
+            text-align: center;
+            margin-top: 8px;
+        }
+        footer {
+            text-align: center;
+            font-size: 0.7rem;
+            color: #83abc7;
+            margin-top: 30px;
+            border-top: 1px solid #2e708a;
+            padding-top: 18px;
+        }
+        @media (max-width: 800px) {
+            .lab-row { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+<div class="main-container">
+    <div class="title-area">
+        <h1>📐 完全平方公式 · 几何证明实验室</h1>
+        <div class="sub">(a+b)² = a² + 2ab + b² &nbsp; | &nbsp; 动态分割 · 直观理解代数本质</div>
+    </div>
+
+    <div class="lab-row">
+        <!-- 左侧画布区 -->
+        <div class="canvas-area">
+            <div class="canvas-wrapper">
+                <canvas id="squareCanvas" width="600" height="600" style="width:100%; height:auto; aspect-ratio:600/600"></canvas>
+            </div>
+            <div class="formula-preview" id="formulaValue">
+                📐 (a+b)² = <span id="sumSquare">0.00</span> cm² &nbsp; = &nbsp;
+                <span id="aSquare">0.00</span> + <span id="abTerm">0.00</span> + <span id="bSquare">0.00</span>
+            </div>
+        </div>
+
+        <!-- 右侧控制区 -->
+        <div class="control-area">
+            <div class="param-card">
+                <div class="param-title">🎛️ 参数调节</div>
+                <div class="slider-group">
+                    <span>边长 a:</span>
+                    <input type="range" id="aSlider" min="1.0" max="6.0" step="0.1" value="3.0">
+                    <input type="number" id="aNum" class="num-input" step="0.1" value="3.0">
+                    <span>cm</span>
+                </div>
+                <div class="slider-group">
+                    <span>边长 b:</span>
+                    <input type="range" id="bSlider" min="1.0" max="6.0" step="0.1" value="2.0">
+                    <input type="number" id="bNum" class="num-input" step="0.1" value="2.0">
+                    <span>cm</span>
+                </div>
+            </div>
+
+            <div class="param-card">
+                <div class="param-title">🎨 显示选项</div>
+                <div class="option-group">
+                    <label class="check-label">
+                        <input type="checkbox" id="showAreaCheck" checked> 📏 显示面积
+                    </label>
+                    <label class="check-label">
+                        <input type="checkbox" id="showLabelCheck" checked> 🏷️ 显示标签
+                    </label>
+                    <label class="check-label">
+                        <input type="checkbox" id="showGridCheck" checked> 🔲 显示网格
+                    </label>
+                </div>
+            </div>
+
+            <div class="param-card">
+                <div class="param-title">🎬 动画演示</div>
+                <button id="animateBtn" class="primary">▶ 开始动画 (a,b 渐变)</button>
+                <div class="value-show" id="animHint">
+                    💡 动画将在a/b之间交替变化，展示公式几何魅力
+                </div>
+            </div>
+
+            <div class="param-card">
+                <div class="param-title">📖 几何证明原理</div>
+                <div style="font-size: 0.75rem; line-height: 1.4;">
+                    大正方形边长为 \( a+b \)，面积 = \((a+b)^2\)。<br>
+                    🟥 红色区域: \( a^2 \) &nbsp;&nbsp; 🟩 绿色矩形: \( 2 \times ab \)<br>
+                    🟦 蓝色区域: \( b^2 \)<br>
+                    总面积 = \( a^2 + 2ab + b^2 \)<br>
+                    ⇒ 代数恒等式得证。
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer>
+        🖱️ 拖拽滑块或输入数值 → 实时分割大正方形 | 面积显示帮助理解公式 | 动画自动演示参数变化
+    </footer>
+</div>
+
+<script>
+    (function() {
+        // 获取canvas元素
+        const canvas = document.getElementById('squareCanvas');
+        const ctx = canvas.getContext('2d');
+        const size = 600;          // 固定画布大小 600x600
+        canvas.width = size;
+        canvas.height = size;
+
+        // DOM 元素
+        const aSlider = document.getElementById('aSlider');
+        const aNum = document.getElementById('aNum');
+        const bSlider = document.getElementById('bSlider');
+        const bNum = document.getElementById('bNum');
+        const showAreaCheck = document.getElementById('showAreaCheck');
+        const showLabelCheck = document.getElementById('showLabelCheck');
+        const showGridCheck = document.getElementById('showGridCheck');
+        const animateBtn = document.getElementById('animateBtn');
+        const sumSquareSpan = document.getElementById('sumSquare');
+        const aSquareSpan = document.getElementById('aSquare');
+        const abTermSpan = document.getElementById('abTerm');
+        const bSquareSpan = document.getElementById('bSquare');
+
+        // 当前边长 (cm) 实际映射到画布像素：比例因子，保留一定边距
+        let a = 3.0;
+        let b = 2.0;
+        let animationId = null;
+        let isAnimating = false;
+        let animDirection = 1;   // 用于动画: 1=增加a, -1=减少a等模式，简洁起见让a,b在1~5.5间往返
+
+        // 实际绘制时的边长映射: 最大边长 (a+b) 不能超出画布可用区域，留白40px边距
+        const maxDrawSize = size - 60;   // 540px 用于边长总和
+        function getScale() {
+            let sum = a + b;
+            return maxDrawSize / sum;
+        }
+
+        // 更新显示数值 (面积)
+        function updateNumbers() {
+            let sum = a + b;
+            let sumSq = sum * sum;
+            let aSq = a * a;
+            let bSq = b * b;
+            let ab2 = 2 * a * b;
+            sumSquareSpan.innerText = sumSq.toFixed(2);
+            aSquareSpan.innerText = aSq.toFixed(2);
+            abTermSpan.innerText = ab2.toFixed(2);
+            bSquareSpan.innerText = bSq.toFixed(2);
+        }
+
+        // 绘制整个图形 (大正方形被分割为a², b², 和两个ab矩形)
+        function drawSquare() {
+            ctx.clearRect(0, 0, size, size);
+
+            // 背景科技网格
+            if (showGridCheck.checked) {
+                ctx.save();
+                ctx.strokeStyle = "#2a6f8a";
+                ctx.lineWidth = 0.5;
+                for (let i = 0; i < size; i += 30) {
+                    ctx.beginPath();
+                    ctx.moveTo(i, 0);
+                    ctx.lineTo(i, size);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(0, i);
+                    ctx.lineTo(size, i);
+                    ctx.stroke();
+                }
+                ctx.restore();
+            }
+
+            const scale = getScale();
+            const offset = (size - (a + b) * scale) / 2;   // 居中对齐
+            const aPx = a * scale;
+            const bPx = b * scale;
+
+            // 四个区域:
+            // 大正方形左下角起点 (offset, offset)
+            const startX = offset;
+            const startY = offset;
+            // 绘制区域填充
+            // 1. 左下角 a x a 正方形 (红色区域)
+            ctx.fillStyle = "rgba(235, 100, 80, 0.75)";
+            ctx.fillRect(startX, startY + bPx, aPx, aPx);
+            // 2. 右上角 b x b 正方形 (蓝色区域)
+            ctx.fillStyle = "rgba(70, 150, 230, 0.75)";
+            ctx.fillRect(startX + aPx, startY, bPx, bPx);
+            // 3. 左上矩形 a x b (绿色区域, 两个中的一个)
+            ctx.fillStyle = "rgba(100, 200, 110, 0.7)";
+            ctx.fillRect(startX, startY, aPx, bPx);
+            // 4. 右下矩形 b x a (另一个绿色矩形)
+            ctx.fillStyle = "rgba(100, 200, 110, 0.7)";
+            ctx.fillRect(startX + aPx, startY + bPx, bPx, aPx);
+            
+            // 边框 + 分割线
+            ctx.beginPath();
+            ctx.strokeStyle = "#ffdd99";
+            ctx.lineWidth = 2;
+            // 外边框
+            ctx.strokeRect(startX, startY, aPx + bPx, aPx + bPx);
+            // 内部分割线
+            ctx.beginPath();
+            ctx.moveTo(startX + aPx, startY);
+            ctx.lineTo(startX + aPx, startY + aPx + bPx);
+            ctx.moveTo(startX, startY + bPx);
+            ctx.lineTo(startX + aPx + bPx, startY + bPx);
+            ctx.stroke();
+
+            // 显示标签 (a, b, a+b, 面积等)
+            if (showLabelCheck.checked) {
+                ctx.font = "bold 14px 'Segoe UI'";
+                ctx.fillStyle = "#ffffff";
+                ctx.shadowBlur = 0;
+                // 标注边长 a, b 在相应边上
+                ctx.fillStyle = "#ffda99";
+                ctx.font = "bold 14px monospace";
+                ctx.fillText(`a = ${a.toFixed(1)} cm`, startX + aPx/2 - 20, startY + bPx + aPx + 10);
+                ctx.fillText(`a`, startX + aPx/2 - 6, startY + bPx + aPx - 6);
+                ctx.fillText(`b = ${b.toFixed(1)} cm`, startX + aPx + bPx/2 - 20, startY + bPx/2);
+                ctx.fillText(`b`, startX + aPx + bPx - 10, startY + bPx/2 + 5);
+                
+                // 标注整个边长 a+b
+                ctx.fillStyle = "#ffecb3";
+                ctx.font = "italic 12px 'Segoe UI'";
+                ctx.fillText(`a+b = ${(a+b).toFixed(1)} cm`, startX + (aPx+bPx)/2 - 30, startY - 8);
+                // 各区域面积标注
+                if (showAreaCheck.checked) {
+                    ctx.font = "11px monospace";
+                    ctx.fillStyle = "#fff5e0";
+                    // a²区域
+                    ctx.fillText(`${a.toFixed(1)}² = ${(a*a).toFixed(1)}`, startX + aPx/2 - 20, startY + bPx + aPx/2);
+                    // b²区域
+                    ctx.fillText(`${b.toFixed(1)}² = ${(b*b).toFixed(1)}`, startX + aPx + bPx/2 - 20, startY + bPx/2);
+                    // 矩形ab区域 (上下)
+                    ctx.fillStyle = "#ddf3c0";
+                    ctx.fillText(`a·b = ${(a*b).toFixed(2)}`, startX + aPx/2 - 20, startY + bPx/2 - 6);
+                    ctx.fillText(`a·b = ${(a*b).toFixed(2)}`, startX + aPx + bPx/2 - 20, startY + bPx + aPx/2 + 4);
+                }
+            }
+
+            // 如果显示面积额外显示总面积的数值
+            if (showAreaCheck.checked) {
+                ctx.font = "bold 16px 'Segoe UI'";
+                ctx.fillStyle = "#ffe3a3";
+                ctx.shadowBlur = 2;
+                ctx.fillText(`总面积 = ${(a+b)*(a+b).toFixed(2)} cm²`, startX + 15, startY - 15);
+                ctx.fillStyle = "#ffd966";
+                ctx.font = "12px monospace";
+                ctx.fillText(`(a+b)² = ${(a+b).toFixed(2)}² = ${((a+b)*(a+b)).toFixed(2)}`, startX + 15, startY + (aPx+bPx) + 20);
+            }
+        }
+
+        // 刷新全部（数值+重绘）
+        function refresh() {
+            a = parseFloat(aSlider.value);
+            b = parseFloat(bSlider.value);
+            // 约束范围
+            a = Math.min(6.0, Math.max(1.0, a));
+            b = Math.min(6.0, Math.max(1.0, b));
+            aSlider.value = a;
+            bSlider.value = b;
+            aNum.value = a.toFixed(1);
+            bNum.value = b.toFixed(1);
+            updateNumbers();
+            drawSquare();
+        }
+
+        // 绑定控制事件
+        function bindEvents() {
+            aSlider.addEventListener('input', () => {
+                a = parseFloat(aSlider.value);
+                aNum.value = a.toFixed(1);
+                refresh();
+            });
+            aNum.addEventListener('change', () => {
+                let val = parseFloat(aNum.value);
+                if (isNaN(val)) val = 1.0;
+                val = Math.min(6.0, Math.max(1.0, val));
+                aSlider.value = val;
+                aNum.value = val.toFixed(1);
+                refresh();
+            });
+            bSlider.addEventListener('input', () => {
+                b = parseFloat(bSlider.value);
+                bNum.value = b.toFixed(1);
+                refresh();
+            });
+            bNum.addEventListener('change', () => {
+                let val = parseFloat(bNum.value);
+                if (isNaN(val)) val = 1.0;
+                val = Math.min(6.0, Math.max(1.0, val));
+                bSlider.value = val;
+                bNum.value = val.toFixed(1);
+                refresh();
+            });
+            showAreaCheck.addEventListener('change', () => refresh());
+            showLabelCheck.addEventListener('change', () => refresh());
+            showGridCheck.addEventListener('change', () => refresh());
+        }
+
+        // 动画演示: 让a和b在正弦变化周期移动 (模拟动态展示)
+        function startAnimation() {
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+            isAnimating = true;
+            let startTime = performance.now();
+            const duration = 10000; // 10秒完整周期
+            function animateStep(timestamp) {
+                if (!isAnimating) return;
+                const elapsed = (timestamp - startTime) / 1000;
+                // 使用正弦让a和b在1~5.5之间平滑变化，且保持互补感
+                let phase = elapsed * 0.8;   // 减缓速度
+                let newA = 2.5 + 2.2 * Math.sin(phase);
+                let newB = 2.5 + 2.2 * Math.sin(phase + Math.PI/1.5);
+                newA = Math.min(5.8, Math.max(1.2, newA));
+                newB = Math.min(5.8, Math.max(1.2, newB));
+                aSlider.value = newA.toFixed(1);
+                bSlider.value = newB.toFixed(1);
+                aNum.value = newA.toFixed(1);
+                bNum.value = newB.toFixed(1);
+                refresh();
+                animationId = requestAnimationFrame(animateStep);
+            }
+            animationId = requestAnimationFrame(animateStep);
+        }
+
+        function stopAnimation() {
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+            isAnimating = false;
+        }
+
+        // 动画按钮交互: 开始或停止
+        function toggleAnimation() {
+            if (isAnimating) {
+                stopAnimation();
+                animateBtn.textContent = "▶ 开始动画 (a,b 渐变)";
+                animateBtn.style.background = "linear-gradient(105deg, #e1982e, #c06e17)";
+            } else {
+                startAnimation();
+                animateBtn.textContent = "⏸ 停止动画";
+                animateBtn.style.background = "linear-gradient(105deg, #bf6f32, #a1581e)";
+            }
+        }
+
+        // 窗口尺寸和初始绘制
+        function init() {
+            bindEvents();
+            refresh();
+            animateBtn.addEventListener('click', toggleAnimation);
+        }
+        
+        init();
+    })();
+</script>
+</body>
+</html>

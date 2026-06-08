@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>灵月仙途</title>
+  <style>
+    /* ========== 基础样式 ========== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Microsoft YaHei', 'SimSun', sans-serif;
+    }
+    body {
+      background: linear-gradient(135deg, #0a0e17, #1a1f35);
+      color: #e0e0ff;
+      min-height: 100vh;
+      padding: 20px;
+      background-attachment: fixed;
+      overflow-x: hidden;
+    }
+    .game-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: rgba(10, 15, 30, 0.85);
+      border: 1px solid #4a5568;
+      border-radius: 12px;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
+      overflow: hidden;
+    }
+
+    /* ========== 角色创建面板 ========== */
+    #creationPanel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 60px 20px;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0a0e17, #1a1f35);
+    }
+    .creation-title {
+      font-size: 2.8rem;
+      margin-bottom: 20px;
+      color: #4cc9f0;
+      text-shadow: 0 0 15px rgba(76, 201, 240, 0.6);
+    }
+    .creation-subtitle {
+      font-size: 1.2rem;
+      color: #81ecec;
+      margin-bottom: 50px;
+      max-width: 700px;
+    }
+    .origins-container {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      flex-wrap: wrap;
+      max-width: 900px;
+    }
+    .origin-card {
+      width: 240px;
+      padding: 25px;
+      background: rgba(26, 42, 108, 0.6);
+      border: 2px solid transparent;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .origin-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 200%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(76, 201, 240, 0.2), transparent);
+      transition: left 0.5s;
+    }
+    .origin-card:hover::before {
+      left: 100%;
+    }
+    .origin-card.selected {
+      border-color: #4cc9f0;
+      transform: translateY(-8px);
+      box-shadow: 0 10px 25px rgba(76, 201, 240, 0.4);
+    }
+    .origin-card h3 {
+      font-size: 1.4rem;
+      color: #4cc9f0;
+      margin-bottom: 12px;
+    }
+    .origin-card p {
+      font-size: 0.95rem;
+      color: #b0c4de;
+      line-height: 1.5;
+      margin: 6px 0;
+    }
+    #confirmOrigin {
+      margin-top: 50px;
+      padding: 12px 40px;
+      background: linear-gradient(to bottom, #2c3e50, #1a2a6c);
+      color: #666;
+      border: none;
+      border-radius: 30px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: not-allowed;
+      transition: all 0.3s;
+      letter-spacing: 1px;
+    }
+    #confirmOrigin:not(:disabled) {
+      color: #e0e0ff;
+      cursor: pointer;
+      background: linear-gradient(to right, #3498db, #1a2a6c);
+      box-shadow: 0 0 15px rgba(52, 152, 219, 0.5);
+    }
+    #confirmOrigin:not(:disabled):hover {
+      transform: scale(1.05);
+    }
+
+    /* ========== 主游戏界面 ========== */
+    #mainGame {
+      display: none;
+    }
+    header {
+      background: linear-gradient(to right, #1a2a6c, #2c3e50);
+      padding: 15px 30px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    header h1 {
+      font-size: 2.2rem;
+      margin-bottom: 5px;
+      text-shadow: 0 0 10px rgba(100, 150, 255, 0.7);
+      letter-spacing: 2px;
+    }
+    .subtitle {
+      font-size: 1.1rem;
+      color: #81ecec;
+      margin-top: 5px;
+      text-shadow: 0 0 5px rgba(100, 150, 255, 0.5);
+    }
+
+    /* ========== 状态栏 ========== */
+    .status-bar {
+      display: flex;
+      justify-content: space-around;
+      padding: 12px 20px;
+      background: #1a2a6c;
+      border-bottom: 1px solid #2c3e50;
+    }
+    .status-item {
+      text-align: center;
+    }
+    .status-value {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #4cc9f0;
+    }
+    .status-label {
+      font-size: 0.8rem;
+      color: #a0aec0;
+      margin-top: 3px;
+    }
+
+    /* ========== 主体布局 ========== */
+    .game-content {
+      display: flex;
+      min-height: 600px;
+    }
+    .sidebar {
+      width: 220px;
+      background: #1a2a6c;
+      padding: 20px 15px;
+      border-right: 1px solid #2c3e50;
+    }
+    @media (max-width: 900px) {
+      .game-content {
+        flex-direction: column;
+      }
+      .sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #2c3e50;
+      }
+    }
+    .sidebar h2 {
+      font-size: 1.3rem;
+      margin-bottom: 15px;
+      color: #4cc9f0;
+      text-align: center;
+    }
+    .sidebar-menu {
+      list-style: none;
+    }
+    .sidebar-menu li {
+      margin-bottom: 8px;
+    }
+    .sidebar-menu a {
+      display: block;
+      padding: 10px 15px;
+      background: #2c3e50;
+      border-radius: 6px;
+      color: #e0e0ff;
+      text-decoration: none;
+      transition: all 0.2s;
+      font-weight: 500;
+      text-align: center;
+    }
+    .sidebar-menu a:hover {
+      background: #3498db;
+      transform: translateX(2px);
+    }
+    .sidebar-menu a.active {
+      background: #4cc9f0;
+      color: #1a2a6c;
+      font-weight: bold;
+    }
+
+    .main-content {
+      flex: 1;
+      padding: 25px;
+      overflow-y: auto;
+    }
+
+    /* ========== 区块通用 ========== */
+    .section {
+      background: #1a2a6c;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 25px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+      display: none;
+    }
+    #home-section {
+      display: block;
+    }
+    .section-title {
+      font-size: 1.5rem;
+      color: #4cc9f0;
+      margin-bottom: 15px;
+      position: relative;
+      padding-left: 10px;
+    }
+    .section-title::before {
+      content: "✦";
+      position: absolute;
+      left: 0;
+      color: #d4af37;
+    }
+
+    /* ========== 角色信息 ========== */
+    .character-info {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+      padding: 15px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+    }
+    .character-portrait {
+      width: 100px;
+      height: 100px;
+      background: linear-gradient(135deg, #1a2a6c, #2c3e50);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 20px;
+      border: 2px solid #4cc9f0;
+      box-shadow: 0 0 10px rgba(76, 201, 240, 0.4);
+    }
+    .character-portrait img {
+      width: 90%;
+      height: 90%;
+      object-fit: cover;
+      border-radius: 50%;
+      border: 1px solid #4cc9f0;
+    }
+    .character-details h3 {
+      font-size: 1.6rem;
+      color: #4cc9f0;
+      margin-bottom: 5px;
+    }
+    .realm {
+      font-size: 1.1rem;
+      color: #4cc9f0;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+    }
+    .realm::before {
+      content: "";
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background: #4cc9f0;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+
+    /* ========== 属性网格 ========== */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 12px;
+      margin-top: 20px;
+    }
+    .stat-item {
+      background: #2c3e50;
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+      transition: all 0.3s;
+      border: 1px solid #4a5568;
+    }
+    .stat-item:hover {
+      background: #3498db;
+      transform: translateY(-3px);
+    }
+    .stat-value {
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: #4cc9f0;
+    }
+    .stat-label {
+      font-size: 0.85rem;
+      color: #a0aec0;
+    }
+
+    /* ========== 操作按钮 ========== */
+    .action-buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      flex: 1;
+      min-width: 110px;
+      padding: 12px;
+      background: linear-gradient(to bottom, #2c3e50, #1a2a6c);
+      border: none;
+      border-radius: 8px;
+      color: #e0e0ff;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .btn:hover {
+      background: linear-gradient(to bottom, #3498db, #1a2a6c);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+    }
+    .btn-success {
+      background: linear-gradient(to bottom, #27ae60, #1a2a6c);
+    }
+    .btn-success:hover {
+      background: linear-gradient(to bottom, #2ecc71, #1a2a6c);
+    }
+    .btn-danger {
+      background: linear-gradient(to bottom, #e74c3c, #1a2a6c);
+    }
+    .btn-danger:hover {
+      background: linear-gradient(to bottom, #c0392b, #1a2a6c);
+    }
+
+    /* ========== 修为进度条 ========== */
+    .progress-bar {
+      height: 6px;
+      background: #4a5568;
+      border-radius: 3px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(to right, #4cc9f0, #3498db);
+      border-radius: 3px;
+    }
+
+    /* ========== 职业提示 ========== */
+    .profession-hint {
+      margin-top: 15px;
+      color: #81ecec;
+      font-size: 0.95rem;
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    /* ========== 战斗日志 ========== */
+    .battle-log {
+      background: #1a2a6c;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 20px;
+      max-height: 180px;
+      overflow-y: auto;
+      font-size: 0.95rem;
+    }
+    .log-entry {
+      margin-bottom: 6px;
+      padding-bottom: 6px;
+      border-bottom: 1px dashed #2c3e50;
+      color: #e0e0ff;
+    }
+    .log-entry .time {
+      color: #4cc9f0;
+      font-weight: bold;
+      margin-right: 5px;
+    }
+
+    /* ========== 功能模块 ========== */
+    .skill-list, .task-list {
+      margin-top: 15px;
+    }
+    .skill-card, .task-item {
+      background: #2c3e50;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+      border-left: 3px solid #4cc9f0;
+    }
+    .task-item.completed {
+      border-left-color: #2ecc71;
+    }
+    .skill-name, .task-title {
+      font-weight: bold;
+      color: #4cc9f0;
+      margin-bottom: 5px;
+    }
+
+    /* ========== 背包 ========== */
+    .grid-backpack {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 6px;
+      padding: 0 10px 16px;
+    }
+    .grid-item {
+      aspect-ratio: 1;
+      background: #1e2535;
+      border: 1px solid #3a4255;
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+    .grid-item:hover:not(.empty-slot) {
+      border-color: #d4af37;
+      background: rgba(212, 175, 55, 0.15);
+    }
+    .grid-icon {
+      font-size: 1.2rem;
+      margin-bottom: 2px;
+    }
+    .grid-count {
+      position: absolute;
+      bottom: 2px;
+      right: 2px;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 0 4px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+    }
+    .empty-slot {
+      background: #151a25;
+    }
+    .resource-bar {
+      display: flex;
+      justify-content: space-around;
+      padding: 12px 20px;
+      background: #1e2535;
+      border-top: 1px solid #3a4255;
+      font-size: 0.95rem;
+    }
+    .res-value {
+      font-weight: bold;
+      color: #d4af37;
+      font-size: 1.1rem;
+    }
+    .res-label {
+      color: #a0aec0;
+      font-size: 0.85rem;
+    }
+
+    /* ========== 物品详情模态框 ========== */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: #1a2a6c;
+      padding: 25px;
+      border-radius: 12px;
+      width: 350px;
+      max-width: 90%;
+      color: #e0e0ff;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    }
+    .modal-title {
+      font-size: 1.4rem;
+      margin-bottom: 15px;
+      color: #4cc9f0;
+    }
+    .modal-desc {
+      margin-bottom: 15px;
+      line-height: 1.5;
+    }
+    .modal-action {
+      text-align: right;
+    }
+    .close-btn {
+      background: #e74c3c;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    /* ========== 通知 ========== */
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #2c3e50;
+      color: #e0e0ff;
+      padding: 15px 25px;
+      border-radius: 8px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      transform: translateX(150%);
+      transition: transform 0.3s ease;
+      border-left: 3px solid #4cc9f0;
+      max-width: 300px;
+      word-break: break-word;
+    }
+    .notification.show {
+      transform: translateX(0);
+    }
+    .notification.success { border-left-color: #2ecc71; }
+    .notification.warning { border-left-color: #f39c12; }
+    .notification.error { border-left-color: #e74c3c; }
+
+    /* ========== 页脚 ========== */
+    .footer {
+      text-align: center;
+      padding: 20px;
+      color: #a0aec0;
+      font-size: 0.9rem;
+      border-top: 1px solid #2c3e50;
+    }
+  </style>
+</head>
+<body>
+  <!-- 角色创建面板 -->
+  <div id="creationPanel">
+    <h1 class="creation-title">灵月仙途</h1>
+    <p class="creation-subtitle">九洲四海，灵气复苏。你将从何而来？又将走向何方？</p>
+    <div class="origins-container">
+      <div class="origin-card" data-origin="orphan" data-stones="10">
+        <h3>山村孤儿</h3>
+        <p>心志坚定，心魔抗性+20%</p>
+        <p>初始：10灵石，粗布衣</p>
+      </div>
+      <div class="origin-card" data-origin="fallen" data-stones="50">
+        <h3>没落世家</h3>
+        <p>家传玉佩，灵力+5</p>
+        <p>初始：50灵石，家族人脉</p>
+      </div>
+      <div class="origin-card" data-origin="sect" data-stones="100">
+        <h3>宗门子弟</h3>
+        <p>同门照拂，基础功法</p>
+        <p>初始：100灵石，宗门令牌</p>
+      </div>
+    </div>
+    <button id="confirmOrigin" disabled>选择出身以继续</button>
+  </div>
+
+  <!-- 主游戏界面 -->
+  <div id="mainGame" class="game-container">
+    <header>
+      <h1>灵月仙途</h1>
+      <div class="subtitle">九洲四海，修仙问道，一念成仙</div>
+    </header>
+    <div class="status-bar">
+      <div class="status-item">
+        <div class="status-value" id="realm">炼气·初期</div>
+        <div class="status-label">境界</div>
+      </div>
+      <div class="status-item">
+        <div class="status-value" id="spiritStones">0</div>
+        <div class="status-label">灵石</div>
+      </div>
+      <div class="status-item">
+        <div class="status-value" id="health">100/100</div>
+        <div class="status-label">气血</div>
+      </div>
+      <div class="status-item">
+        <div class="status-value" id="mana">80/80</div>
+        <div class="status-label">灵力</div>
+      </div>
+    </div>
+    <div class="game-content">
+      <div class="sidebar">
+        <h2>仙途</h2>
+        <ul class="sidebar-menu">
+          <li><a href="#" class="active" data-section="home">修仙界</a></li>
+          <li><a href="#" data-section="skills">功法</a></li>
+          <li><a href="#" data-section="tasks">任务</a></li>
+          <li><a href="#" data-section="inventory">物品</a></li>
+          <li><a href="#" data-section="combat">战斗</a></li>
+          <li><a href="#" data-section="world">世界</a></li>
+          <li><a href="#" data-section="crafting">炼丹炼器</a></li>
+        </ul>
+      </div>
+      <div class="main-content">
+        <!-- 修仙界 -->
+        <div id="home-section" class="section">
+          <h2 class="section-title">修仙界</h2>
+          <div class="character-info">
+            <div class="character-portrait">
+              <img src="./images/player.png" alt="主角形象" />
+            </div>
+            <div class="character-details">
+              <h3 id="playerName">林清羽</h3>
+              <p class="realm">境界：<span id="realm2">炼气·初期</span></p>
+              <p id="originDesc">出身：-</p>
+              <p id="spiritRoot">灵根：-</p>
+            </div>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-item"><div class="stat-value" id="str">10</div><div class="stat-label">力量</div></div>
+            <div class="stat-item"><div class="stat-value" id="agi">15</div><div class="stat-label">敏捷</div></div>
+            <div class="stat-item"><div class="stat-value" id="con">12</div><div class="stat-label">体质</div></div>
+            <div class="stat-item"><div class="stat-value" id="int">18</div><div class="stat-label">灵力</div></div>
+            <div class="stat-item"><div class="stat-value" id="wis">16</div><div class="stat-label">神识</div></div>
+            <div class="stat-item"><div class="stat-value" id="luck">8</div><div class="stat-label">气运</div></div>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="cultivationBar" style="width:30%"></div>
+          </div>
+          <p style="text-align:center; font-size:0.9rem; color:#a0aec0; margin-top:5px;">
+            修为：<span id="cultivationText">30 / 100</span>
+          </p>
+          <div class="action-buttons">
+            <button class="btn btn-success" id="cultivateBtn">打坐修炼</button>
+            <button class="btn" id="exploreBtn">外出探索</button>
+            <button class="btn" id="restBtn">静心调息</button>
+            <button class="btn btn-danger" id="breakthroughBtn">尝试突破</button>
+          </div>
+          <p class="profession-hint">
+            💡 达到筑基期后可选择职业：<br/>
+            炼丹师 · 炼器师 · 阵法师 · 符箓师
+          </p>
+          <div class="battle-log" id="battleLog">
+            <div class="log-entry"><span class="time">[00:00]</span> 欢迎来到灵月仙途！</div>
+          </div>
+        </div>
+
+        <!-- 功法 -->
+        <div id="skills-section" class="section">
+          <h2 class="section-title">功法</h2>
+          <div class="skill-list">
+            <div class="skill-card">
+              <div class="skill-name">基础吐纳术</div>
+              <div class="skill-desc">最基础的炼气法门，适合初学者。</div>
+              <div class="skill-level">等级：1 | 熟练度：30/100</div>
+            </div>
+            <div class="skill-card">
+              <div class="skill-name">御风步</div>
+              <div class="skill-desc">轻身术，提升移动速度与闪避。</div>
+              <div class="skill-level">等级：0 | 未习得</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 任务 -->
+        <div id="tasks-section" class="section">
+          <h2 class="section-title">任务</h2>
+          <div class="task-list">
+            <div class="task-item completed">
+              <div class="task-title">拜入山门</div>
+              <div class="task-desc">前往青云宗完成入门仪式。</div>
+              <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+            </div>
+            <div class="task-item">
+              <div class="task-title">采集灵草</div>
+              <div class="task-desc">在后山采集3株月华草。</div>
+              <div class="progress-bar"><div class="progress-fill" style="width:40%"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 物品 -->
+        <div id="inventory-section" class="section">
+          <h2 class="section-title">物品</h2>
+          <div class="grid-backpack" id="backpackGrid">
+            <!-- 动态生成 -->
+          </div>
+          <div class="resource-bar">
+            <div class="res-item"><div class="res-value" id="spiritStones2">0</div><div class="res-label">灵石</div></div>
+            <div class="res-item"><div class="res-value">2</div><div class="res-label">丹药</div></div>
+            <div class="res-item"><div class="res-value">1</div><div class="res-label">符箓</div></div>
+          </div>
+        </div>
+
+        <!-- 战斗 -->
+        <div id="combat-section" class="section">
+          <h2 class="section-title">战斗</h2>
+          <p>暂无战斗目标。可外出探索遭遇敌人。</p>
+        </div>
+
+        <!-- 世界 -->
+        <div id="world-section" class="section">
+          <h2 class="section-title">世界</h2>
+          <p>当前位置：青云宗 · 外门弟子居所</p>
+          <p>周边区域：后山灵田、藏经阁、演武场、坊市</p>
+        </div>
+
+        <!-- 炼丹炼器 -->
+        <div id="crafting-section" class="section">
+          <h2 class="section-title">炼丹炼器</h2>
+          <p>尚未解锁炼丹或炼器功能。</p>
+        </div>
+      </div>
+    </div>
+    <div class="footer">© 2026 灵月仙途 · 修仙模拟器 v0.1</div>
+  </div>
+
+  <!-- 物品详情模态框 -->
+  <div class="modal" id="itemModal">
+    <div class="modal-content">
+      <div class="modal-title" id="itemName">物品名称</div>
+      <div class="modal-desc" id="itemDesc">物品描述</div>
+      <div class="modal-action">
+        <button class="close-btn" id="closeModal">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 通知区域 -->
+  <div class="notification" id="notification">提示信息</div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+  // ==================== 游戏数据 ====================
+  const player = {
+    name: "林清羽",
+    realm: "炼气",
+    realmStage: "初",
+    cultivation: 30,
+    cultivationMax: 100,
+    spiritRoot: "-",
+    str: 10,
+    agi: 15,
+    con: 12,
+    int: 18,
+    wis: 16,
+    luck: 8,
+    spiritStones: 0,
+    health: 100,
+    healthMax: 100,
+    mana: 80,
+    manaMax: 80,
+    origin: "",
+    sect: "青云宗",
+    profession: null,
+    professionLevel: 0,
+    tasks: [
+      { id: 1, title: "拜入山门", desc: "前往青云宗完成入门仪式。", progress: 100, completed: true },
+      { id: 2, title: "采集灵草", desc: "在后山采集3株月华草。", progress: 40, completed: false }
+    ],
+    skills: [
+      { name: "基础吐纳术", type: "cultivation", level: 1, exp: 30, maxExp: 100 },
+      { name: "御风步", type: "movement", level: 0, exp: 0, maxExp: 100, unlocked: false }
+    ],
+    inventory: [
+      { id: 1, name: "月华草", icon: "🌿", count: 3, desc: "稀有灵草，可用于炼制疗伤丹药。" },
+      { id: 2, name: "回春丹", icon: "💊", count: 5, desc: "恢复气血的初级丹药。" },
+      { id: 3, name: "火属性符纸", icon: "🔥", count: 1, desc: "可绘制火焰类符箓的材料。" }
+    ]
+  };
+
+  // ==================== 通用工具函数 ====================
+  function updateUI() {
+    document.getElementById("spiritStones").textContent = player.spiritStones;
+    document.getElementById("spiritStones2").textContent = player.spiritStones;
+    document.getElementById("health").textContent = `${player.health}/${player.healthMax}`;
+    document.getElementById("mana").textContent = `${player.mana}/${player.manaMax}`;
+  }
+
+  function showNotification(message, type = "info") {
+    const notif = document.getElementById('notification');
+    notif.textContent = message;
+    notif.className = 'notification ' + type;
+    notif.classList.add('show');
+    setTimeout(() => notif.classList.remove('show'), 3000);
+  }
+
+  function updateCultivationUI() {
+    const percent = (player.cultivation / player.cultivationMax) * 100;
+    document.getElementById("cultivationBar").style.width = `${percent}%`;
+    document.getElementById("cultivationText").textContent = `${player.cultivation} / ${player.cultivationMax}`;
+  }
+
+  function renderBackpack() {
+    const grid = document.getElementById('backpackGrid');
+    grid.innerHTML = '';
+    player.inventory.forEach(item => {
+      const itemDiv = document.createElement('div');
+      itemDiv.className = 'grid-item';
+      itemDiv.innerHTML = `
+        <div class="grid-icon">${item.icon}</div>
+        <div class="grid-count">${item.count}</div>
+      `;
+      itemDiv.addEventListener('click', () => showItemDetails(item));
+      grid.appendChild(itemDiv);
+    });
+  }
+
+  function showItemDetails(item) {
+    document.getElementById('itemName').textContent = item.name;
+    document.getElementById('itemDesc').textContent = item.desc;
+    document.getElementById('itemModal').style.display = 'flex';
+  }
+
+  // ==================== 初始化游戏 ====================
+  function initGame() {
+    document.getElementById("creationPanel").style.display = "none";
+    document.getElementById("mainGame").style.display = "block";
+
+    document.getElementById("playerName").textContent = player.name;
+    document.getElementById("originDesc").textContent = "出身：" + player.origin;
+    document.getElementById("spiritRoot").textContent = "灵根：" + player.spiritRoot;
+
+    const fullRealm = `${player.realm}·${player.realmStage}期`;
+    document.getElementById("realm2").textContent = fullRealm;
+    document.getElementById("realm").textContent = fullRealm;
+
+    document.getElementById("str").textContent = player.str;
+    document.getElementById("agi").textContent = player.agi;
+    document.getElementById("con").textContent = player.con;
+    document.getElementById("int").textContent = player.int;
+    document.getElementById("wis").textContent = player.wis;
+    document.getElementById("luck").textContent = player.luck;
+
+    updateUI();
+    updateCultivationUI();
+    renderBackpack();
+    addMainEventListeners();
+  }
+
+  // ==================== 主界面事件 ====================
+  function addMainEventListeners() {
+    // 侧边栏切换
+    document.querySelectorAll('.sidebar-menu a').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
+        link.classList.add('active');
+        const target = link.dataset.section;
+        document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
+        document.getElementById(target + '-section').style.display = 'block';
+      });
+    });
+
+    // 打坐修炼
+    document.getElementById('cultivateBtn').addEventListener('click', () => {
+      const gain = Math.floor(player.int * 0.5) + Math.floor(Math.random() * 3);
+      player.cultivation += gain;
+      if (player.cultivation > player.cultivationMax) {
+        player.cultivation = player.cultivationMax;
+        showNotification("修为已圆满！可尝试突破", "success");
+      }
+      updateCultivationUI();
+      showNotification(`打坐修炼成功！获得 ${gain} 点修为`, "success");
+    });
+
+    // 外出探索
+    document.getElementById('exploreBtn').addEventListener('click', () => {
+      const events = [
+        "在后山发现一株月华草，获得灵草 ×1",
+        "遇到一只妖兽，击败后获得灵石 ×5",
+        "无意间触发阵法，获得神秘玉简一份",
+        "在小溪边捡到一枚残破符箓",
+        "运气极佳，掉落灵石 ×10"
+      ];
+      const event = events[Math.floor(Math.random() * events.length)];
+      showNotification(event, "success");
+
+      if (event.includes("月华草")) {
+        const task = player.tasks.find(t => t.id === 2);
+        if (task && !task.completed) {
+          task.progress += 20;
+          if (task.progress >= 100) {
+            task.progress = 100;
+            task.completed = true;
+            showNotification("任务【采集灵草】已完成！", "success");
+          }
+        }
+      } else if (event.includes("灵石 ×5")) {
+        player.spiritStones += 5;
+      } else if (event.includes("灵石 ×10")) {
+        player.spiritStones += 10;
+      }
+      updateUI();
+    });
+
+    // 静心调息
+    document.getElementById('restBtn').addEventListener('click', () => {
+      if (player.health >= player.healthMax) {
+        showNotification("气血已满，无需调息！", "warning");
+        return;
+      }
+      const gain = Math.floor(Math.random() * 15) + 10;
+      player.health += gain;
+      if (player.health > player.healthMax) player.health = player.healthMax;
+      updateUI();
+      showNotification(`静心调息成功！气血恢复 ${gain} 点`, "success");
+    });
+
+    // 尝试突破
+    document.getElementById('breakthroughBtn').addEventListener('click', () => {
+      if (player.cultivation < player.cultivationMax) {
+        showNotification("修为未圆满，无法突破！", "warning");
+        return;
+      }
+
+      const baseSuccessRate = 60;
+      const successRate = Math.min(
+        95,
+        baseSuccessRate +
+          (player.int - 10) * 2 +
+          (player.wis - 10) * 1.5 +
+          (player.luck - 5) * 3
+      );
+
+      const roll = Math.random() * 100;
+      if (roll <= successRate) {
+        // 突破成功
+        if (player.realmStage === "初") {
+          player.realmStage = "中";
+        } else if (player.realmStage === "中") {
+          player.realmStage = "后";
+        } else if (player.realmStage === "后") {
+          player.realm = "筑基";
+          player.realmStage = "初";
+          player.cultivationMax = 500;
+          showNotification("🎉 恭喜突破至筑基期！可选择职业方向。", "success");
+        }
+
+        // 重置修为
+        player.cultivation = 0;
+        if (player.realm === "炼气") {
+          player.cultivationMax = player.realmStage === "中" ? 200 : 300;
+        }
+
+        const fullRealm = `${player.realm}·${player.realmStage}期`;
+        document.getElementById("realm2").textContent = fullRealm;
+        document.getElementById("realm").textContent = fullRealm;
+        updateCultivationUI();
+        showNotification(`突破成功！当前境界：${fullRealm}`, "success");
+      } else {
+        // 突破失败
+        if (Math.random() > 0.7) {
+          player.health = Math.max(1, Math.floor(player.healthMax * 0.3));
+          showNotification("突破失败！走火入魔，气血大损！", "error");
+        } else {
+          player.cultivation = Math.max(0, player.cultivation - 30);
+          updateCultivationUI();
+          showNotification("突破失败！经脉受损，修为倒退！", "error");
+        }
+        updateUI();
+      }
+    });
+  }
+
+  // ==================== 角色创建面板 ====================
+  let selectedOrigin = null;
+  document.querySelectorAll('.origin-card').forEach(card => {
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.origin-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      selectedOrigin = {
+        type: card.dataset.origin,
+        stones: parseInt(card.dataset.stones)
+      };
+      document.getElementById('confirmOrigin').disabled = false;
+    });
+  });
+
+  document.getElementById('confirmOrigin').addEventListener('click', () => {
+    if (!selectedOrigin) return;
+
+    const originMap = {
+      orphan: '山村孤儿',
+      fallen: '没落世家',
+      sect: '宗门子弟'
+    };
+    player.origin = originMap[selectedOrigin.type];
+    player.spiritStones = selectedOrigin.stones;
+
+    // 出身加成
+    if (selectedOrigin.type === 'orphan') {
+      player.luck += 3; // 心魔抗性模拟
+    } else if (selectedOrigin.type === 'fallen') {
+      player.int += 5;
+    } else if (selectedOrigin.type === 'sect') {
+      // 提升初始功法
+      player.skills[0].level = 2;
+      player.cultivation = 50;
+    }
+
+    initGame();
+  });
+
+  // ==================== 模态框关闭 ====================
+  document.getElementById('closeModal').addEventListener('click', () => {
+    document.getElementById('itemModal').style.display = 'none';
+  });
+
+});
+</script>
+</body>
+</html>
+  

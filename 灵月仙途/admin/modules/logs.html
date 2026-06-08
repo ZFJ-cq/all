@@ -1,0 +1,77 @@
+<div class="section active">
+  <h2 class="section-title">操作日志</h2>
+  <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+    <input type="text" id="logSearch" placeholder="搜索关键词..." style="flex:1; padding: 8px; border:1px solid #ddd; border-radius:4px;">
+    <button class="btn btn-primary" onclick="loadLogs()">刷新</button>
+    <button class="btn btn-danger" onclick="clearLogs()">清空</button>
+  </div>
+  <div id="logsContent" style="max-height: 500px; overflow-y: auto; border: 1px solid #eee; padding: 15px; background: #fafafa; border-radius: 6px;">
+    <!-- JS 生成 -->
+  </div>
+</div>
+
+<script>
+  // 初始化日志管理
+  function initLogs() {
+    loadLogs();
+  }
+
+  // 加载日志
+  async function loadLogs() {
+    const logsContent = document.getElementById('logsContent');
+    logsContent.innerHTML = '<div style="text-align: center; color: #999;">加载中...</div>';
+    
+    try {
+      const logSearch = document.getElementById('logSearch').value;
+      let url = '/system-log';
+      if (logSearch) {
+        url += `?keyword=${encodeURIComponent(logSearch)}`;
+      }
+      
+      const logs = await apiService.get(url);
+      
+      // 处理API返回的数据格式
+      let logsData = logs;
+      if (logs && logs.data) {
+        logsData = logs.data;
+      }
+      
+      logsContent.innerHTML = '';
+      if (logsData && logsData.length > 0) {
+        logsData.forEach(log => {
+          const logItem = document.createElement('div');
+          logItem.style.padding = '10px 0';
+          logItem.style.borderBottom = '1px solid #eee';
+          logItem.innerHTML = `
+            <div style="font-size: 0.9rem; color: #666;">${log.operateTime || log.timestamp || '未知时间'}</div>
+            <div style="font-size: 1rem; margin: 5px 0;"><strong>${log.operator || log.username || '系统'}</strong> - ${log.action || log.details || '未知操作'}</div>
+          `;
+          logsContent.appendChild(logItem);
+        });
+      } else {
+        logsContent.innerHTML = '<div style="text-align: center; color: #999;">暂无日志</div>';
+      }
+    } catch (error) {
+      console.error('加载日志失败:', error);
+      logsContent.innerHTML = '<div style="text-align: center; color: #e74c3c;">加载失败: ' + (error.message || '未知错误') + '</div>';
+    }
+  }
+
+  // 清空日志
+  async function clearLogs() {
+    if (confirm('确定要清空所有日志吗？')) {
+      try {
+        await apiService.delete('/system-log/clear');
+        document.getElementById('logsContent').innerHTML = '<div style="text-align: center; color: #666;">日志已清空</div>';
+      } catch (error) {
+        console.error('清空日志失败:', error);
+        document.getElementById('logsContent').innerHTML = '<div style="text-align: center; color: #e74c3c;">清空失败: ' + (error.message || '未知错误') + '</div>';
+      }
+    }
+  }
+
+  // 页面加载完成后初始化
+  if (typeof window.initLogs === 'undefined') {
+    window.initLogs = initLogs;
+  }
+</script>

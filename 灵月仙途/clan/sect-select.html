@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="../js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="../css/mobile-adapt.css">
+    <title>仙门宗 - 门派选择</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary-color: #2a4a6c;
+            --secondary-color: #4a7a9c;
+            --accent-color: #d4af37;
+            --dark-bg: #0a1628;
+            --light-text: #e6e6e6;
+            --card-bg: rgba(20, 30, 48, 0.9);
+            --border-color: rgba(120, 150, 200, 0.3);
+            --highlight: #ffcc00;
+        }
+        
+        body {
+            font-family: 'Arial', 'Microsoft YaHei', sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--light-text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding-bottom: 70px; /* 为底部导航留出空间 */
+            position: relative;
+        }
+        
+        /* 水墨山水背景 */
+        .mountain-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        .mountain {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 60%;
+            background: linear-gradient(to top, #1a2a4a, transparent);
+            clip-path: polygon(0% 100%, 10% 70%, 20% 80%, 30% 60%, 40% 75%, 50% 50%, 60% 65%, 70% 45%, 80% 55%, 90% 35%, 100% 50%, 100% 100%);
+        }
+        
+        .mountain-1 {
+            position: absolute;
+            bottom: 0;
+            left: 10%;
+            width: 80%;
+            height: 50%;
+            background: linear-gradient(to top, #2a3a5a, transparent);
+            clip-path: polygon(0% 100%, 5% 60%, 15% 75%, 25% 50%, 35% 65%, 45% 40%, 55% 55%, 65% 35%, 75% 50%, 85% 30%, 95% 45%, 100% 100%);
+            opacity: 0.7;
+        }
+        
+        .mountain-2 {
+            position: absolute;
+            bottom: 0;
+            left: 20%;
+            width: 60%;
+            height: 40%;
+            background: linear-gradient(to top, #3a4a6a, transparent);
+            clip-path: polygon(0% 100%, 10% 55%, 20% 65%, 30% 45%, 40% 60%, 50% 35%, 60% 50%, 70% 30%, 80% 45%, 90% 25%, 100% 100%);
+            opacity: 0.5;
+        }
+        
+        .cloud {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            filter: blur(10px);
+            animation: float 20s infinite ease-in-out;
+        }
+        
+        .cloud-1 {
+            width: 120px;
+            height: 60px;
+            top: 20%;
+            left: -20px;
+            animation-delay: 0s;
+        }
+        
+        .cloud-2 {
+            width: 150px;
+            height: 80px;
+            top: 40%;
+            right: -30px;
+            animation-delay: 5s;
+        }
+        
+        .cloud-3 {
+            width: 100px;
+            height: 50px;
+            top: 10%;
+            left: 30%;
+            animation-delay: 10s;
+        }
+        
+        .crane {
+            position: absolute;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 24px;
+            animation: fly 30s infinite linear;
+        }
+        
+        .crane-1 {
+            top: 15%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+        
+        .crane-2 {
+            top: 25%;
+            right: 15%;
+            animation-delay: 15s;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); }
+            50% { transform: translateY(-10px) translateX(10px); }
+        }
+        
+        @keyframes fly {
+            0% { transform: translateX(-50px) translateY(0); }
+            50% { transform: translateX(calc(100vw + 50px)) translateY(-20px); }
+            100% { transform: translateX(calc(100vw + 50px)) translateY(-20px); }
+        }
+        
+        /* 主容器 */
+        .container {
+            padding: 15px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        /* 顶部标题 */
+        .page-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 20px 0;
+        }
+        
+        .page-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--accent-color);
+            margin-bottom: 10px;
+        }
+        
+        .page-subtitle {
+            font-size: 14px;
+            color: #aaa;
+        }
+        
+        /* 筛选栏 */
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-btn {
+            flex: 1;
+            padding: 8px 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            color: var(--light-text);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 80px;
+        }
+        
+        .filter-btn.active {
+            background: rgba(212, 175, 55, 0.2);
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+        
+        /* 门派列表 */
+        .sect-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        /* 门派卡片 */
+        .sect-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .sect-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+            border-color: var(--accent-color);
+        }
+        
+        .sect-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--accent-color);
+        }
+        
+        .sect-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        
+        .sect-info {
+            flex: 1;
+        }
+        
+        .sect-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--light-text);
+            margin-bottom: 5px;
+        }
+        
+        .sect-level {
+            font-size: 14px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: rgba(212, 175, 55, 0.2);
+            color: var(--accent-color);
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+        
+        .sect-desc {
+            font-size: 14px;
+            color: #aaa;
+            line-height: 1.4;
+            margin-bottom: 15px;
+        }
+        
+        .sect-stats {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .stat-value {
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #aaa;
+        }
+        
+        .sect-requirements {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .requirement-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        
+        .requirement-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .requirement-status {
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+        
+        .sect-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .join-btn {
+            flex: 1;
+            padding: 10px;
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(212, 175, 55, 0.1));
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: bold;
+        }
+        
+        .join-btn:hover {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.3), rgba(212, 175, 55, 0.2));
+            transform: translateY(-2px);
+        }
+        
+        .join-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .detail-btn {
+            padding: 10px 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            color: var(--light-text);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .detail-btn:hover {
+            background: rgba(0, 0, 0, 0.5);
+            border-color: var(--accent-color);
+        }
+        
+        /* 底部导航栏 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: var(--card-bg);
+            border-top: 1px solid var(--border-color);
+            padding: 8px 0;
+            display: flex;
+            justify-content: space-around;
+            z-index: 100;
+            backdrop-filter: blur(5px);
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 5px;
+            text-decoration: none;
+            color: #aaa;
+            transition: all 0.2s ease;
+            width: 20%;
+        }
+        
+        .nav-item.active {
+            color: var(--accent-color);
+        }
+        
+        .nav-icon {
+            font-size: 22px;
+            margin-bottom: 3px;
+        }
+        
+        .nav-text {
+            font-size: 12px;
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .page-title {
+                font-size: 20px;
+            }
+            
+            .sect-name {
+                font-size: 16px;
+            }
+            
+            .sect-desc {
+                font-size: 13px;
+            }
+            
+            .sect-stats {
+                gap: 10px;
+            }
+            
+            .stat-value {
+                font-size: 14px;
+            }
+        }
+        
+        /* 修仙元素装饰 */
+        .cultivation-element {
+            position: absolute;
+            z-index: -1;
+            opacity: 0.1;
+        }
+        
+        .floating-text {
+            position: absolute;
+            font-family: 'Ma Shan Zheng', cursive;
+            color: rgba(255, 255, 255, 0.05);
+            font-size: 40px;
+            z-index: -1;
+            animation: floatText 30s infinite linear;
+        }
+        
+        @keyframes floatText {
+            0% { transform: translateX(-100px) translateY(0); }
+            50% { transform: translateX(calc(100vw + 100px)) translateY(-20px); }
+            100% { transform: translateX(calc(100vw + 100px)) translateY(-20px); }
+        }
+        
+        /* 弹窗样式 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 20px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+        
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: #aaa;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--accent-color);
+        }
+    </style>
+
+  </head>
+<body>
+    <!-- 水墨山水背景 -->
+    <div class="mountain-bg">
+        <div class="mountain"></div>
+        <div class="mountain-1"></div>
+        <div class="mountain-2"></div>
+        <div class="cloud cloud-1"></div>
+        <div class="cloud cloud-2"></div>
+        <div class="cloud cloud-3"></div>
+        <div class="crane crane-1"><i class="fas fa-dove"></i></div>
+        <div class="crane crane-2"><i class="fas fa-dove"></i></div>
+        
+        <!-- 修仙元素装饰 -->
+        <div class="floating-text" style="top: 15%; left: 0;">道法自然</div>
+        <div class="floating-text" style="top: 40%; left: 0; animation-delay: 10s;">修真问道</div>
+        <div class="floating-text" style="top: 65%; left: 0; animation-delay: 20s;">天人合一</div>
+        
+        <div class="cultivation-element" style="top: 20%; right: 10%; font-size: 60px; transform: rotate(15deg);">☯</div>
+        <div class="cultivation-element" style="top: 50%; left: 5%; font-size: 80px; transform: rotate(-10deg);">☯</div>
+        <div class="cultivation-element" style="bottom: 20%; right: 15%; font-size: 50px; transform: rotate(5deg);">✨</div>
+    </div>
+    
+    <!-- 主容器 -->
+    <div class="container">
+        <!-- 顶部标题 -->
+        <div class="page-header">
+            <h1 class="page-title">修仙门派选择</h1>
+            <p class="page-subtitle">选择适合你的修仙门派，开启修真之路</p>
+        </div>
+        
+        <!-- 筛选栏 -->
+        <div class="filter-bar">
+            <button class="filter-btn active" onclick="filterSects('all')">全部</button>
+            <button class="filter-btn" onclick="filterSects('top')">顶级门派</button>
+            <button class="filter-btn" onclick="filterSects('element')">元素门派</button>
+            <button class="filter-btn" onclick="filterSects('special')">特殊门派</button>
+        </div>
+        
+        <!-- 门派列表 -->
+        <div class="sect-list">
+            <!-- 青云门 -->
+            <div class="sect-card" data-type="element">
+                <div class="sect-header">
+                    <div class="sect-info">
+                        <div class="sect-name">青云门</div>
+                        <div class="sect-level">一流门派</div>
+                        <div class="sect-desc">青云门以修习仙剑之道为主，擅长御剑术和雷法，门派弟子多以正义自居，讲究斩妖除魔，维护世间和平。</div>
+                    </div>
+                </div>
+                
+                <div class="sect-stats">
+                    <div class="stat-item">
+                        <div class="stat-value">9500</div>
+                        <div class="stat-label">门派实力</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">1200</div>
+                        <div class="stat-label">弟子数量</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">85%</div>
+                        <div class="stat-label">加入难度</div>
+                    </div>
+                </div>
+                
+                <div class="sect-requirements">
+                    <div class="requirement-item">
+                        <span>修为要求</span>
+                        <span class="requirement-status">元婴期</span>
+                    </div>
+                    <div class="requirement-item">
+                        <span>贡献要求</span>
+                        <span class="requirement-status">5000</span>
+                    </div>
+                    <div class="requirement-item">
+                        <span>推荐属性</span>
+                        <span class="requirement-status">木、金</span>
+                    </div>
+                </div>
+                
+                <div class="sect-actions">
+                    <button class="join-btn" onclick="joinSect('青云门')">申请加入</button>
+                    <button class="detail-btn" onclick="showSectDetail('青云门')">详情</button>
+                </div>
+            </div>
+            
+            <!-- 天剑宗 -->
+            <div class="sect-card" data-type="top">
+                <div class="sect-header">
+                    <div class="sect-info">
+                        <div class="sect-name">天剑宗</div>
+                        <div class="sect-level">顶级门派</div>
+                        <div class="sect-desc">天剑宗是剑道圣地，门派绝学为《太一剑经》，注重剑意的修炼，追求剑心通明，是天下剑修的向往之地。</div>
+                    </div>
+                </div>
+                
+                <div class="sect-stats">
+                    <div class="stat-item">
+                        <div class="stat-value">18000</div>
+                        <div class="stat-label">门派实力</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">2500</div>
+                        <div class="stat-label">弟子数量</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">95%</div>
+                        <div class="stat-label">加入难度</div>
+                    </div>
+                </div>
+                
+                <div class="sect-requirements">
+                    <div class="requirement-item">
+                        <span>修为要求</span>
+                        <span class="requirement-status">化神期</span>
+                    </div>
+                    <div class="requirement-item">
+                        <span>贡献要求</span>
+                        <span class="requirement-status">10000</span>
+                    </div>
+                    <div class="requirement-item">
+                        <span>推荐属性</span>
+                        <span class="requirement-status">金</span>
+                    </div>
+                </div>
+                
+                <div class="sect-actions">
+                    <button class="join-btn" onclick="joinSect('天剑宗')">申请加入</button>
+                    <button class="detail-btn" onclick="showSectDetail('天剑宗')">详情</button>
+                </div>
+            </div>
+            
+            <!-- 御兽门 -->
+            <div class="sect-card" data-type="special">
+                <div class="sect-header">
+                    <div class="sect-info">
+                        <div class="sect-name">御兽门</div>
+                        <div class="sect-level">二流门派</div>
+                        <div class="sect-desc">御兽门擅长与妖兽沟通，契约灵宠，通过与灵宠的配合发挥强大战斗力，门派弟子多以驯兽师自居。</div>
+                    </div>
+                </div>
+                
+                <div class="sect-stats">
+                    <div class="stat-item">
+                        <div class="stat-value">7500</div>
+                        <div class="stat-label">门派实力</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">800</div>
+                        <div class="stat-label">弟子数量</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">70%</div>
+                        <div class="stat-label">加入难度</div>
+                    </div>
+                </div>
+                
+                <div class="sect-requirements">
+                    <div class="requirement-item">
+                        <span>修为要求</span>
+                        <span class="requirement-status">金丹期</span>
+                    </div>
+                    <div class="requirement-item">
+                        <span>贡献要求</span>
+                        <span class="requirement-status">3000</span>
+                    </div>
+                    <div class="requirement-item">
+                        <span>推荐属性</span>
+                        <span class="requirement-status">木、土</span>
+                    </div>
+                </div>
+                
+                <div class="sect-actions">
+                    <button class="join-btn" onclick="joinSect('御兽门')">申请加入</button>
+                    <button class="detail-btn" onclick="showSectDetail('御兽门')">详情</button>
+                </div>
+            </div>
+            
+            <!-- 合欢派 -->
+            <div class="sect-card" data-type="special">
+                <div class="sect-header">
+                    <div class="sect-info">
+                        <div class="sect-name">合欢派</div>
+                        <div class="sect-level">二流门派</div>
+                        <div class="sect-desc">合欢派修习双修之道，通过阴阳调和提升修为，门派弟子多擅长魅惑之术，在江湖中以神秘著称。</div>
+                    </div>
+                </div>
+                
+                <div class="sect-stats">
+                    <div class="stat-item">
+                        <div class="stat-value">7000</div>
+                        <div class="stat-label">门派实力</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">600</div>
+                        <div class="stat-label">弟子数量</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">65%</div>
+                        <div class="stat-label">加入难度</div>
+                    </div>
+                </div>
+                
+                <div class="sect-requirements">
+                    <div class="requirement-item">
+                        <span>修为要求</span>
+                        <span class="requirement-status">金丹期</span>
+                    </div>
+                    <div class="requirement-item">
+                        <span>贡献要求</span>
+                        <span class="requirement-status">2500</span>
+                    </div>
+                    <div class="requirement-item">
+                        <span>推荐属性</span>
+                        <span class="requirement-status">火、水</span>
+                    </div>
+                </div>
+                
+                <div class="sect-actions">
+                    <button class="join-btn" onclick="joinSect('合欢派')">申请加入</button>
+                    <button class="detail-btn" onclick="showSectDetail('合欢派')">详情</button>
+                </div>
+            </div>
+            
+            <!-- 血煞教 -->
+            <div class="sect-card" data-type="special">
+                <div class="sect-header">
+                    <div class="sect-info">
+                        <div class="sect-name">血煞教</div>
+                        <div class="sect-level">二流门派</div>
+                        <div class="sect-desc">血煞教修习血道之术，通过吸收血气提升修为，门派弟子多以杀伐著称，在江湖中被视为邪派。</div>
+                    </div>
+                </div>
+                
+                <div class="sect-stats">
+                    <div class="stat-item">
+                        <div class="stat-value">8000</div>
+                        <div class="stat-label">门派实力</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">700</div>
+                        <div class="stat-label">弟子数量</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">60%</div>
+                        <div class="stat-label">加入难度</div>
+                    </div>
+                </div>
+                
+                <div class="sect-requirements">
+                    <div class="requirement-item">
+                        <span>修为要求</span>
+                        <span class="requirement-status">金丹期</span>
+                    </div>
+                    <div class="requirement-item">
+                        <span>贡献要求</span>
+                        <span class="requirement-status">2000</span>
+                    </div>
+                    <div class="requirement-item">
+                        <span>推荐属性</span>
+                        <span class="requirement-status">火</span>
+                    </div>
+                </div>
+                
+                <div class="sect-actions">
+                    <button class="join-btn" onclick="joinSect('血煞教')">申请加入</button>
+                    <button class="detail-btn" onclick="showSectDetail('血煞教')">详情</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 底部导航栏 -->
+    <nav class="bottom-nav" role="navigation" aria-label="主导航">
+            <a href="../index.html" class="nav-item" aria-label="修炼页面">
+                <div class="nav-icon">🧘</div>
+                <div class="nav-text">修炼</div>
+            </a>
+            <a href="../skills/skills.html" class="nav-item" aria-label="功法页面">
+                <div class="nav-icon">📜</div>
+                <div class="nav-text">功法</div>
+            </a>
+            <a href="clan.html" class="nav-item active" aria-label="宗门页面" aria-current="page">
+                <div class="nav-icon">🏯</div>
+                <div class="nav-text">宗门</div>
+            </a>
+            <a href="../word/world.html" class="nav-item" aria-label="仙途页面">
+                <div class="nav-icon">🌌</div>
+                <div class="nav-text">仙途</div>
+            </a>
+            <a href="../map/map.html" class="nav-item" aria-label="云游页面">
+                <div class="nav-icon">🗺️</div>
+                <div class="nav-text">云游</div>
+            </a>
+        </nav>
+            <div class="nav-text">洞府</div>
+        </a>
+        <a href="../inventory/inventory.html" class="nav-item">
+            <div class="nav-icon">🎒</div>
+            <div class="nav-text">背包</div>
+        </a>
+        <a href="../character/character.html" class="nav-item">
+            <div class="nav-icon">👤</div>
+            <div class="nav-text">角色</div>
+        </a>
+        <a href="index.html" class="nav-item active">
+            <div class="nav-icon">🏯</div>
+            <div class="nav-text">宗门</div>
+        </a>
+        <a href="../tasks/tasks.html" class="nav-item">
+            <div class="nav-icon">📜</div>
+            <div class="nav-text">任务</div>
+        </a>
+    </div>
+    
+    <!-- 弹窗 -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal()">&times;</button>
+            <div class="modal-title" id="modalTitle">门派详情</div>
+            <div id="modalBody">
+                <!-- 弹窗内容将通过JS动态填充 -->
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 门派数据
+        const sectsData = {
+            '青云门': {
+                name: '青云门',
+                level: '一流门派',
+                desc: '青云门以修习仙剑之道为主，擅长御剑术和雷法，门派弟子多以正义自居，讲究斩妖除魔，维护世间和平。',
+                strength: 9500,
+                members: 1200,
+                difficulty: 85,
+                requirements: {
+                    cultivation: '元婴期',
+                    contribution: 5000,
+                    attributes: '木、金'
+                },
+                skills: [
+                    '御剑术',
+                    '雷法',
+                    '青云剑诀',
+                    '太极玄清道'
+                ],
+                features: '擅长远程攻击，防御能力强，适合正义之士'
+            },
+            '天剑宗': {
+                name: '天剑宗',
+                level: '顶级门派',
+                desc: '天剑宗是剑道圣地，门派绝学为《太一剑经》，注重剑意的修炼，追求剑心通明，是天下剑修的向往之地。',
+                strength: 18000,
+                members: 2500,
+                difficulty: 95,
+                requirements: {
+                    cultivation: '化神期',
+                    contribution: 10000,
+                    attributes: '金'
+                },
+                skills: [
+                    '太一剑经',
+                    '剑心通明',
+                    '万剑归宗',
+                    '剑气纵横'
+                ],
+                features: '攻击力极强，修炼速度快，对剑修资质要求极高'
+            },
+            '御兽门': {
+                name: '御兽门',
+                level: '二流门派',
+                desc: '御兽门擅长与妖兽沟通，契约灵宠，通过与灵宠的配合发挥强大战斗力，门派弟子多以驯兽师自居。',
+                strength: 7500,
+                members: 800,
+                difficulty: 70,
+                requirements: {
+                    cultivation: '金丹期',
+                    contribution: 3000,
+                    attributes: '木、土'
+                },
+                skills: [
+                    '御兽术',
+                    '灵宠契约',
+                    '兽语沟通',
+                    '万兽奔腾'
+                ],
+                features: '擅长辅助和控制，与灵宠配合战斗，适合喜欢宠物的修士'
+            },
+            '合欢派': {
+                name: '合欢派',
+                level: '二流门派',
+                desc: '合欢派修习双修之道，通过阴阳调和提升修为，门派弟子多擅长魅惑之术，在江湖中以神秘著称。',
+                strength: 7000,
+                members: 600,
+                difficulty: 65,
+                requirements: {
+                    cultivation: '金丹期',
+                    contribution: 2500,
+                    attributes: '火、水'
+                },
+                skills: [
+                    '双修术',
+                    '魅惑之术',
+                    '阴阳调和',
+                    '合欢秘术'
+                ],
+                features: '擅长辅助和控制，修炼速度快，适合双修伴侣'
+            },
+            '血煞教': {
+                name: '血煞教',
+                level: '二流门派',
+                desc: '血煞教修习血道之术，通过吸收血气提升修为，门派弟子多以杀伐著称，在江湖中被视为邪派。',
+                strength: 8000,
+                members: 700,
+                difficulty: 60,
+                requirements: {
+                    cultivation: '金丹期',
+                    contribution: 2000,
+                    attributes: '火'
+                },
+                skills: [
+                    '血道秘术',
+                    '血影术',
+                    '血煞掌',
+                    '血魔大法'
+                ],
+                features: '攻击力强，适合喜欢杀伐的修士，在正派中名声不佳'
+            }
+        };
+        
+        // 筛选门派
+        function filterSects(type) {
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            filterBtns.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const sectCards = document.querySelectorAll('.sect-card');
+            sectCards.forEach(card => {
+                if (type === 'all' || card.dataset.type === type) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+        
+        // 显示门派详情
+        function showSectDetail(sectName) {
+            const sect = sectsData[sectName];
+            if (!sect) return;
+            
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+            const modalOverlay = document.getElementById('modalOverlay');
+            
+            modalTitle.textContent = sect.name + ' - 门派详情';
+            
+            let bodyContent = `
+                <div style="margin-bottom: 15px;">
+                    <div style="font-weight: bold; margin-bottom: 10px;">${sect.level}</div>
+                    <div style="margin-bottom: 15px;">${sect.desc}</div>
+                    
+                    <div style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; margin-bottom: 15px;">
+                        <div style="font-weight: bold; margin-bottom: 10px;">门派实力</div>
+                        <div style="display: flex; justify-content: space-around; margin-bottom: 10px;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 16px; font-weight: bold; color: var(--accent-color);">${sect.strength}</div>
+                                <div style="font-size: 12px; color: #aaa;">综合实力</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 16px; font-weight: bold; color: var(--accent-color);">${sect.members}</div>
+                                <div style="font-size: 12px; color: #aaa;">弟子数量</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 16px; font-weight: bold; color: var(--accent-color);">${sect.difficulty}%</div>
+                                <div style="font-size: 12px; color: #aaa;">加入难度</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; margin-bottom: 15px;">
+                        <div style="font-weight: bold; margin-bottom: 10px;">加入要求</div>
+                        <div style="margin-bottom: 5px;">修为要求：${sect.requirements.cultivation}</div>
+                        <div style="margin-bottom: 5px;">贡献要求：${sect.requirements.contribution}</div>
+                        <div>推荐属性：${sect.requirements.attributes}</div>
+                    </div>
+                    
+                    <div style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; margin-bottom: 15px;">
+                        <div style="font-weight: bold; margin-bottom: 10px;">门派绝学</div>
+                        <ul style="padding-left: 20px;">
+            `;
+            
+            sect.skills.forEach(skill => {
+                bodyContent += `<li>${skill}</li>`;
+            });
+            
+            bodyContent += `
+                        </ul>
+                    </div>
+                    
+                    <div style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; margin-bottom: 20px;">
+                        <div style="font-weight: bold; margin-bottom: 10px;">门派特色</div>
+                        <div>${sect.features}</div>
+                    </div>
+                    
+                    <button class="join-btn" onclick="joinSect('${sectName}')" style="width: 100%;">申请加入 ${sectName}</button>
+                </div>
+            `;
+            
+            modalBody.innerHTML = bodyContent;
+            modalOverlay.classList.add('active');
+        }
+        
+        // 加入门派
+        function joinSect(sectName) {
+            showConfirm(`确定要申请加入 ${sectName} 吗？`, () => {
+                // 模拟申请加入
+                setTimeout(() => {
+                    showToast(`申请已提交，正在等待 ${sectName} 的审核...`);
+                    // 实际项目中这里会调用后端API
+                }, 500);
+            });
+        }
+        
+        // 关闭弹窗
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+        }
+    </script>
+  <script src="../js/ui-components.js"></script>
+</body>
+</html>

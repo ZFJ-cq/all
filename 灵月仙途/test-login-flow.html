@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="css/mobile-adapt.css">
+  <title>登录流程测试 - 灵月仙途</title>
+  <script src="js/config.js"></script>
+  <script src="js/token-manager.js"></script>
+  <script src="js/role-sync.js"></script>
+  <style>
+    body {
+      font-family: 'Microsoft YaHei', sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #1a1a2e;
+      color: #fff;
+    }
+    h1 { color: #e6c749; }
+    .test-section {
+      background: rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    .test-btn {
+      background: #e6c749;
+      color: #000;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 5px;
+      font-weight: bold;
+    }
+    .test-btn:hover {
+      background: #f4d03f;
+    }
+    .test-result {
+      background: rgba(0,0,0,0.3);
+      padding: 15px;
+      border-radius: 5px;
+      margin: 10px 0;
+      font-family: monospace;
+      white-space: pre-wrap;
+    }
+    .success { color: #4CAF50; }
+    .error { color: #ff4444; }
+    .info { color: #2196F3; }
+  </style>
+
+  </head>
+<body>
+  <h1>🔍 登录流程集成测试</h1>
+  
+  <div class="test-section">
+    <h2>1️⃣ 环境检查</h2>
+    <button class="test-btn" onclick="checkEnvironment()">检查环境</button>
+    <div id="env-result" class="test-result"></div>
+  </div>
+  
+  <div class="test-section">
+    <h2>2️⃣ Token 管理器测试</h2>
+    <button class="test-btn" onclick="testTokenManager()">测试 TokenManager</button>
+    <div id="token-result" class="test-result"></div>
+  </div>
+  
+  <div class="test-section">
+    <h2>3️⃣ 角色同步测试</h2>
+    <button class="test-btn" onclick="testRoleSync()">测试 RoleSync</button>
+    <div id="rolesync-result" class="test-result"></div>
+  </div>
+  
+  <div class="test-section">
+    <h2>4️⃣ API 连接测试</h2>
+    <button class="test-btn" onclick="testAPIConnection()">测试 API 连接</button>
+    <div id="api-result" class="test-result"></div>
+  </div>
+  
+  <div class="test-section">
+    <h2>5️⃣ 完整流程测试</h2>
+    <button class="test-btn" onclick="testFullFlow()">执行完整流程测试</button>
+    <button class="test-btn" onclick="clearAllData()">清除所有数据</button>
+    <div id="fullflow-result" class="test-result"></div>
+  </div>
+  
+  <div class="test-section">
+    <h2>6️⃣ 当前状态</h2>
+    <div id="current-state" class="test-result"></div>
+  </div>
+
+  <script>
+    // 工具函数
+    function log(elementId, message, type = 'info') {
+      const el = document.getElementById(elementId);
+      const timestamp = new Date().toLocaleTimeString();
+      const colorClass = type === 'success' ? 'success' : type === 'error' ? 'error' : 'info';
+      el.innerHTML += `<span class="${colorClass}">[${timestamp}] ${message}</span>\n`;
+      el.scrollTop = el.scrollHeight;
+    }
+    
+    function clearLog(elementId) {
+      document.getElementById(elementId).innerHTML = '';
+    }
+
+    // 1. 环境检查
+    async function checkEnvironment() {
+      clearLog('env-result');
+      log('env-result', '开始环境检查...', 'info');
+      
+      const checks = {
+        'TokenManager': typeof window.TokenManager !== 'undefined',
+        'RoleSync': typeof window.RoleSync !== 'undefined',
+        'APP_CONFIG': typeof window.APP_CONFIG !== 'undefined',
+        'apiService': typeof window.apiService !== 'undefined',
+        'API_BASE_URL': window.APP_CONFIG?.API_BASE_URL || '未配置'
+      };
+      
+      for (const [key, value] of Object.entries(checks)) {
+        const status = value ? '✅' : '❌';
+        log('env-result', `${status} ${key}: ${value}`, value ? 'success' : 'error');
+      }
+      
+      return Object.values(checks).every(v => v === true || v === 'string');
+    }
+
+    // 2. Token 管理器测试
+    async function testTokenManager() {
+      clearLog('token-result');
+      log('token-result', '开始测试 TokenManager...', 'info');
+      
+      try {
+        // 测试 TokenManager 是否存在
+        if (!window.TokenUtils) {
+          log('token-result', '❌ TokenUtils 未定义', 'error');
+          return;
+        }
+        
+        log('token-result', '✅ TokenUtils 已加载', 'success');
+        
+        // 测试保存 Token
+        const testToken = 'test_token_' + Date.now();
+        const testUserId = 'test_user_' + Date.now();
+        
+        const saveResult = window.TokenUtils.save(testToken, testUserId, null);
+        log('token-result', `保存 Token: ${saveResult ? '✅ 成功' : '❌ 失败'}`, saveResult ? 'success' : 'error');
+        
+        // 验证 Token
+        const validateResult = window.TokenUtils.validate();
+        log('token-result', `验证 Token: ${validateResult.isComplete ? '✅ 完整' : '⚠️ 不完整'}`, 'info');
+        log('token-result', `  - hasToken: ${validateResult.hasToken}`, 'info');
+        log('token-result', `  - hasUserId: ${validateResult.hasUserId}`, 'info');
+        log('token-result', `  - hasRoleId: ${validateResult.hasRoleId}`, 'info');
+        
+        // 读取 Token
+        const savedToken = window.TokenUtils.getToken();
+        log('token-result', `读取 Token: ${savedToken ? '✅ 成功' : '❌ 失败'}`, savedToken ? 'success' : 'error');
+        
+        // 清除测试数据
+        window.TokenUtils.clear();
+        log('token-result', '✅ 测试完成', 'success');
+        
+      } catch (error) {
+        log('token-result', `❌ 测试失败：${error.message}`, 'error');
+      }
+    }
+
+    // 3. 角色同步测试
+    async function testRoleSync() {
+      clearLog('rolesync-result');
+      log('rolesync-result', '开始测试 RoleSync...', 'info');
+      
+      try {
+        if (!window.RoleSync) {
+          log('rolesync-result', '❌ RoleSync 未定义', 'error');
+          return;
+        }
+        
+        log('rolesync-result', '✅ RoleSync 已加载', 'success');
+        
+        // 设置测试数据
+        localStorage.setItem('currentRoleId', 'test_1');
+        localStorage.setItem('roleId', '');
+        localStorage.setItem('selectedCharacterId', null);
+        
+        log('rolesync-result', '测试数据已设置', 'info');
+        log('rolesync-result', `  - currentRoleId: ${localStorage.getItem('currentRoleId')}`, 'info');
+        log('rolesync-result', `  - roleId: ${localStorage.getItem('roleId')}`, 'info');
+        log('rolesync-result', `  - selectedCharacterId: ${localStorage.getItem('selectedCharacterId')}`, 'info');
+        
+        // 执行同步
+        await window.RoleSync._syncRoleId();
+        
+        log('rolesync-result', '同步完成', 'success');
+        log('rolesync-result', `  - currentRoleId: ${localStorage.getItem('currentRoleId')}`, 'info');
+        log('rolesync-result', `  - roleId: ${localStorage.getItem('roleId')}`, 'info');
+        log('rolesync-result', `  - selectedCharacterId: ${localStorage.getItem('selectedCharacterId')}`, 'info');
+        
+        // 清除测试数据
+        localStorage.removeItem('currentRoleId');
+        localStorage.removeItem('roleId');
+        localStorage.removeItem('selectedCharacterId');
+        
+        log('rolesync-result', '✅ 测试完成', 'success');
+        
+      } catch (error) {
+        log('rolesync-result', `❌ 测试失败：${error.message}`, 'error');
+      }
+    }
+
+    // 4. API 连接测试
+    async function testAPIConnection() {
+      clearLog('api-result');
+      log('api-result', '开始测试 API 连接...', 'info');
+      
+      try {
+        const baseUrl = window.APP_CONFIG?.API_BASE_URL || 'http://localhost:8088/api';
+        log('api-result', `API 基础路径：${baseUrl}`, 'info');
+        
+        // 测试排行榜接口（无需认证）
+        log('api-result', '测试排行榜接口（无需认证）...', 'info');
+        const response = await fetch(`${baseUrl}/leaderboard/realm?page=1&size=10`);
+        log('api-result', `状态码：${response.status}`, response.ok ? 'success' : 'error');
+        
+        if (response.ok) {
+          const data = await response.json();
+          log('api-result', `✅ API 连接成功`, 'success');
+          log('api-result', `返回数据：${JSON.stringify(data, null, 2)}`, 'info');
+        } else {
+          log('api-result', `❌ API 连接失败`, 'error');
+        }
+        
+      } catch (error) {
+        log('api-result', `❌ 请求失败：${error.message}`, 'error');
+      }
+    }
+
+    // 5. 完整流程测试
+    async function testFullFlow() {
+      clearLog('fullflow-result');
+      log('fullflow-result', '🚀 开始完整流程测试...', 'info');
+      
+      try {
+        // Step 1: 清除所有数据
+        log('fullflow-result', 'Step 1: 清除所有数据...', 'info');
+        localStorage.clear();
+        log('fullflow-result', '✅ 数据已清除', 'success');
+        
+        // Step 2: 初始化组件
+        log('fullflow-result', 'Step 2: 初始化组件...', 'info');
+        await window.APP_CONFIG.init();
+        await window.TokenManager.init();
+        await window.RoleSync.init();
+        log('fullflow-result', '✅ 组件初始化完成', 'success');
+        
+        // Step 3: 模拟登录（需要用户手动登录）
+        log('fullflow-result', 'Step 3: 请手动登录...', 'info');
+        log('fullflow-result', '👉 访问：http://localhost:8000/login.html', 'info');
+        log('fullflow-result', '👉 输入用户名和密码进行登录', 'info');
+        log('fullflow-result', '⏳ 等待用户登录...', 'info');
+        
+        // Step 4: 检查登录状态
+        setTimeout(() => {
+          checkLoginStatus();
+        }, 5000);
+        
+      } catch (error) {
+        log('fullflow-result', `❌ 测试失败：${error.message}`, 'error');
+      }
+    }
+    
+    function checkLoginStatus() {
+      const token = localStorage.getItem('token');
+      const userId = localStorage.getItem('userId');
+      const roleId = localStorage.getItem('roleId');
+      
+      log('fullflow-result', 'Step 4: 检查登录状态...', 'info');
+      log('fullflow-result', `  - Token: ${token ? '✅ 存在' : '❌ 不存在'}`, token ? 'success' : 'error');
+      log('fullflow-result', `  - UserId: ${userId || '❌ 不存在'}`, userId ? 'success' : 'error');
+      log('fullflow-result', `  - RoleId: ${roleId ? '✅ 存在' : '⚠️ 不存在（应该的，需要选择角色）'}`, roleId ? 'success' : 'info');
+      
+      if (token && userId) {
+        log('fullflow-result', '✅ 登录成功！准备进入角色选择页面...', 'success');
+        log('fullflow-result', '👉 访问：http://localhost:8000/start/start.html', 'info');
+      }
+    }
+
+    // 6. 清除所有数据
+    function clearAllData() {
+      if (confirm('确定要清除所有本地存储数据吗？')) {
+        localStorage.clear();
+        alert('✅ 数据已清除！请刷新页面。');
+        location.reload();
+      }
+    }
+
+    // 显示当前状态
+    function updateCurrentState() {
+      const stateEl = document.getElementById('current-state');
+      const state = {
+        'Token': localStorage.getItem('token') ? '存在' : '不存在',
+        'UserId': localStorage.getItem('userId') || '不存在',
+        'RoleId': localStorage.getItem('roleId') || '不存在',
+        'CurrentRoleId': localStorage.getItem('currentRoleId') || '不存在',
+        'SelectedCharacterId': localStorage.getItem('selectedCharacterId') || '不存在',
+        'Username': localStorage.getItem('username') || '不存在',
+        '角色列表': localStorage.getItem('roles') ? '存在' : '不存在'
+      };
+      
+      stateEl.innerHTML = Object.entries(state)
+        .map(([key, value]) => `${key}: ${value}`)
+        .join('\n');
+    }
+
+    // 页面加载时更新状态
+    updateCurrentState();
+    setInterval(updateCurrentState, 2000);
+  </script>
+</body>
+</html>

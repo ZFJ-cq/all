@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="css/mobile-adapt.css">
+    <title>localStorage 测试</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+        }
+        .log {
+            background: #f5f5f5;
+            padding: 10px;
+            margin-top: 20px;
+            border-radius: 4px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+
+  </head>
+<body>
+    <div class="container">
+        <h1>localStorage 测试</h1>
+        <p>测试 localStorage 是否能正常保存数据</p>
+        
+        <button onclick="setData()">设置数据</button>
+        <button onclick="getData()">读取数据</button>
+        <button onclick="clearData()">清除数据</button>
+        <button onclick="autoTest()">自动测试</button>
+        
+        <div class="log" id="logBox"></div>
+    </div>
+    
+    <script>
+        const logBox = document.getElementById('logBox');
+        
+        function log(message) {
+            const time = new Date().toLocaleTimeString();
+            logBox.innerHTML += `[${time}] ${message}<br>`;
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+        
+        function setData() {
+            localStorage.setItem('userId', '1');
+            localStorage.setItem('roleId', '45');
+            localStorage.setItem('token', 'test-token-123');
+            log('✅ 已设置数据：userId=1, roleId=45, token=test-token-123');
+        }
+        
+        function getData() {
+            const userId = localStorage.getItem('userId');
+            const roleId = localStorage.getItem('roleId');
+            const token = localStorage.getItem('token');
+            
+            log(`📖 读取数据：userId=${userId}, roleId=${roleId}, token=${token ? '存在' : '不存在'}`);
+            
+            if (!userId || !roleId) {
+                log('❌ 数据丢失！');
+            } else {
+                log('✅ 数据完整');
+            }
+        }
+        
+        function clearData() {
+            localStorage.clear();
+            log('🗑️ 已清除所有数据');
+        }
+        
+        async function autoTest() {
+            log('=== 开始自动测试 ===');
+            
+            // 第一次设置
+            setData();
+            await sleep(1000);
+            
+            // 第一次读取
+            log('--- 第一次读取 ---');
+            getData();
+            await sleep(1000);
+            
+            // 第二次读取
+            log('--- 第二次读取 ---');
+            getData();
+            await sleep(1000);
+            
+            // 第三次读取
+            log('--- 第三次读取 ---');
+            getData();
+            
+            log('=== 测试完成 ===');
+        }
+        
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+        
+        // 页面加载时自动读取
+        window.addEventListener('DOMContentLoaded', () => {
+            log('页面加载完成，自动读取数据...');
+            getData();
+        });
+    </script>
+</body>
+</html>

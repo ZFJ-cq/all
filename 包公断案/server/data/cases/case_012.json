@@ -1,0 +1,211 @@
+{
+  "id": "case_012",
+  "title": "东京判斩赵皇亲",
+  "subtitle": "第十二案",
+  "difficulty": 3,
+  "description": "赵王观灯强抢民女，杀害织造匠全家，包拯智斩皇亲，为民除害！",
+  "background": "西京师员外之子师官受娶妻刘都赛，美貌非凡。上元观灯时被赵王看中，强抢入府。师家满门被灭口，只剩张公携幼主逃脱，包拯明断此案，斩赵皇亲。",
+  "stages": {
+    "report": {
+      "id": "report",
+      "name": "报案",
+      "dialogues": [
+        {
+          "speaker": "系统",
+          "speakerTitle": "旁白",
+          "content": "扬州张公抱着五岁小主人师金保，星夜赶到开封府鸣冤。",
+          "emotion": "narrator"
+        },
+        {
+          "speaker": "张公",
+          "speakerTitle": "告状人",
+          "content": "包大人！大事不好！我家员外一家都被赵王害死了！",
+          "emotion": "cry"
+        },
+        {
+          "speaker": "包拯",
+          "speakerTitle": "包青天",
+          "content": "赵王？哪个赵王？慢慢道来！",
+          "emotion": "serious"
+        },
+        {
+          "speaker": "张公",
+          "speakerTitle": "告状人",
+          "content": "西京棋盘巷师员外之子师官受，娶妻刘都赛。上元夜观灯，被赵王看中，强抢入府！",
+          "emotion": "cry"
+        },
+        {
+          "speaker": "张公",
+          "speakerTitle": "告状人",
+          "content": "后来员外去府中探妻，被赵王杀害……又杀了梅香和四个匠人……更灭了我师家满门！",
+          "emotion": "cry"
+        },
+        {
+          "speaker": "包拯",
+          "speakerTitle": "包青天",
+          "content": "竟有此事！皇亲如此横行霸道，本官必为你家讨回公道！",
+          "emotion": "angry"
+        }
+      ]
+    },
+    "investigation": {
+      "id": "investigation",
+      "name": "取证",
+      "scenes": [
+        {
+          "id": "xi_jing",
+          "name": "西京师家",
+          "description": "师家旧址已被烧毁，满目疮痍。",
+          "searchHints": ["查看烧毁现场", "询问邻里", "寻找幸存者"]
+        },
+        {
+          "id": "zhao_palace",
+          "name": "赵王府",
+          "description": "赵王的府邸，戒备森严。",
+          "searchHints": ["探查刘都赛下落", "寻找证人", "收集罪证"]
+        },
+        {
+          "id": "prison",
+          "name": "开封府牢",
+          "description": "开封府大牢，关押着相关人犯。",
+          "searchHints": ["审问狱卒", "寻找知情人", "核实证据"]
+        }
+      ],
+      "evidences": [
+        {
+          "id": "ev_1201",
+          "name": "师家烧毁现场",
+          "icon": "bone",
+          "description": "师家被赵王放火烧毁，尸体遍地，血流成河。",
+          "sceneId": "xi_jing",
+          "isKey": true,
+          "clue": "现场惨状证明赵王杀人灭口的罪行。"
+        },
+        {
+          "id": "ev_1202",
+          "name": "孙文仪书信",
+          "icon": "note",
+          "description": "监官孙文仪与赵王勾结，陷害师家的密信。",
+          "sceneId": "prison",
+          "isKey": true,
+          "clue": "书信证明孙文仪参与谋害师家。"
+        },
+        {
+          "id": "ev_1203",
+          "name": "赵王罪状册",
+          "icon": "book",
+          "description": "包拯查明的赵王一系列罪行记录。",
+          "sceneId": "zhao_palace",
+          "isKey": true,
+          "clue": "罪行累累，罄竹难书。"
+        },
+        {
+          "id": "ev_1204",
+          "name": "张公证词",
+          "icon": "witness",
+          "description": "张公亲眼目睹赵王带人杀害师家满门。",
+          "sceneId": "xi_jing",
+          "isKey": true,
+          "clue": "张公是直接证人，证词可信。"
+        },
+        {
+          "id": "ev_1205",
+          "name": "刘都赛织锦",
+          "icon": "cloth",
+          "description": "刘都赛被囚宫中，为赵王织造万象织锦。",
+          "sceneId": "zhao_palace",
+          "isKey": false,
+          "clue": "刘都赛尚在人世，可为重要证人。"
+        }
+      ]
+    },
+    "interrogation": {
+      "id": "interrogation",
+      "name": "审讯",
+      "suspects": [
+        {
+          "id": "sus_1201",
+          "name": "赵王",
+          "role": "皇亲",
+          "description": "当朝皇亲，为非作歹，残害百姓。",
+          "dialogues": [
+            {
+              "speaker": "赵王",
+              "speakerTitle": "嫌疑人",
+              "content": "包拯！你敢审本王？",
+              "emotion": "arrogant"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "王子犯法与庶民同罪！你强抢民女，杀害师家满门，可知罪？",
+              "emotion": "angry"
+            },
+            {
+              "speaker": "赵王",
+              "speakerTitle": "嫌疑人",
+              "content": "你有何证据？",
+              "emotion": "defensive"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "张公便是证人，师家烧毁现场便是物证！你还有何话说？",
+              "emotion": "serious"
+            },
+            {
+              "speaker": "赵王",
+              "speakerTitle": "嫌疑人",
+              "content": "……",
+              "emotion": "defeated"
+            }
+          ],
+          "isGuilty": true
+        },
+        {
+          "id": "sus_1202",
+          "name": "孙文仪",
+          "role": "监官",
+          "description": "监官，与赵王勾结，陷害忠良。",
+          "dialogues": [
+            {
+              "speaker": "孙文仪",
+              "speakerTitle": "嫌疑人",
+              "content": "包大人，我只是奉命行事……",
+              "emotion": "fear"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "奉命？你与赵王勾结，陷害师家，罪不可恕！",
+              "emotion": "angry"
+            },
+            {
+              "speaker": "孙文仪",
+              "speakerTitle": "嫌疑人",
+              "content": "大人饶命……是我一时糊涂……",
+              "emotion": "surrender"
+            }
+          ],
+          "isGuilty": true
+        }
+      ]
+    },
+    "judgment": {
+      "id": "judgment",
+      "name": "断案",
+      "correctSuspectId": "sus_1201",
+      "requiredEvidenceIds": ["ev_1201", "ev_1202", "ev_1203", "ev_1204"],
+      "judgmentText": {
+        "correct": "经查明，赵王上元观灯，见刘都赛美貌，起意强抢，囚于府中。师郎来府探妻，赵王杀之，又杀梅香、四匠人，灭师家满门，放火毁尸灭迹。孙文仪与赵王勾结，助纣为虐。判赵王绑赴法场处斩，孙文仪同谋论死。赵王家产抄没，赈济西京百姓。刘都赛与家人团聚，表彰其节烈。此案彰显包拯不畏皇亲，为民请命之精神！",
+        "wrong": "案情复杂，需继续查证。",
+        "partial": "已掌握部分证据，需深挖。"
+      }
+    }
+  },
+  "hints": [
+    { "id": "hint_12_1", "content": "张公是目击证人，他的证词很重要。", "cost": 1 },
+    { "id": "hint_12_2", "content": "孙文仪与赵王有书信往来，书信是铁证。", "cost": 1 },
+    { "id": "hint_12_3", "content": "师家烧毁现场是赵王杀人灭口的直接证据。", "cost": 1 }
+  ]
+}

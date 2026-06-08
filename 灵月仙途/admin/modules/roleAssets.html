@@ -1,0 +1,338 @@
+<script src="../js/api-service.js"></script>
+<div class="section active">
+  <div class="status-message" id="assetMessage"></div>
+  <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+    <h2 class="section-title">角色资产</h2>
+    <button class="btn btn-primary" onclick="openAddRoleAssetModal()">新增角色资产</button>
+  </div>
+  
+  <!-- 筛选条件 -->
+  <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+    <select id="roleAssetTypeFilter" onchange="handleRoleAssetSearch()" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; min-width: 150px;">
+      <option value="">全部资产类型</option>
+    </select>
+    <select id="roleAssetRoleFilter" onchange="handleRoleAssetSearch()" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; min-width: 150px;">
+      <option value="">全部角色</option>
+    </select>
+    <input type="text" id="roleAssetUserFilter" placeholder="用户名称筛选" onkeyup="handleRoleAssetSearch()" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; min-width: 150px;">
+  </div>
+  
+  <!-- 角色资产管理 -->
+  <div>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>角色名称</th>
+          <th>用户名称</th>
+          <th>角色 ID</th>
+          <th>资产类型</th>
+          <th>数量</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody id="roleAssetTableBody">
+        <!-- JS 生成 -->
+      </tbody>
+    </table>
+    <div id="roleAssetPagination"></div>
+  </div>
+</div>
+
+<!-- 新增/编辑角色资产模态框 -->
+<div id="roleAssetModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="roleAssetModalTitle">新增角色资产</h3>
+      <span class="close" onclick="closeRoleAssetModal()">&times;</span>
+    </div>
+    <form id="roleAssetForm">
+      <input type="hidden" id="roleAssetId">
+      <div class="form-group">
+        <label>角色</label>
+        <select id="roleAssetRoleId" required>
+          <option value="">请选择角色</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>资产类型</label>
+        <select id="roleAssetAssetTypeId" required>
+          <option value="">请选择资产类型</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>数量</label>
+        <input type="number" id="roleAssetQuantity" min="1" required>
+      </div>
+      <div style="text-align: right; margin-top: 20px;">
+        <button type="button" class="btn btn-secondary" onclick="closeRoleAssetModal()">取消</button>
+        <button type="submit" class="btn btn-primary">保存</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  // 初始化角色资产管理
+  async function initRoleAssets() {
+    await loadRoleAssets();
+    await loadAssetTypeFilter();
+    await loadRoleFilter();
+  }
+
+  // 加载角色资产
+  async function loadRoleAssets() {
+    const tableBody = document.getElementById('roleAssetTableBody');
+    tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#999;">加载中...</td></tr>';
+    
+    try {
+      const roleAssets = await apiService.get('/role-asset');
+      
+      console.log('角色资产数据:', roleAssets);
+      
+      tableBody.innerHTML = '';
+      if (roleAssets && Array.isArray(roleAssets) && roleAssets.length > 0) {
+        roleAssets.forEach(asset => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${asset.id || '-'}</td>
+            <td>${asset.roleName || '-'}</td>
+            <td>${asset.userName || '-'}</td>
+            <td>${asset.roleId || '-'}</td>
+            <td>${asset.assetTypeName || '-'}</td>
+            <td>${asset.quantity || 0}</td>
+            <td>
+              <button class="btn btn-primary" onclick="editRoleAsset(${asset.id})">编辑</button>
+              <button class="btn btn-danger" onclick="deleteRoleAsset(${asset.id})">删除</button>
+            </td>
+          `;
+          tableBody.appendChild(row);
+        });
+      } else {
+        tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#999;">暂无数据</td></tr>';
+      }
+    } catch (error) {
+      console.error('加载角色资产失败:', error);
+      tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#e74c3c;">加载失败：' + (error.message || '未知错误') + '</td></tr>';
+    }
+  }
+
+  // 加载资产类型筛选
+  async function loadAssetTypeFilter() {
+    const filter = document.getElementById('roleAssetTypeFilter');
+    filter.innerHTML = '<option value="">全部资产类型</option>';
+    
+    try {
+      const assetTypes = await apiService.get('/asset-type');
+      if (assetTypes && assetTypes.length > 0) {
+        assetTypes.forEach(type => {
+          const option = document.createElement('option');
+          option.value = type.name;
+          option.textContent = type.name;
+          filter.appendChild(option);
+        });
+      }
+    } catch (error) {
+      console.error('加载资产类型筛选失败:', error);
+    }
+  }
+
+  // 加载角色筛选
+  async function loadRoleFilter() {
+    const filter = document.getElementById('roleAssetRoleFilter');
+    filter.innerHTML = '<option value="">全部角色</option>';
+    
+    try {
+      const roles = await apiService.get('/role/all');
+      if (roles && roles.length > 0) {
+        roles.forEach(role => {
+          const option = document.createElement('option');
+          option.value = role.roleName;
+          option.textContent = role.roleName;
+          filter.appendChild(option);
+        });
+      }
+    } catch (error) {
+      console.error('加载角色筛选失败:', error);
+    }
+  }
+
+  // 处理角色资产搜索
+  async function handleRoleAssetSearch() {
+    const typeFilter = document.getElementById('roleAssetTypeFilter').value;
+    const roleFilter = document.getElementById('roleAssetRoleFilter').value;
+    const userFilter = document.getElementById('roleAssetUserFilter').value.toLowerCase();
+    const tableBody = document.getElementById('roleAssetTableBody');
+    tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#999;">搜索中...</td></tr>';
+    
+    try {
+      let url = '/role-asset/search';
+      const params = new URLSearchParams();
+      if (typeFilter) params.append('type', typeFilter);
+      if (roleFilter) params.append('role', roleFilter);
+      if (userFilter) params.append('user', userFilter);
+      
+      const roleAssets = await apiService.get(`${url}?${params.toString()}`);
+      
+      tableBody.innerHTML = '';
+      if (roleAssets && Array.isArray(roleAssets) && roleAssets.length > 0) {
+        roleAssets.forEach(asset => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${asset.id || '-'}</td>
+            <td>${asset.roleName || '-'}</td>
+            <td>${asset.userName || '-'}</td>
+            <td>${asset.roleId || '-'}</td>
+            <td>${asset.assetTypeName || '-'}</td>
+            <td>${asset.quantity || 0}</td>
+            <td>
+              <button class="btn btn-primary" onclick="editRoleAsset(${asset.id})">编辑</button>
+              <button class="btn btn-danger" onclick="deleteRoleAsset(${asset.id})">删除</button>
+            </td>
+          `;
+          tableBody.appendChild(row);
+        });
+      } else {
+        tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#999;">未找到匹配数据</td></tr>';
+      }
+    } catch (error) {
+      console.error('搜索角色资产失败:', error);
+      tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#e74c3c;">搜索失败，请重试</td></tr>';
+    }
+  }
+
+  // 加载角色选项
+  async function loadRoleOptions() {
+    const roleSelect = document.getElementById('roleAssetRoleId');
+    roleSelect.innerHTML = '<option value="">请选择角色</option>';
+    
+    try {
+      const roles = await apiService.get('/role/all');
+      if (roles && roles.length > 0) {
+        roles.forEach(role => {
+          const option = document.createElement('option');
+          option.value = role.id;
+          option.textContent = role.roleName;
+          roleSelect.appendChild(option);
+        });
+      }
+    } catch (error) {
+      console.error('加载角色选项失败:', error);
+    }
+  }
+
+  // 加载资产类型选项
+  async function loadAssetTypeOptions() {
+    const assetTypeSelect = document.getElementById('roleAssetAssetTypeId');
+    assetTypeSelect.innerHTML = '<option value="">请选择资产类型</option>';
+    
+    try {
+      const assetTypes = await apiService.get('/asset-type');
+      if (assetTypes && assetTypes.length > 0) {
+        assetTypes.forEach(type => {
+          const option = document.createElement('option');
+          option.value = type.id;
+          option.textContent = type.name;
+          assetTypeSelect.appendChild(option);
+        });
+      }
+    } catch (error) {
+      console.error('加载资产类型选项失败:', error);
+    }
+  }
+
+  // 打开新增角色资产模态框
+  async function openAddRoleAssetModal() {
+    document.getElementById('roleAssetModalTitle').textContent = '新增角色资产';
+    document.getElementById('roleAssetForm').reset();
+    document.getElementById('roleAssetId').value = '';
+    await loadRoleOptions();
+    await loadAssetTypeOptions();
+    document.getElementById('roleAssetModal').style.display = 'block';
+  }
+
+  // 编辑角色资产
+  async function editRoleAsset(id) {
+    try {
+      const asset = await apiService.get(`/role-asset/${id}`);
+      document.getElementById('roleAssetModalTitle').textContent = '编辑角色资产';
+      document.getElementById('roleAssetId').value = asset.id;
+      await loadRoleOptions();
+      await loadAssetTypeOptions();
+      document.getElementById('roleAssetRoleId').value = asset.roleId;
+      document.getElementById('roleAssetAssetTypeId').value = asset.assetTypeId;
+      document.getElementById('roleAssetQuantity').value = asset.quantity;
+      document.getElementById('roleAssetModal').style.display = 'block';
+    } catch (error) {
+      console.error('获取角色资产信息失败:', error);
+      showMessage('assetMessage', '获取信息失败', 'error');
+    }
+  }
+
+  // 关闭角色资产模态框
+  function closeRoleAssetModal() {
+    document.getElementById('roleAssetModal').style.display = 'none';
+  }
+
+  // 保存角色资产
+  async function saveRoleAsset() {
+    const id = document.getElementById('roleAssetId').value;
+    const roleAsset = {
+      roleId: document.getElementById('roleAssetRoleId').value,
+      assetTypeId: document.getElementById('roleAssetAssetTypeId').value,
+      quantity: parseInt(document.getElementById('roleAssetQuantity').value)
+    };
+    
+    try {
+      if (id) {
+        await apiService.put(`/role-asset/${id}`, roleAsset);
+        showMessage('assetMessage', '更新成功', 'success');
+      } else {
+        await apiService.post('/role-asset', roleAsset);
+        showMessage('assetMessage', '新增成功', 'success');
+      }
+      closeRoleAssetModal();
+      loadRoleAssets();
+    } catch (error) {
+      console.error('保存角色资产失败:', error);
+      showMessage('assetMessage', '保存失败: ' + error.message, 'error');
+    }
+  }
+
+  // 删除角色资产
+  async function deleteRoleAsset(id) {
+    if (confirm('确定要删除这个角色资产吗？')) {
+      try {
+        await apiService.delete(`/role-asset/${id}`);
+        showMessage('assetMessage', '删除成功', 'success');
+        loadRoleAssets();
+      } catch (error) {
+        console.error('删除角色资产失败:', error);
+        showMessage('assetMessage', '删除失败: ' + error.message, 'error');
+      }
+    }
+  }
+
+  // 绑定表单事件
+  function bindRoleAssetFormEvents() {
+    document.getElementById('roleAssetForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      saveRoleAsset();
+    });
+  }
+
+  // 页面加载完成后初始化
+  if (typeof window.initRoleAssets === 'undefined') {
+    window.initRoleAssets = async function() {
+      await loadRoleAssets();
+      await loadAssetTypeFilter();
+      await loadRoleFilter();
+      bindRoleAssetFormEvents();
+    };
+  }
+
+  // 页面加载完成后初始化
+  if (typeof window.initRoleAssets === 'undefined') {
+    window.initRoleAssets = initRoleAssets;
+  }
+</script>

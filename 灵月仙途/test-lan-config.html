@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="css/mobile-adapt.css">
+    <title>测试局域网配置</title>
+
+  </head>
+<body>
+    <h1>灵月仙途 - 局域网配置测试</h1>
+    <div id="results"></div>
+    
+    <script src="js/config.js"></script>
+    <script>
+        const results = document.getElementById('results');
+        let html = '<h2>测试结果：</h2>';
+        
+        // 测试 1: 显示当前 hostname
+        html += `<p><strong>当前 hostname:</strong> ${window.location.hostname}</p>`;
+        
+        // 测试 2: 显示 API_BASE_URL
+        html += `<p><strong>API_BASE_URL:</strong> ${window.APP_CONFIG.API_BASE_URL}</p>`;
+        
+        // 测试 3: 显示环境
+        html += `<p><strong>当前环境:</strong> ${window.APP_CONFIG.ENVIRONMENT}</p>`;
+        
+        // 测试 4: 检查是否是局域网 IP
+        const isLan = window.location.hostname.match(/^192\.168\./) || 
+                      window.location.hostname.match(/^10\./) || 
+                      window.location.hostname.match(/^172\.(1[6-9]|2[0-9]|3[0-1])\./);
+        html += `<p><strong>是否局域网访问:</strong> ${isLan ? '✅ 是' : '❌ 否'}</p>`;
+        
+        // 测试 5: 测试 API 请求
+        html += '<h3>API 连通性测试：</h3>';
+        
+        fetch(window.APP_CONFIG.API_BASE_URL + '/health')
+            .then(res => res.json())
+            .then(data => {
+                html += `<p style="color: green;">✅ API 请求成功！</p>`;
+                html += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                results.innerHTML = html;
+            })
+            .catch(err => {
+                html += `<p style="color: red;">❌ API 请求失败：${err.message}</p>`;
+                html += `<p>请检查后端服务是否运行在：<strong>${window.APP_CONFIG.API_BASE_URL}</strong></p>`;
+                results.innerHTML = html;
+            });
+        
+        results.innerHTML = html + '<p>API 请求中...</p>';
+    </script>
+</body>
+</html>

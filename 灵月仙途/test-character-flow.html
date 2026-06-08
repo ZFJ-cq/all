@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="css/mobile-adapt.css">
+    <title>灵月仙途 - 角色流程测试</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+
+        :root {
+            --success: #4ade80;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text: #f0f3f5;
+            --sub: #94a3b8;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--info);
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: var(--info);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--sub);
+        }
+
+        .status-indicator.success { background: var(--success); }
+        .status-indicator.error { background: var(--error); }
+        .status-indicator.warning { background: var(--warning); }
+        .status-indicator.running { 
+            background: var(--warning); 
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .test-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+
+        .test-result {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .btn:hover { transform: translateY(-2px); }
+        .btn-primary { background: var(--info); color: white; }
+        .btn-success { background: var(--success); color: #000; }
+        .btn-warning { background: var(--warning); color: #000; }
+
+        .log-container {
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            padding: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 5px;
+            border-radius: 4px;
+        }
+
+        .log-info { background: rgba(59, 130, 246, 0.2); color: var(--info); }
+        .log-success { background: rgba(74, 222, 128, 0.2); color: var(--success); }
+        .log-error { background: rgba(239, 68, 68, 0.2); color: var(--error); }
+        .log-warning { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: rgba(0,0,0,0.2);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            color: var(--sub);
+            font-size: 0.9rem;
+        }
+
+        input {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: var(--text);
+            padding: 10px;
+            border-radius: 6px;
+            width: 200px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+    </style>
+
+  </head>
+<body>
+    <div class="container">
+        <h1>🌀 灵月仙途 - 角色流程测试</h1>
+        
+        <div class="card">
+            <div class="card-title">
+                <span>📊 测试统计</span>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="total-tests">0</div>
+                    <div class="stat-label">总测试数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="passed-tests" style="color: var(--success);">0</div>
+                    <div class="stat-label">通过</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="failed-tests" style="color: var(--error);">0</div>
+                    <div class="stat-label">失败</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="pending-tests" style="color: var(--warning);">0</div>
+                    <div class="stat-label">待测试</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">
+                <span>⚙️ 测试配置</span>
+            </div>
+            <div class="input-group">
+                <label>测试用户名:</label>
+                <input type="text" id="test-username" value="testuser" placeholder="请输入测试用户名">
+                <label>测试密码:</label>
+                <input type="password" id="test-password" value="123456" placeholder="请输入测试密码">
+            </div>
+            <div class="input-group">
+                <button class="btn btn-primary" onclick="startFlowTest()">▶️ 开始流程测试</button>
+                <button class="btn btn-warning" onclick="clearLogs()">🗑️ 清除日志</button>
+                <button class="btn btn-success" onclick="loadExistingUser()">📥 使用现有用户</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">
+                <span>🎯 测试流程</span>
+            </div>
+            <div id="test-flow">
+                <div class="test-item" id="step-1">
+                    <span>1. 检查后端连接</span>
+                    <div class="test-result"><span class="status-indicator" id="status-1"></span><span id="text-1">待测试</span></div>
+                </div>
+                <div class="test-item" id="step-2">
+                    <span>2. 用户登录</span>
+                    <div class="test-result"><span class="status-indicator" id="status-2"></span><span id="text-2">待测试</span></div>
+                </div>
+                <div class="test-item" id="step-3">
+                    <span>3. 获取角色列表</span>
+                    <div class="test-result"><span class="status-indicator" id="status-3"></span><span id="text-3">待测试</span></div>
+                </div>
+                <div class="test-item" id="step-4">
+                    <span>4. 加载角色详细信息</span>
+                    <div class="test-result"><span class="status-indicator" id="status-4"></span><span id="text-4">待测试</span></div>
+                </div>
+                <div class="test-item" id="step-5">
+                    <span>5. 获取角色资产</span>
+                    <div class="test-result"><span class="status-indicator" id="status-5"></span><span id="text-5">待测试</span></div>
+                </div>
+                <div class="test-item" id="step-6">
+                    <span>6. 获取角色背包</span>
+                    <div class="test-result"><span class="status-indicator" id="status-6"></span><span id="text-6">待测试</span></div>
+                </div>
+                <div class="test-item" id="step-7">
+                    <span>7. 获取修炼状态</span>
+                    <div class="test-result"><span class="status-indicator" id="status-7"></span><span id="text-7">待测试</span></div>
+                </div>
+                <div class="test-item" id="step-8">
+                    <span>8. 获取任务列表</span>
+                    <div class="test-result"><span class="status-indicator" id="status-8"></span><span id="text-8">待测试</span></div>
+                </div>
+                <div class="test-item" id="step-9">
+                    <span>9. 获取排行榜</span>
+                    <div class="test-result"><span class="status-indicator" id="status-9"></span><span id="text-9">待测试</span></div>
+                </div>
+                <div class="test-item" id="step-10">
+                    <span>10. 获取宗门列表</span>
+                    <div class="test-result"><span class="status-indicator" id="status-10"></span><span id="text-10">待测试</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">
+                <span>📜 测试日志</span>
+            </div>
+            <div class="log-container" id="log-container">
+                <div class="log-entry log-info">等待开始测试...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8088/api';
+        let testResults = {
+            total: 10,
+            passed: 0,
+            failed: 0,
+            pending: 10
+        };
+        let currentUserId = null;
+        let currentRoleId = null;
+
+        function updateStats() {
+            document.getElementById('total-tests').textContent = testResults.total;
+            document.getElementById('passed-tests').textContent = testResults.passed;
+            document.getElementById('failed-tests').textContent = testResults.failed;
+            document.getElementById('pending-tests').textContent = testResults.pending;
+        }
+
+        function log(message, type = 'info') {
+            const container = document.getElementById('log-container');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            const time = new Date().toLocaleTimeString();
+            entry.textContent = `[${time}] ${message}`;
+            container.appendChild(entry);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function clearLogs() {
+            document.getElementById('log-container').innerHTML = '<div class="log-entry log-info">日志已清除</div>';
+            resetTestSteps();
+        }
+
+        function resetTestSteps() {
+            for (let i = 1; i <= 10; i++) {
+                updateStep(i, '待测试', '');
+            }
+            testResults = { total: 10, passed: 0, failed: 0, pending: 10 };
+            updateStats();
+        }
+
+        function updateStep(stepNum, text, status) {
+            const indicator = document.getElementById(`status-${stepNum}`);
+            const textEl = document.getElementById(`text-${stepNum}`);
+            textEl.textContent = text;
+            
+            indicator.className = 'status-indicator';
+            if (status === 'success') {
+                indicator.classList.add('success');
+            } else if (status === 'error') {
+                indicator.classList.add('error');
+            } else if (status === 'running') {
+                indicator.classList.add('running');
+            }
+        }
+
+        async function apiCall(endpoint, options = {}) {
+            const url = `${API_BASE}${endpoint}`;
+            log(`调用 API: ${url}`, 'info');
+            
+            try {
+                const response = await fetch(url, {
+                    ...options,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    }
+                });
+                
+                const data = await response.json();
+                log(`响应: ${JSON.stringify(data).substring(0, 200)}`, 'info');
+                return data;
+            } catch (error) {
+                log(`API 调用失败: ${error.message}`, 'error');
+                throw error;
+            }
+        }
+
+        async function testStep1() {
+            updateStep(1, '测试中...', 'running');
+            log('开始测试: 检查后端连接', 'info');
+            
+            try {
+                const data = await apiCall('/stats');
+                if (data) {
+                    updateStep(1, '✓ 后端连接正常', 'success');
+                    testResults.passed++;
+                    testResults.pending--;
+                    log('后端连接测试通过', 'success');
+                    return true;
+                }
+            } catch (error) {
+                try {
+                    const data = await apiCall('/item');
+                    if (data) {
+                        updateStep(1, '✓ 后端连接正常', 'success');
+                        testResults.passed++;
+                        testResults.pending--;
+                        log('后端连接测试通过', 'success');
+                        return true;
+                    }
+                } catch (e) {
+                    updateStep(1, '✗ 后端连接失败', 'error');
+                    testResults.failed++;
+                    testResults.pending--;
+                    log('后端连接测试失败', 'error');
+                    return false;
+                }
+            }
+        }
+
+        async function testStep2() {
+            updateStep(2, '测试中...', 'running');
+            log('开始测试: 用户登录', 'info');
+            
+            const username = document.getElementById('test-username').value;
+            const password = document.getElementById('test-password').value;
+            
+            try {
+                const data = await apiCall('/auth/login', {
+                    method: 'POST',
+                    body: JSON.stringify({ username, password })
+                });
+                
+                if (data.success && data.data) {
+                    currentUserId = data.data.userId || data.data.id;
+                    
+                    updateStep(2, `✓ 登录成功 (用户ID: ${currentUserId})`, 'success');
+                    testResults.passed++;
+                    testResults.pending--;
+                    log(`用户登录成功: ${currentUserId}`, 'success');
+                    return true;
+                } else {
+                    log('尝试注册新用户...', 'warning');
+                    const regData = await apiCall('/auth/register', {
+                        method: 'POST',
+                        body: JSON.stringify({ phone: username, code: '123456', password: password, nickname: username })
+                    });
+                    
+                    if (regData.success && regData.data) {
+                        currentUserId = regData.data.userId || regData.data.id;
+                        updateStep(2, `✓ 注册并登录成功 (用户ID: ${currentUserId})`, 'success');
+                        testResults.passed++;
+                        testResults.pending--;
+                        log(`新用户注册成功: ${currentUserId}`, 'success');
+                        return true;
+                    }
+                }
+                throw new Error(data.message || '登录失败');
+            } catch (error) {
+                updateStep(2, '✗ 登录失败', 'error');
+                testResults.failed++;
+                testResults.pending--;
+                log(`登录测试失败: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        async function testStep3() {
+            updateStep(3, '测试中...', 'running');
+            log('开始测试: 获取角色列表', 'info');
+            
+            try {
+                const data = await apiCall(`/role/user/${currentUserId}`);
+                
+                if (data && Array.isArray(data) && data.length > 0) {
+                    currentRoleId = data[0].id;
+                    updateStep(3, `✓ 找到 ${data.length} 个角色 (角色ID: ${currentRoleId})`, 'success');
+                    testResults.passed++;
+                    testResults.pending--;
+                    log(`角色列表获取成功，当前角色ID: ${currentRoleId}`, 'success');
+                    return true;
+                } else {
+                    log('没有找到角色，尝试创建角色...', 'warning');
+                    const createData = await apiCall('/character/create', {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            userId: currentUserId,
+                            name: '测试角色',
+                            realm: '炼气一层',
+                            gender: '男'
+                        })
+                    });
+                    
+                    if (createData && createData.id) {
+                        currentRoleId = createData.id;
+                        updateStep(3, `✓ 创建角色成功 (角色ID: ${currentRoleId})`, 'success');
+                        testResults.passed++;
+                        testResults.pending--;
+                        log(`角色创建成功: ${currentRoleId}`, 'success');
+                        return true;
+                    }
+                }
+                throw new Error('无法获取或创建角色');
+            } catch (error) {
+                updateStep(3, '✗ 获取角色列表失败', 'error');
+                testResults.failed++;
+                testResults.pending--;
+                log(`角色列表测试失败: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        async function testStep4() {
+            if (!currentRoleId) {
+                updateStep(4, '✗ 跳过（无角色）', 'error');
+                testResults.failed++;
+                testResults.pending--;
+                return false;
+            }
+            
+            updateStep(4, '测试中...', 'running');
+            log('开始测试: 加载角色详细信息', 'info');
+            
+            try {
+                const data = await apiCall(`/role/${currentRoleId}`);
+                
+                if (data) {
+                    updateStep(4, `✓ 角色信息加载成功`, 'success');
+                    testResults.passed++;
+                    testResults.pending--;
+                    log(`角色信息: ${data.name || '未知角色'}`, 'success');
+                    return true;
+                }
+                throw new Error('角色信息为空');
+            } catch (error) {
+                updateStep(4, '✗ 加载角色信息失败', 'error');
+                testResults.failed++;
+                testResults.pending--;
+                log(`角色信息测试失败: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        async function testStep5() {
+            if (!currentRoleId) {
+                updateStep(5, '✗ 跳过（无角色）', 'error');
+                testResults.failed++;
+                testResults.pending--;
+                return false;
+            }
+            
+            updateStep(5, '测试中...', 'running');
+            log('开始测试: 获取角色资产', 'info');
+            
+            try {
+                const data = await apiCall(`/role-asset/${currentRoleId}`);
+                
+                if (data) {
+                    updateStep(5, '✓ 资产加载成功', 'success');
+                    testResults.passed++;
+                    testResults.pending--;
+                    log('角色资产获取成功', 'success');
+                    return true;
+                }
+                throw new Error('资产数据为空');
+            } catch (error) {
+                updateStep(5, '✗ 获取资产失败', 'error');
+                testResults.failed++;
+                testResults.pending--;
+                log(`资产测试失败: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        async function testStep6() {
+            if (!currentRoleId) {
+                updateStep(6, '✗ 跳过（无角色）', 'error');
+                testResults.failed++;
+                testResults.pending--;
+                return false;
+            }
+            
+            updateStep(6, '测试中...', 'running');
+            log('开始测试: 获取角色背包', 'info');
+            
+            try {
+                const data = await apiCall(`/api/inventory/${currentRoleId}`);
+                
+                if (data) {
+                    updateStep(6, '✓ 背包加载成功', 'success');
+                    testResults.passed++;
+                    testResults.pending--;
+                    log('角色背包获取成功', 'success');
+                    return true;
+                }
+                throw new Error('背包数据为空');
+            } catch (error) {
+                updateStep(6, '✗ 获取背包失败', 'error');
+                testResults.failed++;
+                testResults.pending--;
+                log(`背包测试失败: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        async function testStep7() {
+            if (!currentRoleId) {
+                updateStep(7, '✗ 跳过（无角色）', 'error');
+                testResults.failed++;
+                testResults.pending--;
+                return false;
+            }
+            
+            updateStep(7, '测试中...', 'running');
+            log('开始测试: 获取修炼状态', 'info');
+            
+            try {
+                const data = await apiCall(`/cultivation/status/${currentRoleId}`);
+                
+                if (data) {
+                    updateStep(7, '✓ 修炼状态加载成功', 'success');
+                    testResults.passed++;
+                    testResults.pending--;
+                    log('修炼状态获取成功', 'success');
+                    return true;
+                }
+                throw new Error('修炼状态为空');
+            } catch (error) {
+                updateStep(7, '✗ 获取修炼状态失败', 'error');
+                testResults.failed++;
+                testResults.pending--;
+                log(`修炼状态测试失败: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        async function testStep8() {
+            if (!currentRoleId) {
+                updateStep(8, '✗ 跳过（无角色）', 'error');
+                testResults.failed++;
+                testResults.pending--;
+                return false;
+            }
+            
+            updateStep(8, '测试中...', 'running');
+            log('开始测试: 获取任务列表', 'info');
+            
+            try {
+                const data = await apiCall(`/task/list/${currentRoleId}`);
+                
+                if (data) {
+                    updateStep(8, '✓ 任务列表加载成功', 'success');
+                    testResults.passed++;
+                    testResults.pending--;
+                    log('任务列表获取成功', 'success');
+                    return true;
+                }
+                throw new Error('任务列表为空');
+            } catch (error) {
+                updateStep(8, '✗ 获取任务列表失败', 'error');
+                testResults.failed++;
+                testResults.pending--;
+                log(`任务列表测试失败: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        async function testStep9() {
+            updateStep(9, '测试中...', 'running');
+            log('开始测试: 获取排行榜', 'info');
+            
+            try {
+                const data = await apiCall('/stats');
+                
+                if (data) {
+                    updateStep(9, '✓ 排行榜加载成功', 'success');
+                    testResults.passed++;
+                    testResults.pending--;
+                    log('排行榜获取成功', 'success');
+                    return true;
+                }
+                throw new Error('排行榜数据为空');
+            } catch (error) {
+                updateStep(9, '✗ 获取排行榜失败', 'error');
+                testResults.failed++;
+                testResults.pending--;
+                log(`排行榜测试失败: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        async function testStep10() {
+            updateStep(10, '测试中...', 'running');
+            log('开始测试: 获取宗门列表', 'info');
+            
+            try {
+                const data = await apiCall('/clan');
+                
+                if (data) {
+                    updateStep(10, '✓ 宗门列表加载成功', 'success');
+                    testResults.passed++;
+                    testResults.pending--;
+                    log('宗门列表获取成功', 'success');
+                    return true;
+                }
+                throw new Error('宗门列表为空');
+            } catch (error) {
+                updateStep(10, '✗ 获取宗门列表失败', 'error');
+                testResults.failed++;
+                testResults.pending--;
+                log(`宗门列表测试失败: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        async function startFlowTest() {
+            log('='.repeat(50), 'info');
+            log('开始完整流程测试', 'info');
+            log('='.repeat(50), 'info');
+            
+            resetTestSteps();
+            currentUserId = null;
+            currentRoleId = null;
+            
+            const startTime = Date.now();
+            
+            const step1Result = await testStep1();
+            updateStats();
+            if (!step1Result) {
+                log('流程测试终止: 后端连接失败', 'error');
+                return;
+            }
+            
+            await new Promise(r => setTimeout(r, 500));
+            const step2Result = await testStep2();
+            updateStats();
+            if (!step2Result) {
+                log('流程测试终止: 登录失败', 'error');
+                return;
+            }
+            
+            await new Promise(r => setTimeout(r, 500));
+            const step3Result = await testStep3();
+            updateStats();
+            if (!step3Result) {
+                log('流程测试终止: 获取角色失败', 'error');
+                return;
+            }
+            
+            await new Promise(r => setTimeout(r, 500));
+            await testStep4();
+            updateStats();
+            
+            await new Promise(r => setTimeout(r, 500));
+            await testStep5();
+            updateStats();
+            
+            await new Promise(r => setTimeout(r, 500));
+            await testStep6();
+            updateStats();
+            
+            await new Promise(r => setTimeout(r, 500));
+            await testStep7();
+            updateStats();
+            
+            await new Promise(r => setTimeout(r, 500));
+            await testStep8();
+            updateStats();
+            
+            await new Promise(r => setTimeout(r, 500));
+            await testStep9();
+            updateStats();
+            
+            await new Promise(r => setTimeout(r, 500));
+            await testStep10();
+            updateStats();
+            
+            const endTime = Date.now();
+            const duration = ((endTime - startTime) / 1000).toFixed(2);
+            
+            log('='.repeat(50), 'info');
+            log(`流程测试完成! 耗时: ${duration}秒`, 'success');
+            log(`通过: ${testResults.passed}/${testResults.total}`, testResults.passed === testResults.total ? 'success' : 'warning');
+            log('='.repeat(50), 'info');
+            
+            if (currentUserId && currentRoleId) {
+                localStorage.setItem('userId', currentUserId);
+                localStorage.setItem('roleId', currentRoleId);
+                log('已保存用户信息到 localStorage', 'success');
+            }
+        }
+
+        function loadExistingUser() {
+            const savedUserId = localStorage.getItem('userId');
+            const savedRoleId = localStorage.getItem('roleId');
+            
+            if (savedUserId && savedRoleId) {
+                currentUserId = savedUserId;
+                currentRoleId = savedRoleId;
+                document.getElementById('test-username').value = 'existing';
+                document.getElementById('test-password').value = '******';
+                log(`已加载现有用户: userId=${savedUserId}, roleId=${savedRoleId}`, 'success');
+                
+                updateStep(1, '✓ 使用现有用户', 'success');
+                updateStep(2, '✓ 使用现有用户', 'success');
+                updateStep(3, '✓ 使用现有用户', 'success');
+                testResults.passed = 3;
+                testResults.pending = 7;
+                updateStats();
+            } else {
+                log('没有找到现有用户信息', 'warning');
+            }
+        }
+
+        updateStats();
+    </script>
+</body>
+</html>

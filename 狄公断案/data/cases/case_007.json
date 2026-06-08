@@ -1,0 +1,71 @@
+{
+  "id": "case_007",
+  "title": "贡茶毒案",
+  "subtitle": "第七案",
+  "difficulty": 2,
+  "description": "御赐贡茶竟成毒茶，品茶官员当场倒地。狄仁杰循着茶香，追踪一桩蓄谋已久的投毒案……",
+  "background": "唐武则天时期，洛阳官府举办品茶大会，品尝今年新到的蒙顶贡茶。不料茶刚入口，工部侍郎便当场倒地中毒。狄仁杰恰好在场，立即封锁现场，追查毒茶来源。",
+  "stages": {
+    "report": {
+      "id": "report",
+      "name": "报案",
+      "dialogues": [
+        { "speaker": "系统", "speakerTitle": "旁白", "content": "洛阳官府品茶大会，众官员齐聚一堂。新到的蒙顶贡茶刚斟上，工部侍郎端起茶杯一饮而尽。", "emotion": "narrator" },
+        { "speaker": "系统", "speakerTitle": "旁白", "content": "忽然，工部侍郎面色铁青，茶杯跌落在地，人已倒下！满堂惊呼！", "emotion": "narrator" },
+        { "speaker": "狄仁杰", "speakerTitle": "同平章事", "content": "封锁大门！任何人不得离开！此茶有毒，本官要彻查到底！", "emotion": "angry" },
+        { "speaker": "狄仁杰", "speakerTitle": "同平章事", "content": "来人，将中毒的茶水和剩余的贡茶全部封存，逐一检验！", "emotion": "serious" }
+      ]
+    },
+    "investigation": {
+      "id": "investigation",
+      "name": "取证",
+      "scenes": [
+        { "id": "tea_hall", "name": "品茶大厅", "description": "品茶大会现场，茶具散落，地上有打碎的茶杯和泼洒的茶水。", "searchHints": ["检查各茶杯中的茶水", "查看茶壶和茶叶罐", "注意侍者的行动轨迹"] },
+        { "id": "tea_storage", "name": "贡茶仓库", "description": "存放贡茶的仓库，从蜀地运来的蒙顶贡茶在此保管，由专人看管。", "searchHints": ["检查贡茶包装", "查看仓库出入记录", "寻找可疑痕迹"] }
+      ],
+      "evidences": [
+        { "id": "ev_001", "name": "毒茶杯", "icon": "teacup", "description": "工部侍郎使用的茶杯中检测出鹤顶红成分，而其他官员的茶杯中无毒。", "sceneId": "tea_hall", "isKey": true, "clue": "只有工部侍郎的茶杯有毒，说明毒是针对性投放的！" },
+        { "id": "ev_002", "name": "侍者的证词", "icon": "witness", "description": "斟茶的侍者称，在给工部侍郎斟茶前，有人'好心'帮他擦了擦杯子。", "sceneId": "tea_hall", "isKey": true, "clue": "有人趁擦杯子之机在杯中下了毒！这个'好心人'就是凶手！" },
+        { "id": "ev_003", "name": "仓库的撬痕", "icon": "seal", "description": "贡茶仓库门锁有被撬过的痕迹，但仓库内的贡茶经检验全部无毒。", "sceneId": "tea_storage", "isKey": true, "clue": "仓库被撬但贡茶无毒，说明毒不是下在茶叶里，而是在茶杯上！" },
+        { "id": "ev_004", "name": "仓库出入记录", "icon": "book", "description": "仓库出入记录显示，案发前夜有人以'检查贡茶'为由进入仓库，签名者是户部郎中赵安。", "sceneId": "tea_storage", "isKey": true, "clue": "赵安深夜进入仓库并非检查贡茶，而是为了制造贡茶有毒的假象！" },
+        { "id": "ev_005", "name": "工部侍郎的奏折", "icon": "letter", "description": "在工部侍郎书房发现一份未呈递的奏折，弹劾户部郎中赵安贪污修河银两。", "sceneId": "tea_hall", "isKey": false, "clue": "工部侍郎正要弹劾赵安，赵安因此先下手为强！" },
+        { "id": "ev_006", "name": "赵安的手帕", "icon": "cloth", "description": "赵安随身携带的手帕上残留有鹤顶红粉末。", "sceneId": "tea_hall", "isKey": false, "clue": "手帕上的鹤顶红就是赵安用来擦杯下毒的铁证！" }
+      ]
+    },
+    "interrogation": {
+      "id": "interrogation",
+      "name": "审讯",
+      "suspects": [
+        { "id": "sus_001", "name": "赵安", "role": "户部郎中", "description": "户部郎中，负责修河工程银两拨付，与工部侍郎素有矛盾。", "dialogues": [
+          { "speaker": "赵安", "speakerTitle": "嫌疑人", "content": "大人！下官与中毒之事毫无关系！下官也是品茶大会的宾客！", "emotion": "fear" },
+          { "speaker": "狄仁杰", "speakerTitle": "同平章事", "content": "你案发前夜为何深夜进入贡茶仓库？", "emotion": "serious" },
+          { "speaker": "赵安", "speakerTitle": "嫌疑人", "content": "那……那只是例行检查！下官负责拨付银两，自然要确保贡茶安全！", "emotion": "panic" },
+          { "speaker": "狄仁杰", "speakerTitle": "同平章事", "content": "例行检查需要撬锁？你手帕上的鹤顶红又作何解释？工部侍郎弹劾你贪污的奏折，你可见过？", "emotion": "angry" },
+          { "speaker": "赵安", "speakerTitle": "嫌疑人", "content": "大人饶命！下官……下官知罪！", "emotion": "surrender" }
+        ], "isGuilty": true },
+        { "id": "sus_002", "name": "孙茶师", "role": "品茶师", "description": "负责品茶大会茶艺展示的茶师，对各种茶叶了如指掌。", "dialogues": [
+          { "speaker": "孙茶师", "speakerTitle": "嫌疑人", "content": "大人，小人只是负责泡茶，绝无下毒之事！", "emotion": "fear" },
+          { "speaker": "狄仁杰", "speakerTitle": "同平章事", "content": "你泡茶时可曾注意到什么异常？", "emotion": "serious" },
+          { "speaker": "孙茶师", "speakerTitle": "嫌疑人", "content": "小人只负责泡茶斟茶，倒是看到赵大人帮工部侍郎擦了擦杯子……小人当时觉得奇怪。", "emotion": "nervous" },
+          { "speaker": "狄仁杰", "speakerTitle": "同平章事", "content": "你看得真切？这很重要，你且仔细回忆。", "emotion": "serious" }
+        ], "isGuilty": false, "hint": "孙茶师只是泡茶的，他看到赵安擦杯子是关键证词" }
+      ]
+    },
+    "judgment": {
+      "id": "judgment",
+      "name": "断案",
+      "correctSuspectId": "sus_001",
+      "requiredEvidenceIds": ["ev_001", "ev_002", "ev_003", "ev_004"],
+      "judgmentText": {
+        "correct": "经查明，户部郎中赵安贪污修河银两，被工部侍郎发现并准备弹劾。赵安得知后先下手为强，在品茶大会上趁帮工部侍郎擦杯之机，用沾有鹤顶红的手帕在杯沿下毒。又提前撬开贡茶仓库制造贡茶有毒的假象，企图转移视线。判赵安斩立决，追回贪污银两！此案彰显狄公明断是非之智！",
+        "wrong": "本案证据尚不充分，大人还需仔细查证，切莫冤枉了好人。",
+        "partial": "大人所断有部分道理，但仍有关键证据未纳入考量，请重新审视所有证据。"
+      }
+    }
+  },
+  "hints": [
+    { "id": "hint_1", "content": "毒不在茶叶里——只有工部侍郎的茶杯有毒，说明毒下在杯子上。", "cost": 1 },
+    { "id": "hint_2", "content": "谁在斟茶前接触过工部侍郎的杯子？侍者的证词很关键。", "cost": 1 },
+    { "id": "hint_3", "content": "仓库被撬但贡茶无毒——这是凶手声东击西的伎俩。谁深夜进入仓库？", "cost": 1 }
+  ]
+}

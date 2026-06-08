@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="css/mobile-adapt.css">
+    <title>调试工具 - 灵月仙途</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #667eea;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        .section h2 {
+            color: #333;
+            margin-top: 0;
+        }
+        .data-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .data-item:last-child {
+            border-bottom: none;
+        }
+        .label {
+            font-weight: bold;
+            color: #666;
+        }
+        .value {
+            color: #333;
+            word-break: break-all;
+        }
+        .value.error {
+            color: #f44336;
+        }
+        .value.success {
+            color: #4caf50;
+        }
+        .value.warning {
+            color: #ff9800;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        .log-box {
+            background: #1e1e1e;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            padding: 15px;
+            border-radius: 5px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+    </style>
+
+  </head>
+<body>
+    <div class="container">
+        <h1>🔍 调试工具</h1>
+        
+        <div class="section">
+            <h2>登录状态</h2>
+            <div id="loginStatus">检查中...</div>
+        </div>
+        
+        <div class="section">
+            <h2>Token 验证</h2>
+            <button onclick="testToken()">测试 Token</button>
+            <button onclick="clearToken()">清除 Token</button>
+            <button onclick="goToLogin()">去登录</button>
+        </div>
+        
+        <div class="section">
+            <h2>日志输出</h2>
+            <div class="log-box" id="logBox">等待操作...</div>
+        </div>
+    </div>
+    
+    <script>
+        const logBox = document.getElementById('logBox');
+        
+        function log(message) {
+            const time = new Date().toLocaleTimeString();
+            logBox.innerHTML += `[${time}] ${message}\n`;
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+        
+        function checkLoginStatus() {
+            const token = localStorage.getItem('token');
+            const userId = localStorage.getItem('userId');
+            const username = localStorage.getItem('username');
+            const roleId = localStorage.getItem('currentRoleId');
+            const selectedCharacterId = localStorage.getItem('selectedCharacterId');
+            
+            const statusDiv = document.getElementById('loginStatus');
+            
+            let html = '';
+            
+            // Token
+            if (token) {
+                const parts = token.split('.');
+                html += `
+                    <div class="data-item">
+                        <span class="label">Token:</span>
+                        <span class="value ${parts.length === 3 ? 'success' : 'error'}">
+                            ${parts.length === 3 ? '存在 (格式正确)' : '存在 (格式错误)'}
+                        </span>
+                    </div>
+                    <div class="data-item">
+                        <span class="label">Token 长度:</span>
+                        <span class="value">${token.length} 字符</span>
+                    </div>
+                `;
+            } else {
+                html += `
+                    <div class="data-item">
+                        <span class="label">Token:</span>
+                        <span class="value error">不存在</span>
+                    </div>
+                `;
+            }
+            
+            // 用户 ID
+            html += `
+                <div class="data-item">
+                    <span class="label">用户 ID:</span>
+                    <span class="value ${userId ? 'success' : 'error'}">${userId || '不存在'}</span>
+                </div>
+            `;
+            
+            // 用户名
+            html += `
+                <div class="data-item">
+                    <span class="label">用户名:</span>
+                    <span class="value ${username ? 'success' : 'warning'}">${username || '不存在'}</span>
+                </div>
+            `;
+            
+            // 角色 ID
+            html += `
+                <div class="data-item">
+                    <span class="label">角色 ID:</span>
+                    <span class="value ${roleId ? 'success' : 'warning'}">${roleId || '不存在'}</span>
+                </div>
+            `;
+            
+            // 选择的角色 ID
+            html += `
+                <div class="data-item">
+                    <span class="label">选择的角色 ID:</span>
+                    <span class="value ${selectedCharacterId ? 'success' : 'warning'}">${selectedCharacterId || '不存在'}</span>
+                </div>
+            `;
+            
+            statusDiv.innerHTML = html;
+        }
+        
+        async function testToken() {
+            log('开始测试 Token...');
+            
+            const token = localStorage.getItem('token');
+            const userId = localStorage.getItem('userId');
+            
+            if (!token || !userId) {
+                log('❌ Token 或用户 ID 不存在');
+                return;
+            }
+            
+            try {
+                log(`测试请求：/role/user/${userId}`);
+                const response = await fetch(`http://localhost:8088/api/role/user/${userId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    log(`✅ Token 有效！状态码：${response.status}`);
+                    log(`响应数据：${JSON.stringify(data)}`);
+                } else {
+                    log(`❌ Token 无效！状态码：${response.status}`);
+                    log(`错误信息：${data.message || '未知错误'}`);
+                }
+            } catch (error) {
+                log(`❌ 请求失败：${error.message}`);
+            }
+        }
+        
+        function clearToken() {
+            log('清除所有登录数据...');
+            localStorage.clear();
+            log('✅ 已清除');
+            checkLoginStatus();
+        }
+        
+        function goToLogin() {
+            log('跳转到登录页面...');
+            window.location.href = '/login.html';
+        }
+        
+        // 页面加载时检查
+        checkLoginStatus();
+        log('调试工具已加载');
+    </script>
+</body>
+</html>

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="../js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="../css/mobile-adapt.css">
+    <title>宗门藏阁</title>
+    <link rel="stylesheet" href="common.css">
+
+  </head>
+<body>
+    <div class="clan-container">
+        <!-- 顶部宗门信息栏 -->
+        <div class="clan-header">
+            <div class="clan-info">
+                <h1 id="clan-name">灵月仙宗</h1>
+                <div class="clan-level">等级: <span id="clan-level">3</span></div>
+                <div class="clan-resources">
+                    <div class="resource-item">
+                        <span class="resource-icon">⚡</span>
+                        <span id="clan-energy">12000</span>
+                    </div>
+                    <div class="resource-item">
+                        <span class="resource-icon">💰</span>
+                        <span id="clan-gold">50000</span>
+                    </div>
+                </div>
+            </div>
+            <div class="clan-ranking">
+                <div class="ranking-item">
+                    <span class="ranking-label">宗门排名:</span>
+                    <span id="clan-ranking">第12名</span>
+                </div>
+                <div class="ranking-item">
+                    <span class="ranking-label">藏阁等级:</span>
+                    <span id="treasure-level">4</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 藏阁系统内容 -->
+        <div class="clan-content">
+            <h2 class="section-title">宗门藏阁</h2>
+            
+            <!-- 藏阁分类标签 -->
+            <div class="treasure-tabs">
+                <button class="tab-button active" onclick="switchTab('gongfa')">功法阁</button>
+                <button class="tab-button" onclick="switchTab('danyao')">丹药阁</button>
+                <button class="tab-button" onclick="switchTab('lianqi')">炼器阁</button>
+                <button class="tab-button" onclick="switchTab('cailiao')">材料阁</button>
+            </div>
+
+            <!-- 藏阁内容区域 -->
+            <div class="treasure-content">
+                <!-- 功法阁 -->
+                <div id="gongfa-content" class="tab-content active">
+                    <h3>功法阁</h3>
+                    <div class="treasure-list" id="gongfa-list">
+                        <!-- 功法项将通过JavaScript动态生成 -->
+                    </div>
+                </div>
+
+                <!-- 丹药阁 -->
+                <div id="danyao-content" class="tab-content">
+                    <h3>丹药阁</h3>
+                    <div class="treasure-list" id="danyao-list">
+                        <!-- 丹药项将通过JavaScript动态生成 -->
+                    </div>
+                </div>
+
+                <!-- 炼器阁 -->
+                <div id="lianqi-content" class="tab-content">
+                    <h3>炼器阁</h3>
+                    <div class="treasure-list" id="lianqi-list">
+                        <!-- 炼器项将通过JavaScript动态生成 -->
+                    </div>
+                </div>
+
+                <!-- 材料阁 -->
+                <div id="cailiao-content" class="tab-content">
+                    <h3>材料阁</h3>
+                    <div class="treasure-list" id="cailiao-list">
+                        <!-- 材料项将通过JavaScript动态生成 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部导航栏 -->
+        <nav class="bottom-nav" role="navigation" aria-label="主导航">
+            <a href="../index.html" class="nav-item" aria-label="修炼页面">
+                <div class="nav-icon">🧘</div>
+                <div class="nav-text">修炼</div>
+            </a>
+            <a href="../skills/skills.html" class="nav-item" aria-label="功法页面">
+                <div class="nav-icon">📜</div>
+                <div class="nav-text">功法</div>
+            </a>
+            <a href="clan.html" class="nav-item active" aria-label="宗门页面" aria-current="page">
+                <div class="nav-icon">🏯</div>
+                <div class="nav-text">宗门</div>
+            </a>
+            <a href="../word/world.html" class="nav-item" aria-label="仙途页面">
+                <div class="nav-icon">🌌</div>
+                <div class="nav-text">仙途</div>
+            </a>
+            <a href="../map/map.html" class="nav-item" aria-label="云游页面">
+                <div class="nav-icon">🗺️</div>
+                <div class="nav-text">云游</div>
+            </a>
+        </nav>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="utils.js"></script>
+    <script>
+        // 初始化藏阁页面
+        function initTreasurePage() {
+            renderTreasureList('treasure', treasureData.treasure.items);
+            renderTreasureList('artifact', treasureData.artifact.items);
+            renderTreasureList('pills', treasureData.pills.items);
+            renderTreasureList('pets', treasureData.pets.items);
+        }
+
+        // 切换标签
+        function switchTab(tabId) {
+            // 移除所有标签的active类
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            // 移除所有内容的active类
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            // 添加当前标签的active类
+            document.querySelector(`[onclick="switchTab('${tabId}')"]`).classList.add('active');
+            // 添加当前内容的active类
+            document.getElementById(`${tabId}-content`).classList.add('active');
+        }
+
+        // 渲染藏阁列表
+        function renderTreasureList(category, items) {
+            const list = document.getElementById(`${category}-list`);
+            if (!list) return;
+            list.innerHTML = '';
+
+            if (!items || items.length === 0) {
+                list.innerHTML = '<p style="text-align:center;color:#999;">暂无物品</p>';
+                return;
+            }
+
+            items.forEach((item, index) => {
+                const treasureItem = document.createElement('div');
+                treasureItem.className = 'treasure-item';
+                treasureItem.innerHTML = `
+                    <div class="treasure-info">
+                        <h4>${item.name}</h4>
+                        <p>${item.desc || item.description || ''}</p>
+                        <div class="treasure-details">
+                            ${item.level ? `<span class="detail-item">等级: ${item.level}</span>` : ''}
+                            ${item.quality ? `<span class="detail-item">品质: ${item.quality}</span>` : ''}
+                        </div>
+                        <div class="treasure-cost">
+                            <span class="cost-item">贡献: ${item.contribution || (item.cost && item.cost.contribution) || 0}</span>
+                            ${item.cost && item.cost.gold ? `<span class="cost-item">金币: ${item.cost.gold}</span>` : ''}
+                        </div>
+                    </div>
+                    <button class="treasure-button" onclick="exchangeTreasure('${category}', ${index})">
+                        兑换
+                    </button>
+                `;
+                list.appendChild(treasureItem);
+            });
+        }
+
+        // 兑换物品
+        function exchangeTreasure(category, itemIndex) {
+            const categoryData = treasureData[category];
+            if (!categoryData) return;
+            const items = categoryData.items;
+            if (!items || itemIndex < 0 || itemIndex >= items.length) return;
+            const item = items[itemIndex];
+            if (item) {
+                showNotification(`成功兑换: ${item.name}，消耗贡献: ${item.contribution || 0}`);
+            }
+        }
+
+        // 显示通知
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 2000);
+        }
+
+        // 页面加载完成后初始化
+        window.onload = initTreasurePage;
+    </script>
+  <script src="../js/ui-components.js"></script>
+</body>
+</html>

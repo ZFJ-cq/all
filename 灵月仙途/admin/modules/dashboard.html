@@ -1,0 +1,226 @@
+<div class="section active">
+  <h2 class="section-title">服务器概况</h2>
+  <div class="stats-grid">
+    <div class="stat-card bg-blue">
+      <h3>总用户数</h3>
+      <div class="value" id="totalUsers">0</div>
+    </div>
+    <div class="stat-card bg-green">
+      <h3>总角色数</h3>
+      <div class="value" id="totalRoles">0</div>
+    </div>
+    <div class="stat-card bg-orange">
+      <h3>最高境界</h3>
+      <div class="value" id="highestRealm">练气</div>
+    </div>
+    <div class="stat-card bg-cyan">
+      <h3>今日活跃</h3>
+      <div class="value" id="activeUsers">0</div>
+    </div>
+  </div>
+  
+  <h3 style="margin-top: 30px; color: #555;">境界分布</h3>
+  <div class="pie-chart-container">
+    <div class="pie-chart-wrapper">
+      <canvas id="realmChart" width="300" height="300"></canvas>
+      <div class="chart-legend" id="realmLegend"></div>
+    </div>
+  </div>
+  
+  <h3 style="margin-top: 30px; color: #555;">出身分布</h3>
+  <div class="pie-chart-container">
+    <div class="pie-chart-wrapper">
+      <canvas id="originChart" width="300" height="300"></canvas>
+      <div class="chart-legend" id="originLegend"></div>
+    </div>
+  </div>
+  
+  <h3 style="margin-top: 30px; color: #555;">灵根分布</h3>
+  <div class="pie-chart-container">
+    <div class="pie-chart-wrapper">
+      <canvas id="spiritRootChart" width="300" height="300"></canvas>
+      <div class="chart-legend" id="spiritRootLegend"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    // 饼图颜色配置
+    const PIE_COLORS = [
+      '#e6c749', // 金色
+      '#4facfe', // 蓝色
+      '#00f2fe', // 青色
+      '#f093fb', // 粉色
+      '#f5576c', // 红色
+      '#4facfe', // 浅蓝
+      '#43e97b', // 绿色
+      '#fa709a', // 玫红
+      '#fee140', // 黄色
+      '#30cfd0'  // 蓝绿
+    ];
+
+    function initDashboard() {
+      loadDashboardData();
+      loadDistributionData();
+    }
+
+    async function loadDashboardData() {
+      try {
+        const data = await apiService.get('/stats');
+        document.getElementById('totalUsers').textContent = data.gameUserCount || 0;
+        document.getElementById('totalRoles').textContent = data.roleCount || 0;
+        document.getElementById('highestRealm').textContent = data.highestRealm || '练气';
+        document.getElementById('activeUsers').textContent = data.activeUserCount || 0;
+      } catch (error) {
+        console.error('加载仪表盘数据失败:', error);
+        document.getElementById('totalUsers').textContent = '0';
+        document.getElementById('totalRoles').textContent = '0';
+        document.getElementById('highestRealm').textContent = '练气';
+        document.getElementById('activeUsers').textContent = '0';
+      }
+    }
+
+    async function loadDistributionData() {
+      try {
+        const roles = await apiService.get('/role/all');
+        renderRealmChart(roles);
+        renderOriginChart(roles);
+        renderSpiritRootChart(roles);
+      } catch (error) {
+        console.error('加载分布数据失败:', error);
+        renderRealmChart([]);
+        renderOriginChart([]);
+        renderSpiritRootChart([]);
+      }
+    }
+
+    function renderRealmChart(roles) {
+      const ctx = document.getElementById('realmChart');
+      const realmCount = {};
+      
+      roles.forEach(role => {
+        const realm = role.realm || '练气';
+        realmCount[realm] = (realmCount[realm] || 0) + 1;
+      });
+      
+      const data = Object.entries(realmCount).map(([name, value]) => ({ name, value }));
+      renderPieChart(ctx, 'realmLegend', data);
+    }
+
+    function renderOriginChart(roles) {
+      const ctx = document.getElementById('originChart');
+      const originCount = {};
+      
+      roles.forEach(role => {
+        const origin = role.origin || '凡人';
+        originCount[origin] = (originCount[origin] || 0) + 1;
+      });
+      
+      const data = Object.entries(originCount).map(([name, value]) => ({ name, value }));
+      renderPieChart(ctx, 'originLegend', data);
+    }
+
+    function renderSpiritRootChart(roles) {
+      const ctx = document.getElementById('spiritRootChart');
+      const spiritRootCount = {};
+      
+      roles.forEach(role => {
+        const spiritRoot = role.spiritRoot || '金灵根';
+        spiritRootCount[spiritRoot] = (spiritRootCount[spiritRoot] || 0) + 1;
+      });
+      
+      const data = Object.entries(spiritRootCount).map(([name, value]) => ({ name, value }));
+      renderPieChart(ctx, 'spiritRootLegend', data);
+    }
+
+    function renderPieChart(canvas, legendId, data) {
+      const ctx = canvas.getContext('2d');
+      
+      if (data.length === 0) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.font = '16px Microsoft YaHei';
+        ctx.fillStyle = '#999';
+        ctx.textAlign = 'center';
+        ctx.fillText('暂无数据', canvas.width / 2, canvas.height / 2);
+        document.getElementById(legendId).innerHTML = '';
+        return;
+      }
+      
+      const total = data.reduce((sum, item) => sum + item.value, 0);
+      let startAngle = -Math.PI / 2;
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      const radius = Math.min(centerX, centerY) - 60;
+      
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // 绘制饼图
+      data.forEach((item, index) => {
+        const sliceAngle = (item.value / total) * 2 * Math.PI;
+        const color = PIE_COLORS[index % PIE_COLORS.length];
+        
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.arc(centerX, centerY, radius, startAngle, startAngle + sliceAngle);
+        ctx.closePath();
+        ctx.fillStyle = color;
+        ctx.fill();
+        
+        // 绘制分隔线
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        // 绘制百分比标签
+        const midAngle = startAngle + sliceAngle / 2;
+        const labelRadius = radius * 0.7;
+        const labelX = centerX + Math.cos(midAngle) * labelRadius;
+        const labelY = centerY + Math.sin(midAngle) * labelRadius;
+        
+        const percentage = ((item.value / total) * 100).toFixed(1);
+        if (percentage > 5) {
+          ctx.font = 'bold 12px Microsoft YaHei';
+          ctx.fillStyle = '#fff';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(`${percentage}%`, labelX, labelY);
+        }
+        
+        startAngle += sliceAngle;
+      });
+      
+      // 绘制中心圆（甜甜圈效果）
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius * 0.5, 0, 2 * Math.PI);
+      ctx.fillStyle = '#f8f9fa';
+      ctx.fill();
+      
+      // 绘制总数
+      ctx.font = 'bold 18px Microsoft YaHei';
+      ctx.fillStyle = '#333';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(total, centerX, centerY - 10);
+      ctx.font = '12px Microsoft YaHei';
+      ctx.fillStyle = '#666';
+      ctx.fillText('总数', centerX, centerY + 15);
+      
+      // 生成图例
+      const legendContainer = document.getElementById(legendId);
+      legendContainer.innerHTML = data.map((item, index) => {
+        const color = PIE_COLORS[index % PIE_COLORS.length];
+        const percentage = ((item.value / total) * 100).toFixed(1);
+        return `
+          <div class="legend-item">
+            <span class="legend-color" style="background: ${color}"></span>
+            <span class="legend-label">${item.name}</span>
+            <span class="legend-value">${item.value} (${percentage}%)</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    window.initDashboard = initDashboard;
+  })();
+</script>

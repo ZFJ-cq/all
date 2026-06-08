@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="css/mobile-adapt.css">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>灵月仙途 - 登录</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Microsoft YaHei', sans-serif;
+      background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+    }
+    
+    .login-container {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      padding: 40px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+    
+    .logo {
+      font-size: 2.5rem;
+      margin-bottom: 30px;
+      color: #f4d03f;
+      text-shadow: 0 0 20px rgba(244, 208, 63, 0.5);
+    }
+    
+    .title {
+      font-size: 1.8rem;
+      margin-bottom: 30px;
+      color: #fff;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #ddd;
+      font-size: 0.9rem;
+    }
+    
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+    
+    .form-group input:focus {
+      outline: none;
+      border-color: #f4d03f;
+      box-shadow: 0 0 10px rgba(244, 208, 63, 0.3);
+    }
+    
+    .form-group input::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .btn {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(90deg, #f4d03f, #f1c40f);
+      border: none;
+      border-radius: 8px;
+      color: #333;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 10px;
+    }
+    
+    .btn:hover {
+      background: linear-gradient(90deg, #f1c40f, #f4d03f);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(244, 208, 63, 0.4);
+    }
+    
+    .btn:active {
+      transform: translateY(0);
+    }
+    
+    .register-link {
+      margin-top: 20px;
+      font-size: 0.9rem;
+      color: #ddd;
+    }
+    
+    .register-link a {
+      color: #f4d03f;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    
+    .register-link a:hover {
+      color: #f1c40f;
+      text-decoration: underline;
+    }
+    
+    .error-message {
+      background: rgba(255, 99, 71, 0.2);
+      border: 1px solid rgba(255, 99, 71, 0.5);
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 20px;
+      color: #ff6347;
+      font-size: 0.9rem;
+      display: none;
+    }
+    
+    .success-message {
+      background: rgba(144, 238, 144, 0.2);
+      border: 1px solid rgba(144, 238, 144, 0.5);
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 20px;
+      color: #90ee90;
+      font-size: 0.9rem;
+      display: none;
+    }
+    
+    @media (max-width: 480px) {
+      .login-container {
+        padding: 30px 20px;
+        margin: 0 20px;
+      }
+      
+      .logo {
+        font-size: 2rem;
+      }
+      
+      .title {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+
+  </head>
+<body>
+  <div class="login-container">
+    <div class="logo">🌙</div>
+    <h1 class="title">灵月仙途</h1>
+    
+    <div class="error-message" id="errorMessage"></div>
+    <div class="success-message" id="successMessage"></div>
+    
+    <form id="loginForm" autocomplete="off">
+      <!-- 隐藏的虚假输入框，用于欺骗浏览器自动填充 -->
+      <input type="text" style="display:none;" tabindex="-1">
+      <input type="password" style="display:none;" tabindex="-1">
+      
+      <div class="form-group">
+        <label for="username">用户名/手机号</label>
+        <input type="text" id="username" name="username_new" placeholder="请输入用户名或手机号" required autocomplete="new-password">
+      </div>
+      
+      <div class="form-group">
+        <label for="password">密码</label>
+        <input type="password" id="password" name="password_new" placeholder="请输入密码" required autocomplete="new-password">
+      </div>
+      
+      <button type="submit" class="btn">登录</button>
+    </form>
+    
+    <div class="register-link">
+      还没有账号？ <a href="register.html">立即注册</a>
+    </div>
+  </div>
+  
+  <script src="js/auth-manager.js"></script>
+  <script src="js/role-validator.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/ui-components.js"></script>
+  <script src="js/toast-utils.js"></script>
+  <script src="js/token-manager.js"></script>
+  <script>
+    // 确保 DOM 加载完成后再绑定事件
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('DOM 加载完成');
+      
+      // 页面加载时清空输入框
+      window.addEventListener('load', function() {
+        setTimeout(function() {
+          document.getElementById('username').value = '';
+          document.getElementById('password').value = '';
+        }, 100);
+      });
+      
+      // 输入框聚焦时的处理
+      document.getElementById('username').addEventListener('focus', function() {
+        this.value = '';
+      });
+      
+      document.getElementById('password').addEventListener('focus', function() {
+        this.value = '';
+      });
+      
+      // 登录表单提交处理（只绑定一次）
+      let loginFormSubmitted = false;
+      document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        // 防止重复提交
+        if (loginFormSubmitted) return;
+        loginFormSubmitted = true;
+        
+        console.log('=== 登录表单提交 ===');
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        
+        console.log('用户名:', username);
+        console.log('密码:', password ? '***' : '(空)');
+        
+        // 验证输入
+        if (!username || !password) {
+          window.showToast('请输入用户名和密码', 'error');
+          loginFormSubmitted = false;
+          return;
+        }
+        
+        console.log('开始发送登录请求...');
+        
+        try {
+          // 显示加载动画
+          const loginButton = document.querySelector('.btn');
+          const originalButtonText = loginButton.textContent;
+          loginButton.textContent = '登录中...';
+          loginButton.disabled = true;
+          
+          const response = await fetch(window.APP_CONFIG.API_BASE_URL + '/auth/login', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify({ username, password })
+          });
+          
+          console.log('登录响应状态:', response.status);
+          
+          // 恢复按钮状态
+          loginButton.textContent = originalButtonText;
+          loginButton.disabled = false;
+          
+          const result = await response.json();
+          console.log('登录响应数据:', result);
+          
+          if (result.code === 200 && result.data) {
+            window.showToast('登录成功，正在跳转...', 'success');
+            const data = result.data;
+            
+            console.log('=== 登录成功，保存认证信息 ===');
+            console.log('userId:', data.userId);
+            console.log('username:', data.username);
+            console.log('token:', data.token ? '存在' : '不存在');
+            console.log('currentRoleId:', data.currentRoleId);
+            
+            // 使用 TokenManager 保存认证信息（带备份机制）
+            if (data.token) {
+              // 清除旧的 roleId，强制用户重新选择角色
+              localStorage.removeItem('roleId');
+              localStorage.removeItem('currentRoleId');
+              localStorage.removeItem('selectedCharacterId');
+              
+              // 保存 userId 和 token（不保存 roleId，因为需要用户选择）
+              const saved = window.TokenUtils.save(data.token, data.userId, null);
+              console.log('Token 保存结果:', saved ? '成功 ✓' : '失败 ✗');
+              
+              // 验证保存后的状态
+              const status = window.TokenUtils.validate();
+              console.log('Token 完整性检查:', status);
+              console.log('✅ 已清除旧 roleId，用户需要重新选择角色');
+              
+              // 保存角色列表（供选择角色页面使用）
+              if (data.roles && data.roles.length > 0) {
+                localStorage.setItem('roles', JSON.stringify(data.roles));
+                console.log('角色列表已保存:', data.roles.length, '个角色');
+              }
+              
+              // 额外保存 username（非关键信息）
+              if (data.username) {
+                localStorage.setItem('username', data.username);
+              }
+            } else {
+              console.error('❌ 严重错误：后端没有返回 Token！');
+              window.showToast('登录失败：服务器未返回认证信息', 'error');
+              return;
+            }
+            
+            // 验证保存结果
+            const savedToken = localStorage.getItem('token');
+            const savedUserId = localStorage.getItem('userId');
+            const savedRoleId = localStorage.getItem('roleId');
+            console.log('验证：localStorage 中的 token:', savedToken ? '存在' : '不存在');
+            console.log('验证：localStorage 中的 userId:', savedUserId ? '存在' : '不存在');
+            console.log('验证：localStorage 中的 roleId:', savedRoleId ? '存在' : '不存在');
+            
+            // 跳转到角色选择页面（让用户选择要使用的角色）
+            console.log('✅ 登录成功，跳转到角色选择页面...');
+            setTimeout(() => {
+              window.location.href = 'start/start.html';
+            }, 1500);
+          } else {
+            window.showToast(result.message || '登录失败，请检查用户名和密码', 'error');
+            loginFormSubmitted = false;
+          }
+        } catch (error) {
+          console.error('登录错误:', error);
+          // 恢复按钮状态
+          const loginButton = document.querySelector('.btn');
+          loginButton.textContent = '登录';
+          loginButton.disabled = false;
+          
+          if (error.message.includes('NetworkError') || error.message.includes('网络')) {
+            window.showToast('网络连接失败，请检查网络设置', 'error');
+          } else if (error.message.includes('timeout')) {
+            window.showToast('登录请求超时，请稍后重试', 'error');
+          } else {
+            window.showToast('登录失败，请稍后重试', 'error');
+          }
+          loginFormSubmitted = false;
+        }
+      }, { once: false });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<div class="section active">
+  <div class="status-message" id="mailMessage"></div>
+  <h2 class="section-title">邮件管理</h2>
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 30px;">
+    <div style="background: linear-gradient(135deg, #667eea, #764ba2); padding: 25px; border-radius: 10px; color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+      <h3 style="margin-bottom: 15px;">发送给单个用户</h3>
+      <p style="margin-bottom: 20px; opacity: 0.9;">选择指定用户发送邮件</p>
+      <button class="btn" style="background: white; color: #667eea; font-weight: bold;" onclick="openSendMailModal('single')">发送邮件</button>
+    </div>
+    <div style="background: linear-gradient(135deg, #43e97b, #38f9d7); padding: 25px; border-radius: 10px; color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+      <h3 style="margin-bottom: 15px;">发送全服邮件</h3>
+      <p style="margin-bottom: 20px; opacity: 0.9;">向所有用户发送邮件</p>
+      <button class="btn" style="background: white; color: #43e97b; font-weight: bold;" onclick="openSendMailModal('all')">发送邮件</button>
+    </div>
+    <div style="background: linear-gradient(135deg, #f093fb, #f5576c); padding: 25px; border-radius: 10px; color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+      <h3 style="margin-bottom: 15px;">发送给指定用户</h3>
+      <p style="margin-bottom: 20px; opacity: 0.9;">批量选择用户发送邮件</p>
+      <button class="btn" style="background: white; color: #f093fb; font-weight: bold;" onclick="openSendMailModal('users')">发送邮件</button>
+    </div>
+  </div>
+
+  <div style="margin-top: 40px;">
+    <h3 style="color: #555; margin-bottom: 20px; border-bottom: 2px solid var(--primary-gold); padding-bottom: 10px;">新手礼包配置</h3>
+    <div class="status-message" id="newbieGiftMessage"></div>
+    <div class="form-group">
+      <label>礼包配置（JSON格式）</label>
+      <textarea id="newbieGiftConfig" rows="15" style="font-family: 'Courier New', monospace; font-size: 14px;"></textarea>
+    </div>
+    <div style="text-align: right;">
+      <button class="btn btn-secondary" onclick="loadNewbieGiftConfig()">重新加载</button>
+      <button class="btn btn-primary" onclick="saveNewbieGiftConfig()">保存配置</button>
+    </div>
+    <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 6px;">
+      <h4 style="margin-bottom: 10px; color: #555;">配置说明：</h4>
+      <ul style="color: #666; line-height: 1.8;">
+        <li><strong>title</strong>: 邮件标题</li>
+        <li><strong>content</strong>: 邮件内容，{roleName} 会被替换为角色名</li>
+        <li><strong>items</strong>: 固定物品列表，格式：[{"itemId": 物品ID, "quantity": 数量}]</li>
+        <li><strong>randomWeapons</strong>: 随机武器ID列表</li>
+        <li><strong>randomArmors</strong>: 随机护甲ID列表</li>
+        <li><strong>randomAccessories</strong>: 随机饰品ID列表</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+  // 初始化邮件管理
+  function initMail() {
+    loadNewbieGiftConfig();
+  }
+
+  // 打开发送邮件模态框
+  function openSendMailModal(type) {
+    console.log('打开发送邮件模态框:', type);
+  }
+
+  // 加载新手礼包配置
+  function loadNewbieGiftConfig() {
+    const config = {
+      title: '新手礼包',
+      content: '亲爱的{roleName}，欢迎来到灵月仙途！这是你的新手礼包，请查收。',
+      items: [
+        { itemId: 1, quantity: 100 },
+        { itemId: 2, quantity: 10 }
+      ],
+      randomWeapons: [1, 2, 3],
+      randomArmors: [1, 2],
+      randomAccessories: [1]
+    };
+    document.getElementById('newbieGiftConfig').value = JSON.stringify(config, null, 2);
+  }
+
+  // 保存新手礼包配置
+  function saveNewbieGiftConfig() {
+    const config = document.getElementById('newbieGiftConfig').value;
+    try {
+      JSON.parse(config);
+      console.log('保存新手礼包配置');
+      showMessage('newbieGiftMessage', '配置保存成功', 'success');
+    } catch (error) {
+      showMessage('newbieGiftMessage', '配置格式错误，请检查JSON格式', 'error');
+    }
+  }
+
+  // 页面加载完成后初始化
+  if (typeof window.initMail === 'undefined') {
+    window.initMail = initMail;
+  }
+</script>

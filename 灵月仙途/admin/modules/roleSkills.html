@@ -1,0 +1,86 @@
+<div class="section active">
+  <h2 class="section-title">角色技能管理</h2>
+  
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>角色 ID</th>
+        <th>技能名称</th>
+        <th>类型</th>
+        <th>等级</th>
+        <th>熟练度</th>
+        <th>装备状态</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody id="roleSkillTableBody">
+      <!-- JS 生成 -->
+    </tbody>
+  </table>
+  <div id="roleSkillPagination"></div>
+</div>
+
+<script>
+  // 初始化角色技能管理
+  function initRoleSkills() {
+    loadRoleSkills();
+  }
+
+  // 加载角色技能列表
+  async function loadRoleSkills() {
+    const tableBody = document.getElementById('roleSkillTableBody');
+    tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#999;">加载中...</td></tr>';
+    
+    try {
+      // 模拟数据
+      const roleSkills = [
+        { id: 1, roleId: 1, skillName: '火球术', type: '攻击', level: 1, proficiency: 50, equipped: true },
+        { id: 2, roleId: 1, skillName: '水盾术', type: '防御', level: 1, proficiency: 30, equipped: false },
+        { id: 3, roleId: 2, skillName: '风刃术', type: '攻击', level: 2, proficiency: 70, equipped: true },
+        { id: 4, roleId: 3, skillName: '土遁术', type: '辅助', level: 1, proficiency: 40, equipped: true },
+        { id: 5, roleId: 4, skillName: '雷法', type: '攻击', level: 3, proficiency: 90, equipped: true }
+      ];
+      
+      tableBody.innerHTML = '';
+      roleSkills.forEach(roleSkill => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${roleSkill.id}</td>
+          <td>${roleSkill.roleId}</td>
+          <td>${roleSkill.skillName}</td>
+          <td>${roleSkill.type}</td>
+          <td>${roleSkill.level}</td>
+          <td>${roleSkill.proficiency}%</td>
+          <td>${roleSkill.equipped ? '已装备' : '未装备'}</td>
+          <td>
+            <button class="btn btn-primary" onclick="editRoleSkill(${roleSkill.id})">编辑</button>
+            <button class="btn btn-danger" onclick="deleteRoleSkill(${roleSkill.id})">删除</button>
+          </td>
+        `;
+        tableBody.appendChild(row);
+      });
+    } catch (error) {
+      console.error('加载角色技能列表失败:', error);
+      tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#e74c3c;">加载失败</td></tr>';
+    }
+  }
+
+  // 编辑角色技能
+  function editRoleSkill(id) {
+    console.log('编辑角色技能:', id);
+  }
+
+  // 删除角色技能
+  function deleteRoleSkill(id) {
+    if (confirm('确定要删除这个角色技能吗？')) {
+      console.log('删除角色技能:', id);
+      loadRoleSkills();
+    }
+  }
+
+  // 页面加载完成后初始化
+  if (typeof window.initRoleSkills === 'undefined') {
+    window.initRoleSkills = initRoleSkills;
+  }
+</script>

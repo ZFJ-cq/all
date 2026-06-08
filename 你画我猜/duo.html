@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>你画我猜 - 双人模式</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; overflow-x: hidden; }
+        body {
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            min-height: 100vh; display: flex; flex-direction: column;
+        }
+        .header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 15px; background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px); flex-shrink: 0;
+        }
+        .back-btn {
+            background: rgba(255,255,255,0.9); border: none; padding: 8px 16px;
+            border-radius: 20px; font-size: 14px; font-weight: 600; cursor: pointer;
+        }
+        h1 { color: white; font-size: 18px; font-weight: 600; }
+        .game-container {
+            flex: 1; background: #fff; border-radius: 20px 20px 0 0;
+            padding: 5px; display: flex; flex-direction: column;
+            min-height: calc(100vh - 50px); overflow-y: auto;
+        }
+        .round-selector { text-align: center; margin-bottom: 15px; }
+        .round-selector h3 { color: #666; font-size: 16px; margin-bottom: 15px; }
+        .round-options { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        .round-option {
+            padding: 12px 25px; background: #f5f5f5; border-radius: 20px;
+            cursor: pointer; font-size: 15px; font-weight: 600; border: 3px solid transparent;
+        }
+        .round-option.selected { background: linear-gradient(135deg, #10b981, #059669); color: white; border-color: #059669; }
+        .players-info { display: flex; gap: 10px; margin-bottom: 12px; flex-shrink: 0; }
+        .player-card {
+            flex: 1; text-align: center; padding: 12px 8px;
+            border-radius: 12px; background: #f8fafc;
+        }
+        .player-card.active { background: linear-gradient(135deg, #10b981, #059669); color: white; }
+        .player-name { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+        .player-score { font-size: 26px; font-weight: 700; color: #10b981; }
+        .player-card.active .player-score { color: white; }
+        .player-role { font-size: 11px; opacity: 0.8; margin-top: 2px; }
+        .round-info {
+            text-align: center; font-size: 15px; font-weight: 600; color: #666;
+            margin-bottom: 10px; padding: 8px; background: #f0fdf4; border-radius: 10px; flex-shrink: 0;
+        }
+        .word-display {
+            background: linear-gradient(135deg, #f093fb, #f5576c); color: white;
+            padding: 10px 18px; border-radius: 10px; font-size: 17px; font-weight: 600;
+            text-align: center; margin-bottom: 10px; flex-shrink: 0;
+        }
+        .canvas-container {
+            width: 100%; margin-bottom: 10px; border-radius: 12px;
+            overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); flex-shrink: 0;
+        }
+        #drawCanvas {
+            width: 100%; height: 260px; background: white; display: block;
+            touch-action: none; cursor: crosshair;
+        }
+        .controls {
+            display: flex; flex-wrap: wrap; justify-content: center;
+            gap: 6px; margin-bottom: 10px; flex-shrink: 0;
+        }
+        .control-group {
+            display: flex; align-items: center; gap: 4px;
+            background: #f5f5f5; padding: 5px 10px; border-radius: 15px;
+        }
+        button {
+            padding: 8px 16px; border: none; border-radius: 18px;
+            font-size: 13px; font-weight: 600; cursor: pointer;
+            display: flex; align-items: center; gap: 4px;
+        }
+        button:active { transform: scale(0.95); }
+        .btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
+        .btn-success { background: linear-gradient(135deg, #43e97b, #38f9d7); color: white; }
+        .btn-danger { background: linear-gradient(135deg, #f093fb, #f5576c); color: white; }
+        .btn-warning { background: linear-gradient(135deg, #f6d365, #fda085); color: white; }
+        input[type="color"] { width: 32px; height: 28px; border: none; border-radius: 6px; }
+        input[type="range"] { width: 60px; }
+        .guessing-area {
+            display: flex; gap: 8px; margin-bottom: 10px; flex-shrink: 0;
+            background: #fff3cd; padding: 10px; border-radius: 10px;
+            border: 2px dashed #f59e0b;
+        }
+        #guessInput {
+            flex: 1; padding: 10px 15px; border: 2px solid #e0e0e0;
+            border-radius: 18px; font-size: 16px;
+        }
+        #guessInput:focus { outline: none; border-color: #10b981; }
+        .pass-device {
+            text-align: center; padding: 15px;
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            border-radius: 10px; margin-bottom: 10px; border: 2px dashed #10b981; flex-shrink: 0;
+        }
+        .pass-device p { color: #065f46; font-size: 14px; margin-bottom: 10px; }
+        .result-message {
+            text-align: center; font-size: 15px; font-weight: 600;
+            padding: 12px; border-radius: 10px; margin-bottom: 10px; flex-shrink: 0;
+        }
+        .result-message.success { background: #d4edda; color: #155724; border: 2px solid #28a745; }
+        .result-message.fail { background: #f8d7da; color: #721c24; border: 2px solid #dc3545; }
+        .game-over {
+            text-align: center; padding: 20px;
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            border-radius: 12px; margin-bottom: 15px; border: 2px dashed #10b981; flex-shrink: 0;
+        }
+        .game-over h2 { color: #10b981; font-size: 20px; margin-bottom: 10px; }
+        .game-over .winner { font-size: 28px; font-weight: 700; color: #667eea; margin-bottom: 8px; }
+        .game-over .final-scores { font-size: 15px; color: #666; margin-bottom: 12px; }
+        .hidden { display: none !important; }
+        @media (min-width: 576px) { #drawCanvas { height: 320px; } }
+        @media (min-width: 768px) {
+            body { padding: 15px; }
+            .game-container { border-radius: 20px; max-width: 700px; margin: 0 auto; min-height: auto; }
+            #drawCanvas { height: 380px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <button class="back-btn" onclick="location.href='index.html'">⬅️ 返回</button>
+        <h1>👫 双人模式</h1>
+        <div style="width:70px"></div>
+    </div>
+    <div class="game-container">
+        <div class="round-selector" id="roundSelector">
+            <h3>🎯 选择游戏轮数</h3>
+            <div class="round-options">
+                <div class="round-option" onclick="selectRounds(3,this)">3轮</div>
+                <div class="round-option" onclick="selectRounds(5,this)">5轮</div>
+                <div class="round-option" onclick="selectRounds(7,this)">7轮</div>
+            </div>
+            <button class="btn-success" onclick="startGame()">🎮 开始游戏</button>
+        </div>
+        <div class="players-info hidden" id="playersInfo">
+            <div class="player-card" id="player1">
+                <div class="player-name">玩家 1</div>
+                <div class="player-score" id="score1">0</div>
+                <div class="player-role" id="role1">-</div>
+            </div>
+            <div class="player-card" id="player2">
+                <div class="player-name">玩家 2</div>
+                <div class="player-score" id="score2">0</div>
+                <div class="player-role" id="role2">-</div>
+            </div>
+        </div>
+        <div class="round-info hidden" id="roundInfo">第 <span id="currentRound">1</span> 轮 / <span id="totalRounds">3</span> 轮</div>
+        <div class="word-display hidden" id="wordDisplay">词语: <span id="currentWord">点击开始</span></div>
+        <div class="canvas-container hidden" id="canvasContainer"><canvas id="drawCanvas"></canvas></div>
+        <div class="controls hidden" id="drawControls">
+            <div class="control-group"><input type="color" id="colorPicker" value="#000000"></div>
+            <div class="control-group"><input type="range" id="brushSize" min="2" max="20" value="5"></div>
+            <button class="btn-warning" onclick="clearCanvas()">🗑️清空</button>
+            <button class="btn-danger" onclick="isEraser=true">⚪橡皮</button>
+            <button class="btn-success" onclick="startDrawingTurn()">🎮开始</button>
+            <button class="btn-primary" onclick="finishDrawing()">✅完成</button>
+        </div>
+        <div class="pass-device hidden" id="passDevice">
+            <p>📱 绘画完成！请将设备传给对方</p>
+            <button class="btn-primary" onclick="startGuessingTurn()">开始猜词</button>
+        </div>
+        <div class="guessing-area hidden" id="guessingArea">
+            <input type="text" id="guessInput" placeholder="输入答案..." onkeypress="if(event.key==='Enter')submitGuess()">
+            <button class="btn-primary" onclick="submitGuess()">提交</button>
+        </div>
+        <div class="result-message hidden" id="resultMessage"></div>
+        <div class="game-over hidden" id="gameOver">
+            <h2>🎊 游戏结束！</h2>
+            <div class="winner" id="winner">-</div>
+            <div class="final-scores">玩家1: <span id="finalScore1">0</span>分 | 玩家2: <span id="finalScore2">0</span>分</div>
+            <button class="btn-success" onclick="restartGame()">🔄再来一局</button>
+            <button class="btn-primary" onclick="location.href='index.html'">🏠返回</button>
+        </div>
+    </div>
+    <img id="savedImg" style="display:none">
+
+    <script>
+        var canvas = document.getElementById('drawCanvas');
+        var ctx = canvas.getContext('2d');
+        var savedImg = document.getElementById('savedImg');
+        var isDrawing = false, lastX = 0, lastY = 0;
+        var currentColor = '#000000', brushSize = 5, isEraser = false;
+        var totalRounds = 3, currentRound = 1, isPlayer1Turn = true, isDrawingPhase = true;
+        var player1Score = 0, player2Score = 0, currentWord = '', gameStarted = false;
+        var usedWords = [], canvasW = 0, canvasH = 260;
+        var words = ['猫','狗','大象','老虎','熊猫','兔子','狐狸','猴子','马','苹果','香蕉','西瓜','足球','篮球','手机','电脑','太阳','月亮','星星','花朵','树木','房子','汽车','飞机','轮船','鱼','鸟','蛇','蛋糕','雨伞'];
+
+        function initCanvas() {
+            canvasW = window.innerWidth;
+            canvasH = 450;
+            if (window.innerWidth >= 576) canvasH = 520;
+            if (window.innerWidth >= 768) canvasH = 600;
+            canvas.width = canvasW; canvas.height = canvasH;
+            canvas.style.width = canvasW + 'px'; canvas.style.height = canvasH + 'px';
+            ctx.fillStyle = 'white'; ctx.fillRect(0, 0, canvasW, canvasH);
+            ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+        }
+
+        function getPos(e) {
+            var rect = canvas.getBoundingClientRect();
+            var sx = canvasW / rect.width, sy = canvasH / rect.height;
+            var cx, cy;
+            if (e.touches && e.touches.length > 0) { cx = e.touches[0].clientX; cy = e.touches[0].clientY; }
+            else { cx = e.clientX; cy = e.clientY; }
+            return { x: (cx - rect.left) * sx, y: (cy - rect.top) * sy };
+        }
+
+        function onStart(e) {
+            if (!gameStarted || !isDrawingPhase) return;
+            e.preventDefault(); isDrawing = true;
+            var p = getPos(e); lastX = p.x; lastY = p.y;
+        }
+        function onMove(e) {
+            if (!isDrawing) return; e.preventDefault();
+            var p = getPos(e);
+            ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(p.x, p.y);
+            ctx.strokeStyle = isEraser ? 'white' : currentColor;
+            ctx.lineWidth = isEraser ? brushSize * 3 : brushSize;
+            ctx.stroke();
+            lastX = p.x; lastY = p.y;
+        }
+        function onEnd() { isDrawing = false; }
+
+        canvas.addEventListener('mousedown', onStart);
+        canvas.addEventListener('mousemove', onMove);
+        canvas.addEventListener('mouseup', onEnd);
+        canvas.addEventListener('mouseout', onEnd);
+        canvas.addEventListener('touchstart', onStart, {passive:false});
+        canvas.addEventListener('touchmove', onMove, {passive:false});
+        canvas.addEventListener('touchend', onEnd);
+        canvas.addEventListener('touchcancel', onEnd);
+
+        document.getElementById('colorPicker').addEventListener('change', function(e) { currentColor = e.target.value; isEraser = false; });
+        document.getElementById('brushSize').addEventListener('input', function(e) { brushSize = parseInt(e.target.value); });
+
+        function selectRounds(r, el) {
+            totalRounds = r;
+            document.querySelectorAll('.round-option').forEach(function(e) { e.classList.remove('selected'); });
+            el.classList.add('selected');
+        }
+
+        function startGame() {
+            if (!document.querySelector('.round-option.selected')) { alert('请先选择轮数！'); return; }
+            document.getElementById('roundSelector').classList.add('hidden');
+            document.getElementById('playersInfo').classList.remove('hidden');
+            document.getElementById('roundInfo').classList.remove('hidden');
+            document.getElementById('wordDisplay').classList.remove('hidden');
+            document.getElementById('canvasContainer').classList.remove('hidden');
+            document.getElementById('drawControls').classList.remove('hidden');
+            currentRound = 1; player1Score = 0; player2Score = 0;
+            isPlayer1Turn = true; isDrawingPhase = true; usedWords = [];
+            initCanvas(); updateRoundInfo(); updatePlayerInfo(); startDrawingTurn();
+        }
+
+        function updateRoundInfo() {
+            document.getElementById('currentRound').textContent = currentRound;
+            document.getElementById('totalRounds').textContent = totalRounds;
+        }
+
+        function updatePlayerInfo() {
+            document.getElementById('score1').textContent = player1Score;
+            document.getElementById('score2').textContent = player2Score;
+            document.getElementById('role1').textContent = isDrawingPhase ? (isPlayer1Turn ? '🎨 绘画' : '-') : (!isPlayer1Turn ? '🔍 猜词' : '-');
+            document.getElementById('role2').textContent = isDrawingPhase ? (isPlayer1Turn ? '-' : '🎨 绘画') : (!isPlayer1Turn ? '-' : '🔍 猜词');
+            document.getElementById('player1').classList.toggle('active', isPlayer1Turn === isDrawingPhase);
+            document.getElementById('player2').classList.toggle('active', isPlayer1Turn !== isDrawingPhase);
+        }
+
+        function startDrawingTurn() {
+            var available = words.filter(function(w) { return usedWords.indexOf(w) === -1; });
+            if (available.length === 0) { usedWords = []; available = words.slice(); }
+            var i = Math.floor(Math.random() * available.length);
+            currentWord = available[i]; usedWords.push(currentWord);
+            document.getElementById('currentWord').textContent = currentWord;
+            clearCanvas(); gameStarted = true; isDrawingPhase = true;
+            document.getElementById('drawControls').classList.remove('hidden');
+            document.getElementById('canvasContainer').classList.remove('hidden');
+            updatePlayerInfo();
+        }
+
+        function clearCanvas() { ctx.fillStyle = 'white'; ctx.fillRect(0, 0, canvasW, canvasH); }
+
+        function finishDrawing() {
+            if (!gameStarted) { alert('请先点击开始！'); return; }
+            savedImg.src = canvas.toDataURL();
+            document.getElementById('drawControls').classList.add('hidden');
+            document.getElementById('passDevice').classList.remove('hidden');
+        }
+
+        function startGuessingTurn() {
+            isDrawingPhase = false;
+            document.getElementById('passDevice').classList.add('hidden');
+            document.getElementById('guessingArea').classList.remove('hidden');
+            document.getElementById('canvasContainer').classList.remove('hidden');
+            document.getElementById('currentWord').textContent = '???';
+            document.getElementById('guessInput').value = '';
+            document.getElementById('resultMessage').classList.add('hidden');
+            // 恢复画布
+            if (savedImg.src && savedImg.complete) {
+                ctx.clearRect(0, 0, canvasW, canvasH);
+                ctx.drawImage(savedImg, 0, 0, canvasW, canvasH);
+            }
+            updatePlayerInfo();
+            setTimeout(function() { document.getElementById('guessInput').focus(); }, 200);
+        }
+
+        function submitGuess() {
+            var guess = document.getElementById('guessInput').value.trim();
+            if (!guess) { alert('请输入答案！'); return; }
+            var el = document.getElementById('resultMessage');
+            if (guess === currentWord) {
+                var points = 100;
+                if (isPlayer1Turn) { player2Score += points; } else { player1Score += points; }
+                el.textContent = '🎉 答对了！+' + points + '分';
+                el.className = 'result-message success';
+            } else {
+                el.textContent = '❌ 答错了！正确答案：' + currentWord;
+                el.className = 'result-message fail';
+            }
+            el.classList.remove('hidden');
+            document.getElementById('guessingArea').classList.add('hidden');
+            updatePlayerInfo();
+            setTimeout(function() { nextRound(); }, 2000);
+        }
+
+        function nextRound() {
+            document.getElementById('resultMessage').classList.add('hidden');
+            document.getElementById('guessInput').value = '';
+            if (currentRound >= totalRounds) { gameOver(); return; }
+            currentRound++; isPlayer1Turn = !isPlayer1Turn;
+            isDrawingPhase = true; gameStarted = false;
+            updateRoundInfo(); updatePlayerInfo();
+            document.getElementById('wordDisplay').classList.remove('hidden');
+            document.getElementById('drawControls').classList.remove('hidden');
+            document.getElementById('canvasContainer').classList.remove('hidden');
+            document.getElementById('currentWord').textContent = '点击开始';
+            clearCanvas();
+        }
+
+        function gameOver() {
+            document.getElementById('roundInfo').classList.add('hidden');
+            document.getElementById('wordDisplay').classList.add('hidden');
+            document.getElementById('canvasContainer').classList.add('hidden');
+            document.getElementById('drawControls').classList.add('hidden');
+            document.getElementById('resultMessage').classList.add('hidden');
+            document.getElementById('finalScore1').textContent = player1Score;
+            document.getElementById('finalScore2').textContent = player2Score;
+            var w = '';
+            if (player1Score > player2Score) w = '🥇 玩家1获胜！';
+            else if (player2Score > player1Score) w = '🥇 玩家2获胜！';
+            else w = '🤝 平局！';
+            document.getElementById('winner').textContent = w;
+            document.getElementById('gameOver').classList.remove('hidden');
+        }
+
+        function restartGame() {
+            document.getElementById('gameOver').classList.add('hidden');
+            document.getElementById('roundSelector').classList.remove('hidden');
+            document.querySelectorAll('.round-option').forEach(function(e) { e.classList.remove('selected'); });
+            document.getElementById('playersInfo').classList.add('hidden');
+            document.getElementById('roundInfo').classList.add('hidden');
+            document.getElementById('wordDisplay').classList.add('hidden');
+            document.getElementById('canvasContainer').classList.add('hidden');
+            document.getElementById('drawControls').classList.add('hidden');
+            document.getElementById('guessingArea').classList.add('hidden');
+            document.getElementById('resultMessage').classList.add('hidden');
+            document.getElementById('guessInput').value = '';
+            clearCanvas();
+        }
+
+        initCanvas();
+    </script>
+</body>
+</html>

@@ -1,0 +1,177 @@
+<script src="../js/api-service.js"></script>
+<div class="section active">
+  <div class="status-message" id="permissionMessage"></div>
+  <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+    <h2 class="section-title">权限管理</h2>
+    <button class="btn btn-primary" onclick="openAddPermissionModal()">新增权限</button>
+  </div>
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>权限名称</th>
+        <th>权限代码</th>
+        <th>描述</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody id="permissionTableBody">
+      <tr><td colspan="5" style="text-align:center; color:#999;">加载中...</td></tr>
+    </tbody>
+  </table>
+  <div id="permissionPagination"></div>
+</div>
+
+<!-- 新增/编辑权限模态框 -->
+<div id="permissionModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="permissionModalTitle">新增权限</h3>
+      <span class="close" onclick="closePermissionModal()">&times;</span>
+    </div>
+    <form id="permissionForm">
+      <input type="hidden" id="permissionId">
+      <div class="form-group">
+        <label>权限名称</label>
+        <input type="text" id="permissionName" required>
+      </div>
+      <div class="form-group">
+        <label>权限代码</label>
+        <input type="text" id="permissionCode" required>
+      </div>
+      <div class="form-group">
+        <label>描述</label>
+        <textarea id="permissionDescription" rows="3"></textarea>
+      </div>
+      <div style="text-align: right; margin-top: 20px;">
+        <button type="button" class="btn btn-secondary" onclick="closePermissionModal()">取消</button>
+        <button type="submit" class="btn btn-primary">保存</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  // 初始化权限管理
+  function initPermissions() {
+    loadPermissions();
+  }
+
+  // 加载权限列表
+  async function loadPermissions() {
+    const tableBody = document.getElementById('permissionTableBody');
+    tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999;">加载中...</td></tr>';
+    
+    try {
+      const result = await apiService.get('/sys/permission');
+      const permissions = result.data || result;
+      
+      tableBody.innerHTML = '';
+      if (Array.isArray(permissions) && permissions.length > 0) {
+        permissions.forEach(permission => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${permission.id}</td>
+            <td>${permission.name}</td>
+            <td>${permission.code}</td>
+            <td>${permission.description}</td>
+            <td>
+              <button class="btn btn-primary" onclick="editPermission(${permission.id})">编辑</button>
+              <button class="btn btn-danger" onclick="deletePermission(${permission.id})">删除</button>
+            </td>
+          `;
+          tableBody.appendChild(row);
+        });
+      } else {
+        tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999;">暂无数据</td></tr>';
+      }
+    } catch (error) {
+      console.error('加载权限列表失败:', error);
+      tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#e74c3c;">加载失败</td></tr>';
+    }
+  }
+
+  // 打开新增权限模态框
+  function openAddPermissionModal() {
+    document.getElementById('permissionModalTitle').textContent = '新增权限';
+    document.getElementById('permissionForm').reset();
+    document.getElementById('permissionId').value = '';
+    document.getElementById('permissionModal').style.display = 'block';
+  }
+
+  // 编辑权限
+  async function editPermission(id) {
+    try {
+      const permission = await apiService.get(`/sys/permission/${id}`);
+      document.getElementById('permissionModalTitle').textContent = '编辑权限';
+      document.getElementById('permissionId').value = permission.id;
+      document.getElementById('permissionName').value = permission.name;
+      document.getElementById('permissionCode').value = permission.code;
+      document.getElementById('permissionDescription').value = permission.description || '';
+      document.getElementById('permissionModal').style.display = 'block';
+    } catch (error) {
+      console.error('获取权限信息失败:', error);
+      showMessage('permissionMessage', '获取权限信息失败', 'error');
+    }
+  }
+
+  // 关闭权限模态框
+  function closePermissionModal() {
+    document.getElementById('permissionModal').style.display = 'none';
+  }
+
+  // 保存权限
+  async function savePermission() {
+    const id = document.getElementById('permissionId').value;
+    const permission = {
+      name: document.getElementById('permissionName').value,
+      code: document.getElementById('permissionCode').value,
+      description: document.getElementById('permissionDescription').value
+    };
+    
+    try {
+      if (id) {
+        await apiService.put(`/sys/permission/${id}`, permission);
+        showMessage('permissionMessage', '更新成功', 'success');
+      } else {
+        await apiService.post('/sys/permission', permission);
+        showMessage('permissionMessage', '新增成功', 'success');
+      }
+      closePermissionModal();
+      loadPermissions();
+    } catch (error) {
+      console.error('保存权限失败:', error);
+      showMessage('permissionMessage', '保存失败: ' + error.message, 'error');
+    }
+  }
+
+  // 删除权限
+  async function deletePermission(id) {
+    if (confirm('确定要删除这个权限吗？')) {
+      try {
+        await apiService.delete(`/sys/permission/${id}`);
+        showMessage('permissionMessage', '删除成功', 'success');
+        loadPermissions();
+      } catch (error) {
+        console.error('删除权限失败:', error);
+        showMessage('permissionMessage', '删除失败: ' + error.message, 'error');
+      }
+    }
+  }
+
+  // 绑定表单事件
+  function bindPermissionFormEvents() {
+    document.getElementById('permissionForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      savePermission();
+    });
+  }
+
+  // 页面加载完成后初始化
+  if (typeof window.initPermissions === 'undefined') {
+    window.initPermissions = function() {
+      loadPermissions();
+      bindPermissionFormEvents();
+    };
+  }
+</script>

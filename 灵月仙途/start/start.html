@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="../js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="../css/mobile-adapt.css">
+  <title>灵月仙途 - 道启</title>
+  <script src="../js/ui-components.js"></script>
+  <script src="../js/server-selector.js"></script>
+  <style>
+    :root {
+      --gold-primary: #e6c749;
+      --gold-light: #f4d03f;
+      --gold-dark: #b8860b;
+      --text-main: #fdfbf7;
+      --text-dim: #d4c5a9;
+      --bg-overlay: rgba(20, 25, 40, 0.6);
+      --glass-bg: rgba(30, 35, 50, 0.75);
+      --border-glow: 0 0 15px rgba(230, 199, 73, 0.3);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Microsoft YaHei', 'SimSun', serif;
+      /* 这里使用你之前上传的背景图路径，如果本地没有，暂时用渐变色代替 */
+      background: linear-gradient(to bottom, #2b3242, #1a1f2e), 
+                  url('../images/beijing.png'); 
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    /* 动态云雾背景层 (纯 CSS 实现) */
+    .fog-container {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: 0;
+      pointer-events: none;
+    }
+    
+    .fog-img {
+      position: absolute;
+      height: 100vh;
+      width: 300vw;
+      background: url('https://raw.githubusercontent.com/danielstuart14/CSS_FOG_ANIMATION/master/fog1.png') repeat-x;
+      background-size: contain;
+      animation: fog 60s linear infinite;
+      opacity: 0.3;
+    }
+    
+    .fog-img-2 {
+      background: url('https://raw.githubusercontent.com/danielstuart14/CSS_FOG_ANIMATION/master/fog2.png') repeat-x;
+      background-size: contain;
+      animation: fog 40s linear infinite;
+      z-index: 1;
+      opacity: 0.2;
+      top: 30%;
+    }
+
+    @keyframes fog {
+      0% { transform: translate3d(0, 0, 0); }
+      100% { transform: translate3d(-200vw, 0, 0); }
+    }
+
+    /* 主容器 */
+    .main-container {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 420px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 40px 20px;
+      /* 移动端全屏，桌面端居中限制高度 */
+      max-height: 850px; 
+    }
+    
+    /* 右上角注销图标 */
+    .logout-icon {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+      z-index: 100;
+      transition: all 0.3s ease;
+    }
+    
+    .logout-icon:hover {
+      transform: scale(1.1);
+      filter: drop-shadow(0 0 10px var(--gold-primary));
+    }
+    
+    /* 角色删除图标 */
+    .delete-role-icon {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .delete-role-icon:hover {
+      transform: scale(1.1);
+      filter: drop-shadow(0 0 5px #ff6347);
+    }
+
+    @media (min-width: 480px) {
+      .main-container {
+        height: auto;
+        aspect-ratio: 9/16;
+        border-radius: 20px;
+        background: var(--glass-bg);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(230, 199, 73, 0.2);
+        box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        padding: 60px 30px;
+      }
+    }
+
+    /* 顶部标题区 */
+    .header-section {
+      text-align: center;
+      margin-bottom: 20px;
+      animation: fadeInDown 1.2s ease-out;
+    }
+
+    .game-title-vertical {
+      font-family: 'SimSun', serif;
+      font-size: 4rem;
+      font-weight: 900;
+      color: var(--gold-primary);
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+      letter-spacing: 15px;
+      margin: 0 auto;
+      height: 300px;
+      text-shadow: 0 0 20px rgba(230, 199, 73, 0.6), 2px 2px 4px rgba(0,0,0,0.8);
+      position: relative;
+      filter: drop-shadow(0 0 10px rgba(230, 199, 73, 0.4));
+    }
+
+    /* 标题装饰印章 */
+    .title-seal {
+      position: absolute;
+      bottom: -20px;
+      left: 50%;
+      transform: translateX(-50%) rotate(-15deg);
+      width: 50px;
+      height: 50px;
+      background: #b22222;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 24px;
+      font-weight: bold;
+      font-family: 'SimSun', serif;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      border: 2px solid rgba(255,255,255,0.2);
+    }
+
+    /* 中间内容区 */
+    .content-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 30px;
+      animation: fadeInUp 1.2s ease-out 0.3s both;
+    }
+
+    .intro-text {
+      font-size: 1.1rem;
+      color: var(--text-dim);
+      text-align: center;
+      line-height: 1.8;
+      font-weight: 300;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+      background: rgba(0,0,0,0.3);
+      padding: 15px;
+      border-radius: 8px;
+      border-left: 2px solid var(--gold-primary);
+      border-right: 2px solid var(--gold-primary);
+    }
+
+    /* 按钮组 */
+    .btn-group {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .xianxia-btn {
+      position: relative;
+      width: 100%;
+      padding: 18px 0;
+      background: linear-gradient(90deg, transparent 0%, rgba(230, 199, 73, 0.1) 20%, rgba(230, 199, 73, 0.2) 50%, rgba(230, 199, 73, 0.1) 80%, transparent 100%);
+      border: 1px solid var(--gold-primary);
+      border-left: none;
+      border-right: none;
+      color: var(--gold-primary);
+      font-size: 1.2rem;
+      font-family: 'SimSun', serif;
+      font-weight: bold;
+      letter-spacing: 4px;
+      cursor: pointer;
+      transition: all 0.4s ease;
+      overflow: hidden;
+      background-size: 200% 100%;
+      text-shadow: 0 0 5px rgba(230, 199, 73, 0.5);
+    }
+
+    /* 按钮两端装饰 */
+    .xianxia-btn::before, .xianxia-btn::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 10px;
+      height: 10px;
+      border: 2px solid var(--gold-primary);
+      transition: all 0.4s ease;
+      transform: translateY(-50%);
+    }
+    .xianxia-btn::before { left: 0; border-right: none; }
+    .xianxia-btn::after { right: 0; border-left: none; }
+
+    .xianxia-btn:hover {
+      background-position: 100% 0;
+      text-shadow: 0 0 15px var(--gold-primary);
+      box-shadow: 0 0 20px rgba(230, 199, 73, 0.4);
+      letter-spacing: 6px;
+    }
+    
+    .xianxia-btn:hover::before { left: 10px; width: 20px; }
+    .xianxia-btn:hover::after { right: 10px; width: 20px; }
+
+    .xianxia-btn:active {
+      transform: scale(0.98);
+    }
+
+    /* 特殊按钮样式：开始游戏 */
+    .btn-start {
+      background: linear-gradient(90deg, transparent 0%, rgba(230, 199, 73, 0.3) 50%, transparent 100%);
+      border-top: 2px solid var(--gold-primary);
+      border-bottom: 2px solid var(--gold-primary);
+      font-size: 1.4rem;
+      color: #fff;
+      text-shadow: 0 0 10px var(--gold-primary);
+      animation: pulseGold 2s infinite;
+    }
+
+    @keyframes pulseGold {
+      0% { box-shadow: 0 0 10px rgba(230, 199, 73, 0.2); }
+      50% { box-shadow: 0 0 25px rgba(230, 199, 73, 0.6); }
+      100% { box-shadow: 0 0 10px rgba(230, 199, 73, 0.2); }
+    }
+
+    /* 底部信息 */
+    .footer-section {
+      text-align: center;
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.4);
+      margin-top: 20px;
+      animation: fadeIn 2s ease-out 1s both;
+    }
+    
+    .version-tag {
+      display: inline-block;
+      margin-top: 5px;
+      padding: 2px 8px;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 4px;
+      font-size: 0.7rem;
+    }
+
+    /* 动画定义 */
+    @keyframes fadeInDown { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    /* 移动端适配调整 */
+    @media (max-height: 700px) {
+      .game-title-vertical { font-size: 3rem; height: 240px; letter-spacing: 10px; }
+      .intro-text { font-size: 0.9rem; padding: 10px; }
+      .xianxia-btn { padding: 14px 0; font-size: 1.1rem; }
+      .main-container { padding: 20px 15px; }
+    }
+
+    /* 角色选择弹窗样式 */
+    .character-selection-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .character-selection-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .character-selection-container {
+      background: var(--glass-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--gold-primary);
+      border-radius: 20px;
+      padding: 30px;
+      width: 90%;
+      max-width: 400px;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 0 50px rgba(230, 199, 73, 0.3);
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+    }
+
+    .character-selection-overlay.active .character-selection-container {
+      transform: scale(1);
+    }
+
+    .selection-title {
+      color: var(--gold-primary);
+      font-size: 1.5rem;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 20px;
+      font-family: 'SimSun', serif;
+    }
+
+    .character-list {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .character-item {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--gold-primary);
+      border-radius: 10px;
+      padding: 15px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .character-item:hover {
+      background: rgba(230, 199, 73, 0.1);
+      box-shadow: 0 0 20px rgba(230, 199, 73, 0.3);
+    }
+
+    .character-item.selected {
+      background: rgba(230, 199, 73, 0.2);
+      box-shadow: 0 0 20px rgba(230, 199, 73, 0.5);
+    }
+
+    /* 服务器选择专用样式 */
+    .server-selection-container {
+      max-width: 600px;
+    }
+
+    .server-status-bar {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      margin-bottom: 20px;
+      padding: 15px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 10px;
+      border: 1px solid rgba(230, 199, 73, 0.2);
+    }
+
+    .server-status-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+      color: var(--text-dim);
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .status-dot.online {
+      background: #4CAF50;
+      box-shadow: 0 0 10px #4CAF50;
+    }
+
+    .status-dot.maintenance {
+      background: #FF9800;
+      box-shadow: 0 0 10px #FF9800;
+    }
+
+    .status-dot.recommended {
+      background: #2196F3;
+      box-shadow: 0 0 10px #2196F3;
+    }
+
+    .server-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .server-item {
+      background: rgba(0, 0, 0, 0.3);
+      border: 2px solid rgba(230, 199, 73, 0.3);
+      border-radius: 12px;
+      padding: 18px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .server-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: linear-gradient(to bottom, var(--gold-primary), var(--gold-dark));
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .server-item:hover {
+      border-color: var(--gold-primary);
+      box-shadow: 0 0 20px rgba(230, 199, 73, 0.3);
+      transform: translateX(5px);
+    }
+
+    .server-item:hover::before {
+      opacity: 1;
+    }
+
+    .server-item.selected {
+      border-color: var(--gold-light);
+      box-shadow: 0 0 30px rgba(230, 199, 73, 0.5);
+      background: rgba(230, 199, 73, 0.1);
+    }
+
+    .server-item.selected::before {
+      opacity: 1;
+    }
+
+    .server-item.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .server-item.disabled:hover {
+      transform: none;
+      box-shadow: none;
+    }
+
+    .server-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .server-name {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .server-recommended {
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      background: linear-gradient(135deg, #2196F3, #1976D2);
+      color: white;
+      border-radius: 4px;
+    }
+
+    .server-status {
+      font-size: 0.85rem;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-weight: bold;
+    }
+
+    .server-status.online {
+      background: rgba(76, 175, 80, 0.2);
+      color: #4CAF50;
+    }
+
+    .server-status.maintenance {
+      background: rgba(255, 152, 0, 0.2);
+      color: #FF9800;
+    }
+
+    .server-info {
+      display: flex;
+      gap: 15px;
+      font-size: 0.85rem;
+      color: var(--text-dim);
+    }
+
+    .server-info-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .server-ping {
+      font-size: 0.75rem;
+      color: #aaa;
+      margin-top: 5px;
+    }
+
+    .character-name {
+      font-size: 1.2rem;
+      color: var(--gold-primary);
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .character-info {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      display: flex;
+      gap: 10px;
+    }
+
+    .selection-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .selection-buttons .xianxia-btn {
+      flex: 1;
+    }
+  </style>
+
+  </head>
+<body>
+
+  <!-- 动态云雾背景 -->
+  <div class="fog-container">
+    <div class="fog-img"></div>
+    <div class="fog-img-2"></div>
+  </div>
+
+  <div class="main-container">
+    <!-- 右上角注销图标 -->
+    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=chinese%20xianxia%20style%20logout%20icon%20simple%20clean%20design&image_size=square" alt="注销" class="logout-icon" onclick="showLogoutPopup()">
+    
+    <!-- 顶部：竖排大标题 -->
+    <div class="header-section">
+      <h1 class="game-title-vertical">
+        灵月仙途
+        <div class="title-seal">仙</div>
+      </h1>
+    </div>
+
+    <!-- 中部：介绍与按钮 -->
+    <div class="content-section">
+      <div class="intro-text">
+        天地不仁，以万物为刍狗。<br>
+        踏上修行路，问鼎长生天。
+      </div>
+
+      <div class="btn-group">
+        <button class="xianxia-btn btn-start" onclick="startGame(event)">
+          踏入仙途
+        </button>
+        <button class="xianxia-btn" onclick="createCharacter()">
+          重塑肉身
+        </button>
+        <button class="xianxia-btn" onclick="showServerSelection()">
+          服务器选择
+        </button>
+      </div>
+    </div>
+
+    <!-- 底部：版本信息 -->
+    <div class="footer-section">
+    <div>灵月仙界 · 此间少年</div>
+    <div class="version-tag">Ver 1.0.0 Build 2026</div>
+  </div>
+</div>
+
+<!-- 角色选择弹窗 -->
+<div class="character-selection-overlay" id="characterSelectionOverlay">
+  <div class="character-selection-container">
+    <h2 class="selection-title">选择神魂</h2>
+    <div class="character-list" id="characterList"></div>
+    <div class="selection-buttons">
+      <button class="xianxia-btn" onclick="createCharacter()">
+        重塑肉身
+      </button>
+      <button class="xianxia-btn" onclick="closeCharacterSelection()">
+        取消
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- 服务器选择弹窗 -->
+<div class="character-selection-overlay" id="serverSelectionOverlay">
+  <div class="character-selection-container server-selection-container">
+    <h2 class="selection-title">🌍 选择服务器</h2>
+    <div class="server-status-bar">
+      <div class="server-status-item">
+        <span class="status-dot online"></span>
+        <span>在线：<span id="onlineCount">0</span></span>
+      </div>
+      <div class="server-status-item">
+        <span class="status-dot maintenance"></span>
+        <span>维护：<span id="maintenanceCount">0</span></span>
+      </div>
+      <div class="server-status-item">
+        <span class="status-dot recommended"></span>
+        <span>推荐</span>
+      </div>
+    </div>
+    <div class="server-list" id="serverList"></div>
+    <div class="selection-buttons">
+      <button class="xianxia-btn" onclick="closeServerSelection()">
+        取消
+      </button>
+      <button class="xianxia-btn" onclick="refreshServerList()" style="margin-left: 10px;">
+        🔄 刷新
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- 图片注销弹窗 -->
+<div class="character-selection-overlay" id="logoutOverlay">
+  <div class="character-selection-container">
+    <h2 class="selection-title">确认注销</h2>
+    <div style="text-align: center; margin: 20px 0;">
+      <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=chinese%20xianxia%20style%20logout%20confirmation%20image%20with%20zen%20symbol&image_size=square" alt="注销确认" style="max-width: 200px; border-radius: 10px;">
+      <p style="margin-top: 20px; color: var(--text-dim);">确定要注销当前账号吗？</p>
+    </div>
+    <div class="selection-buttons">
+      <button class="xianxia-btn" onclick="logout()">
+        确认注销
+      </button>
+      <button class="xianxia-btn" onclick="closeLogoutPopup()">
+        取消
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- 删除账号弹窗 -->
+<div class="character-selection-overlay" id="deleteAccountOverlay">
+  <div class="character-selection-container">
+    <h2 class="selection-title">删除账号</h2>
+    <div style="text-align: center; margin: 20px 0;">
+      <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=chinese%20xianxia%20style%20account%20deletion%20confirmation%20image%20with%20warning%20symbol&image_size=square" alt="删除账号确认" style="max-width: 200px; border-radius: 10px;">
+      <p style="margin-top: 20px; color: var(--danger); font-weight: bold;">警告：此操作不可恢复！</p>
+      <p style="margin-top: 10px; color: var(--text-dim);">确定要删除当前账号吗？所有数据将被永久清除。</p>
+    </div>
+    <div class="selection-buttons">
+      <button class="xianxia-btn" onclick="deleteAccount()" style="border-color: var(--danger); color: var(--danger);">
+        确认删除
+      </button>
+      <button class="xianxia-btn" onclick="closeDeleteAccountPopup()">
+        取消
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- 删除角色弹窗 -->
+<div class="character-selection-overlay" id="deleteRoleOverlay">
+  <div class="character-selection-container">
+    <h2 class="selection-title">删除角色</h2>
+    <div style="text-align: center; margin: 20px 0;">
+      <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=chinese%20xianxia%20style%20character%20deletion%20confirmation%20image%20with%20warning%20symbol&image_size=square" alt="删除角色确认" style="max-width: 200px; border-radius: 10px;">
+      <p style="margin-top: 20px; color: var(--danger); font-weight: bold;">警告：此操作不可恢复！</p>
+      <p style="margin-top: 10px; color: var(--text-dim);">确定要删除这个角色吗？所有角色数据将被永久清除。</p>
+    </div>
+    <div class="selection-buttons">
+      <button class="xianxia-btn" onclick="confirmDeleteRole()" style="border-color: var(--danger); color: var(--danger);">
+        确认删除
+      </button>
+      <button class="xianxia-btn" onclick="closeDeleteRolePopup()">
+        取消
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="../js/config.js"></script>
+  <script src="../js/toast-utils.js"></script>
+  <script src="../js/auth-check.js"></script>
+  <script src="../js/token-manager.js"></script>
+  <script src="../js/role-sync.js"></script>
+  <script src="../js/api-interceptor.js"></script>
+  <script>
+    // 开始游戏逻辑
+    function startGame(event) {
+      // 添加点击特效（可选）
+      const btn = event.currentTarget;
+      btn.style.transform = 'scale(0.95)';
+      setTimeout(() => btn.style.transform = 'scale(1)', 150);
+
+      // 向后端 API 查询角色信息  
+      btn.innerHTML = "正在感应神魂...";
+      btn.style.pointerEvents = 'none';
+
+      const userId = localStorage.getItem('userId');
+      console.log('当前登录用户ID:', userId);
+      
+      if (!userId) {
+        showToast('请先登录！');
+        window.location.href = '../login.html';
+        return;
+      }
+      
+      console.log('最终使用的用户ID:', userId);
+      
+      // 使用 apiService 获取角色列表，自动添加 Authorization 头
+      (async function() {
+        try {
+          const roles = await window.apiService.getRole(userId);
+          console.log('角色查询结果:', roles);
+          
+          if (roles && Array.isArray(roles) && roles.length > 0) {
+            // 无论有多少个角色，都显示角色选择界面
+            showCharacterSelection(roles);
+          } else {
+            // 无角色，提示创建或直接跳转
+            showToast("道友尚未凝聚神魂，请先重塑肉身！");
+            createCharacter();
+          }
+        } catch (error) {
+          console.error('查询角色失败:', error);
+          // 后端查询失败时，尝试从本地存储获取
+          const characterData = localStorage.getItem('character');
+          if (characterData) {
+            // 有角色，进入加载页
+            window.location.href = 'loading.html';
+          } else {
+            // 无角色，提示创建或直接跳转
+            showToast("道友尚未凝聚神魂，请先重塑肉身！");
+            createCharacter();
+          }
+        } finally {
+          btn.innerHTML = "踏入仙途";
+          btn.style.pointerEvents = 'auto';
+        }
+      })();
+    }
+
+    // 创建角色
+    function createCharacter() {
+      window.location.href = 'character-create/character-create-step1.html';
+    }
+
+    // 设置
+    function showSettings() {
+      // 这里可以做一个简单的弹窗，或者跳转页面
+      showToast("天道未开，设置功能敬请期待...");
+      // window.location.href = 'settings.html';
+    }
+
+    // 预加载背景图，防止闪烁
+    window.addEventListener('load', () => {
+      const bg = new Image();
+      bg.src = '../images/beijing.png';
+    });
+
+    // 显示角色选择界面
+    function showCharacterSelection(characterList) {
+      const overlay = document.getElementById('characterSelectionOverlay');
+      const characterListEl = document.getElementById('characterList');
+      
+      // 清空角色列表
+      characterListEl.innerHTML = '';
+      
+      // 渲染角色列表
+      characterList.forEach((character, index) => {
+        const characterItem = document.createElement('div');
+        characterItem.className = 'character-item';
+        characterItem.style.position = 'relative';
+        
+        // 如果只有一个角色，自动选中
+        if (characterList.length === 1) {
+          characterItem.classList.add('selected');
+          localStorage.setItem('selectedCharacterId', character.id);
+          localStorage.setItem('currentRoleId', character.id);
+          
+          // 🔥 方案一补充：自动选中时也更新 token 备份
+          const token = localStorage.getItem('token');
+          const userId = localStorage.getItem('userId');
+          if (token && userId) {
+            const saved = window.TokenUtils.save(token, userId, character.id);
+            console.log('✅ 自动选中角色，已更新 Token 备份:', saved ? '成功 ✓' : '失败 ✗');
+          }
+        }
+        
+        // 初始化境界信息
+        let realmInfo = '凡人';
+        
+        characterItem.innerHTML = `
+          <div class="character-name">${character.roleName}</div>
+          <div class="character-info">
+            <span>${character.gender === 1 ? '男' : '女'}</span>
+            <span class="character-realm">${realmInfo}</span>
+            <span>等级 ${character.level}</span>
+          </div>
+          <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=chinese%20xianxia%20style%20delete%20icon%20simple%20red%20design&image_size=square" alt="删除角色" class="delete-role-icon" data-role-id="${character.id}">
+        `;
+        
+        // 获取角色境界信息
+        (async function() {
+          try {
+            const realmData = await window.apiService.get(`/role-realm/role/${character.id}`);
+            if (realmData) {
+              realmInfo = `${realmData.realmName} ${realmData.realmLevel}层`;
+              const realmElement = characterItem.querySelector('.character-realm');
+              if (realmElement) {
+                realmElement.textContent = realmInfo;
+              }
+            }
+          } catch (error) {
+            console.error('获取角色境界信息失败:', error);
+          }
+        })();
+        
+        // 点击选择角色
+        characterItem.addEventListener('click', (e) => {
+          // 防止点击删除图标时触发选择角色
+          if (!e.target.classList.contains('delete-role-icon')) {
+            // 移除其他角色的选中状态
+            document.querySelectorAll('.character-item').forEach(item => {
+              item.classList.remove('selected');
+            });
+            // 添加当前角色的选中状态
+            characterItem.classList.add('selected');
+            // 存储选中的角色 ID
+            localStorage.setItem('selectedCharacterId', character.id);
+            localStorage.setItem('currentRoleId', character.id);
+            
+            // 🔥 方案一补充：手动选择时更新 token 备份
+            const token = localStorage.getItem('token');
+            const userId = localStorage.getItem('userId');
+            if (token && userId) {
+              const saved = window.TokenUtils.save(token, userId, character.id);
+              console.log('✅ 手动选择角色，已更新 Token 备份:', saved ? '成功 ✓' : '失败 ✗');
+            }
+          }
+        });
+        
+        // 点击删除角色
+        const deleteIcon = characterItem.querySelector('.delete-role-icon');
+        deleteIcon.addEventListener('click', (e) => {
+          e.stopPropagation(); // 阻止事件冒泡
+          const roleId = deleteIcon.dataset.roleId;
+          showDeleteRolePopup(roleId);
+        });
+        
+        characterListEl.appendChild(characterItem);
+      });
+      
+      // 显示弹窗
+      overlay.classList.add('active');
+      
+      // 先清除现有的进入游戏按钮
+      const existingEnterBtn = document.querySelector('.selection-buttons .xianxia-btn:nth-child(3)');
+      if (existingEnterBtn) {
+        existingEnterBtn.remove();
+      }
+      
+      // 添加进入游戏按钮
+      const enterBtn = document.createElement('button');
+      enterBtn.className = 'xianxia-btn';
+      enterBtn.textContent = '踏入仙途';
+      enterBtn.style.marginTop = '10px';
+      enterBtn.addEventListener('click', () => {
+        const selectedCharacterId = localStorage.getItem('selectedCharacterId');
+        
+        // 关键检查：确保 token 和 userId 存在
+        const token = localStorage.getItem('token');
+        const userId = localStorage.getItem('userId');
+        
+        console.log('=== 踏入仙途前检查 ===');
+        console.log('selectedCharacterId:', selectedCharacterId);
+        console.log('userId:', userId);
+        console.log('token:', token ? '存在' : '不存在');
+        
+        if (!selectedCharacterId) {
+          showToast('请选择一个角色');
+          return;
+        }
+        
+        // 🔥 方案一关键修复：选择角色后重新保存 token，更新备份
+        if (token && userId) {
+          const saved = window.TokenUtils.save(token, userId, selectedCharacterId);
+          console.log('✅ 已更新 Token 备份，包含 roleId:', saved ? '成功 ✓' : '失败 ✗');
+          
+          // 验证保存后的状态
+          const status = window.TokenUtils.validate();
+          console.log('Token 完整性检查:', status);
+        } else {
+          console.error('❌ 缺少 token 或 userId，无法更新备份');
+        }
+        
+        if (!token || !userId) {
+          console.error('缺少 token 或 userId，无法继续');
+          showToast('登录信息丢失，请重新登录');
+          setTimeout(() => {
+            window.location.href = '../login.html';
+          }, 1500);
+          return;
+        }
+        
+        // 确保 currentRoleId 已设置
+        localStorage.setItem('currentRoleId', selectedCharacterId);
+        
+        // 获取并存储角色境界信息
+        window.apiService.get(`/role-realm/role/${selectedCharacterId}`)
+          .then(realmData => {
+            console.log('境界数据:', realmData);
+            if (realmData) {
+              localStorage.setItem('currentRoleRealm', JSON.stringify(realmData));
+            }
+            
+            // 获取并存储角色资产信息
+            return window.apiService.getAssets(selectedCharacterId);
+          })
+          .then(assetData => {
+            console.log('资产数据:', assetData);
+            if (assetData) {
+              localStorage.setItem('currentRoleAssets', JSON.stringify(assetData));
+            }
+            
+            console.log('数据获取完成，跳转到加载页面');
+            window.location.href = 'loading.html';
+          })
+          .catch(error => {
+            console.error('获取角色信息失败:', error);
+            // 即使失败也跳转，让 loading 页面处理
+            window.location.href = 'loading.html';
+          });
+      });
+      
+      const selectionButtons = document.querySelector('.selection-buttons');
+      if (selectionButtons) {
+        selectionButtons.appendChild(enterBtn);
+      }
+    }
+    
+    // 删除角色
+    async function deleteRole(roleId) {
+      try {
+        // 向后端 API 发送删除角色请求
+        await window.apiService.delete(`/role/${roleId}`);
+        
+        // 关闭角色选择弹窗
+        const overlay = document.getElementById('characterSelectionOverlay');
+        if (overlay) {
+          overlay.classList.remove('active');
+        }
+        
+        // 重新获取并显示角色列表
+        const userId = localStorage.getItem('userId');
+        if (!userId) {
+          showToast('请先登录！');
+          window.location.href = '../login.html';
+          return;
+        }
+        
+        const roles = await window.apiService.getRole(userId);
+        if (roles && roles.length > 0) {
+          // 还有角色，显示角色选择界面
+          showCharacterSelection(roles);
+        } else {
+          // 没有角色了，提示创建
+          showToast("您已无可用角色，请创建新角色");
+          createCharacter();
+        }
+      } catch (error) {
+        console.error('删除角色失败:', error);
+        showToast('删除角色失败，请稍后重试');
+      }
+    }
+
+    // 关闭角色选择界面
+    function closeCharacterSelection() {
+      const overlay = document.getElementById('characterSelectionOverlay');
+      overlay.classList.remove('active');
+    }
+
+    // 显示服务器选择界面
+    function showServerSelection() {
+      const overlay = document.getElementById('serverSelectionOverlay');
+      const serverListEl = document.getElementById('serverList');
+      
+      // 清空服务器列表
+      serverListEl.innerHTML = '';
+      
+      // 服务器数据
+      const servers = [
+        { id: 1, name: '万夫之勇', status: 'online', region: '张福建' },
+        { id: 2, name: '剑气纵横', status: 'online', region: '李广东' },
+        { id: 3, name: '道法自然', status: 'online', region: '王浙江' },
+        { id: 4, name: '仙风道骨', status: 'maintenance', region: '赵北京' }
+      ];
+      
+      // 渲染服务器列表
+      servers.forEach(server => {
+        const serverItem = document.createElement('div');
+        serverItem.className = 'character-item';
+        serverItem.innerHTML = `
+          <div class="character-name">${server.name}</div>
+          <div class="character-info">
+            <span style="color: ${server.status === 'online' ? '#4CAF50' : '#FF9800'};">
+              ${server.status === 'online' ? '在线' : '维护中'}
+            </span>
+            <span>${server.region}</span>
+          </div>
+        `;
+        
+        // 点击选择服务器
+        serverItem.addEventListener('click', () => {
+          // 移除其他服务器的选中状态
+          document.querySelectorAll('#serverList .character-item').forEach(item => {
+            item.classList.remove('selected');
+          });
+          // 添加当前服务器的选中状态
+          serverItem.classList.add('selected');
+          // 存储选中的服务器ID
+          localStorage.setItem('selectedServerId', server.id);
+          localStorage.setItem('selectedServerName', server.name);
+          
+          // 显示选择成功提示
+          showToast(`已选择服务器: ${server.name}`);
+          closeServerSelection();
+        });
+        
+        serverListEl.appendChild(serverItem);
+      });
+      
+      // 显示弹窗
+      overlay.classList.add('active');
+    }
+
+    // 关闭服务器选择界面
+    function closeServerSelection() {
+      const overlay = document.getElementById('serverSelectionOverlay');
+      overlay.classList.remove('active');
+    }
+
+    // 显示图片注销弹窗
+    function showLogoutPopup() {
+      const overlay = document.getElementById('logoutOverlay');
+      overlay.classList.add('active');
+    }
+
+    // 关闭注销弹窗
+    function closeLogoutPopup() {
+      const overlay = document.getElementById('logoutOverlay');
+      overlay.classList.remove('active');
+    }
+
+    // 执行注销操作
+    function logout() {
+      // 清除本地存储的用户数据
+      localStorage.removeItem('character');
+      localStorage.removeItem('selectedCharacterId');
+      localStorage.removeItem('selectedServerId');
+      localStorage.removeItem('selectedServerName');
+      
+      // 显示注销成功提示
+      showToast('注销成功，感谢您的游玩！');
+      
+      // 关闭弹窗
+      closeLogoutPopup();
+    }
+
+    // 显示删除账号弹窗
+    function showDeleteAccountPopup() {
+      const overlay = document.getElementById('deleteAccountOverlay');
+      overlay.classList.add('active');
+    }
+
+    // 关闭删除账号弹窗
+    function closeDeleteAccountPopup() {
+      const overlay = document.getElementById('deleteAccountOverlay');
+      overlay.classList.remove('active');
+    }
+
+    // 执行删除账号操作
+    function deleteAccount() {
+      // 清除本地存储中的所有数据
+      localStorage.clear();
+      
+      // 显示删除成功提示
+      showToast('账号已删除，所有数据已清除。');
+      
+      // 关闭弹窗
+      closeDeleteAccountPopup();
+    }
+
+    // 显示删除角色弹窗
+    let currentRoleIdToDelete = null;
+    function showDeleteRolePopup(roleId) {
+      currentRoleIdToDelete = roleId;
+      const overlay = document.getElementById('deleteRoleOverlay');
+      overlay.classList.add('active');
+    }
+
+    // 关闭删除角色弹窗
+    function closeDeleteRolePopup() {
+      currentRoleIdToDelete = null;
+      const overlay = document.getElementById('deleteRoleOverlay');
+      overlay.classList.remove('active');
+    }
+
+    // 确认删除角色
+    function confirmDeleteRole() {
+      if (currentRoleIdToDelete) {
+        deleteRole(currentRoleIdToDelete);
+        closeDeleteRolePopup();
+      }
+    }
+  </script>
+</body>
+</html> 

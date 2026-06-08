@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>思维闯关</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;background:#f5efe6;min-height:100vh;overflow-x:hidden;color:#5c4033}
+.app{max-width:480px;margin:0 auto;min-height:100vh;position:relative}
+
+/* ====== 封面页 ====== */
+.cover-page{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;background:linear-gradient(180deg,#f5efe6 0%,#e8dfd1 100%);position:relative}
+.cover-bg{position:absolute;top:0;left:0;right:0;height:200px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 80'%3E%3Cpath d='M0 80 Q50 20 100 80 T200 80' fill='%23d4c5a9' opacity='0.4'/%3E%3Cpath d='M0 60 Q50 0 100 60 T200 60' fill='%23d4c5a9' opacity='0.2'/%3E%3C/svg%3E") repeat-x;background-size:200px 80px}
+.cover-illustration{width:200px;height:200px;border-radius:32px;background:linear-gradient(135deg,#e8a87c,#d4a574);display:flex;align-items:center;justify-content:center;box-shadow:0 16px 48px rgba(212,165,116,.35);margin-bottom:32px;position:relative;z-index:1}
+.cover-illustration .emoji{font-size:90px}
+.cover-title{font-size:36px;font-weight:800;color:#5c4033;margin-bottom:8px;letter-spacing:4px;position:relative;z-index:1}
+.cover-subtitle{font-size:14px;color:#8b7355;margin-bottom:48px;letter-spacing:2px;position:relative;z-index:1}
+.cover-btn{background:linear-gradient(135deg,#7cb342,#689f38);color:#fff;border:none;padding:18px 60px;border-radius:36px;font-size:18px;font-weight:700;cursor:pointer;box-shadow:0 8px 24px rgba(124,179,66,.4);transition:all .2s;letter-spacing:2px;position:relative;z-index:1}
+.cover-btn:active{transform:scale(.96);box-shadow:0 4px 12px rgba(124,179,66,.3)}
+.cover-stats{display:flex;gap:40px;margin-top:40px;position:relative;z-index:1}
+.cover-stat{text-align:center}
+.cover-stat-num{font-size:32px;font-weight:800;color:#5c4033}
+.cover-stat-label{font-size:12px;color:#8b7355;margin-top:4px}
+
+/* ====== 关卡选择页 ====== */
+.select-page{display:none;min-height:100vh;padding:12px;flex-direction:column;width:100%}
+.select-header{display:flex;align-items:center;justify-content:space-between;padding:12px 8px}
+.select-back{width:40px;height:40px;border-radius:50%;background:#fff;border:2px solid #ddd5c8;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;color:#5c4033;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.select-back:active{transform:scale(.9)}
+.select-header h2{font-size:24px;font-weight:800;color:#5c4033}
+.select-header-right{width:40px}
+.select-progress{width:100%;height:8px;background:#ddd5c8;border-radius:4px;margin-bottom:16px;overflow:hidden}
+.select-progress-fill{height:100%;background:linear-gradient(90deg,#7cb342,#689f38);border-radius:4px;transition:width .4s ease}
+.select-page-num{text-align:center;font-size:14px;color:#8b7355;font-weight:600;padding:8px 0}
+.select-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding-bottom:100px}
+.level-card{background:#fff;border-radius:16px;border:2px solid #e8dfd1;overflow:hidden;cursor:pointer;transition:all .2s;position:relative;box-shadow:0 4px 12px rgba(0,0,0,.06)}
+.level-card:active{transform:scale(.96)}
+.level-card.locked{opacity:.5;filter:grayscale(.5)}
+.level-card.locked::after{content:'🔒';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:32px;z-index:2}
+.level-card-inner{padding:12px}
+.level-card-img{width:100%;height:80px;border-radius:10px;background:linear-gradient(135deg,#f0e6d8,#e8dfd1);display:flex;align-items:center;justify-content:center;margin-bottom:8px;position:relative;overflow:hidden}
+.level-card-img .emoji{font-size:40px}
+.level-card-img .tag{position:absolute;top:4px;right:4px;background:#5c4033;color:#fff;font-size:10px;padding:2px 8px;border-radius:8px;font-weight:600}
+.level-card-name{font-size:13px;font-weight:700;color:#5c4033;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.level-card-info{font-size:11px;color:#8b7355}
+.level-card-done{position:absolute;top:6px;left:6px;width:24px;height:24px;background:#7cb342;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700}
+.select-footer{position:fixed;bottom:0;left:0;right:0;background:linear-gradient(180deg,transparent,#f5efe6 30%);padding:16px 12px 24px;display:flex;justify-content:center;gap:10px;max-width:480px;margin:0 auto;z-index:10}
+.select-footer-btn{background:#fff;border:2px solid #ddd5c8;border-radius:12px;padding:12px 20px;font-size:13px;font-weight:700;color:#5c4033;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.06);min-width:80px}
+.select-footer-btn.primary{background:linear-gradient(135deg,#7cb342,#689f38);color:#fff;border:none}
+.select-footer-btn.danger{background:linear-gradient(135deg,#e8a87c,#d4a574);color:#fff;border:none}
+.select-footer-btn:active{transform:scale(.95)}
+
+/* ====== 答题页 ====== */
+.game-page{display:none;min-height:100vh;flex-direction:column}
+.game-header{background:linear-gradient(135deg,#7cb342,#689f38);padding:16px 20px 20px;color:#fff;position:relative}
+.game-header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.game-back{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;color:#fff;border:none}
+.game-back:active{transform:scale(.9)}
+.game-level-tag{background:rgba(255,255,255,.2);padding:6px 16px;border-radius:20px;font-size:14px;font-weight:700}
+.game-header-right{width:40px}
+.game-progress{width:100%;height:6px;background:rgba(255,255,255,.25);border-radius:3px;overflow:hidden}
+.game-progress-fill{height:100%;background:#fff;border-radius:3px;transition:width .4s ease}
+.game-body{flex:1;padding:20px;overflow-y:auto}
+.game-body::-webkit-scrollbar{width:4px}
+.game-body::-webkit-scrollbar-thumb{background:#ddd5c8;border-radius:2px}
+.game-tag-row{display:flex;gap:8px;margin-bottom:16px}
+.game-tag{font-size:12px;padding:4px 12px;border-radius:10px;font-weight:600}
+.game-tag.logic{background:#e3f2fd;color:#1565c0}
+.game-tag.math{background:#e8f5e9;color:#2e7d32}
+.game-tag.strategy{background:#fff3e0;color:#e65100}
+.game-tag.lateral{background:#fce4ec;color:#c2185b}
+.game-tag.riddle{background:#f3e5f5;color:#6a1b9a}
+.game-title{font-size:20px;font-weight:800;color:#5c4033;line-height:1.5;margin-bottom:16px}
+.game-question{font-size:15px;line-height:1.9;color:#5c4033;background:#fff;padding:20px;border-radius:16px;border:1px solid #e8dfd1;box-shadow:0 2px 8px rgba(0,0,0,.04);white-space:pre-line}
+.game-answer-section{display:none;margin-top:16px;background:#fff;padding:20px;border-radius:16px;border:1px solid #e8dfd1;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.game-answer-section.show{display:block}
+.game-answer-label{font-size:13px;color:#7cb342;font-weight:800;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.game-answer-label::before{content:'';display:inline-block;width:4px;height:14px;background:#7cb342;border-radius:2px}
+.game-answer-text{font-size:15px;line-height:1.8;color:#5c4033;font-weight:700;margin-bottom:12px}
+.game-answer-detail{font-size:13px;line-height:1.9;color:#8b7355;padding:14px;background:#faf7f2;border-radius:12px;border:1px dashed #ddd5c8;white-space:pre-line}
+.game-footer{padding:16px 20px 24px;display:flex;gap:10px;background:#f5efe6}
+.game-btn{flex:1;padding:14px;border:none;border-radius:14px;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s}
+.game-btn:active{transform:scale(.96)}
+.game-btn-answer{background:#fff;color:#5c4033;border:2px solid #ddd5c8}
+.game-btn-next{background:linear-gradient(135deg,#7cb342,#689f38);color:#fff}
+.game-btn-prev{background:#fff;color:#8b7355;border:2px solid #ddd5c8;flex:0 0 50px;font-size:20px}
+
+/* ====== 弹窗 ====== */
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
+.modal-overlay.show{display:flex}
+.modal{background:#fff;border-radius:24px;padding:32px 24px;max-width:340px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal-emoji{font-size:56px;margin-bottom:12px}
+.modal h2{font-size:22px;color:#5c4033;margin-bottom:8px}
+.modal p{color:#8b7355;font-size:14px;margin-bottom:20px}
+.modal-btn{background:linear-gradient(135deg,#7cb342,#689f38);color:#fff;border:none;padding:14px 40px;border-radius:28px;font-size:16px;font-weight:700;cursor:pointer}
+.modal-btn:active{transform:scale(.95)}
+
+/* ====== 动画 ====== */
+@keyframes floatHint{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}30%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}50%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-60%)}}
+.float-hint{position:fixed;top:45%;left:50%;transform:translate(-50%,-50%);background:rgba(92,64,51,.9);color:#ffd54f;padding:12px 28px;border-radius:14px;font-size:16px;font-weight:700;z-index:50;pointer-events:none;animation:floatHint .9s ease forwards}
+.confetti{position:fixed;top:-10px;z-index:99;pointer-events:none;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:0}}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+<!-- 封面页 -->
+<div class="cover-page" id="coverPage">
+  <div class="cover-bg"></div>
+  <div class="cover-illustration">
+    <div class="emoji">🧠</div>
+  </div>
+  <div class="cover-title">思维闯关</div>
+  <div class="cover-subtitle">100道经典逻辑思维题</div>
+  <button class="cover-btn" onclick="goSelect()">开始挑战</button>
+  <div class="cover-stats">
+    <div class="cover-stat">
+      <div class="cover-stat-num" id="coverTotal">100</div>
+      <div class="cover-stat-label">总关卡</div>
+    </div>
+    <div class="cover-stat">
+      <div class="cover-stat-num" id="coverDone">0</div>
+      <div class="cover-stat-label">已通关</div>
+    </div>
+    <div class="cover-stat">
+      <div class="cover-stat-num" id="coverRate">0%</div>
+      <div class="cover-stat-label">完成度</div>
+    </div>
+  </div>
+</div>
+
+<!-- 关卡选择页 -->
+<div class="select-page" id="selectPage">
+  <div class="select-header">
+    <div class="select-back" onclick="goCover()">‹</div>
+    <h2>选择关卡</h2>
+    <div class="select-header-right"></div>
+  </div>
+  <div class="select-progress"><div class="select-progress-fill" id="selectProgressFill"></div></div>
+  <div class="select-page-num" id="selectPageNum">1 / 10</div>
+  <div class="select-grid" id="selectGrid"></div>
+  <div class="select-footer">
+    <button class="select-footer-btn" id="btnPrevPage" onclick="prevPage()">‹ 上一页</button>
+    <button class="select-footer-btn primary" onclick="goGame(findFirstUndone())">继续挑战</button>
+    <button class="select-footer-btn danger" onclick="resetProgress()">重置进度</button>
+    <button class="select-footer-btn" id="btnNextPage" onclick="nextPage()">下一页 ›</button>
+  </div>
+</div>
+
+<!-- 答题页 -->
+<div class="game-page" id="gamePage">
+  <div class="game-header">
+    <div class="game-header-top">
+      <button class="game-back" onclick="goSelect()">‹</button>
+      <div class="game-level-tag">第 <span id="gameLevelNum">1</span> 关</div>
+      <div class="game-header-right"></div>
+    </div>
+    <div class="game-progress"><div class="game-progress-fill" id="gameProgressFill"></div></div>
+  </div>
+  <div class="game-body" id="gameBody">
+    <div class="game-tag-row">
+      <span class="game-tag" id="gameTag">逻辑推理</span>
+      <span style="font-size:12px;color:#8b7355;font-weight:600" id="gameDiff">难度：⭐⭐</span>
+    </div>
+    <div class="game-title" id="gameTitle"></div>
+    <div class="game-question" id="gameQuestion"></div>
+    <div class="game-answer-section" id="gameAnswerSection">
+      <div class="game-answer-label">答案</div>
+      <div class="game-answer-text" id="gameAnswerText"></div>
+      <div class="game-answer-detail" id="gameAnswerDetail"></div>
+    </div>
+  </div>
+  <div class="game-footer">
+    <button class="game-btn game-btn-prev" id="gameBtnPrev" onclick="prevLevel()">‹</button>
+    <button class="game-btn game-btn-answer" id="gameBtnAnswer" onclick="toggleAnswer()">查看答案</button>
+    <button class="game-btn game-btn-next" id="gameBtnNext" onclick="nextLevel()">下一关 ›</button>
+  </div>
+</div>
+
+<!-- 弹窗 -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-emoji" id="modalEmoji">🎉</div>
+    <h2 id="modalTitle">恭喜通关</h2>
+    <p id="modalDesc">你已完成全部100关！</p>
+    <button class="modal-btn" onclick="closeModal()">再来一次</button>
+  </div>
+</div>
+
+</div>
+<script>
+// ====== 100关数据 ======
+var levels=[
+{title:"奶茶试毒",tag:"logic",tagName:"逻辑推理",diff:"⭐⭐⭐",emoji:"🧋",
+q:"有8杯奶茶，其中1杯有毒，喝完24小时会发作。你有3只小白鼠，只能用一次实验（只喂一次，等24小时看结果），怎么精准找出哪杯有毒？",
+a:"用二进制编码，3只老鼠刚好能表示000～111共8种状态，对应8杯奶茶。",
+detail:"给奶茶编号1-8，给3只老鼠叫A、B、C\n把编号转3位二进制：\n1号：001 → 只喂C\n2号：010 → 只喂B\n3号：011 → 喂B+C\n4号：100 → 只喂A\n5号：101 → 喂A+C\n6号：110 → 喂A+B\n7号：111 → 喂A+B+C\n8号：000 → 哪只都不喂\n\n24小时后看老鼠死活：\n只有C死 → 1号有毒\n只有B死 → 2号有毒\nB、C都死 → 3号有毒\n只有A死 → 4号有毒\nA、C都死 → 5号有毒\nA、B都死 → 6号有毒\nA、B、C全死 → 7号有毒\n全活着 → 8号有毒"},
+{title:"四人过桥",tag:"strategy",tagName:"策略分配",diff:"⭐⭐⭐",emoji:"🌉",
+q:"甲、乙、丙、丁四人夜晚过桥，桥最多同时过2人，过桥需用手电筒，四人过桥时间分别为1分钟、2分钟、5分钟、10分钟，只有1个手电筒，怎样安排总时间最短？",
+a:"最短总时间17分钟。",
+detail:"核心策略：让最慢的两人一起过桥，让最快的负责送手电筒。\n\n1. 甲(1分)和乙(2分)先过桥 → 2分钟\n2. 甲带手电返回 → 1分钟（累计3分钟）\n3. 丙(5分)和丁(10分)过桥 → 10分钟（累计13分钟）\n4. 乙带手电返回 → 2分钟（累计15分钟）\n5. 甲和乙再次过桥 → 2分钟（累计17分钟）"},
+{title:"烧绳计时",tag:"logic",tagName:"逻辑推理",diff:"⭐⭐",emoji:"🕯️",
+q:"有两根粗细不均匀的绳子，每根烧完需1小时，如何用这两根绳子测量出15分钟？",
+a:"通过两端点燃+二次点燃的方式，可精准测量15分钟。",
+detail:"1. 同时点燃第一根绳子的两端，和第二根绳子的一端\n2. 第一根绳子两端同时烧，只需30分钟就烧完\n3. 第一根烧完的瞬间，立即点燃第二根绳子的另一端\n4. 第二根绳子剩余部分两端同时烧，只需15分钟烧完\n5. 从点燃第二根另一端到烧完 = 15分钟"},
+{title:"量水问题",tag:"math",tagName:"数学思维",diff:"⭐⭐",emoji:"💧",
+q:"你有一个3升的水壶和一个5升的水壶，水无限供应，如何只用这两个水壶量出4升水？",
+a:"用5升壶装满倒入3升壶，5升壶剩2升；重复操作即可得到4升。",
+detail:"1. 5升壶装满 → 倒入3升壶，5升壶剩2升\n2. 3升壶倒空，把2升倒入3升壶\n3. 5升壶再装满 → 倒入3升壶（只能倒1升就满了）\n4. 5升壶剩下4升！"},
+{title:"1000瓶毒药",tag:"logic",tagName:"逻辑推理",diff:"⭐⭐⭐⭐",emoji:"🧪",
+q:"有1000瓶水，其中1瓶有毒，喝完后一周会发作。你只有10只小白鼠和一周时间，如何检验出哪瓶有毒？",
+a:"最少需要10只小白鼠，用二进制编码法。",
+detail:"2^10 = 1024 > 1000，所以10只老鼠足够。\n\n把瓶子从0到999编号，转为10位二进制数。\n让第1只老鼠喝掉所有二进制右起第1位是1的瓶子，\n让第2只老鼠喝掉所有二进制右起第2位是1的瓶子……\n以此类推。\n\n一周后，每只老鼠的死活确定二进制的一位：\n死=1，活=0\n10只老鼠的死活状态组合，就是毒药瓶子的编号。"},
+{title:"海盗分金",tag:"strategy",tagName:"策略分配",diff:"⭐⭐⭐⭐⭐",emoji:"🏴‍☠️",
+q:"5个海盗抢得100枚金币，按规则由1号到5号依次提分配方案，方案需半数以上（含自己）同意才通过，否则提方案者被扔海里。所有海盗绝对理性且优先保命、其次多拿金币，1号海盗如何提方案能存活且获利最多？",
+a:"1号方案：自己97枚，2号0枚，3号1枚，4号0枚，5号2枚。",
+detail:"反向推理（从少到多推导）：\n\n只剩4号、5号：4号提(100,0)，自己同意即过，5号0枚\n\n只剩3、4、5号：3号提(99,0,1)，5号得1枚比0枚好，同意\n\n只剩2、3、4、5号：2号提(99,0,1,0)，4号得1枚比0枚好，同意\n\n1号需再争取2票：\n给3号1枚（比2号方案多），3号同意\n给5号2枚（比2号方案多），5号同意\n\n所以1号提(97,0,1,0,2)，获3票通过！"},
+{title:"12枚硬币找假币",tag:"logic",tagName:"逻辑推理",diff:"⭐⭐⭐⭐⭐",emoji:"⚖️",
+q:"有12枚外观相同的硬币，其中1枚是假币（与真币重量不同，但不知轻重），用无砝码天平，最少称几次能找出假币并判断其轻重？",
+a:"最多3次称量即可找出假币并判断轻重。",
+detail:"将12枚分成三组(A1-A4, B1-B4, C1-C4)\n\n第一次：称A组 vs B组\n\n情况1：A=B → 假币在C组\n  第二次：称C1,C2 vs A1,A2（已知A正常）\n  若平衡→假币在C3,C4，第三次称C3 vs A1即可\n  若不平衡→假币在C1或C2，第三次称C1 vs A1即可\n\n情况2：A≠B（假设A重）→ 假币在A或B中\n  第二次：称A1,A2,B1 vs A3,B2,C1\n  根据结果可缩小到3枚以内\n  第三次：1对1称量即可确定\n\n核心：每次称量将可能性缩小到1/3"},
+{title:"蜗牛爬井",tag:"math",tagName:"数学思维",diff:"⭐",emoji:"🐌",
+q:"有口井7米深，有只蜗牛从井底往上爬，白天爬3米，晚上往下掉2米，问几天蜗牛能从井里爬出来？",
+a:"5天爬出井口。",
+detail:"每天净爬升：3-2=1米\n\n第1天：爬到3米，掉到1米\n第2天：爬到4米，掉到2米\n第3天：爬到5米，掉到3米\n第4天：爬到6米，掉到4米\n第5天：爬到7米！已经到井口，不会再掉下去了\n\n关键：最后一天白天爬出就不再下落，所以不是7天而是5天"},
+{title:"三个开关三个灯",tag:"logic",tagName:"逻辑推理",diff:"⭐⭐⭐",emoji:"💡",
+q:"房间外有3个开关，房间内有3盏灯，你不知道开关和灯的对应关系。你只能进房间一次，如何确定每个开关控制哪盏灯？",
+a:"利用灯泡发热的物理特性，可以一次判断三个开关的对应关系。",
+detail:"1. 先打开第1个开关，等10分钟\n2. 关掉第1个开关，打开第2个开关\n3. 立即进入房间\n\n判断方法：\n- 亮着的灯 → 第2个开关控制\n- 不亮但摸起来热的灯 → 第1个开关控制\n- 不亮且凉的灯 → 第3个开关控制\n\n关键：利用灯泡发热这一额外信息维度！"},
+{title:"25匹马赛跑",tag:"strategy",tagName:"策略分配",diff:"⭐⭐⭐⭐",emoji:"🐴",
+q:"有25匹马和5条赛道，每次比赛只能知道5匹马的相对名次，没有计时器。最少赛几次能找出跑得最快的前3匹马？",
+a:"最少7次比赛可确定前3名。",
+detail:"1. 先分5组各赛1次（共5次），记录每组排名\n2. 取每组第1名再赛1次（第6次），确定第1名\n   假设结果为 A1>B1>C1>D1>E1\n   则A1是全场第1名\n3. 第3名候选：A2、A3、B1、B2、C1\n   第7次让这5匹赛一次，前2名即全场第2、第3名\n\n共7次比赛确定前3名"},
+{title:"蒙提霍尔问题",tag:"logic",tagName:"逻辑推理",diff:"⭐⭐⭐",emoji:"🚪",
+q:"你参加一个游戏节目，面前有3扇门，1扇后面是跑车，2扇后面是山羊。你选了1号门，主持人（知道门后是什么）打开了3号门，后面是山羊，然后问你要不要换到2号门。你应该换吗？",
+a:"应该换！换门后赢的概率是2/3，不换只有1/3。",
+detail:"直觉上换不换好像都是1/2，但实际并非如此：\n\n不换：你最初选中的概率 = 1/3\n换门：相当于选了另外两扇门 = 2/3\n\n主持人开门是「条件信息」：\n- 如果你选的是山羊（概率2/3），换门一定赢\n- 如果你选的是跑车（概率1/3），换门一定输\n\n所以换门赢的概率 = 2/3，是不换的2倍！\n\n这就是著名的三门问题/蒙提霍尔悖论"},
+{title:"鸡兔同笼",tag:"math",tagName:"数学思维",diff:"⭐⭐",emoji:"🐔",
+q:"笼子里有若干只鸡和兔，从上面数有35个头，从下面数有94只脚，问鸡和兔各有多少只？",
+a:"鸡23只，兔12只。",
+detail:"设鸡x只，兔y只\nx + y = 35（头的数量）\n2x + 4y = 94（脚的数量）\n\n由第一个方程：x = 35 - y\n代入第二个：2(35-y) + 4y = 94\n70 - 2y + 4y = 94\n2y = 24\ny = 12\nx = 23\n\n趣味解法（假设法）：\n假设全是鸡：35×2=70只脚，少了94-70=24只脚\n每只兔比鸡多2只脚，所以兔=24÷2=12只\n鸡=35-12=23只"},
+{title:"两个守卫两扇门",tag:"logic",tagName:"逻辑推理",diff:"⭐⭐⭐",emoji:"👮",
+q:"你来到一个岔路口，一条路通往天堂，一条路通往地狱。路口各站一个守卫，一个只说真话，一个只说假话（你不知道谁是谁）。你只能问其中一个守卫一个问题，如何找到通往天堂的路？",
+a:"问任意一个守卫：「如果我问另一个守卫哪条路通往天堂，他会指哪条路？」然后走他指的相反方向。",
+detail:"分析两种情况：\n\n如果问的是说真话的守卫：\n他知道说谎者会指地狱，如实告诉你 → 指向地狱\n\n如果问的是说谎的守卫：\n他知道说真者会指天堂，但他要说谎 → 指向地狱\n\n无论问谁，答案都指向地狱！\n所以走相反方向就是天堂。\n\n更简洁的问法：\n「如果我问你哪条路通往天堂，你会怎么回答？」\n- 真话者直接指天堂\n- 假话者本应指地狱，但要说谎，所以指天堂\n这样两人都指天堂！"},
+{title:"100盏灯",tag:"math",tagName:"数学思维",diff:"⭐⭐⭐",emoji:"💡",
+q:"走廊上有100盏灯，编号1-100，初始全关。第1轮把所有灯的开关按一下，第2轮把编号为2的倍数的灯按一下，第3轮把编号为3的倍数的灯按一下……第100轮把编号100的灯按一下。最后哪些灯是亮的？",
+a:"10盏灯亮着，编号为：1、4、9、16、25、36、49、64、81、100。",
+detail:"每盏灯被按的次数 = 它编号的因数个数\n\n灯最终亮 = 被按了奇数次 = 因数个数为奇数\n\n什么样的数有奇数个因数？\n只有完全平方数！\n因为因数是成对出现的，只有完全平方数的某个因数对是相同的（如36=6×6），所以因数个数为奇数。\n\n1²=1, 2²=4, 3²=9 ... 10²=100\n100以内有10个完全平方数，所以10盏灯亮"},
+{title:"狼羊菜过河",tag:"strategy",tagName:"策略分配",diff:"⭐⭐",emoji:"🐺",
+q:"农夫需要把狼、羊、菜从河的一边运到另一边，船一次只能载农夫和一样东西。如果农夫不在，狼会吃羊，羊会吃菜。如何安全运过河？",
+a:"7步完成，关键是先把羊运过去，再把羊运回来。",
+detail:"1. 农夫带羊过河 → 对岸：羊\n2. 农夫空手返回\n3. 农夫带狼过河 → 对岸：羊、狼\n4. 农夫带羊返回（关键！防止狼吃羊）\n5. 农夫带菜过河 → 对岸：狼、菜\n6. 农夫空手返回\n7. 农夫带羊过河 → 对岸：狼、菜、羊\n\n关键：第4步把羊运回来是破局点！"},
+{title:"猴子搬香蕉",tag:"strategy",tagName:"策略分配",diff:"⭐⭐⭐",emoji:"🍌",
+q:"小猴子在离家50米处发现50根香蕉，每次最多搬50根，每走1米吃1根香蕉，最多能搬回家多少根？",
+a:"最多搬回家16根香蕉。",
+detail:"猴子需要设中转站分段搬运：\n\n1. 搬50根走17米（吃17根），放下16根，返回吃17根\n2. 再搬50根走17米（吃17根），到中转站共16+33=49根\n3. 搬49根走33米到家，吃33根，剩16根\n\n核心：每走1米消耗1根，需要在中途放下部分香蕉减少往返消耗"},
+{title:"飞机加油",tag:"strategy",tagName:"策略分配",diff:"⭐⭐⭐⭐⭐",emoji:"✈️",
+q:"每架飞机只有一个油箱，飞机之间可以在空中互相加油（即时传输），一箱油可供一架飞机绕地球半圈。为使一架飞机绕地球一圈回到起飞点，至少需要几架飞机？",
+a:"至少需要3架飞机（含主飞机）。",
+detail:"设全程为1，油箱容量为0.5（半圈）\n\n主飞机A、辅助飞机B和C同时顺时针起飞\n\n1. 飞到1/8处，三架各剩3/8油\n   C给A和B各1/8油，C剩1/8返回\n   A、B油箱满\n\n2. 飞到1/4处，A和B各剩3/8油\n   B给A 1/8油，B剩1/4返回\n   A油箱满\n\n3. A独自飞到3/4处，剩1/8油\n   此时B从基地逆时针起飞接应\n\n4. B逆时针飞到3/4处与A会合\n   B给A 1/8油，两架各1/8油飞回\n\n5. C再起飞接应，保证安全返回\n\n共3架飞机完成！"},
+{title:"囚犯帽子",tag:"logic",tagName:"逻辑推理",diff:"⭐⭐⭐⭐",emoji:"🎩",
+q:"10个囚犯排成一列，每人戴一顶红或蓝帽子，每个人能看到前面所有人的帽子颜色，看不到自己和后面人的。从最后一人开始猜自己帽子颜色，猜对释放，猜错处死。他们可以提前商量策略，最多能保证救几个人？",
+a:"可以保证救9个人，第1个人有50%概率。",
+detail:"策略：用奇偶校验\n\n最后一人（第10号）能看到前面9顶帽子\n他数红色帽子的数量：\n- 如果红色帽子是奇数个，他喊「红」\n- 如果红色帽子是偶数个，他喊「蓝」\n\n第10号自己可能猜错（50%），但他传递了关键信息\n\n第9号：看到前面8顶红色帽子数\n- 如果与第10号说的奇偶性不同 → 自己是红色\n- 如果奇偶性相同 → 自己是蓝色\n\n后面每个人都能根据之前人的回答和看到的帽子\n推断出自己的颜色\n\n保证99人存活！"},
+{title:"倒水问题",tag:"math",tagName:"数学思维",diff:"⭐⭐",emoji:"🚰",
+q:"有两个水壶，容积分别为5升和6升，水无限供应，如何只用这两个水壶量出3升水？",
+a:"利用6升壶和5升壶的差值，反复操作可得3升。",
+detail:"1. 6升壶装满，倒入5升壶 → 6升壶剩1升\n2. 5升壶倒空，把1升倒入5升壶\n3. 6升壶再装满，倒入5升壶（只能倒4升）→ 6升壶剩2升\n4. 5升壶倒空，把2升倒入5升壶\n5. 6升壶再装满，倒入5升壶（只能倒3升）→ 6升壶剩3升！\n\n得到3升水"},
+{title:"猜数字",tag:"math",tagName:"数学思维",diff:"⭐⭐",emoji:"🔢",
+q:"在1到100之间猜一个数字，每次猜完会告诉你大了还是小了，最少猜几次一定能猜中？",
+a:"7次一定能猜中。",
+detail:"使用二分法：\n2^7 = 128 > 100\n\n每次猜中间值，将范围缩小一半：\n第1次：猜50，范围缩小到1-49或51-100（50个数）\n第2次：猜25或75，范围缩小到25个数\n第3次：范围缩小到12个数\n第4次：6个数\n第5次：3个数\n第6次：1-2个数\n第7次：确定\n\n因为2^6=64<100，6次不够\n2^7=128>100，7次一定够"},
+{title:"三个箱子标签",tag:"logic",tagName:"逻辑推理",diff:"⭐⭐⭐",emoji:"📦",
+q:"有三个箱子，分别装苹果、橙子、苹果和橙子混装。但每个箱子的标签都是错的。你只能从一个箱子里取出一个水果，如何确定三个箱子各自装的是什么？",
+a:"从标签为「混装」的箱子里取一个水果即可判断全部。",
+detail:"因为所有标签都是错的：\n\n标签「混装」的箱子一定不是混装，只能是纯苹果或纯橙子\n\n从中取出一个水果：\n- 如果是苹果 → 这个箱子装的是苹果\n  标签「橙子」的箱子不是橙子（标签错），也不是苹果（已找到），所以是混装\n  标签「苹果」的箱子只能是橙子\n\n- 如果是橙子 → 这个箱子装的是橙子\n  标签「苹果」的箱子不是苹果，也不是橙子，所以是混装\n  标签「橙子」的箱子只能是苹果\n\n只需取1个水果就能全部确定！"},
+{title:"称球问题",tag:"logic",tagName:"逻辑推理",diff:"⭐⭐",emoji:"⚖️",
+q:"有8个外观相同的球，其中1个比其他7个重。用天平最少称几次能找出那个较重的球？",
+a:"2次即可找出。",
+detail:"分成3组：A组(3球)、B组(3球)、C组(2球)\n\n第一次：称A组 vs B组\n\n情况1：A=B → 重球在C组(2球)\n  第二次：称C组的2个球，重的一边就是答案\n\n情况2：A>B → 重球在A组\n  第二次：从A组取2球对称\n  若平衡 → 第3个球是重球\n  若不平衡 → 重的一边是重球\n\n情况3：A<B → 重球在B组，同理2次可找\n\n2次搞定！"},
+{title:"蜡烛计时",tag:"logic",tagName:"逻辑推理",diff:"⭐⭐",emoji:"🕯️",
+q:"有两根粗细不均匀的香，每根燃烧完需1小时，如何用它们测量出45分钟？",
+a:"通过两端点燃+一端点燃的组合，可测量45分钟。",
+detail:"1. 同时点燃第一根香的两端，和第二根香的一端\n2. 第一根香两端同时烧，30分钟烧完\n3. 第一根烧完时，第二根已烧了30分钟，还剩30分钟的量\n4. 立即点燃第二根香的另一端\n5. 剩余部分两端同时烧，只需15分钟烧完\n6. 总时间 = 30 + 15 = 45分钟"},
+{title:"说谎者悖论",tag:"lateral",tagName:"横向思维",diff:"⭐⭐",emoji:"💈",
+q:"意大利的理发师宣布：他只给不给自己理发的人理发。请问理发师的这句话有没有逻辑问题？",
+a:"有逻辑矛盾，这就是著名的「理发师悖论」。",
+detail:"如果理发师不给自己理发：\n→ 他属于「不给自己理发的人」\n→ 按规则他应该给自己理发 → 矛盾！\n\n如果理发师给自己理发：\n→ 他属于「给自己理发的人」\n→ 按规则他不该给自己理发 → 矛盾！\n\n无论哪种情况都自相矛盾\n\n这就是罗素悖论的通俗版本，引发了第三次数学危机\n它揭示了「自我指涉」带来的逻辑困境"},
+{title:"啤酒瓶盖换酒",tag:"math",tagName:"数学思维",diff:"⭐⭐",emoji:"🍺",
+q:"啤酒2元一瓶，4个瓶盖可以换1瓶啤酒，2个空瓶可以换1瓶啤酒，请问10元钱最多可以喝多少瓶啤酒？",
+a:"最多可以喝20瓶啤酒。",
+detail:"思路一（等价换算）：\n1瓶啤酒 = 2元\n1个瓶盖 = 0.5元（4盖=1瓶=2元）\n1个空瓶 = 1元（2瓶=1瓶=2元）\n啤酒液 = 2 - 0.5 - 1 = 0.5元\n10 ÷ 0.5 = 20瓶\n\n思路二（实际操作+借瓶）：\n10元买5瓶 → 喝5瓶\n5瓶5盖 → 2瓶换1瓶+余1瓶，5盖换1瓶+余1盖\n→ 喝3瓶，余2瓶2盖\n2瓶换1瓶 → 喝1瓶，余1瓶3盖\n借1瓶 → 喝1瓶，还1瓶1盖\n...\n\n最终：借瓶法可喝到20瓶"},
+{title:"蓝眼岛问题",tag:"logic",tagName:"逻辑推理",diff:"⭐⭐⭐⭐⭐",emoji:"👁️",
+q:"岛上有100个蓝眼人和100个棕眼人，他们都能看到别人的眼睛颜色但看不到自己的，宗教禁忌禁止讨论眼睛颜色，任何人一旦确定自己是蓝眼就必须在当晚离开。一天，外来者对所有人说「你们中至少有一个蓝眼人」，之后会发生什么？",
+a:"第100天晚上，所有100个蓝眼人同时离开。",
+detail:"用递归思维：\n\n如果只有1个蓝眼人：他看到0个蓝眼人，听到「至少1个」，立刻确定自己是 → 第1天离开\n\n如果有2个蓝眼人：各看到1个蓝眼人，等1天看对方走不走，对方没走说明不止1个 → 第2天两人同时离开\n\n如果有3个蓝眼人：各看到2个，等2天，第3天同时离开\n\n……\n\n如果有100个蓝眼人：各看到99个，等99天，第100天同时离开\n\n外来者的话看似多余（大家都看得到蓝眼人），但它提供了「公共知识」——每个人都知道、每个人都知道每个人都知道……这是触发递归的关键！"},
+{title:"两个沙漏",tag:"strategy",tagName:"策略分配",diff:"⭐⭐",emoji:"⏳",
+q:"有一个7分钟沙漏和一个11分钟沙漏，如何用它们准确计时15分钟？",
+a:"通过两个沙漏的组合翻转，可精确计时15分钟。",
+detail:"1. 同时开始7分钟和11分钟沙漏\n2. 7分钟沙漏漏完时（0:07），立即翻转\n3. 11分钟沙漏漏完时（0:11）\n   此时7分钟沙漏已又漏了4分钟（11-7=4），上面还剩3分钟\n4. 从0:11开始，等7分钟沙漏剩余3分钟漏完\n5. 0:11 + 0:04 = 0:15 → 15分钟！"},
+{title:"囚犯灯泡",tag:"strategy",tagName:"策略分配",diff:"⭐⭐⭐⭐",emoji:"💡",
+q:"100个囚犯被关在单独的牢房，每天随机选1人去一个房间，房间里有1个灯泡（初始关闭）。囚犯可以开灯或关灯，也可以不动。任何时刻任何囚犯可以宣布「所有人都来过这个房间了」，如果正确则全部释放，错误则全部处死。他们可以提前商量策略，如何保证正确？",
+a:"指定1人为计数者，其余99人每人开灯1次，计数者数到99即可宣布。",
+detail:"策略：\n1. 指定1号囚犯为「计数者」\n2. 其他99人的规则：\n   - 如果灯是关的，且自己还没开过灯 → 开灯\n   - 否则不动\n3. 计数者的规则：\n   - 如果灯是开的 → 关灯，计数+1\n   - 如果灯是关的 → 不动\n4. 当计数者数到99时 → 所有其他人都来过了\n\n为什么正确：\n- 每个非计数者最多开灯1次\n- 计数者每次关灯说明有1个新人来过\n- 数到99 = 99个不同的人都来过了\n- 加上计数者自己 = 100人都来过\n\n缺点：可能需要很长时间（约27年）"},
+{title:"分蛋糕",tag:"strategy",tagName:"策略分配",diff:"⭐",emoji:"🎂",
+q:"两个小朋友分一块蛋糕，怎样分能让两人都觉得公平？",
+a:"「切者后选」原则：一人切，另一人先选。",
+detail:"让其中一个小朋友切蛋糕，另一个小朋友先选择。\n\n为什么公平：\n- 切蛋糕的人会尽量切得均匀\n  因为如果切得不均匀，先选的人会拿大的，自己吃亏\n- 先选的人一定满意\n  因为自己选了更大的那块\n\n这个原则叫「我切你选」(I cut, you choose)\n是博弈论中公平分配的经典方案\n\n扩展：3人分蛋糕怎么分？\n→ 「移动刀法」：刀从一端慢慢移过蛋糕\n  任何人喊「停」就切下那块给他\n  最后剩的给没喊过的人"},
+{title:"电梯之谜",tag:"lateral",tagName:"横向思维",diff:"⭐⭐",emoji:"🏢",
+q:"一个人住10楼，每天早上坐电梯到1楼上班。下班回来，如果电梯里只有他一个人，他就坐到7楼然后走3层楼梯回家；但如果电梯里有其他人或者下雨，他就直接坐到10楼。为什么？",
+a:"因为他是个侏儒（身材矮小），够不到10楼的按钮。",
+detail:"- 他能按到1楼按钮（最下面）\n- 一个人时，最高只能按到7楼的按钮\n- 有别人时，可以请人帮忙按10楼\n- 下雨时，用雨伞的尖端按到10楼按钮\n\n这道题考验的是打破「正常人」的默认假设\n所有行为在侏儒的视角下都完全合理"},
+{title:"三个火枪手决斗",tag:"strategy",tagName:"策略分配",diff:"⭐⭐⭐⭐",emoji:"🔫",
+q:"三个火枪手决斗，小李命中率30%，小黄命中率50%，小林命中率100%。按小李→小黄→小林的顺序轮流开枪，直到只剩一人。每个人都想活下来，小李第一枪应该打谁？",
+a:"小李第一枪应该故意打偏（朝天开枪）！",
+detail:"如果小李打小林（100%命中率）：\n- 打中：轮到小黄打小李（50%命中）\n- 小李存活率约30%\n\n如果小李打小黄（50%命中率）：\n- 打中：轮到小林打小李（100%命中），小李必死\n- 打不中：小黄会打小林（最大威胁）\n\n最优策略：故意打偏！\n- 小黄一定会打小林（最大威胁）\n  - 小黄打中：小李 vs 小黄，小李先手\n  - 小黄打不中：小林一定打小黄（更大威胁），小李 vs 小林\n\n无论哪种结果，小李都能获得先手优势\n存活率最高约33.6%\n\n反直觉：最弱者故意浪费机会，让强者互斗，反而存活率最高！"},
+{title:"平分金条",tag:"strategy",tagName:"策略分配",diff:"⭐⭐⭐",emoji:"🪙",
+q:"你让工人为你工作7天，给工人的回报是一根金条。金条平分成相连的7段，你必须在每天结束时都付费，如果只许你两次把金条弄断，你如何给你的工人付费？",
+a:"把金条切成1、2、4三段（切两刀），利用找零方式每天付费。",
+detail:"金条切成三段：1段、2段、4段\n\n第1天：给1段\n第2天：给2段，收回1段\n第3天：给1段（工人有1+2=3段）\n第4天：给4段，收回1段和2段\n第5天：给1段（工人有1+4=5段）\n第6天：给2段，收回1段（工人有2+4=6段）\n第7天：给1段（工人有1+2+4=7段）\n\n核心：1、2、4可以组合出1-7的所有数字！"},
+{title:"两只桶取水",tag:"math",tagName:"数学思维",diff:"⭐⭐",emoji:"🪣",
+q:"有一个装满水的8升桶和一个空的5升桶、一个空的3升桶，如何量出正好4升水？",
+a:"利用8、5、3之间的差值关系，通过倒换得到4升。",
+detail:"1. 8升桶倒满5升桶 → 8升剩3升，5升满\n2. 5升桶倒满3升桶 → 5升剩2升，3升满\n3. 3升桶倒回8升桶 → 8升有6升，3升空\n4. 5升桶的2升倒入3升桶 → 5升空，3升有2升\n5. 8升桶倒满5升桶 → 8升剩1升，5升满\n6. 5升桶倒1升给3升桶（3升已有2升）→ 5升剩4升！\n\n8升桶中有4升水！"},
+{title:"疯狗问题",tag:"logic",tagName:"逻辑推理",diff:"⭐⭐⭐⭐",emoji:"🐕",
+q:"村子里有若干户人家，每户养一条狗。某天有人宣布「村子里有疯狗」，之后每天所有人都会出门看别人的狗。如果某人确定自己的狗是疯狗，就会在当天夜里枪毙它。第一天平安无事，第二天平安无事，第三天夜里传来枪声。请问村子里有几条疯狗？",
+a:"3条疯狗。",
+detail:"用递归推理：\n\n如果有1条疯狗：\n  疯狗主人看到0条疯狗 → 确定自己的是疯狗 → 第1天夜里枪毙\n\n如果有2条疯狗：\n  每个疯狗主人看到1条疯狗\n  等1天看对方是否枪毙\n  第1天平安 → 说明不止1条 → 第2天夜里两人同时枪毙\n\n如果有3条疯狗：\n  每个疯狗主人看到2条疯狗\n  等2天看对方是否枪毙\n  前两天平安 → 说明不止2条 → 第3天夜里三人同时枪毙\n\n所以第3天有枪声 → 3条疯狗！\n\n与蓝眼岛问题原理完全相同！"},
+{title:"赛马找前5",tag:"strategy",tagName:"策略分配",diff:"⭐⭐⭐⭐⭐",emoji:"🏇",
+q:"25匹马，5条赛道，没有计时器，最少赛几次能找出前5名？",
+a:"最少8次比赛可确定前5名。",
+detail:"1. 分5组各赛1次（5次），记录每组排名A1-A5,B1-B5...\n2. 各组第1名再赛1次（第6次），假设A1>B1>C1>D1>E1\n   则A1是全场第1\n3. 第2名候选：A2、B1\n   第3名候选：A2、A3、B1、B2、C1\n   第4、5名候选更多\n4. 第7次：让A2、A3、B1、B2、C1比赛\n5. 第8次：根据前7次结果，让剩余候选比赛\n\n共8次确定前5名"},
+{title:"约瑟夫环",tag:"math",tagName:"数学思维",diff:"⭐⭐⭐⭐",emoji:"⭕",
+q:"41个人围成一圈，从第1个人开始报数，报到3的人出列，下一个人从1重新开始报数。最后剩下的人是第几个？",
+a:"最后剩下的是第31个人。",
+detail:"这是经典的约瑟夫问题。\n\n设f(n,k)为n个人，每第k个出列时最后剩下的人的编号。\n\n递推公式：\nf(1,k) = 0\nf(n,k) = (f(n-1,k) + k) mod n\n\n对于n=41, k=3：\n逐步计算：\nf(1)=0, f(2)=1, f(3)=1, f(4)=0...\n\n最终f(41)=30（从0开始计数）\n从1开始计数 = 31\n\n答案：第31个人最后存活！"},
+{title:"称药丸",tag:"logic",tagName:"逻辑推理",diff:"⭐⭐⭐",emoji:"💊",
+q:"有10瓶药丸，每瓶100粒，其中9瓶每粒重10克，1瓶每粒重9克。用电子秤只称一次，如何找出哪瓶是轻的？",
+a:"从第n瓶取n粒药丸，总重量与标准重量对比即可找出。",
+detail:"从第1瓶取1粒，第2瓶取2粒，...，第10瓶取10粒\n一共取：1+2+...+10 = 55粒\n\n如果全部正常，总重量 = 55×10 = 550克\n\n实际称量后：\n若少1克 → 第1瓶是轻的\n若少2克 → 第2瓶是轻的\n...\n若少n克 → 第n瓶是轻的\n\n只称1次就搞定！"},
+{title:"老虎吃羊",tag:"strategy",tagName:"策略分配",diff:"⭐⭐⭐",emoji:"🐅",
+q:"100只老虎和1只羊被关在一个岛上，老虎可以吃羊，但吃了羊的老虎会变成羊。假设所有老虎都绝对聪明且优先想活命，其次想吃羊，最后想避免变成羊。羊会被吃吗？",
+a:"羊不会被吃。",
+detail:"用逆向归纳法：\n\n如果只有1只老虎：\n  没有竞争，吃掉羊变成羊也没事 → 羊被吃\n\n如果有2只老虎：\n  如果一只吃羊，变成羊后被另一只吃掉\n  所以都不吃 → 羊存活\n\n如果有3只老虎：\n  如果一只吃羊，变成羊后剩下2只老虎\n  根据上面，2只老虎时羊存活\n  所以吃羊安全 → 羊被吃\n\n规律：奇数只老虎时羊被吃，偶数只时羊存活\n\n100是偶数 → 羊不会被吃！"},
+{title:"握手问题",tag:"math",tagName:"数学思维",diff:"⭐⭐",emoji:"🤝",
+q:"聚会中有10个人，每两人之间最多握一次手。已知其中9个人的握手次数分别是0、1、2、3、4、5、6、7、8次，请问第10个人握了几次手？",
+a:"第10个人握了4次手。",
+detail:"设10人为A0-A9，握手次数分别为0-8和x\n\n握手8次的人与除自己外所有人都握了手\n握手0次的人没与任何人握手\n所以握手8次的人没与握手0次的人握手\n\n去掉这两人，剩下8人：\n  原握手7次的人现在握6次\n  原握手1次的人现在握0次\n\n同理，握手7次的人与握手1次的人配对\n握手6次的人与握手2次的人配对\n握手5次的人与握手3次的人配对\n\n剩下握手4次的人 → 第10个人握了4次！"},
+{title:"帽子颜色",tag:"logic",tagName:"逻辑推理",diff:"⭐⭐⭐",emoji:"🎩",
+q:"3个人排成一列，每人戴一顶红或蓝帽子（共3顶红帽、2顶蓝帽，但每人不知道总数）。最后一人能看到前两人，中间人能看到前面一人，第一人看不到任何人。主持人问最后一人「你知道自己帽子颜色吗？」他说不知道。又问中间人，他也说不知道。最后问第一人，他说知道了。第一人戴的是什么颜色的帽子？",
+a:"第一人戴的是红色帽子。",
+detail:"分析最后一人为什么不知道：\n\n如果最后一人看到前两人都是蓝帽子：\n  由于只有2顶蓝帽，他立刻知道自己戴红帽\n  但他不知道 → 所以前两人不都是蓝帽\n\n中间人听到最后一人不知道后：\n  如果中间人看到第一人戴蓝帽：\n    结合最后一人不知道（说明不都是蓝帽）\n    中间人立刻知道自己戴红帽\n  但中间人也不知道 → 所以第一人不是蓝帽\n\n第一人听到两人都不知道：\n  推断出自己戴的是红帽！"},
+{title:"生日问题",tag:"math",tagName:"数学思维",diff:"⭐⭐",emoji:"🎂",
+q:"一个房间至少需要多少人，才能使其中至少有两个人生日相同的概率超过50%？",
+a:"只需要23人。",
+detail:"计算「所有人生日都不同」的概率：\n\n第1个人：365/365 = 1\n第2个人：364/365\n第3个人：363/365\n...\n第n个人：(365-n+1)/365\n\nP(都不同) = 365/365 × 364/365 × ... × (365-n+1)/365\n\n当n=22时：P ≈ 52.4%（都不同）\n当n=23时：P ≈ 49.3%（都不同）\n\n所以23人时，至少两人生日相同的概率 = 1-49.3% = 50.7% > 50%\n\n反直觉：不需要183人，23人就够了！"},
+{title:"囚徒困境",tag:"strategy",tagName:"策略分配",diff:"⭐⭐⭐",emoji:"⛓️",
+q:"两个囚徒被分开审讯，如果两人都抵赖，各判1年；如果一人坦白一人抵赖，坦白者释放，抵赖者判10年；如果两人都坦白，各判5年。两人无法沟通，各自会怎么选择？",
+a:"理性选择都是坦白，但最优结果是两人都抵赖。",
+detail:"用收益矩阵分析：\n\n        囚徒B抵赖    囚徒B坦白\n囚徒A抵赖  (1,1)      (10,0)\n囚徒A坦白  (0,10)     (5,5)\n\n对囚徒A来说：\n- 如果B抵赖，A坦白更好（0<1）\n- 如果B坦白，A坦白更好（5<10）\n\n所以无论B怎么选，A坦白都是更优策略\n同理B也会选择坦白\n\n纳什均衡：（坦白，坦白）→ 各判5年\n\n但集体最优是（抵赖，抵赖）→ 各判1年\n\n这就是囚徒困境：个人理性导致集体非理性！"},
+{title:"火柴棒问题",tag:"math",tagName:"数学思维",diff:"⭐⭐",emoji:"🎯",
+q:"用6根火柴棒摆出4个等边三角形，怎么摆？",
+a:"摆成三棱锥（四面体）的形状。",
+detail:"平面内用6根火柴最多摆2个三角形（共用1边）\n\n但题目要求4个三角形！\n\n答案：摆成四面体（三棱锥）\n\n四面体有4个面，每个面都是等边三角形\n共需要6条棱（火柴）\n\n关键：跳出二维平面，进入三维空间！"},
+{title:"过河问题进阶",tag:"strategy",tagName:"策略分配",diff:"⭐⭐⭐",emoji:"⛵",
+q:"一家人要过河：爸爸、妈妈、两个儿子、两个女儿、一个警察、一个犯人。只有一条船，每次最多载2人。规则：只有爸爸、妈妈、警察会划船；爸爸不在时妈妈会打儿子；妈妈不在时爸爸会打女儿；警察不在时犯人会伤害家人。如何安全过河？",
+a:"需要9步，关键是警察和犯人先过河，以及父母分别看护孩子。",
+detail:"1. 警察+犯人过河，警察返回\n2. 警察+儿子A过河，警察+犯人返回\n3. 爸爸+儿子A过河，爸爸返回\n4. 爸爸+妈妈过河，妈妈返回\n5. 警察+犯人过河，爸爸返回\n6. 爸爸+妈妈过河，妈妈返回\n7. 妈妈+女儿A过河，警察+犯人返回\n8. 警察+女儿B过河，警察返回\n9. 警察+犯人过河\n\n共9步，全家安全过河！"},
+{title:"年龄问题",tag:"math",tagName:"数学思维",diff:"⭐⭐",emoji:"👶",
+q:"父亲今年35岁，儿子今年5岁。几年后父亲的年龄是儿子的3倍？",
+a:"10年后。",
+detail:"设x年后父亲年龄是儿子的3倍\n\n35 + x = 3(5 + x)\n35 + x = 15 + 3x\n20 = 2x\nx = 10\n\n10年后：父亲45岁，儿子15岁\n45 = 3×15 ✓\n\n关键：年龄差永远不变（30岁）\n当父亲是儿子3倍时，年龄差 = 2倍儿子年龄\n所以儿子年龄 = 30÷2 = 15岁\n15-5 = 10年后"},
+{title:"时钟角度",tag:"math",tagName:"数学思维",diff:"⭐⭐",emoji:"🕐",
+q:"3点15分时，时针和分针的夹角是多少度？",
+a:"7.5度。",
+detail:"分针位置：15分钟 = 15/60 × 360° = 90°\n\n时针位置：\n3点整时，时针在90°位置\n15分钟 = 1/4小时\n时针每小时走30°，15分钟走 30°×1/4 = 7.5°\n所以时针在 90° + 7.5° = 97.5°\n\n夹角 = 97.5° - 90° = 7.5°\n\n注意：不是0度！因为时针也在动！"},
+{title:"逻辑数列",tag:"math",tagName:"数学思维",diff:"⭐⭐",emoji:"🔢",
+q:"找出规律：2、5、11、23、47，下一个数是几？",
+a:"95。",
+detail:"规律：前一个数 × 2 + 1\n\n2 × 2 + 1 = 5\n5 × 2 + 1 = 11\n11 × 2 + 1 = 23\n23 × 2 + 1 = 47\n47 × 2 + 1 = 95\n\n下一个数是95！"},
+{title:"说谎国与诚实国",tag:"logic",tagName:"逻辑推理",diff:"⭐⭐⭐",emoji:"🗺️",
+q:"你面前有两条路，一条通往诚实国（所有人说真话），一条通往说谎国（所有人说谎）。路口站着一个人，你不知道他来自哪个国家。只能问他一个问题，如何确定哪条路通往诚实国？",
+a:"问他：「你来自哪个国家？」无论他说真话还是假话，都会指向诚实国。",
+detail:"问：「你来自哪个国家？」\n\n如果他是诚实国人（说真话）：\n  他会说「诚实国」，并指向诚实国\n\n如果他是说谎国人（说假话）：\n  他实际来自说谎国，但要说谎\n  他会说「诚实国」，并指向诚实国\n\n无论哪种情况，他都会指向诚实国！"},
+{title:"斐波那契数列",tag:"math",tagName:"数学思维",diff:"⭐",emoji:"🐚",
+q:"1、1、2、3、5、8、13，下一个数是几？",
+a:"21。",
+detail:"这是斐波那契数列（Fibonacci Sequence）\n\n规律：每个数 = 前两个数之和\n\n1 + 1 = 2\n1 + 2 = 3\n2 + 3 = 5\n3 + 5 = 8\n5 + 8 = 13\n8 + 13 = 21\n\n下一个数是21！"},
+{title:"找规律图形",tag:"math",tagName:"数学思维",diff:"⭐⭐",emoji:"🔺",
+q:"观察数列：1、11、21、1211、111221，下一个数是什么？",
+a:"312211。",
+detail:"这是「数数并说」序列（Look-and-say sequence）\n\n1 → \"一个1\" → 11\n11 → \"两个1\" → 21\n21 → \"一个2，一个1\" → 1211\n1211 → \"一个1，一个2，两个1\" → 111221\n111221 → \"三个1，两个2，一个1\" → 312211\n\n下一个数是312211！"},
+{title:"硬币翻转",tag:"logic",tagName:"逻辑推理",diff:"⭐⭐",emoji:"🪙",
+q:"桌上有10枚硬币，正面朝上。每次必须翻转恰好4枚硬币。能否经过若干次操作，使所有硬币都反面朝上？",
+a:"可以。",
+detail:"分析：每次翻转4枚硬币，相当于改变4个状态\n10枚硬币，每枚需要翻转奇数次才能从正变反\n总共需要翻转次数 = 10个奇数之和 = 偶数\n每次操作翻转4枚（偶数），总次数始终是偶数\n\n经过5次操作即可全部翻面\n例如：每次翻转不同的4枚，确保每枚被翻转奇数次"},
+{title:"赛马找冠军",tag:"strategy",tagName:"策略分配",diff:"⭐⭐⭐",emoji:"🏇",
+q:"64匹马，8条赛道，没有计时器，最少赛几次能找出最快的1匹马？",
+a:"最少9次比赛可确定冠军。",
+detail:"1. 分8组各赛1次（8次），记录每组排名\n2. 各组第1名再赛1次（第9次），确定全场冠军\n\n只需要9次就能确定冠军！"},
+{title:"数字黑洞",tag:"math",tagName:"数学思维",diff:"⭐⭐",emoji:"🕳️",
+q:"任选一个三位数（各位数字不全相同），将数字从大到小排列减去从小到大排列，重复这个过程，最终会得到什么数？",
+a:"最终都会得到495。",
+detail:"以352为例：\n\n第1次：532 - 235 = 297\n第2次：972 - 279 = 693\n第3次：963 - 369 = 594\n第4次：954 - 459 = 495\n第5次：954 - 459 = 495\n\n一旦得到495，就会一直循环495！\n\n这就是三位数的「数字黑洞」\n四位数的数字黑洞是6174（卡布列克常数）"},
+{title:"握手问题进阶",tag:"math",tagName:"数学思维",diff:"⭐⭐⭐",emoji:"🤝",
+q:"聚会中有n个人，每两人之间最多握一次手。已知有6个人握了1、2、3、4、5、6次手。请问聚会中至少有多少人？",
+a:"至少有7人。",
+detail:"设7人A-G，握手次数分别为0-6\n\n握手6次的人与除自己外所有人都握了手\n握手0次的人没与任何人握手\n所以握手6次的人没与握手0次的人握手\n\n去掉这两人，剩下5人：\n  原握手5次的人现在握4次\n  原握手1次的人现在握0次\n\n同理配对后剩下1人握3次\n\n所以最少需要7人！"},
+{title:"赛马找前3",tag:"strategy",tagName:"策略分配",diff:"⭐⭐⭐⭐",emoji:"🏇",
+q:"16匹马，4条赛道，没有计时器，最少赛几次能找出前3名？",
+a:"最少6次比赛可确定前3名。",
+detail:"1. 分4组各赛1次（4次），记录每组排名\n2. 各组第1名再赛1次（第5次）\n   假设A1>B1>C1>D1\n   则A1是全场第1\n3. 第2、3名候选：A2、A3、B1、B2、C1\n   第6次让这5匹比赛，前2名即全场第2、第3名\n\n共6次确定前3名"},
+{title:"囚犯帽子进阶",tag:"logic",tagName:"逻辑推理",diff:"⭐⭐⭐⭐⭐",emoji:"🎩",
+q:"100个囚犯排成一列，每人戴一顶编号1-100的帽子（编号不重复，随机分配）。每人能看到前面所有人的帽子编号。从最后一人开始，每人只能说一个1-100之间的数。说对自己帽子编号的释放，说错的处死。他们可以提前商量策略，最多能保证救几个人？",
+a:"可以保证救99个人，第1个人可能牺牲。",
+detail:"策略：用模100的和\n\n最后一人（第100号）计算前面99人帽子编号之和 mod 100\n他说这个数\n\n第99号：\n  看到前面98人的编号\n  知道99人总和 mod 100（从第100号的话得知）\n  计算：总和 - 前面98人编号和 = 自己的编号 mod 100\n  因为编号在1-100之间，可唯一确定\n\n后面每个人都能依次计算出自己的编号\n保证99人存活！"},
+{title:"数字谜题",tag:"math",tagName:"数学思维",diff:"⭐⭐",emoji:"🧮",
+q:"用1、2、3、4、5这5个数字，每个数字只能用一次，通过加减乘除和括号，使结果等于24。",
+a:"(5 - 1÷5) × 5 = 24。",
+detail:"经典解法：\n(5 - 1÷5) × 5 = 24\n\n验证：\n1÷5 = 0.2\n5 - 0.2 = 4.8\n4.8 × 5 = 24 ✓\n\n这是经典的24点游戏！"},
+{title:"策略博弈",tag:"strategy",tagName:"策略分配",diff:"⭐⭐⭐",emoji:"♟️",
+q:"桌上有100颗石子，两人轮流取，每次可取1-5颗，取最后一颗的人赢。如果你先手，如何确保必胜？",
+a:"先取4颗，之后每次取(6-对方取的数量)，确保必胜。",
+detail:"关键：控制每轮两人共取6颗\n\n100 ÷ 6 = 16 余 4\n\n先手取4颗，剩下96颗（6的倍数）\n\n之后无论对方取n颗（1≤n≤5）\n你都取(6-n)颗\n\n每轮共取6颗，16轮后取完\n最后一颗一定是你取！"},
+{title:"几何问题",tag:"math",tagName:"数学思维",diff:"⭐⭐",emoji:"📐",
+q:"一个正方形内切一个圆，圆的面积是正方形面积的几分之几？",
+a:"圆的面积是正方形面积的 π/4（约78.5%）。",
+detail:"设正方形边长为2r\n则正方形面积 = (2r)² = 4r²\n\n内切圆半径 = r\n圆面积 = πr²\n\n圆面积 / 正方形面积 = πr² / 4r² = π/4 ≈ 0.785\n\n所以圆的面积约为正方形面积的78.5%"},
+{title:"逻辑悖论",tag:"lateral",tagName:"横向思维",diff:"⭐⭐⭐",emoji:"🌀",
+q:"这句话是假的。请问这句话是真的还是假的？",
+a:"这是说谎者悖论，无法判断真假。",
+detail:"如果「这句话是假的」是真的：\n  那么这句话就是假的 → 矛盾\n\n如果「这句话是假的」是假的：\n  那么这句话就是真的 → 矛盾\n\n无论假设真还是假，都会导致矛盾\n\n这就是说谎者悖论，揭示了语言和逻辑系统的局限性"},
+{title:"概率问题",tag:"math",tagName:"数学思维",diff:"⭐⭐⭐",emoji:"🎲",
+q:"抛一枚均匀硬币，连续出现10次正面后，第11次出现正面的概率是多少？",
+a:"仍然是1/2（50%）。",
+detail:"每次抛硬币都是独立事件\n\n之前的抛掷结果不会影响下一次\n\n硬币没有记忆！\n\n第11次出现正面的概率 = 1/2\n\n常见误区：赌徒谬误\n认为「已经连续10次正面了，下次应该是反面来平衡」\n\n实际上，连续11次正面的概率确实很低，但第11次本身还是50%"},
+{title:"一笔画问题",tag:"math",tagName:"数学思维",diff:"⭐⭐",emoji:"✏️",
+q:"一个图形能否一笔画成（不重复经过任何线段），取决于什么？",
+a:"取决于奇数度顶点的数量：0个或2个时可以一笔画。",
+detail:"欧拉一笔画定理：\n\n一个连通图能一笔画成，当且仅当：\n- 奇数度顶点数量为0（起点=终点，欧拉回路）\n- 或奇数度顶点数量为2（起点和终点不同，欧拉路径）\n\n度：与该顶点相连的边数\n\n例如：\n- 正方形：4个顶点都是2度（偶数）→ 可以一笔画\n- 五角星：5个顶点都是2度 → 可以一笔画"},
+{title:"逻辑数列进阶",tag:"math",tagName:"数学思维",diff:"⭐⭐⭐",emoji:"🔢",
+q:"找出规律：1、4、10、19、31、46，下一个数是几？",
+a:"64。",
+detail:"计算相邻数的差：\n4-1=3\n10-4=6\n19-10=9\n31-19=12\n46-31=15\n\n差值形成等差数列：3、6、9、12、15...\n下一个差值 = 18\n\n所以下一个数 = 46 + 18 = 64"},
+{title:"策略取物",tag:"strategy",tagName:"策略分配",diff:"⭐⭐⭐",emoji:"🎯",
+q:"桌上有30颗石子，两人轮流取，每次可取1、3或4颗，取最后一颗的人赢。如果你先手，如何确保必胜？",
+a:"先取2颗，之后根据对方取的数量调整策略。",
+detail:"分析必胜/必败位置：\n\n必败位置：0, 2, 5, 7, 10, 12, 15...\n\n30 mod 7 = 2 → 必败位置\n\n先手取2颗，之后每次取(7-对方取数)即可获胜"},
+{title:"时钟问题",tag:"math",tagName:"数学思维",diff:"⭐⭐⭐",emoji:"🕐",
+q:"一天当中，时针和分针会重合几次？",
+a:"22次。",
+detail:"12小时内，时针和分针重合11次（不是12次！）\n\n原因：\n- 12:00重合一次\n- 之后约每65又5/11分钟重合一次\n- 12小时内重合11次\n\n24小时内重合22次\n\n常见误区：认为每1小时重合1次\n实际上11点到1点之间只在12点重合1次"},
+{title:"几何面积",tag:"math",tagName:"数学思维",diff:"⭐⭐⭐",emoji:"📐",
+q:"一个边长为1的正方形，连接各边中点形成一个小正方形。小正方形的面积是多少？",
+a:"小正方形面积是1/2。",
+detail:"连接正方形各边中点：\n\n原正方形面积 = 1×1 = 1\n\n连接中点后，四个角形成4个全等的直角三角形\n每个三角形面积 = 1/2 × 1/2 × 1/2 = 1/8\n\n四个三角形总面积 = 4 × 1/8 = 1/2\n\n小正方形面积 = 1 - 1/2 = 1/2"},
+{title:"逻辑推理进阶",tag:"logic",tagName:"逻辑推理",diff:"⭐⭐⭐",emoji:"🧩",
+q:"A、B、C三人中，一人是骑士（总说真话），一人是骗子（总说假话），一人是间谍（可说真可说假）。A说「C是骑士」；B说「A是骗子」；C说「B是间谍」。请问三人各是什么身份？",
+a:"A是间谍，B是骑士，C是骗子。",
+detail:"假设A是骑士（说真话）：\n  A说C是骑士 → C也是骑士 → 矛盾（只有一个骑士）\n\n假设A是骗子（说假话）：\n  A说C是骑士是假话 → C不是骑士\n  B说A是骗子 → B说真话 → B是骑士\n  C说B是间谍 → C说假话（因为B是骑士）→ C是骗子\n\n最终：A是间谍，B是骑士，C是骗子"},
+{title:"数独入门",tag:"math",tagName:"数学思维",diff:"⭐⭐",emoji:"🔢",
+q:"在3×3的格子中填入1-9，使每行、每列、每条对角线之和相等。这个相等的和是多少？",
+a:"每行、每列、对角线之和都是15。",
+detail:"这是3阶幻方（Magic Square）\n\n所有数字之和 = 1+2+3+4+5+6+7+8+9 = 45\n\n3行之和相等，所以每行之和 = 45÷3 = 15\n\n经典3阶幻方：\n8 1 6\n3 5 7\n4 9 2\n\n验证：\n每行：8+1+6=15, 3+5+7=15, 4+9+2=15\n每列：8+3+4=15, 1+5+9=15, 6+7+2=15"},
+{title:"概率进阶",tag:"math",tagName:"数学思维",diff:"⭐⭐⭐",emoji:"🎲",
+q:"一个家庭有两个小孩，已知其中一个是男孩，问另一个也是男孩的概率是多少？",
+a:"1/3。",
+detail:"两个小孩的性别组合（等概率）：\n1. 男-男\n2. 男-女\n3. 女-男\n4. 女-女\n\n已知「至少一个是男孩」，排除第4种\n\n剩下3种等可能情况：\n- 男-男（另一个是男孩）\n- 男-女（另一个是女孩）\n- 女-男（另一个是女孩）\n\n另一个是男孩的概率 = 1/3"},
+{title:"策略游戏",tag:"strategy",tagName:"策略分配",diff:"⭐⭐⭐",emoji:"♟️",
+q:"桌上有3堆石子，分别有3、5、7颗。两人轮流从一堆中取任意数量（至少1颗），取最后一颗的人赢。如果你先手，如何确保必胜？",
+a:"先让三堆变为(3,5,6)，即把7颗那堆取1颗，使各堆异或和为0。",
+detail:"这是尼姆游戏（Nim Game）\n\n必胜策略：使各堆数量的异或和（XOR）为0\n\n初始：3 XOR 5 XOR 7 = 1 ≠ 0\n\n先手需要使XOR=0\n\n计算：1 XOR 7 = 6\n所以把7颗那堆变为6颗（取1颗）\n\n之后无论对手怎么取，XOR都不为0\n你总能取到使XOR=0的状态\n最终你取最后一颗！"},
+{title:"趣味谜题",tag:"riddle",tagName:"趣味谜题",diff:"⭐",emoji:"❓",
+q:"什么东西越洗越脏？",
+a:"水。",
+detail:"水越洗东西，自己越脏\n\n这是一道经典的脑筋急转弯\n考验打破常规思维的能力"},
+{title:"趣味逻辑",tag:"riddle",tagName:"趣味谜题",diff:"⭐",emoji:"🤔",
+q:"什么布剪不断？",
+a:"瀑布。",
+detail:"瀑布不是真正的布\n只是名字里有「布」字\n\n这是文字游戏型脑筋急转弯\n利用词语的多义性制造思维陷阱"},
+{title:"趣味谜题",tag:"riddle",tagName:"趣味谜题",diff:"⭐",emoji:"🎭",
+q:"什么东西打破了才能用？",
+a:"鸡蛋。",
+detail:"鸡蛋需要打破蛋壳才能使用\n（煎蛋、煮蛋、做蛋糕等）\n\n类似的答案还有：\n- 记录（打破记录）\n- 沉默（打破沉默）"},
+{title:"趣味推理",tag:"riddle",tagName:"趣味谜题",diff:"⭐",emoji:"🌊",
+q:"什么河里面没有水？",
+a:"银河。",
+detail:"银河不是真正的河流\n是银河系在夜空中呈现的带状光带\n\n类似的答案还有：\n- 楚河（象棋中的楚河汉界）\n- 拔河"},
+{title:"趣味思维",tag:"riddle",tagName:"趣味谜题",diff:"⭐",emoji:"🎈",
+q:"什么东西有脚却不能走？",
+a:"桌子（或椅子、床等家具）。",
+detail:"桌子有四条腿（脚）\n但不能走路\n\n类似的答案还有：\n- 床\n- 椅子\n- 地图（有比例尺的「脚」）"},
+{title:"趣味谜语",tag:"riddle",tagName:"趣味谜题",diff:"⭐",emoji:"🌙",
+q:"什么东西晚上才出来，白天就消失？",
+a:"星星（或月亮、梦等）。",
+detail:"星星在夜晚出现\n白天被太阳光掩盖看不见\n\n类似的答案还有：\n- 月亮\n- 梦\n- 露水"},
+{title:"趣味逻辑题",tag:"riddle",tagName:"趣味谜题",diff:"⭐",emoji:"🔥",
+q:"什么东西越吹越旺？",
+a:"火。",
+detail:"吹气给火提供更多氧气\n火会越烧越旺\n\n但要注意：\n吹蜡烛会灭，因为蜡烛火焰小\n吹大火会让火势更猛"},
+{title:"趣味脑筋急转弯",tag:"riddle",tagName:"趣味谜题",diff:"⭐",emoji:"💰",
+q:"什么东西越用越有钱？",
+a:"存钱罐。",
+detail:"存钱罐越用（存的钱越多）\n里面就越有钱\n\n类似的趣味答案：\n- 钱包\n- 银行账户"},
+{title:"趣味谜题",tag:"riddle",tagName:"趣味谜题",diff:"⭐",emoji:"🦵",
+q:"什么东西有腿却不能走，有嘴却不能说？",
+a:"茶壶（或裤子、桌子等）。",
+detail:"茶壶有壶嘴（嘴）和壶把（有时像腿）\n但不能说话和走路\n\n标准答案通常是「裤子」：\n- 有裤腿（腿）\n- 有裤腰开口（嘴）\n- 不能走不能说"},
+{title:"趣味思维题",tag:"riddle",tagName:"趣味谜题",diff:"⭐",emoji:"🌳",
+q:"什么树没有叶子？",
+a:"枯树（或铁树、圣诞树等）。",
+detail:"枯树没有叶子\n\n其他答案：\n- 铁树（铁做的树）\n- 圣诞树（人造的）\n- 树桩"},
+{title:"趣味谜语",tag:"riddle",tagName:"趣味谜题",diff:"⭐",emoji:"🏔️",
+q:"什么山不能爬？",
+a:"假山（或火山、冰山、刀山等）。",
+detail:"假山是人造的景观\n不是用来爬的\n\n其他答案：\n- 火山（太危险）\n- 冰山（会融化）\n- 刀山（成语「刀山火海」）"},
+{title:"趣味逻辑",tag:"riddle",tagName:"趣味谜题",diff:"⭐",emoji:"🎵",
+q:"什么门永远关不上？",
+a:"球门（或脑门、嗓门、窍门等）。",
+detail:"球门是体育设施\n不是真正的门，不需要关\n\n其他答案：\n- 脑门\n- 嗓门\n- 窍门\n- 澳门（地名）"},
+{title:"趣味谜题",tag:"riddle",tagName:"趣味谜题",diff:"⭐",emoji:"⚡",
+q:"什么东西越生气越大？",
+a:"脾气（或气球、火等）。",
+detail:"脾气越生气越大\n\n其他答案：\n- 气球（充气越大）\n- 火（越烧越大）\n- 声音（越喊越大）"},
+{title:"趣味脑筋急转弯",tag:"riddle",tagName:"趣味谜题",diff:"⭐",emoji:"👀",
+q:"什么球不能踢？",
+a:"眼球（或地球、月球、火球等）。",
+detail:"眼球是身体器官\n不能用来踢\n\n其他答案：\n- 地球\n- 月球\n- 火球\n- 雪球（可以踢但会散）"},
+{title:"趣味谜语",tag:"riddle",tagName:"趣味谜题",diff:"⭐",emoji:"🌊",
+q:"什么海没有水？",
+a:"辞海（或脑海、火海、人海、云海等）。",
+detail:"辞海是词典\n不是真正的海洋\n\n其他答案：\n- 脑海\n- 火海\n- 人海\n- 云海\n- 学海"},
+{title:"趣味思维",tag:"riddle",tagName:"趣味谜题",diff:"⭐",emoji:"🦷",
+q:"什么牙不会掉？",
+a:"月牙（或门牙、智齿等，但最标准的是月牙）。",
+detail:"月牙是月亮的形状\n不是真正的牙齿\n\n其他答案：\n- 门牙（如果保护得好）\n- 假牙（本来就是假的）"},
+{title:"趣味谜题",tag:"riddle",tagName:"趣味谜题",diff:"⭐",emoji:"🎭",
+q:"什么帽不能戴？",
+a:"螺帽（或绿帽、高帽等）。",
+detail:"螺帽是机械零件\n不是戴在头上的帽子\n\n其他答案：\n- 绿帽（不想戴）\n- 高帽（拍马屁）"},
+{title:"趣味脑筋急转弯",tag:"riddle",tagName:"趣味谜题",diff:"⭐",emoji:"🐔",
+q:"什么鸡没有翅膀？",
+a:"田鸡（青蛙）或打火机。",
+detail:"田鸡是青蛙的别称\n不是真正的鸡\n\n另一个经典答案：\n打火机（火鸡谐音）"},
+{title:"趣味谜语",tag:"riddle",tagName:"趣味谜题",diff:"⭐",emoji:"🌸",
+q:"什么花不能摸？",
+a:"火花（或天花、烟花、泪花等）。",
+detail:"火花是火焰的飞溅\n不能用手摸\n\n其他答案：\n- 天花（疾病）\n- 烟花\n- 泪花\n- 眼花"},
+{title:"趣味逻辑",tag:"riddle",tagName:"趣味谜题",diff:"⭐",emoji:"🎪",
+q:"什么马不会跑？",
+a:"海马（或象棋里的马、二维码、罗马等）。",
+detail:"海马是海洋生物\n不是真正的马\n\n其他答案：\n- 象棋里的马\n- 二维码（QR码）\n- 罗马（地名）"},
+{title:"趣味谜题",tag:"riddle",tagName:"趣味谜题",diff:"⭐",emoji:"🎵",
+q:"什么琴不能弹？",
+a:"钢琴（可以弹，但常见答案是地球仪）。",
+detail:"标准答案：\n- 地球仪（地球）\n- 钢琴本身是可以弹的，这是个反套路题"}];
+
+// ====== 状态管理 ======
+var currentLevel=0;
+var currentPage=0;
+var answerShown=false;
+var cleared=new Set();
+var STORAGE_KEY='mind_game_cleared_v2';
+var LEVELS_PER_PAGE=10;
+
+function loadProgress(){
+  try{
+    var s=localStorage.getItem(STORAGE_KEY);
+    if(s) cleared=new Set(JSON.parse(s));
+  }catch(e){}
+}
+function saveProgress(){
+  try{localStorage.setItem(STORAGE_KEY,JSON.stringify([...cleared]))}catch(e){}
+}
+
+// ====== 页面切换 ======
+function showPage(id){
+  document.getElementById('coverPage').style.display='none';
+  document.getElementById('selectPage').style.display='none';
+  document.getElementById('gamePage').style.display='none';
+  document.getElementById(id).style.display='flex';
+  if(id==='selectPage') renderSelectPage();
+  if(id==='gamePage') renderGamePage();
+  if(id==='coverPage') updateCoverStats();
+}
+function goCover(){showPage('coverPage')}
+function goSelect(){showPage('selectPage')}
+function goGame(idx){
+  if(idx===-1) idx=0;
+  currentLevel=idx;
+  showPage('gamePage');
+}
+
+// ====== 封面页 ======
+function updateCoverStats(){
+  document.getElementById('coverTotal').textContent=levels.length;
+  document.getElementById('coverDone').textContent=cleared.size;
+  var rate=levels.length>0?Math.round(cleared.size/levels.length*100):0;
+  document.getElementById('coverRate').textContent=rate+'%';
+}
+
+// ====== 关卡选择页 ======
+function renderSelectPage(){
+  var totalPages=Math.ceil(levels.length/LEVELS_PER_PAGE);
+  document.getElementById('selectPageNum').textContent=(currentPage+1)+' / '+totalPages;
+  document.getElementById('selectProgressFill').style.width=(cleared.size/levels.length*100)+'%';
+  document.getElementById('btnPrevPage').style.visibility=currentPage>0?'visible':'hidden';
+  document.getElementById('btnNextPage').style.visibility=currentPage<totalPages-1?'visible':'hidden';
+
+  var grid=document.getElementById('selectGrid');
+  grid.innerHTML='';
+  var start=currentPage*LEVELS_PER_PAGE;
+  var end=Math.min(start+LEVELS_PER_PAGE,levels.length);
+  for(var i=start;i<end;i++){
+    (function(idx){
+      var lv=levels[idx];
+      var isDone=cleared.has(idx);
+      var card=document.createElement('div');
+      card.className='level-card'+(isDone?'':' locked');
+      card.innerHTML='<div class="level-card-inner">'+
+        '<div class="level-card-img">'+
+          '<div class="emoji">'+lv.emoji+'</div>'+
+          '<span class="tag">'+lv.tagName+'</span>'+
+        '</div>'+
+        '<div class="level-card-name">'+(idx+1)+'. '+lv.title+'</div>'+
+        '<div class="level-card-info">'+lv.diff+'</div>'+
+      '</div>'+
+      (isDone?'<div class="level-card-done">✓</div>':'');
+      card.onclick=function(){goGame(idx)};
+      grid.appendChild(card);
+    })(i);
+  }
+}
+function prevPage(){if(currentPage>0){currentPage--;renderSelectPage()}}
+function nextPage(){var total=Math.ceil(levels.length/LEVELS_PER_PAGE);if(currentPage<total-1){currentPage++;renderSelectPage()}}
+function findFirstUndone(){for(var i=0;i<levels.length;i++)if(!cleared.has(i))return i;return 0;}
+function resetProgress(){
+  if(confirm('确定要重置所有通关进度吗？')){
+    cleared.clear();
+    saveProgress();
+    currentPage=0;
+    renderSelectPage();
+    updateCoverStats();
+  }
+}
+
+// ====== 答题页 ======
+function renderGamePage(){
+  var lv=levels[currentLevel];
+  document.getElementById('gameLevelNum').textContent=currentLevel+1;
+  document.getElementById('gameTag').textContent=lv.tagName;
+  document.getElementById('gameTag').className='game-tag '+lv.tag;
+  document.getElementById('gameDiff').textContent='难度：'+lv.diff;
+  document.getElementById('gameTitle').textContent=lv.emoji+' '+lv.title;
+  document.getElementById('gameQuestion').textContent=lv.q;
+  document.getElementById('gameAnswerText').textContent=lv.a;
+  document.getElementById('gameAnswerDetail').textContent=lv.detail;
+  answerShown=false;
+  document.getElementById('gameAnswerSection').classList.remove('show');
+  document.getElementById('gameBtnAnswer').textContent='查看答案';
+  document.getElementById('gameBody').scrollTop=0;
+  document.getElementById('gameProgressFill').style.width=(cleared.size/levels.length*100)+'%';
+  document.getElementById('gameBtnPrev').style.opacity=currentLevel>0?'1':'.3';
+  document.getElementById('gameBtnNext').style.opacity=currentLevel<levels.length-1?'1':'.3';
+}
+function toggleAnswer(){
+  if(!answerShown){
+    answerShown=true;
+    document.getElementById('gameAnswerSection').classList.add('show');
+    document.getElementById('gameBtnAnswer').textContent='隐藏答案';
+    if(!cleared.has(currentLevel)){
+      cleared.add(currentLevel);
+      saveProgress();
+      showFloatHint('✨ 通关！');
+      if(cleared.size===levels.length){
+        setTimeout(showCompleteModal,800);
+      }
+    }
+  }else{
+    answerShown=false;
+    document.getElementById('gameAnswerSection').classList.remove('show');
+    document.getElementById('gameBtnAnswer').textContent='查看答案';
+  }
+}
+function prevLevel(){if(currentLevel>0){currentLevel--;renderGamePage()}}
+function nextLevel(){if(currentLevel<levels.length-1){currentLevel++;renderGamePage()}}
+
+// ====== 弹窗 ======
+function showCompleteModal(){
+  document.getElementById('modalOverlay').classList.add('show');
+  launchConfetti();
+}
+function closeModal(){
+  document.getElementById('modalOverlay').classList.remove('show');
+  cleared.clear();
+  saveProgress();
+  currentLevel=0;
+  currentPage=0;
+  goCover();
+}
+
+// ====== 特效 ======
+function showFloatHint(text){
+  var el=document.createElement('div');
+  el.className='float-hint';
+  el.textContent=text;
+  document.body.appendChild(el);
+  setTimeout(function(){el.remove()},900);
+}
+function launchConfetti(){
+  var colors=['#7cb342','#689f38','#e8a87c','#d4a574','#5b9bd5','#ffd54f'];
+  for(var i=0;i<40;i++){
+    (function(idx){
+      setTimeout(function(){
+        var el=document.createElement('div');
+        el.className='confetti';
+        el.style.left=Math.random()*100+'vw';
+        el.style.width=(6+Math.random()*8)+'px';
+        el.style.height=(6+Math.random()*8)+'px';
+        el.style.background=colors[Math.floor(Math.random()*colors.length)];
+        el.style.borderRadius=Math.random()>.5?'50%':'2px';
+        el.style.animationDuration=(2+Math.random()*2)+'s';
+        document.body.appendChild(el);
+        setTimeout(function(){el.remove()},4500);
+      },idx*50);
+    })(i);
+  }
+}
+
+// ====== 初始化 ======
+loadProgress();
+updateCoverStats();
+</script>
+</body>
+</html>

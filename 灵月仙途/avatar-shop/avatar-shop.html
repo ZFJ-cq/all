@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="../js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="../css/mobile-adapt.css">
+  <title>灵月仙途 - 头像商城</title>
+  <link rel="stylesheet" href="../css/avatar.css">
+  <style>
+    :root {
+      --bg-primary: #1a1a1a;
+      --bg-secondary: #2a2a2a;
+      --bg-card: #333;
+      --text-primary: #fdfbf7;
+      --text-secondary: #d4c5a9;
+      --gold-primary: #e6c749;
+      --gold-secondary: #8a7c5d;
+      --success: #4CAF50;
+      --error: #e74c3c;
+      --shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      font-family: 'Microsoft YaHei', 'SimSun', serif;
+      background: var(--bg-primary);
+      background-image: 
+        linear-gradient(to bottom, rgba(0,0,0,0.8), rgba(0,0,0,0.6)),
+        url('https://images.unsplash.com/photo-1518063319789-7217e6706b04?q=80&w=2070&auto=format&fit=crop');
+      background-size: cover;
+      background-position: center;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      color: var(--text-primary);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .main-container {
+      flex: 1;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      max-width: 600px;
+      margin: 0 auto;
+      width: 100%;
+      background: var(--bg-secondary);
+      box-shadow: 0 0 50px rgba(0,0,0,0.5);
+    }
+
+    .header-panel {
+      background: var(--bg-card);
+      padding: 15px 20px;
+      border-bottom: 2px solid var(--gold-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      z-index: 10;
+      box-shadow: var(--shadow);
+    }
+
+    .header-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: var(--gold-primary);
+      font-family: 'SimSun', serif;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .currency-display {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .currency-icon {
+      color: var(--gold-primary);
+      font-size: 1.1rem;
+    }
+
+    .content-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    .section-title {
+      text-align: center;
+      font-family: 'SimSun', serif;
+      font-size: 1.4rem;
+      color: var(--gold-primary);
+      margin-bottom: 20px;
+      position: relative;
+      display: inline-block;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 0 20px;
+      white-space: nowrap;
+    }
+
+    .section-title::before, .section-title::after {
+      content: '✦';
+      position: absolute;
+      top: 50%;
+      color: var(--gold-secondary);
+      font-size: 0.8rem;
+    }
+    .section-title::before { left: 0; }
+    .section-title::after { right: 0; }
+
+    .avatar-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .avatar-item {
+      background: var(--bg-card);
+      border: 1px solid var(--gold-secondary);
+      border-radius: 12px;
+      padding: 15px;
+      text-align: center;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .avatar-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(230, 199, 73, 0.3);
+      border-color: var(--gold-primary);
+    }
+
+    .avatar-item.locked::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.6);
+      z-index: 1;
+    }
+
+    .avatar-item.locked::after {
+      content: '🔒';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 2rem;
+      z-index: 2;
+    }
+
+    .avatar-item-owned {
+      border-color: var(--success);
+      box-shadow: 0 0 15px rgba(76, 175, 80, 0.3);
+    }
+
+    .avatar-item-selected {
+      border-color: var(--gold-primary);
+      box-shadow: 0 0 20px rgba(230, 199, 73, 0.5);
+      background: linear-gradient(to bottom, rgba(230, 199, 73, 0.1), var(--bg-card));
+    }
+
+    .avatar-preview {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: 3px solid var(--gold-primary);
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      margin: 0 auto 10px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .avatar-name {
+      font-size: 0.9rem;
+      font-weight: bold;
+      color: var(--text-primary);
+      margin-bottom: 5px;
+      z-index: 1;
+      position: relative;
+    }
+
+    .avatar-price {
+      font-size: 0.8rem;
+      color: var(--gold-primary);
+      margin-bottom: 10px;
+      z-index: 1;
+      position: relative;
+    }
+
+    .avatar-price.free {
+      color: var(--success);
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 5px;
+      z-index: 1;
+      position: relative;
+    }
+
+    .btn-action {
+      flex: 1;
+      padding: 6px 10px;
+      border: 1px solid var(--gold-secondary);
+      background: transparent;
+      color: var(--text-primary);
+      border-radius: 6px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: 'SimSun', serif;
+    }
+
+    .btn-action:hover {
+      background: var(--gold-secondary);
+      color: #fff;
+    }
+
+    .btn-action.primary {
+      background: var(--gold-primary);
+      border-color: var(--gold-primary);
+      color: #000;
+      font-weight: bold;
+    }
+
+    .btn-action.primary:hover {
+      background: #f4d03f;
+      box-shadow: 0 0 10px rgba(230, 199, 73, 0.5);
+    }
+
+    .btn-action.success {
+      background: var(--success);
+      border-color: var(--success);
+      color: #fff;
+    }
+
+    .btn-action:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .category-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      overflow-x: auto;
+      padding-bottom: 10px;
+    }
+
+    .category-tab {
+      padding: 8px 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--gold-secondary);
+      border-radius: 20px;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.3s ease;
+    }
+
+    .category-tab.active {
+      background: var(--gold-primary);
+      border-color: var(--gold-primary);
+      color: #000;
+      font-weight: bold;
+    }
+
+    .toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.9);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+
+    .toast.show {
+      opacity: 1;
+    }
+
+    .toast.success {
+      background: rgba(76, 175, 80, 0.9);
+    }
+
+    .toast.error {
+      background: rgba(231, 76, 60, 0.9);
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 65px;
+      background: rgba(42, 42, 42, 0.95);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid var(--gold-secondary);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 90;
+      box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+      max-width: 600px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-radius: 20px 20px 0 0;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      padding: 5px 10px;
+      border-radius: 8px;
+      transition: all 0.3s;
+      width: 20%;
+    }
+
+    .nav-item.active {
+      color: var(--gold-primary);
+      background: rgba(230, 199, 73, 0.1);
+    }
+
+    .nav-icon { font-size: 1.4rem; }
+    .nav-text { font-size: 0.75rem; font-weight: bold; font-family: 'SimSun', serif; }
+
+    @media (max-width: 480px) {
+      .avatar-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .avatar-preview {
+        width: 60px;
+        height: 60px;
+        font-size: 2rem;
+      }
+      
+      .header-panel {
+        padding: 10px 15px;
+      }
+      
+      .content-scroll {
+        padding: 15px;
+      }
+    }
+  </style>
+
+  </head>
+<body>
+
+  <div class="main-container">
+    <!-- 顶部状态 -->
+    <div class="header-panel">
+      <h1 class="header-title">头像商城</h1>
+      <div class="user-info">
+        <div class="currency-display">
+          <span class="currency-icon">💰</span>
+          <span id="userCurrency">1000</span>
+        </div>
+        <div class="avatar" id="userAvatar">🧙‍♂️</div>
+      </div>
+    </div>
+
+    <!-- 分类标签 -->
+    <div class="content-scroll">
+      <div class="category-tabs">
+        <div class="category-tab active" data-category="all">全部</div>
+        <div class="category-tab" data-category="common">普通</div>
+        <div class="category-tab" data-category="rare">稀有</div>
+        <div class="category-tab" data-category="epic">史诗</div>
+        <div class="category-tab" data-category="legend">传说</div>
+      </div>
+
+      <h2 class="section-title">可选头像</h2>
+      
+      <div class="avatar-grid" id="avatarGrid">
+        <!-- 动态生成 -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 底部导航 -->
+  <nav class="bottom-nav" role="navigation" aria-label="主导航">
+    <a href="../index.html" class="nav-item" aria-label="修炼页面">
+      <div class="nav-icon">🧘</div>
+      <div class="nav-text">修炼</div>
+    </a>
+    <a href="../skills/skills.html" class="nav-item" aria-label="功法页面">
+      <div class="nav-icon">📜</div>
+      <div class="nav-text">功法</div>
+    </a>
+    <a href="avatar-shop.html" class="nav-item active" aria-label="头像商城" aria-current="page">
+      <div class="nav-icon">🎨</div>
+      <div class="nav-text">头像</div>
+    </a>
+    <a href="javascript:void(0)" onclick="window.pageUtils.navigateToGuildPage()" class="nav-item" aria-label="宗门页面">
+      <div class="nav-icon">🏯</div>
+      <div class="nav-text">宗门</div>
+    </a>
+    <a href="../map/map.html" class="nav-item" aria-label="云游页面">
+      <div class="nav-icon">🗺️</div>
+      <div class="nav-text">云游</div>
+    </a>
+  </nav>
+
+  <!-- 提示框 -->
+  <div class="toast" id="toast"></div>
+
+  <script src="../js/auth-check.js"></script>
+  <script src="../js/token-manager.js"></script>
+  <script src="../js/auth-service.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/api-service.js"></script>
+  <script src="../js/common.js"></script>
+  <script>
+    let avatars = [];
+    let ownedAvatars = [];
+    let currentAvatar = null;
+    let userCurrency = 1000;
+    let roleId = null;
+
+    // 头像数据
+    const avatarData = [
+      { id: 1, name: '凡人', icon: '👤', price: 0, category: 'common', description: '普通凡人形象' },
+      { id: 2, name: '剑修', icon: '⚔️', price: 500, category: 'rare', description: '剑道修行者' },
+      { id: 3, name: '法修', icon: '🔮', price: 800, category: 'epic', description: '法术大师' },
+      { id: 4, name: '丹修', icon: '💊', price: 600, category: 'rare', description: '丹药专家' },
+      { id: 5, name: '器修', icon: '🔨', price: 700, category: 'epic', description: '炼器大师' },
+      { id: 6, name: '妖修', icon: '🐉', price: 1000, category: 'legend', description: '妖修化身' },
+      { id: 7, name: '佛修', icon: '🙏', price: 900, category: 'epic', description: '佛门弟子' },
+      { id: 8, name: '魔修', icon: '😈', price: 1200, category: 'legend', description: '魔道中人' },
+      { id: 9, name: '仙修', icon: '🧚', price: 1500, category: 'legend', description: '仙人之姿' }
+    ];
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      await window.APP_CONFIG.init();
+      roleId = window.APP_CONFIG.currentRoleId;
+      
+      if (!roleId) {
+        showToast('请先创建角色', 'error');
+        return;
+      }
+
+      loadUserData();
+      loadAvatars();
+      initCategoryTabs();
+    });
+
+    async function loadUserData() {
+      try {
+        const roleData = await window.apiService.getUserProfile(roleId);
+        if (roleData) {
+          currentAvatar = roleData.avatar || '👤';
+          document.getElementById('userAvatar').textContent = currentAvatar;
+          
+          // 模拟货币数据
+          userCurrency = 1000;
+          document.getElementById('userCurrency').textContent = userCurrency;
+        }
+      } catch (error) {
+        console.error('加载用户数据失败:', error);
+      }
+    }
+
+    function loadAvatars() {
+      avatars = avatarData;
+      ownedAvatars = [1]; // 初始拥有第一个头像
+      renderAvatars();
+    }
+
+    function renderAvatars(category = 'all') {
+      const grid = document.getElementById('avatarGrid');
+      grid.innerHTML = '';
+
+      const filteredAvatars = category === 'all' 
+        ? avatars 
+        : avatars.filter(avatar => avatar.category === category);
+
+      filteredAvatars.forEach(avatar => {
+        const isOwned = ownedAvatars.includes(avatar.id);
+        const isSelected = avatar.icon === currentAvatar;
+        
+        const item = document.createElement('div');
+        item.className = `avatar-item ${isOwned ? 'avatar-item-owned' : 'locked'} ${isSelected ? 'avatar-item-selected' : ''}`;
+        
+        item.innerHTML = `
+          <div class="avatar-preview">${avatar.icon}</div>
+          <div class="avatar-name">${avatar.name}</div>
+          <div class="avatar-price ${avatar.price === 0 ? 'free' : ''}">
+            ${avatar.price === 0 ? '免费' : `💰 ${avatar.price}`}
+          </div>
+          <div class="action-buttons">
+            ${isOwned ? `
+              <button class="btn-action ${isSelected ? 'success' : 'primary'}" onclick="selectAvatar(${avatar.id}, this)">
+                ${isSelected ? '当前使用' : '使用'}
+              </button>
+            ` : `
+              <button class="btn-action primary" onclick="buyAvatar(${avatar.id}, this)" ${userCurrency < avatar.price ? 'disabled' : ''}>
+                购买
+              </button>
+            `}
+          </div>
+        `;
+        
+        grid.appendChild(item);
+      });
+    }
+
+    function initCategoryTabs() {
+      const tabs = document.querySelectorAll('.category-tab');
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          tabs.forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          renderAvatars(tab.dataset.category);
+        });
+      });
+    }
+
+    async function buyAvatar(avatarId, button) {
+      const avatar = avatars.find(a => a.id === avatarId);
+      if (!avatar) return;
+
+      if (userCurrency < avatar.price) {
+        showToast('灵石不足', 'error');
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent = '购买中...';
+
+      try {
+        // 模拟购买API调用
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // 更新本地数据
+        userCurrency -= avatar.price;
+        ownedAvatars.push(avatarId);
+        
+        // 更新UI
+        document.getElementById('userCurrency').textContent = userCurrency;
+        renderAvatars(document.querySelector('.category-tab.active').dataset.category);
+        
+        showToast(`成功购买 ${avatar.name}！`, 'success');
+      } catch (error) {
+        console.error('购买失败:', error);
+        showToast('购买失败，请重试', 'error');
+        button.disabled = false;
+        button.textContent = '购买';
+      }
+    }
+
+    async function selectAvatar(avatarId, button) {
+      const avatar = avatars.find(a => a.id === avatarId);
+      if (!avatar) return;
+
+      button.disabled = true;
+      button.textContent = '设置中...';
+
+      try {
+        // 模拟设置头像API调用
+        await new Promise(resolve => setTimeout(resolve, 800));
+        
+        // 更新本地数据
+        currentAvatar = avatar.icon;
+        document.getElementById('userAvatar').textContent = currentAvatar;
+        
+        // 更新UI
+        renderAvatars(document.querySelector('.category-tab.active').dataset.category);
+        
+        showToast(`已设置 ${avatar.name} 为当前头像！`, 'success');
+      } catch (error) {
+        console.error('设置头像失败:', error);
+        showToast('设置失败，请重试', 'error');
+        button.disabled = false;
+        button.textContent = '使用';
+      }
+    }
+
+    function showToast(message, type = 'info') {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = `toast show ${type}`;
+      
+      setTimeout(() => {
+        toast.className = 'toast';
+      }, 3000);
+    }
+  </script>
+</body>
+</html>

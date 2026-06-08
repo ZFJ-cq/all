@@ -1,0 +1,47 @@
+package com.lingyue.controller;
+
+import com.lingyue.entity.RoleTask;
+import com.lingyue.service.RoleTaskService;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+
+@RestController
+@RequestMapping("/role/tasks")
+public class RoleTaskController {
+    
+    private final RoleTaskService roleTaskService;
+    
+    public RoleTaskController(RoleTaskService roleTaskService) {
+        this.roleTaskService = roleTaskService;
+    }
+
+    // 获取角色的所有任务
+    @GetMapping("/{roleId}")
+    public List<RoleTask> getRoleTasks(@PathVariable Long roleId) {
+        return roleTaskService.getRoleTasks(roleId);
+    }
+
+    // 接受任务
+    @PostMapping("/{roleId}/{taskId}/accept")
+    public RoleTask acceptTask(@PathVariable Long roleId, @PathVariable Long taskId) {
+        return roleTaskService.acceptTask(roleId, taskId);
+    }
+
+    // 更新任务进度
+    @PutMapping("/{roleId}/{taskId}/progress")
+    public RoleTask updateTaskProgress(@PathVariable Long roleId, @PathVariable Long taskId, @RequestParam String progress) {
+        return roleTaskService.updateTaskProgress(roleId, taskId, progress);
+    }
+
+    // 提交任务
+    @PostMapping("/{roleId}/{taskId}/submit")
+    public RoleTask submitTask(@PathVariable Long roleId, @PathVariable Long taskId) {
+        return roleTaskService.submitTask(roleId, taskId);
+    }
+
+    // 放弃任务
+    @DeleteMapping("/{roleId}/{taskId}/abandon")
+    public void abandonTask(@PathVariable Long roleId, @PathVariable Long taskId) {
+        roleTaskService.abandonTask(roleId, taskId);
+    }
+}

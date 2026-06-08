@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="../js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="../css/mobile-adapt.css">
+  <title>灵月仙途 - 修仙洞府</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Microsoft YaHei", sans-serif;
+    }
+
+    :root {
+      --primary: #06b6d4;
+      --bg: #0f172a;
+      --card: #1e293b;
+      --text: #f0f3f5;
+      --sub: #94a3b8;
+      --line: rgba(255,255,255,0.1);
+      --success: #4ade80;
+      --danger: #ef4444;
+      --warn: #f59e0b;
+      --info: #06b6d4;
+    }
+
+    body {
+      background: #0f172a;
+      background-image: url('https://picsum.photos/id/155/1920/1080');
+      background-size: cover;
+      background-attachment: fixed;
+      background-blend-mode: overlay;
+      color: var(--text);
+      min-height: 100vh;
+      padding: 15px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 500px;
+      margin: 0 auto;
+      background: rgba(15,23,42,0.95);
+      border-radius: 12px;
+      padding: 20px 15px;
+      border: 1px solid rgba(6,182,212,0.2);
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .title {
+      font-size: 24px;
+      font-weight: bold;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .title::before {
+      content: "🕯️";
+      font-size: 28px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .info-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(6,182,212,0.1);
+      border: 1px solid var(--primary);
+      color: var(--primary);
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .info-btn:hover {
+      background: var(--primary);
+      color: #111;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .spirit-stone {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(6,182,212,0.1);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 13px;
+    }
+
+    .btn-back {
+      background: #334155;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 13px;
+    }
+
+    .btn-back:hover {
+      background: #475569;
+    }
+
+    .tab-group {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      background: rgba(0,0,0,0.2);
+      padding: 6px;
+      border-radius: 10px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .tab-group::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tab {
+      padding: 10px 16px;
+      background: #1e293b;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+      font-size: 14px;
+    }
+
+    .tab.active {
+      background: var(--primary);
+      color: #111;
+      font-weight: bold;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(6,182,212,0.3);
+    }
+
+    .panel {
+      display: none;
+    }
+
+    .panel.active {
+      display: block;
+      animation: fade 0.3s;
+    }
+
+    @keyframes fade {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 10px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      transition: all 0.2s;
+      margin-bottom: 15px;
+    }
+
+    .card:last-child {
+      margin-bottom: 0;
+    }
+
+    .card:hover {
+      border-color: rgba(6,182,212,0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+    }
+
+    .card h3 {
+      color: var(--primary);
+      margin-bottom: 12px;
+      font-size: 17px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card p {
+      color: var(--sub);
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .list {
+      margin-top: 10px;
+      padding-left: 20px;
+      color: var(--sub);
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    .list li {
+      margin-bottom: 5px;
+    }
+
+    .grade {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .tag {
+      padding: 5px 10px;
+      background: rgba(6,182,212,0.15);
+      color: var(--primary);
+      border-radius: 20px;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+
+    .tag:hover {
+      background: rgba(6,182,212,0.3);
+    }
+
+    .tag.success {
+      background: rgba(74,222,128,0.15);
+      color: var(--success);
+    }
+
+    .tag.warn {
+      background: rgba(245,158,11,0.15);
+      color: var(--warn);
+    }
+
+    .tag.info {
+      background: rgba(6,182,212,0.15);
+      color: var(--info);
+    }
+
+    .cave-list {
+      margin-top: 12px;
+    }
+
+    .cave-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 12px;
+      border-bottom: 1px dashed var(--line);
+      cursor: pointer;
+      transition: all 0.2s;
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+
+    .cave-item:last-child {
+      border: none;
+    }
+
+    .cave-item:hover {
+      background: rgba(255,255,255,0.05);
+    }
+
+    .cave-item.active {
+      background: rgba(6,182,212,0.1);
+      border: 1px solid var(--primary);
+    }
+
+    .cave-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .cave-name {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .cave-desc {
+      font-size: 12px;
+      color: var(--sub);
+      margin-top: 2px;
+    }
+
+    .cave-cost {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 5px;
+    }
+
+    .skill-list {
+      margin-top: 12px;
+    }
+
+    .skill-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 12px;
+      border-bottom: 1px dashed var(--line);
+      cursor: pointer;
+      transition: all 0.2s;
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+
+    .skill-item:last-child {
+      border: none;
+    }
+
+    .skill-item:hover {
+      background: rgba(255,255,255,0.05);
+    }
+
+    .skill-item.active {
+      background: rgba(6,182,212,0.1);
+      border: 1px solid var(--primary);
+    }
+
+    .skill-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .skill-name {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .skill-star {
+      font-size: 12px;
+      color: var(--warn);
+      margin-top: 2px;
+    }
+
+    .skill-progress {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 5px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #334155;
+      border-radius: 4px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #06b6d4, #22d3ee);
+      transition: width 0.3s ease;
+      border-radius: 4px;
+    }
+
+    .progress-fill.lightning {
+      animation: lightning 0.5s infinite;
+    }
+
+    @keyframes lightning {
+      0%, 100% { box-shadow: 0 0 5px #fbbf24; }
+      50% { box-shadow: 0 0 15px #fbbf24, 0 0 25px #fbbf24; }
+    }
+
+    .control-area {
+      background: var(--card);
+      padding: 20px 15px;
+      border-radius: 10px;
+      text-align: center;
+      margin-top: 15px;
+      border: 1px solid var(--line);
+    }
+
+    .training-info {
+      text-align: left;
+      margin-bottom: 15px;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 8px 0;
+      font-size: 14px;
+    }
+
+    .info-label {
+      color: var(--sub);
+    }
+
+    .info-value {
+      font-weight: bold;
+      color: var(--text);
+    }
+
+    .info-value.warn {
+      color: var(--warn);
+    }
+
+    .info-value.success {
+      color: var(--success);
+    }
+
+    .info-value.info {
+      color: var(--info);
+    }
+
+    .timer {
+      font-size: 18px;
+      font-weight: bold;
+      color: var(--info);
+      margin: 15px 0;
+    }
+
+    .action {
+      margin-top: 20px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+      flex: 1;
+      font-size: 14px;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #111;
+    }
+
+    .btn-primary:hover {
+      background: #22d3ee;
+    }
+
+    .btn-warn {
+      background: var(--warn);
+      color: #111;
+    }
+
+    .btn-warn:hover {
+      background: #fbbf24;
+    }
+
+    .btn-disabled {
+      background: #64748b;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-content {
+      width: 90%;
+      max-width: 400px;
+      background: var(--bg);
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid var(--primary);
+      transform: translateY(-20px);
+      transition: all 0.3s;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .modal-overlay.active .modal-content {
+      transform: translateY(0);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .modal-title {
+      font-size: 18px;
+      color: var(--primary);
+      font-weight: bold;
+    }
+
+    .close-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #334155;
+      color: white;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .modal-body {
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .modal-card {
+      background: var(--card);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+
+    .modal-card h4 {
+      color: var(--primary);
+      margin-bottom: 8px;
+      font-size: 15px;
+    }
+
+    .compare-item {
+      background: var(--card);
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 10px;
+      border: 1px solid var(--line);
+    }
+
+    .compare-item.recommended {
+      border-color: var(--success);
+    }
+
+    .compare-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .compare-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 5px 0;
+      font-size: 13px;
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 15px 10px;
+      }
+      
+      .tab-group {
+        padding: 4px;
+      }
+      
+      .tab {
+        padding: 8px 12px;
+        font-size: 13px;
+      }
+      
+      .action {
+        flex-direction: column;
+      }
+      
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
+
+  </head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="title">修仙洞府 · 悟道圣地</div>
+      <div class="header-actions">
+        <button class="info-btn" id="info-btn">?</button>
+        <div class="user-info">
+          <div class="spirit-stone">
+            <span>💎</span>
+            <span id="stone-count">99999</span>
+          </div>
+          <button class="btn-back" onclick="history.back()">← 返回</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-group">
+      <div class="tab active" data-target="select">选择洞府</div>
+      <div class="tab" data-target="training">修炼中</div>
+    </div>
+
+    <!-- 选择洞府 -->
+    <div class="panel active" id="select">
+      <div class="card">
+        <h3>✨ 未圆满功法（可修炼）</h3>
+        <div class="skill-list">
+          <div class="skill-item" data-skill="1" data-star="2" data-proficiency="45">
+            <div class="skill-info">
+              <div class="skill-name">基础剑诀</div>
+              <div class="skill-star">★★☆☆☆ (2星)</div>
+            </div>
+            <div class="skill-progress">
+              <div class="skill-name" style="font-size:12px;color:var(--warn)">推荐：3星洞府</div>
+              <div style="font-size:12px;">45%</div>
+            </div>
+          </div>
+          <div class="skill-item" data-skill="2" data-star="4" data-proficiency="72">
+            <div class="skill-info">
+              <div class="skill-name">御气诀</div>
+              <div class="skill-star">★★★★☆ (4星)</div>
+            </div>
+            <div class="skill-progress">
+              <div class="skill-name" style="font-size:12px;color:var(--warn)">推荐：5星洞府</div>
+              <div style="font-size:12px;">72%</div>
+            </div>
+          </div>
+          <div class="skill-item" data-skill="3" data-star="8" data-proficiency="20">
+            <div class="skill-info">
+              <div class="skill-name">雷神诀</div>
+              <div class="skill-star">★★★★★★★★☆☆ (8星)</div>
+            </div>
+            <div class="skill-progress">
+              <div class="skill-name" style="font-size:12px;color:var(--warn)">推荐：9星洞府</div>
+              <div style="font-size:12px;">20%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>🏛️ 洞府选择</h3>
+        <div class="cave-list">
+          <div class="cave-item" data-cave="1" data-level="下品" data-star="1" data-cost="10" data-efficiency="1.0">
+            <div class="cave-info">
+              <div class="cave-name">静思间（1星）</div>
+              <div class="cave-desc">灵气稀薄，适合打磨基础 · 效率 1.0x</div>
+            </div>
+            <div class="cave-cost">
+              <span class="tag">10灵石/时辰</span>
+              <span class="tag info">下品</span>
+            </div>
+          </div>
+          <div class="cave-item" data-cave="2" data-level="下品" data-star="3" data-cost="50" data-efficiency="1.0">
+            <div class="cave-info">
+              <div class="cave-name">静思间（3星）</div>
+              <div class="cave-desc">灵气稀薄，适合打磨基础 · 效率 1.0x</div>
+            </div>
+            <div class="cave-cost">
+              <span class="tag">50灵石/时辰</span>
+              <span class="tag info">下品</span>
+            </div>
+          </div>
+          <div class="cave-item" data-cave="3" data-level="中品" data-star="4" data-cost="200" data-efficiency="2.5">
+            <div class="cave-info">
+              <div class="cave-name">明悟轩（4星）</div>
+              <div class="cave-desc">灵雾缭绕，蕴含法则碎片 · 效率 2.5x</div>
+            </div>
+            <div class="cave-cost">
+              <span class="tag">200灵石/时辰</span>
+              <span class="tag warn">中品</span>
+            </div>
+          </div>
+          <div class="cave-item" data-cave="4" data-level="中品" data-star="6" data-cost="800" data-efficiency="2.5">
+            <div class="cave-info">
+              <div class="cave-name">明悟轩（6星）</div>
+              <div class="cave-desc">灵雾缭绕，蕴含法则碎片 · 效率 2.5x</div>
+            </div>
+            <div class="cave-cost">
+              <span class="tag">800灵石/时辰</span>
+              <span class="tag warn">中品</span>
+            </div>
+          </div>
+          <div class="cave-item" data-cave="5" data-level="上品" data-star="7" data-cost="2000" data-efficiency="6.0">
+            <div class="cave-info">
+              <div class="cave-name">通神殿（7星）</div>
+              <div class="cave-desc">大道轰鸣，直指本源 · 效率 6.0x</div>
+            </div>
+            <div class="cave-cost">
+              <span class="tag">2000灵石/时辰</span>
+              <span class="tag success">上品</span>
+            </div>
+          </div>
+          <div class="cave-item" data-cave="6" data-level="上品" data-star="10" data-cost="10000" data-efficiency="6.0">
+            <div class="cave-info">
+              <div class="cave-name">通神殿（10星）</div>
+              <div class="cave-desc">大道轰鸣，直指本源 · 效率 6.0x</div>
+            </div>
+            <div class="cave-cost">
+              <span class="tag">10000灵石/时辰</span>
+              <span class="tag success">上品</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="control-area">
+        <div class="training-info">
+          <div class="info-row">
+            <span class="info-label">已选功法</span>
+            <span class="info-value" id="selected-skill">未选择</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">已选洞府</span>
+            <span class="info-value" id="selected-cave">未选择</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">越阶增益</span>
+            <span class="info-value info" id="bonus-info">无</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">总效率</span>
+            <span class="info-value success" id="total-efficiency">0.0x</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">预计耗时</span>
+            <span class="info-value" id="estimate-time">--</span>
+          </div>
+        </div>
+
+        <div class="action">
+          <button class="btn btn-warn" id="auto-btn">一键修炼</button>
+          <button class="btn btn-primary" id="start-btn" disabled>开始修炼</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 修炼中 -->
+    <div class="panel" id="training">
+      <div class="card" id="training-card">
+        <h3 id="training-title">⚡ 修炼进行中</h3>
+        
+        <div class="training-info">
+          <div class="info-row">
+            <span class="info-label">修炼功法</span>
+            <span class="info-value" id="training-skill">基础剑诀</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">洞府</span>
+            <span class="info-value" id="training-cave">明悟轩（4星）</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">越阶效果</span>
+            <span class="info-value info" id="training-bonus">灵压灌体（3.0x）</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">总效率</span>
+            <span class="info-value success" id="training-efficiency">3.0x</span>
+          </div>
+        </div>
+
+        <div class="progress-bar">
+          <div class="progress-fill" id="training-progress" style="width: 45%;"></div>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-top: 5px;">
+          <span style="font-size:12px;color:var(--sub);">45%</span>
+          <span style="font-size:12px;color:var(--sub);">100%</span>
+        </div>
+
+        <div class="timer">
+          剩余时间：<span id="training-timer">00:59:59</span>
+        </div>
+
+        <div class="action">
+          <button class="btn btn-warn" id="enlighten-btn">顿悟（50%加速）</button>
+          <button class="btn btn-primary" id="stop-btn">结束修炼</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 介绍弹窗 -->
+  <div class="modal-overlay" id="info-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">📜 洞府系统介绍</div>
+        <button class="close-btn" id="close-modal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-card">
+          <h4>🏛️ 洞府分级</h4>
+          <div class="grade">
+            <span class="tag info">下品（1-3星）</span>
+            <span class="tag warn">中品（4-6星）</span>
+            <span class="tag success">上品（7-10星）</span>
+          </div>
+          <ul class="list" style="margin-top:10px">
+            <li><strong>下品</strong>：灵气稀薄，1.0x 效率，10-50灵石/时辰</li>
+            <li><strong>中品</strong>：灵雾缭绕，2.5x 效率，200-800灵石/时辰</li>
+            <li><strong>上品</strong>：大道轰鸣，6.0x 效率，2000-10000灵石/时辰</li>
+          </ul>
+        </div>
+        
+        <div class="modal-card">
+          <h4>⚡ 越阶悟道（核心机制）</h4>
+          <ul class="list">
+            <li><strong>灵压灌体</strong>（跨一级）：效率提升 200%（3.0x）</li>
+            <li><strong>天人感应</strong>（跨两级+）：效率提升 300%（4.0x），5%概率经脉受损</li>
+          </ul>
+        </div>
+        
+        <div class="modal-card">
+          <h4>⚠️ 防沉迷</h4>
+          <p>连续在高星洞府越阶修炼超过4小时，获得"灵觉疲惫"Debuff，效率降至50%</p>
+        </div>
+        
+        <div class="modal-card">
+          <h4>✨ 顿悟</h4>
+          <p>修炼中途可消耗额外灵石开启顿悟，临时再加速50%，持续10分钟</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 一键修炼弹窗 -->
+  <div class="modal-overlay" id="auto-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">🤖 智能匹配</div>
+        <button class="close-btn" id="close-auto-modal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="compare-item">
+          <div class="compare-title">方案一：本级洞府稳扎稳打</div>
+          <div class="compare-row">
+            <span class="info-label">洞府</span>
+            <span>静思间（3星）</span>
+          </div>
+          <div class="compare-row">
+            <span class="info-label">效率</span>
+            <span>1.0x</span>
+          </div>
+          <div class="compare-row">
+            <span class="info-label">消耗</span>
+            <span>50灵石/时辰</span>
+          </div>
+          <div class="compare-row">
+            <span class="info-label">预计耗时</span>
+            <span>约2小时</span>
+          </div>
+        </div>
+        
+        <div class="compare-item recommended">
+          <div class="compare-title">方案二：高阶洞府越阶冲刺 【推荐】</div>
+          <div class="compare-row">
+            <span class="info-label">洞府</span>
+            <span>明悟轩（4星）</span>
+          </div>
+          <div class="compare-row">
+            <span class="info-label">效率</span>
+            <span>3.0x（灵压灌体）</span>
+          </div>
+          <div class="compare-row">
+            <span class="info-label">消耗</span>
+            <span>200灵石/时辰（+300%）</span>
+          </div>
+          <div class="compare-row">
+            <span class="info-label">预计耗时</span>
+            <span>约40分钟（-75%）</span>
+          </div>
+        </div>
+
+        <div class="action">
+          <button class="btn btn-primary" onclick="selectAutoPlan(2)">选择方案二</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let selectedSkill = null;
+    let selectedCave = null;
+    let isTraining = false;
+    let trainingTimer = null;
+    let enlightenActive = false;
+
+    const tabs = document.querySelectorAll('.tab');
+    tabs.forEach(t => {
+      t.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+        document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
+        t.classList.add('active');
+        document.getElementById(t.dataset.target).classList.add('active');
+      });
+    });
+
+    const skillItems = document.querySelectorAll('.skill-item');
+    skillItems.forEach(item => {
+      item.addEventListener('click', () => {
+        skillItems.forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+        
+        selectedSkill = {
+          id: item.dataset.skill,
+          name: item.querySelector('.skill-name').textContent,
+          star: parseInt(item.dataset.star),
+          proficiency: parseInt(item.dataset.proficiency)
+        };
+        
+        updateSelection();
+      });
+    });
+
+    const caveItems = document.querySelectorAll('.cave-item');
+    caveItems.forEach(item => {
+      item.addEventListener('click', () => {
+        caveItems.forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+        
+        selectedCave = {
+          id: item.dataset.cave,
+          name: item.querySelector('.cave-name').textContent,
+          level: item.dataset.level,
+          star: parseInt(item.dataset.star),
+          cost: parseInt(item.dataset.cost),
+          efficiency: parseFloat(item.dataset.efficiency)
+        };
+        
+        updateSelection();
+      });
+    });
+
+    function updateSelection() {
+      const skillEl = document.getElementById('selected-skill');
+      const caveEl = document.getElementById('selected-cave');
+      const bonusEl = document.getElementById('bonus-info');
+      const efficiencyEl = document.getElementById('total-efficiency');
+      const timeEl = document.getElementById('estimate-time');
+      const startBtn = document.getElementById('start-btn');
+      
+      if (selectedSkill) {
+        skillEl.textContent = selectedSkill.name + ' (' + selectedSkill.star + '星)';
+      } else {
+        skillEl.textContent = '未选择';
+      }
+      
+      if (selectedCave) {
+        caveEl.textContent = selectedCave.name;
+      } else {
+        caveEl.textContent = '未选择';
+      }
+      
+      if (selectedSkill && selectedCave) {
+        const starDiff = selectedCave.star - selectedSkill.star;
+        let bonusMultiplier = 1;
+        let bonusText = '无';
+        
+        if (starDiff >= 2) {
+          bonusMultiplier = 4;
+          bonusText = '天人感应（4.0x）⚠️ 5%概率经脉受损';
+          bonusEl.className = 'info-value warn';
+        } else if (starDiff === 1) {
+          bonusMultiplier = 3;
+          bonusText = '灵压灌体（3.0x）';
+          bonusEl.className = 'info-value info';
+        } else {
+          bonusMultiplier = 1;
+          bonusEl.className = 'info-value';
+        }
+        
+        const totalEfficiency = selectedCave.efficiency * bonusMultiplier;
+        
+        bonusEl.textContent = bonusText;
+        efficiencyEl.textContent = totalEfficiency.toFixed(1) + 'x';
+        
+        const remaining = 100 - selectedSkill.proficiency;
+        const baseTimeHours = remaining / 10;
+        const actualTimeHours = baseTimeHours / totalEfficiency;
+        const minutes = Math.ceil(actualTimeHours * 60);
+        timeEl.textContent = '约 ' + minutes + ' 分钟';
+        
+        startBtn.disabled = false;
+      } else {
+        bonusEl.textContent = '无';
+        bonusEl.className = 'info-value';
+        efficiencyEl.textContent = '0.0x';
+        timeEl.textContent = '--';
+        startBtn.disabled = true;
+      }
+    }
+
+    document.getElementById('start-btn').addEventListener('click', () => {
+      if (!selectedSkill || !selectedCave) return;
+      
+      const stoneCount = parseInt(document.getElementById('stone-count').textContent);
+      if (stoneCount < selectedCave.cost) {
+        showToast('灵石不足！', 'warning');
+        return;
+      }
+      
+      document.getElementById('stone-count').textContent = stoneCount - selectedCave.cost;
+      
+      document.getElementById('training-skill').textContent = selectedSkill.name;
+      document.getElementById('training-cave').textContent = selectedCave.name;
+      
+      const starDiff = selectedCave.star - selectedSkill.star;
+      let bonusText = '无';
+      let bonusMultiplier = 1;
+      
+      if (starDiff >= 2) {
+        bonusMultiplier = 4;
+        bonusText = '天人感应（4.0x）';
+      } else if (starDiff === 1) {
+        bonusMultiplier = 3;
+        bonusText = '灵压灌体（3.0x）';
+      }
+      
+      document.getElementById('training-bonus').textContent = bonusText;
+      document.getElementById('training-efficiency').textContent = (selectedCave.efficiency * bonusMultiplier).toFixed(1) + 'x';
+      
+      const progressEl = document.getElementById('training-progress');
+      progressEl.style.width = selectedSkill.proficiency + '%';
+      
+      if (starDiff >= 1) {
+        progressEl.classList.add('lightning');
+      }
+      
+      isTraining = true;
+      let remainingTime = 3599;
+      
+      trainingTimer = setInterval(() => {
+        remainingTime--;
+        
+        const hours = Math.floor(remainingTime / 3600);
+        const minutes = Math.floor((remainingTime % 3600) / 60);
+        const seconds = remainingTime % 60;
+        document.getElementById('training-timer').textContent = 
+          hours.toString().padStart(2, '0') + ':' + 
+          minutes.toString().padStart(2, '0') + ':' + 
+          seconds.toString().padStart(2, '0');
+        
+        const currentWidth = parseFloat(progressEl.style.width);
+        const increment = 0.01 * (enlightenActive ? 1.5 : 1);
+        const newWidth = Math.min(100, currentWidth + increment);
+        progressEl.style.width = newWidth + '%';
+        
+        if (newWidth >= 100) {
+          clearInterval(trainingTimer);
+          isTraining = false;
+          showToast('修炼圆满！', 'success');
+        }
+        
+        if (remainingTime <= 0) {
+          clearInterval(trainingTimer);
+          isTraining = false;
+        }
+      }, 1000);
+      
+      tabs.forEach(x => x.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
+      document.querySelector('[data-target="training"]').classList.add('active');
+      document.getElementById('training').classList.add('active');
+      
+      showToast('开始修炼！', 'success');
+    });
+
+    document.getElementById('stop-btn').addEventListener('click', () => {
+      if (confirm('确定要结束修炼吗？')) {
+        clearInterval(trainingTimer);
+        isTraining = false;
+        document.getElementById('training-progress').classList.remove('lightning');
+        
+        tabs.forEach(x => x.classList.remove('active'));
+        document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
+        document.querySelector('[data-target="select"]').classList.add('active');
+        document.getElementById('select').classList.add('active');
+        
+        showToast('已结束修炼', 'info');
+      }
+    });
+
+    document.getElementById('enlighten-btn').addEventListener('click', () => {
+      const stoneCount = parseInt(document.getElementById('stone-count').textContent);
+      if (stoneCount < 1000) {
+        showToast('顿悟需要1000灵石！', 'warning');
+        return;
+      }
+      
+      if (enlightenActive) {
+        showToast('顿悟效果已在进行中！', 'info');
+        return;
+      }
+      
+      document.getElementById('stone-count').textContent = stoneCount - 1000;
+      enlightenActive = true;
+      document.getElementById('enlighten-btn').disabled = true;
+      showToast('顿悟开启！50%加速10分钟', 'success');
+      
+      setTimeout(() => {
+        enlightenActive = false;
+        document.getElementById('enlighten-btn').disabled = false;
+        showToast('顿悟效果结束', 'info');
+      }, 600000);
+    });
+
+    document.getElementById('auto-btn').addEventListener('click', () => {
+      document.getElementById('auto-modal').classList.add('active');
+    });
+
+    document.getElementById('close-auto-modal').addEventListener('click', () => {
+      document.getElementById('auto-modal').classList.remove('active');
+    });
+
+    function selectAutoPlan(plan) {
+      if (plan === 2) {
+        skillItems[0].click();
+        caveItems[2].click();
+        document.getElementById('auto-modal').classList.remove('active');
+        showToast('已选择方案二！', 'success');
+      }
+    }
+
+    const infoBtn = document.getElementById('info-btn');
+    const infoModal = document.getElementById('info-modal');
+    const closeModal = document.getElementById('close-modal');
+
+    infoBtn.addEventListener('click', () => {
+      infoModal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    });
+
+    closeModal.addEventListener('click', () => {
+      infoModal.classList.remove('active');
+      document.body.style.overflow = 'auto';
+    });
+
+    infoModal.addEventListener('click', (e) => {
+      if (e.target === infoModal) {
+        infoModal.classList.remove('active');
+        document.body.style.overflow = 'auto';
+      }
+    });
+
+    document.getElementById('auto-modal').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('auto-modal')) {
+        document.getElementById('auto-modal').classList.remove('active');
+      }
+    });
+  </script>
+  <script src="../js/ui-components.js"></script>
+  <script src="../js/auth-service.js"></script>
+</body>
+</html>

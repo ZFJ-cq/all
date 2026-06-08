@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>你画我猜 - 竞速模式</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; overflow-x: hidden; }
+        body {
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            min-height: 100vh; display: flex; flex-direction: column;
+        }
+        .header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 15px; background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px); flex-shrink: 0;
+        }
+        .back-btn {
+            background: rgba(255,255,255,0.9); border: none; padding: 8px 16px;
+            border-radius: 20px; font-size: 14px; font-weight: 600; cursor: pointer;
+        }
+        h1 { color: white; font-size: 18px; font-weight: 600; }
+        .game-container {
+            flex: 1; background: #fff; border-radius: 20px 20px 0 0;
+            padding: 5px; display: flex; flex-direction: column;
+            min-height: calc(100vh - 50px); overflow-y: auto;
+        }
+        .time-selector { text-align: center; margin-bottom: 15px; }
+        .time-selector h3 { color: #666; font-size: 16px; margin-bottom: 15px; }
+        .time-options { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        .time-option {
+            padding: 12px 25px; background: #f5f5f5; border-radius: 20px;
+            cursor: pointer; font-size: 15px; font-weight: 600; border: 3px solid transparent;
+        }
+        .time-option.selected { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; border-color: #d97706; }
+        .game-header { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 12px; flex-shrink: 0; }
+        .game-stat {
+            padding: 8px 15px; border-radius: 12px; font-size: 14px; font-weight: 600;
+            color: white; min-width: 80px; text-align: center;
+        }
+        .game-stat.timer { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .game-stat.score { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+        .game-stat.count { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .word-display {
+            background: linear-gradient(135deg, #f093fb, #f5576c); color: white;
+            padding: 12px 20px; border-radius: 10px; font-size: 18px; font-weight: 600;
+            text-align: center; margin-bottom: 10px; flex-shrink: 0;
+        }
+        .canvas-container {
+            width: 100%; margin-bottom: 10px; border-radius: 12px;
+            overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); flex-shrink: 0;
+        }
+        #drawCanvas {
+            width: 100%; height: 260px; background: white; display: block;
+            touch-action: none; cursor: crosshair;
+        }
+        .controls {
+            display: flex; flex-wrap: wrap; justify-content: center;
+            gap: 6px; margin-bottom: 10px; flex-shrink: 0;
+        }
+        .control-group {
+            display: flex; align-items: center; gap: 4px;
+            background: #f5f5f5; padding: 5px 10px; border-radius: 15px;
+        }
+        button {
+            padding: 8px 16px; border: none; border-radius: 18px;
+            font-size: 13px; font-weight: 600; cursor: pointer;
+            display: flex; align-items: center; gap: 4px;
+        }
+        button:active { transform: scale(0.95); }
+        .btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
+        .btn-success { background: linear-gradient(135deg, #43e97b, #38f9d7); color: white; }
+        .btn-warning { background: linear-gradient(135deg, #f6d365, #fda085); color: white; }
+        input[type="color"] { width: 32px; height: 28px; border: none; border-radius: 6px; }
+        input[type="range"] { width: 60px; }
+        .pass-device {
+            text-align: center; padding: 15px;
+            background: linear-gradient(135deg, #fff3cd, #ffeeba);
+            border-radius: 10px; margin-bottom: 10px; border: 2px dashed #f59e0b; flex-shrink: 0;
+        }
+        .pass-device p { color: #856404; font-size: 14px; margin-bottom: 10px; }
+        .guessing-area {
+            display: flex; gap: 8px; margin-bottom: 10px; flex-shrink: 0;
+            background: #fff3cd; padding: 10px; border-radius: 10px;
+            border: 2px dashed #f59e0b;
+        }
+        #guessInput {
+            flex: 1; padding: 10px 15px; border: 2px solid #e0e0e0;
+            border-radius: 18px; font-size: 16px;
+        }
+        #guessInput:focus { outline: none; border-color: #f59e0b; }
+        .result-message {
+            text-align: center; font-size: 15px; font-weight: 600;
+            padding: 12px; border-radius: 10px; margin-bottom: 10px; flex-shrink: 0;
+        }
+        .result-message.success { background: #d4edda; color: #155724; border: 2px solid #28a745; }
+        .result-message.fail { background: #f8d7da; color: #721c24; border: 2px solid #dc3545; }
+        .game-over {
+            text-align: center; padding: 20px;
+            background: linear-gradient(135deg, #fff3cd, #ffeeba);
+            border-radius: 12px; margin-bottom: 15px; border: 2px dashed #f59e0b; flex-shrink: 0;
+        }
+        .game-over h2 { color: #f59e0b; font-size: 20px; margin-bottom: 10px; }
+        .game-over .final-score { font-size: 32px; font-weight: 700; color: #667eea; margin-bottom: 8px; }
+        .game-over .final-count { font-size: 16px; color: #666; margin-bottom: 15px; }
+        .hidden { display: none !important; }
+        @media (min-width: 576px) { #drawCanvas { height: 320px; } }
+        @media (min-width: 768px) {
+            body { padding: 15px; }
+            .game-container { border-radius: 20px; max-width: 700px; margin: 0 auto; min-height: auto; }
+            #drawCanvas { height: 380px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <button class="back-btn" onclick="location.href='index.html'">⬅️ 返回</button>
+        <h1>🏎️ 竞速模式</h1>
+        <div style="width:70px"></div>
+    </div>
+    <div class="game-container">
+        <div class="time-selector" id="timeSelector">
+            <h3>⏱️ 选择游戏时间</h3>
+            <div class="time-options">
+                <div class="time-option" onclick="selectTime(60,this)">1分钟</div>
+                <div class="time-option" onclick="selectTime(120,this)">2分钟</div>
+                <div class="time-option" onclick="selectTime(180,this)">3分钟</div>
+                <div class="time-option" onclick="selectTime(300,this)">5分钟</div>
+            </div>
+            <button class="btn-success" onclick="startGame()">🎮 开始游戏</button>
+        </div>
+        <div class="game-header hidden" id="gameHeader">
+            <div class="game-stat timer" id="timer">00:00</div>
+            <div class="game-stat score">得分: <span id="score">0</span></div>
+            <div class="game-stat count">答对: <span id="correctCount">0</span></div>
+        </div>
+        <div class="word-display hidden" id="wordDisplay">词语: <span id="currentWord">-</span></div>
+        <div class="canvas-container hidden" id="canvasContainer"><canvas id="drawCanvas"></canvas></div>
+        <div class="controls hidden" id="gameControls">
+            <div class="control-group"><input type="color" id="colorPicker" value="#000000"></div>
+            <div class="control-group"><input type="range" id="brushSize" min="2" max="20" value="5"></div>
+            <button class="btn-warning" onclick="clearCanvas()">🗑️清空</button>
+            <button class="btn-primary" onclick="finishDrawing()">✅完成</button>
+        </div>
+        <div class="pass-device hidden" id="passDevice">
+            <p>📱 绘画完成！请猜测答案</p>
+            <button class="btn-primary" onclick="startGuessing()">开始猜词</button>
+        </div>
+        <div class="guessing-area hidden" id="guessingArea">
+            <input type="text" id="guessInput" placeholder="输入答案..." onkeypress="if(event.key==='Enter')submitGuess()">
+            <button class="btn-primary" onclick="submitGuess()">提交</button>
+        </div>
+        <div class="result-message hidden" id="resultMessage"></div>
+        <div class="game-over hidden" id="gameOver">
+            <h2>⏰ 时间到！</h2>
+            <div class="final-score">🏆 得分: <span id="finalScore">0</span></div>
+            <div class="final-count">✅ 答对: <span id="finalCount">0</span> 题</div>
+            <button class="btn-success" onclick="restartGame()">🔄再来一局</button>
+            <button class="btn-primary" onclick="location.href='index.html'">🏠返回</button>
+        </div>
+    </div>
+    <img id="savedImg" style="display:none">
+
+    <script>
+        var canvas = document.getElementById('drawCanvas');
+        var ctx = canvas.getContext('2d');
+        var savedImg = document.getElementById('savedImg');
+        var isDrawing = false, lastX = 0, lastY = 0;
+        var currentColor = '#000000', brushSize = 5;
+        var gameTime = 60, timeLeft = 0, score = 0, correctCount = 0;
+        var currentWord = '', timerInterval = null, isDrawingMode = true;
+        var usedWords = [], canvasW = 0, canvasH = 260;
+        var words = ['猫','狗','大象','老虎','熊猫','兔子','狐狸','猴子','马','苹果','香蕉','西瓜','足球','篮球','手机','电脑','太阳','月亮','星星','花朵','树木','房子','汽车','飞机','轮船','鱼','鸟','蛇','蛋糕','雨伞'];
+
+        function initCanvas() {
+            canvasW = window.innerWidth;
+            canvasH = 450;
+            if (window.innerWidth >= 576) canvasH = 520;
+            if (window.innerWidth >= 768) canvasH = 600;
+            canvas.width = canvasW; canvas.height = canvasH;
+            canvas.style.width = canvasW + 'px'; canvas.style.height = canvasH + 'px';
+            ctx.fillStyle = 'white'; ctx.fillRect(0, 0, canvasW, canvasH);
+            ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+        }
+
+        function getPos(e) {
+            var rect = canvas.getBoundingClientRect();
+            var sx = canvasW / rect.width, sy = canvasH / rect.height;
+            var cx, cy;
+            if (e.touches && e.touches.length > 0) { cx = e.touches[0].clientX; cy = e.touches[0].clientY; }
+            else { cx = e.clientX; cy = e.clientY; }
+            return { x: (cx - rect.left) * sx, y: (cy - rect.top) * sy };
+        }
+
+        function onStart(e) { if (!isDrawingMode) return; e.preventDefault(); isDrawing = true; var p = getPos(e); lastX = p.x; lastY = p.y; }
+        function onMove(e) {
+            if (!isDrawing) return; e.preventDefault();
+            var p = getPos(e);
+            ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(p.x, p.y);
+            ctx.strokeStyle = currentColor; ctx.lineWidth = brushSize; ctx.stroke();
+            lastX = p.x; lastY = p.y;
+        }
+        function onEnd() { isDrawing = false; }
+
+        canvas.addEventListener('mousedown', onStart);
+        canvas.addEventListener('mousemove', onMove);
+        canvas.addEventListener('mouseup', onEnd);
+        canvas.addEventListener('mouseout', onEnd);
+        canvas.addEventListener('touchstart', onStart, {passive:false});
+        canvas.addEventListener('touchmove', onMove, {passive:false});
+        canvas.addEventListener('touchend', onEnd);
+        canvas.addEventListener('touchcancel', onEnd);
+
+        document.getElementById('colorPicker').addEventListener('change', function(e) { currentColor = e.target.value; });
+        document.getElementById('brushSize').addEventListener('input', function(e) { brushSize = parseInt(e.target.value); });
+
+        function selectTime(t, el) {
+            gameTime = t;
+            document.querySelectorAll('.time-option').forEach(function(e) { e.classList.remove('selected'); });
+            el.classList.add('selected');
+        }
+
+        function startGame() {
+            if (!document.querySelector('.time-option.selected')) { alert('请先选择时间！'); return; }
+            document.getElementById('timeSelector').classList.add('hidden');
+            document.getElementById('gameHeader').classList.remove('hidden');
+            document.getElementById('wordDisplay').classList.remove('hidden');
+            document.getElementById('canvasContainer').classList.remove('hidden');
+            document.getElementById('gameControls').classList.remove('hidden');
+            timeLeft = gameTime; score = 0; correctCount = 0; usedWords = []; isDrawingMode = true;
+            initCanvas(); updateTimer(); updateScore(); nextWord();
+            timerInterval = setInterval(function() { timeLeft--; updateTimer(); if (timeLeft <= 0) gameOver(); }, 1000);
+        }
+
+        function updateTimer() {
+            var m = Math.floor(timeLeft / 60), s = timeLeft % 60;
+            document.getElementById('timer').textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+        }
+        function updateScore() { document.getElementById('score').textContent = score; document.getElementById('correctCount').textContent = correctCount; }
+
+        function nextWord() {
+            var available = words.filter(function(w) { return usedWords.indexOf(w) === -1; });
+            if (available.length === 0) { usedWords = []; available = words.slice(); }
+            var i = Math.floor(Math.random() * available.length);
+            currentWord = available[i]; usedWords.push(currentWord);
+            document.getElementById('currentWord').textContent = currentWord;
+            document.getElementById('wordDisplay').classList.remove('hidden');
+            document.getElementById('gameControls').classList.remove('hidden');
+            document.getElementById('guessingArea').classList.add('hidden');
+            document.getElementById('passDevice').classList.add('hidden');
+            clearCanvas(); isDrawingMode = true;
+        }
+
+        function clearCanvas() { ctx.fillStyle = 'white'; ctx.fillRect(0, 0, canvasW, canvasH); }
+
+        function finishDrawing() {
+            savedImg.src = canvas.toDataURL();
+            document.getElementById('gameControls').classList.add('hidden');
+            document.getElementById('wordDisplay').classList.add('hidden');
+            document.getElementById('passDevice').classList.remove('hidden');
+        }
+
+        function startGuessing() {
+            document.getElementById('passDevice').classList.add('hidden');
+            document.getElementById('guessingArea').classList.remove('hidden');
+            document.getElementById('canvasContainer').classList.remove('hidden');
+            document.getElementById('currentWord').textContent = '???';
+            document.getElementById('guessInput').value = '';
+            isDrawingMode = false;
+            if (savedImg.src && savedImg.complete) {
+                ctx.clearRect(0, 0, canvasW, canvasH);
+                ctx.drawImage(savedImg, 0, 0, canvasW, canvasH);
+            }
+            setTimeout(function() { document.getElementById('guessInput').focus(); }, 200);
+        }
+
+        function submitGuess() {
+            var guess = document.getElementById('guessInput').value.trim();
+            if (!guess) return;
+            var el = document.getElementById('resultMessage');
+            if (guess === currentWord) {
+                score += 100 + timeLeft; correctCount++; updateScore();
+                el.textContent = '🎉 答对了！+' + (100 + timeLeft) + '分';
+                el.className = 'result-message success';
+            } else {
+                el.textContent = '❌ 答错了！正确答案：' + currentWord;
+                el.className = 'result-message fail';
+            }
+            el.classList.remove('hidden');
+            document.getElementById('guessingArea').classList.add('hidden');
+            setTimeout(function() {
+                el.classList.add('hidden');
+                nextWord();
+            }, 1500);
+        }
+
+        function gameOver() {
+            clearInterval(timerInterval);
+            document.getElementById('gameHeader').classList.add('hidden');
+            document.getElementById('wordDisplay').classList.add('hidden');
+            document.getElementById('canvasContainer').classList.add('hidden');
+            document.getElementById('gameControls').classList.add('hidden');
+            document.getElementById('passDevice').classList.add('hidden');
+            document.getElementById('guessingArea').classList.add('hidden');
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('finalCount').textContent = correctCount;
+            document.getElementById('gameOver').classList.remove('hidden');
+        }
+
+        function restartGame() {
+            document.getElementById('gameOver').classList.add('hidden');
+            document.getElementById('timeSelector').classList.remove('hidden');
+            document.querySelectorAll('.time-option').forEach(function(e) { e.classList.remove('selected'); });
+            document.getElementById('guessInput').value = '';
+        }
+
+        initCanvas();
+    </script>
+</body>
+</html>

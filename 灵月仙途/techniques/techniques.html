@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="../js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="../css/mobile-adapt.css">
+  <title>灵月仙途 - 功法</title>
+  <style>
+    :root {
+      --gold-primary: #e6c749;
+      --gold-light: #f4d03f;
+      --gold-dim: #8a7525;
+      --text-main: #fdfbf7;
+      --text-dim: #d4c5a9;
+      --bg-dark: rgba(15, 20, 35, 0.95);
+      --bg-panel: rgba(20, 25, 45, 0.85);
+      --success: #4CAF50;
+      --danger: #ff4444;
+      --rarity-common: #9ca3af;
+      --rarity-uncommon: #22c55e;
+      --rarity-rare: #3b82f6;
+      --rarity-epic: #a855f7;
+      --rarity-legendary: #f59e0b;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Microsoft YaHei', serif;
+      background: linear-gradient(to bottom, #0f1420, #1a202c);
+      min-height: 100vh;
+      color: var(--text-main);
+      padding: 15px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .panel {
+      background: var(--bg-panel);
+      border: 1px solid rgba(230, 199, 73, 0.3);
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .panel-title {
+      font-size: 1.2rem;
+      color: var(--gold-primary);
+      margin-bottom: 15px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .bonus-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .bonus-stat {
+      background: rgba(0,0,0,0.3);
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+      border: 1px solid rgba(230, 199, 73, 0.2);
+    }
+
+    .bonus-stat .label {
+      color: var(--text-dim);
+      font-size: 0.85rem;
+      margin-bottom: 5px;
+    }
+
+    .bonus-stat .value {
+      color: var(--gold-light);
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+
+    .technique-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .technique-card {
+      background: rgba(0,0,0,0.3);
+      border-radius: 8px;
+      padding: 15px;
+      border: 1px solid rgba(255,255,255,0.05);
+      transition: all 0.3s;
+    }
+
+    .technique-card:hover {
+      border-color: var(--gold-primary);
+      transform: translateY(-2px);
+    }
+
+    .technique-card.equipped {
+      border-color: var(--success);
+      background: rgba(76, 175, 80, 0.1);
+    }
+
+    .technique-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .technique-name {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: var(--gold-light);
+    }
+
+    .technique-rarity {
+      font-size: 0.75rem;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+
+    .rarity-common { background: var(--rarity-common); color: #000; }
+    .rarity-uncommon { background: var(--rarity-uncommon); color: #fff; }
+    .rarity-rare { background: var(--rarity-rare); color: #fff; }
+    .rarity-epic { background: var(--rarity-epic); color: #fff; }
+    .rarity-legendary { background: var(--rarity-legendary); color: #000; }
+
+    .technique-description {
+      color: var(--text-dim);
+      font-size: 0.9rem;
+      margin-bottom: 10px;
+      line-height: 1.5;
+    }
+
+    .technique-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      font-size: 0.85rem;
+      margin-bottom: 10px;
+    }
+
+    .tech-stat {
+      background: rgba(255,255,255,0.05);
+      padding: 5px 8px;
+      border-radius: 4px;
+      text-align: center;
+    }
+
+    .tech-stat .label {
+      color: var(--text-dim);
+      font-size: 0.75rem;
+    }
+
+    .tech-stat .value {
+      color: var(--gold-light);
+      font-weight: bold;
+    }
+
+    .technique-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-equip {
+      background: linear-gradient(90deg, transparent, rgba(76,175,80,0.3), transparent);
+      border: 1px solid var(--success);
+      color: var(--success);
+    }
+
+    .btn-equip:hover:not(:disabled) {
+      background: rgba(76, 175, 80, 0.3);
+    }
+
+    .btn-unequip {
+      background: linear-gradient(90deg, transparent, rgba(255,68,68,0.3), transparent);
+      border: 1px solid var(--danger);
+      color: var(--danger);
+    }
+
+    .btn-unequip:hover:not(:disabled) {
+      background: rgba(255, 68, 68, 0.3);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .toast {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0,0,0,0.9);
+      color: #fff;
+      padding: 15px 25px;
+      border-radius: 8px;
+      z-index: 3000;
+      border: 1px solid rgba(230, 199, 73, 0.5);
+      animation: fadeInOut 2s ease-in-out;
+    }
+
+    @keyframes fadeInOut {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+      20% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+      80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+    }
+  </style>
+  <script src="../js/auth-service.js"></script>
+
+  </head>
+<body>
+  <div class="container">
+    <div class="panel">
+      <div class="panel-title">📜 功法系统</div>
+      
+      <div class="bonus-stats" id="bonusStats">
+        <div class="bonus-stat">
+          <div class="label">速度加成</div>
+          <div class="value" id="speedBonus">0%</div>
+        </div>
+        <div class="bonus-stat">
+          <div class="label">绝对加成</div>
+          <div class="value" id="speedFlat">+0/秒</div>
+        </div>
+        <div class="bonus-stat">
+          <div class="label">上限加成</div>
+          <div class="value" id="limitBonus">+0</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">我的功法</div>
+      <div class="technique-list" id="techniqueList">
+        <div style="text-align: center; color: var(--text-dim); padding: 40px;">
+          加载中...
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE_URL = window.APP_CONFIG?.API_BASE_URL || 'http://localhost:8088/api';
+    let currentUserId = null;
+    let currentRoleId = null;
+    let userTechniques = [];
+    let allTechniques = [];
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      currentUserId = localStorage.getItem('userId');
+      currentRoleId = localStorage.getItem('currentRoleId');
+      
+      if (!currentUserId || !currentRoleId) {
+        showToast('请先登录');
+        window.location.href = 'login.html';
+        return;
+      }
+      
+      await loadAllData();
+    });
+
+    async function loadAllData() {
+      await Promise.all([
+        loadAllTechniques(),
+        loadUserTechniques(),
+        loadTechniqueBonus()
+      ]);
+      renderTechniqueList();
+    }
+
+    async function loadAllTechniques() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/technique/list`);
+        const data = await response.json();
+        if (data.success) {
+          allTechniques = data.data || [];
+        }
+      } catch (error) {
+        console.error('加载功法列表失败:', error);
+      }
+    }
+
+    async function loadUserTechniques() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/technique/user/${currentUserId}`);
+        const data = await response.json();
+        if (data.success) {
+          userTechniques = data.data || [];
+        }
+      } catch (error) {
+        console.error('加载用户功法失败:', error);
+      }
+    }
+
+    async function loadTechniqueBonus() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/technique/user/${currentUserId}/bonus`);
+        const data = await response.json();
+        if (data.success) {
+          const bonus = data.data;
+          document.getElementById('speedBonus').textContent = `+${((bonus.speedPercentage || 0) * 100).toFixed(1)}%`;
+          document.getElementById('speedFlat').textContent = `+${bonus.speedFlat || 0}/秒`;
+          document.getElementById('limitBonus').textContent = `+${(bonus.limitBonus || 0).toLocaleString()}`;
+        }
+      } catch (error) {
+        console.error('加载功法加成失败:', error);
+      }
+    }
+
+    function renderTechniqueList() {
+      const container = document.getElementById('techniqueList');
+      
+      if (allTechniques.length === 0) {
+        container.innerHTML = '<div style="text-align: center; color: var(--text-dim); padding: 40px;">暂无功法</div>';
+        return;
+      }
+      
+      const userTechniqueMap = new Map();
+      userTechniques.forEach(ut => {
+        userTechniqueMap.set(ut.techniqueId, ut);
+      });
+      
+      let html = '';
+      allTechniques.forEach(tech => {
+        const userTech = userTechniqueMap.get(tech.id);
+        const isOwned = !!userTech;
+        const isEquipped = isOwned && userTech.isEquipped;
+        
+        html += `
+          <div class="technique-card ${isEquipped ? 'equipped' : ''}">
+            <div class="technique-header">
+              <div class="technique-name">${tech.name}</div>
+              <div class="technique-rarity rarity-${(tech.rarity || 'COMMON').toLowerCase()}">
+                ${getRarityName(tech.rarity)}
+              </div>
+            </div>
+            <div class="technique-description">${tech.description || ''}</div>
+            <div class="technique-stats">
+              <div class="tech-stat">
+                <div class="label">速度加成</div>
+                <div class="value">+${((tech.speedAddition || 0) * 100).toFixed(0)}%</div>
+              </div>
+              <div class="tech-stat">
+                <div class="label">绝对加成</div>
+                <div class="value">+${tech.speedAdditionFlat || 0}/秒</div>
+              </div>
+              <div class="tech-stat">
+                <div class="label">上限加成</div>
+                <div class="value">+${(tech.limitAddition || 0).toLocaleString()}</div>
+              </div>
+            </div>
+            <div class="technique-actions">
+              ${isEquipped 
+                ? `<button class="btn btn-unequip" onclick="unequipTechnique(${tech.id})">卸下</button>`
+                : isOwned
+                  ? `<button class="btn btn-equip" onclick="equipTechnique(${tech.id})">装备</button>`
+                  : `<button class="btn btn-equip" onclick="learnTechnique(${tech.id})">学习</button>`
+              }
+            </div>
+          </div>
+        `;
+      });
+      
+      container.innerHTML = html;
+    }
+
+    function getRarityName(rarity) {
+      const names = {
+        'COMMON': '普通',
+        'UNCOMMON': '优秀',
+        'RARE': '稀有',
+        'EPIC': '史诗',
+        'LEGENDARY': '传说'
+      };
+      return names[rarity] || '普通';
+    }
+
+    async function learnTechnique(techniqueId) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/technique/learn?userId=${currentUserId}&roleId=${currentRoleId}&techniqueId=${techniqueId}`, {
+          method: 'POST'
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+          showToast('学习成功');
+          await loadUserTechniques();
+          renderTechniqueList();
+        } else {
+          showToast(data.message || '学习失败');
+        }
+      } catch (error) {
+        console.error('学习功法失败:', error);
+        showToast('网络连接失败');
+      }
+    }
+
+    async function equipTechnique(techniqueId) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/technique/equip?userId=${currentUserId}&roleId=${currentRoleId}&techniqueId=${techniqueId}`, {
+          method: 'POST'
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+          showToast('装备成功');
+          if (data.data.cultivationRecalculated) {
+            showToast('修炼速率已重新校准');
+          }
+          await Promise.all([loadUserTechniques(), loadTechniqueBonus()]);
+          renderTechniqueList();
+        } else {
+          showToast(data.message || '装备失败');
+        }
+      } catch (error) {
+        console.error('装备功法失败:', error);
+        showToast('网络连接失败');
+      }
+    }
+
+    async function unequipTechnique(techniqueId) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/technique/unequip?userId=${currentUserId}&roleId=${currentRoleId}&techniqueId=${techniqueId}`, {
+          method: 'POST'
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+          showToast('卸下成功');
+          if (data.data.cultivationRecalculated) {
+            showToast('修炼速率已重新校准');
+          }
+          await Promise.all([loadUserTechniques(), loadTechniqueBonus()]);
+          renderTechniqueList();
+        } else {
+          showToast(data.message || '卸下失败');
+        }
+      } catch (error) {
+        console.error('卸下功法失败:', error);
+        showToast('网络连接失败');
+      }
+    }
+
+    function showToast(message) {
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.remove();
+      }, 2000);
+    }
+  </script>
+</body>
+</html>

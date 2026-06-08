@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>游戏配置中心 - 灵月仙途</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    .config-container {
+      padding: 20px;
+    }
+    
+    .config-nav {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .config-nav button {
+      padding: 10px 15px;
+      border: 1px solid #e6c749;
+      background: rgba(230, 199, 73, 0.1);
+      color: #e6c749;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .config-nav button:hover {
+      background: rgba(230, 199, 73, 0.3);
+    }
+    
+    .config-nav button.active {
+      background: #e6c749;
+      color: #000;
+      font-weight: bold;
+    }
+    
+    .config-content {
+      background: rgba(20, 25, 45, 0.85);
+      border: 1px solid rgba(230, 199, 73, 0.3);
+      border-radius: 8px;
+      padding: 20px;
+      min-height: 400px;
+    }
+    
+    .config-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    
+    .config-table th,
+    .config-table td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid rgba(230, 199, 73, 0.2);
+    }
+    
+    .config-table th {
+      color: #e6c749;
+      font-weight: bold;
+    }
+    
+    .config-table tr:hover {
+      background: rgba(230, 199, 73, 0.1);
+    }
+    
+    .action-buttons {
+      display: flex;
+      gap: 5px;
+    }
+    
+    .action-buttons button {
+      padding: 5px 10px;
+      border: 1px solid #e6c749;
+      background: rgba(230, 199, 73, 0.1);
+      color: #e6c749;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.3s;
+    }
+    
+    .action-buttons button:hover {
+      background: rgba(230, 199, 73, 0.3);
+    }
+    
+    .add-button {
+      padding: 10px 15px;
+      border: 1px solid #e6c749;
+      background: rgba(230, 199, 73, 0.2);
+      color: #e6c749;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-bottom: 15px;
+      transition: all 0.3s;
+    }
+    
+    .add-button:hover {
+      background: rgba(230, 199, 73, 0.4);
+    }
+    
+    .form-container {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(230, 199, 73, 0.3);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .form-group {
+      margin-bottom: 15px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      color: #d4c5a9;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 8px;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(230, 199, 73, 0.3);
+      border-radius: 4px;
+      color: #fff;
+    }
+    
+    .form-group textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+    
+    .form-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    
+    .form-actions button {
+      padding: 10px 15px;
+      border: 1px solid #e6c749;
+      background: rgba(230, 199, 73, 0.1);
+      color: #e6c749;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .form-actions button:hover {
+      background: rgba(230, 199, 73, 0.3);
+    }
+    
+    .form-actions button.primary {
+      background: #e6c749;
+      color: #000;
+      font-weight: bold;
+    }
+    
+    .refresh-cache {
+      padding: 10px 15px;
+      border: 1px solid #4CAF50;
+      background: rgba(76, 175, 80, 0.1);
+      color: #4CAF50;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: all 0.3s;
+    }
+    
+    .refresh-cache:hover {
+      background: rgba(76, 175, 80, 0.3);
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 50px;
+      color: #d4c5a9;
+    }
+    
+    .error {
+      color: #ff4444;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="config-container">
+    <h1>游戏配置中心</h1>
+    
+    <div class="config-nav">
+      <button class="active" data-config="realm-breakthrough">境界突破</button>
+      <button data-config="equipment-quality">装备品质</button>
+      <button data-config="pill-effect">丹药效果</button>
+      <button data-config="skill-upgrade">技能升级</button>
+    </div>
+    
+    <div class="config-content">
+      <!-- 境界突破配置 -->
+      <div id="realm-breakthrough-content" class="config-section active">
+        <button class="add-button" onclick="showForm('realm-breakthrough')">添加突破配置</button>
+        <button class="refresh-cache" onclick="refreshCache()">刷新缓存</button>
+        
+        <div class="form-container" id="realm-breakthrough-form" style="display: none;">
+          <h3 id="realm-breakthrough-form-title">添加突破配置</h3>
+          <input type="hidden" id="realm-breakthrough-id">
+          <div class="form-group">
+            <label for="realm-breakthrough-from">起始境界</label>
+            <input type="text" id="realm-breakthrough-from" placeholder="例如：炼气">
+          </div>
+          <div class="form-group">
+            <label for="realm-breakthrough-to">目标境界</label>
+            <input type="text" id="realm-breakthrough-to" placeholder="例如：筑基">
+          </div>
+          <div class="form-group">
+            <label for="realm-breakthrough-xiuwei">修为需求</label>
+            <input type="number" id="realm-breakthrough-xiuwei" placeholder="例如：1000">
+          </div>
+          <div class="form-group">
+            <label for="realm-breakthrough-pill">突破丹药</label>
+            <input type="text" id="realm-breakthrough-pill" placeholder="例如：筑基丹">
+          </div>
+          <div class="form-group">
+            <label for="realm-breakthrough-success">成功率</label>
+            <input type="number" id="realm-breakthrough-success" step="0.01" placeholder="例如：0.7">
+          </div>
+          <div class="form-group">
+            <label for="realm-breakthrough-penalty">失败惩罚</label>
+            <input type="text" id="realm-breakthrough-penalty" placeholder="例如：修为损失30%">
+          </div>
+          <div class="form-actions">
+            <button class="primary" onclick="saveConfig('realm-breakthrough')">保存</button>
+            <button onclick="hideForm('realm-breakthrough')">取消</button>
+          </div>
+        </div>
+        
+        <div class="loading" id="realm-breakthrough-loading">加载中...</div>
+        <div class="error" id="realm-breakthrough-error"></div>
+        <table class="config-table" id="realm-breakthrough-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>起始境界</th>
+              <th>目标境界</th>
+              <th>修为需求</th>
+              <th>突破丹药</th>
+              <th>成功率</th>
+              <th>失败惩罚</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- 数据将通过JavaScript动态填充 -->
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- 装备品质配置 -->
+      <div id="equipment-quality-content" class="config-section" style="display: none;">
+        <button class="add-button" onclick="showForm('equipment-quality')">添加品质配置</button>
+        <button class="refresh-cache" onclick="refreshCache()">刷新缓存</button>
+        
+        <div class="form-container" id="equipment-quality-form" style="display: none;">
+          <h3 id="equipment-quality-form-title">添加品质配置</h3>
+          <input type="hidden" id="equipment-quality-id">
+          <div class="form-group">
+            <label for="equipment-quality-name">品质名称</label>
+            <input type="text" id="equipment-quality-name" placeholder="例如：凡器">
+          </div>
+          <div class="form-group">
+            <label for="equipment-quality-color">颜色</label>
+            <input type="text" id="equipment-quality-color" placeholder="例如：白色">
+          </div>
+          <div class="form-group">
+            <label for="equipment-quality-probability">出现概率</label>
+            <input type="number" id="equipment-quality-probability" step="0.0001" placeholder="例如：0.5">
+          </div>
+          <div class="form-group">
+            <label for="equipment-quality-min">最小属性加成</label>
+            <input type="number" id="equipment-quality-min" placeholder="例如：1">
+          </div>
+          <div class="form-group">
+            <label for="equipment-quality-max">最大属性加成</label>
+            <input type="number" id="equipment-quality-max" placeholder="例如：10">
+          </div>
+          <div class="form-group">
+            <label for="equipment-quality-special">特殊效果概率</label>
+            <input type="number" id="equipment-quality-special" step="0.01" placeholder="例如：0">
+          </div>
+          <div class="form-actions">
+            <button class="primary" onclick="saveConfig('equipment-quality')">保存</button>
+            <button onclick="hideForm('equipment-quality')">取消</button>
+          </div>
+        </div>
+        
+        <div class="loading" id="equipment-quality-loading">加载中...</div>
+        <div class="error" id="equipment-quality-error"></div>
+        <table class="config-table" id="equipment-quality-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>品质名称</th>
+              <th>颜色</th>
+              <th>出现概率</th>
+              <th>属性加成范围</th>
+              <th>特殊效果概率</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- 数据将通过JavaScript动态填充 -->
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- 丹药效果配置 -->
+      <div id="pill-effect-content" class="config-section" style="display: none;">
+        <button class="add-button" onclick="showForm('pill-effect')">添加丹药配置</button>
+        <button class="refresh-cache" onclick="refreshCache()">刷新缓存</button>
+        
+        <div class="form-container" id="pill-effect-form" style="display: none;">
+          <h3 id="pill-effect-form-title">添加丹药配置</h3>
+          <input type="hidden" id="pill-effect-id">
+          <div class="form-group">
+            <label for="pill-effect-name">丹药名称</label>
+            <input type="text" id="pill-effect-name" placeholder="例如：聚气丹">
+          </div>
+          <div class="form-group">
+            <label for="pill-effect-rank">品阶</label>
+            <input type="number" id="pill-effect-rank" placeholder="例如：1">
+          </div>
+          <div class="form-group">
+            <label for="pill-effect-effect">效果</label>
+            <input type="text" id="pill-effect-effect" placeholder="例如：修炼速度+10%">
+          </div>
+          <div class="form-group">
+            <label for="pill-effect-duration">持续时间</label>
+            <input type="text" id="pill-effect-duration" placeholder="例如：2小时">
+          </div>
+          <div class="form-group">
+            <label for="pill-effect-cooldown">冷却时间</label>
+            <input type="text" id="pill-effect-cooldown" placeholder="例如：无">
+          </div>
+          <div class="form-group">
+            <label for="pill-effect-cost">材料成本</label>
+            <input type="number" id="pill-effect-cost" placeholder="例如：5">
+          </div>
+          <div class="form-actions">
+            <button class="primary" onclick="saveConfig('pill-effect')">保存</button>
+            <button onclick="hideForm('pill-effect')">取消</button>
+          </div>
+        </div>
+        
+        <div class="loading" id="pill-effect-loading">加载中...</div>
+        <div class="error" id="pill-effect-error"></div>
+        <table class="config-table" id="pill-effect-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>丹药名称</th>
+              <th>品阶</th>
+              <th>效果</th>
+              <th>持续时间</th>
+              <th>冷却时间</th>
+              <th>材料成本</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- 数据将通过JavaScript动态填充 -->
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- 技能升级配置 -->
+      <div id="skill-upgrade-content" class="config-section" style="display: none;">
+        <button class="add-button" onclick="showForm('skill-upgrade')">添加技能升级配置</button>
+        <button class="refresh-cache" onclick="refreshCache()">刷新缓存</button>
+        
+        <div class="form-container" id="skill-upgrade-form" style="display: none;">
+          <h3 id="skill-upgrade-form-title">添加技能升级配置</h3>
+          <input type="hidden" id="skill-upgrade-id">
+          <div class="form-group">
+            <label for="skill-upgrade-level">技能等级</label>
+            <input type="text" id="skill-upgrade-level" placeholder="例如：入门">
+          </div>
+          <div class="form-group">
+            <label for="skill-upgrade-proficiency">熟练度需求</label>
+            <input type="number" id="skill-upgrade-proficiency" placeholder="例如：0">
+          </div>
+          <div class="form-group">
+            <label for="skill-upgrade-effect">效果提升</label>
+            <input type="text" id="skill-upgrade-effect" placeholder="例如：基础效果">
+          </div>
+          <div class="form-group">
+            <label for="skill-upgrade-mana">灵力消耗</label>
+            <input type="text" id="skill-upgrade-mana" placeholder="例如：基础消耗">
+          </div>
+          <div class="form-group">
+            <label for="skill-upgrade-cooldown">冷却时间</label>
+            <input type="text" id="skill-upgrade-cooldown" placeholder="例如：基础冷却">
+          </div>
+          <div class="form-actions">
+            <button class="primary" onclick="saveConfig('skill-upgrade')">保存</button>
+            <button onclick="hideForm('skill-upgrade')">取消</button>
+          </div>
+        </div>
+        
+        <div class="loading" id="skill-upgrade-loading">加载中...</div>
+        <div class="error" id="skill-upgrade-error"></div>
+        <table class="config-table" id="skill-upgrade-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>技能等级</th>
+              <th>熟练度需求</th>
+              <th>效果提升</th>
+              <th>灵力消耗</th>
+              <th>冷却时间</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- 数据将通过JavaScript动态填充 -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // API基础URL
+    const API_BASE_URL = 'http://localhost:8088/api';
+    
+    // 当前激活的配置类型
+    let currentConfigType = 'realm-breakthrough';
+    
+    // 页面加载完成后初始化
+    document.addEventListener('DOMContentLoaded', function() {
+      // 绑定导航按钮事件
+      document.querySelectorAll('.config-nav button').forEach(button => {
+        button.addEventListener('click', function() {
+          const configType = this.dataset.config;
+          switchConfig(configType);
+        });
+      });
+      
+      // 初始加载境界突破配置
+      loadConfig('realm-breakthrough');
+    });
+    
+    // 切换配置类型
+    function switchConfig(configType) {
+      // 更新导航按钮状态
+      document.querySelectorAll('.config-nav button').forEach(button => {
+        button.classList.remove('active');
+        if (button.dataset.config === configType) {
+          button.classList.add('active');
+        }
+      });
+      
+      // 更新内容显示
+      document.querySelectorAll('.config-section').forEach(section => {
+        section.style.display = 'none';
+      });
+      document.getElementById(`${configType}-content`).style.display = 'block';
+      
+      // 加载配置数据
+      currentConfigType = configType;
+      loadConfig(configType);
+    }
+    
+    // 加载配置数据
+    function loadConfig(configType) {
+      const loadingElement = document.getElementById(`${configType}-loading`);
+      const errorElement = document.getElementById(`${configType}-error`);
+      const tableBody = document.querySelector(`#${configType}-table tbody`);
+      
+      loadingElement.style.display = 'block';
+      errorElement.textContent = '';
+      tableBody.innerHTML = '';
+      
+      fetch(`${API_BASE_URL}/config/${configType.replace('-', '/')}`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('网络请求失败');
+          }
+          return response.json();
+        })
+        .then(data => {
+          loadingElement.style.display = 'none';
+          renderConfigTable(configType, data);
+        })
+        .catch(error => {
+          loadingElement.style.display = 'none';
+          errorElement.textContent = `加载失败: ${error.message}`;
+        });
+    }
+    
+    // 渲染配置表格
+    function renderConfigTable(configType, data) {
+      const tableBody = document.querySelector(`#${configType}-table tbody`);
+      tableBody.innerHTML = '';
+      
+      data.forEach(item => {
+        const row = document.createElement('tr');
+        
+        switch(configType) {
+          case 'realm-breakthrough':
+            row.innerHTML = `
+              <td>${item.id}</td>
+              <td>${item.fromRealm}</td>
+              <td>${item.toRealm}</td>
+              <td>${item.xiuweiRequirement}</td>
+              <td>${item.pillName}</td>
+              <td>${(item.successRate * 100).toFixed(0)}%</td>
+              <td>${item.failurePenalty}</td>
+              <td class="action-buttons">
+                <button onclick="editConfig('${configType}', ${item.id})">编辑</button>
+                <button onclick="deleteConfig('${configType}', ${item.id})">删除</button>
+              </td>
+            `;
+            break;
+          case 'equipment-quality':
+            row.innerHTML = `
+              <td>${item.id}</td>
+              <td>${item.quality}</td>
+              <td>${item.color}</td>
+              <td>${(item.probability * 100).toFixed(4)}%</td>
+              <td>${item.minBonus}-${item.maxBonus}</td>
+              <td>${(item.specialEffectProbability * 100).toFixed(0)}%</td>
+              <td class="action-buttons">
+                <button onclick="editConfig('${configType}', ${item.id})">编辑</button>
+                <button onclick="deleteConfig('${configType}', ${item.id})">删除</button>
+              </td>
+            `;
+            break;
+          case 'pill-effect':
+            row.innerHTML = `
+              <td>${item.id}</td>
+              <td>${item.pillName}</td>
+              <td>${item.rank}品</td>
+              <td>${item.effect}</td>
+              <td>${item.duration}</td>
+              <td>${item.cooldown}</td>
+              <td>${item.materialCost}灵石</td>
+              <td class="action-buttons">
+                <button onclick="editConfig('${configType}', ${item.id})">编辑</button>
+                <button onclick="deleteConfig('${configType}', ${item.id})">删除</button>
+              </td>
+            `;
+            break;
+          case 'skill-upgrade':
+            row.innerHTML = `
+              <td>${item.id}</td>
+              <td>${item.skillLevel}</td>
+              <td>${item.proficiencyRequirement}</td>
+              <td>${item.effectIncrease}</td>
+              <td>${item.manaConsumption}</td>
+              <td>${item.cooldown}</td>
+              <td class="action-buttons">
+                <button onclick="editConfig('${configType}', ${item.id})">编辑</button>
+                <button onclick="deleteConfig('${configType}', ${item.id})">删除</button>
+              </td>
+            `;
+            break;
+        }
+        
+        tableBody.appendChild(row);
+      });
+    }
+    
+    // 显示表单
+    function showForm(configType) {
+      const form = document.getElementById(`${configType}-form`);
+      const formTitle = document.getElementById(`${configType}-form-title`);
+      
+      // 重置表单
+      document.getElementById(`${configType}-id`).value = '';
+      
+      switch(configType) {
+        case 'realm-breakthrough':
+          formTitle.textContent = '添加突破配置';
+          document.getElementById('realm-breakthrough-from').value = '';
+          document.getElementById('realm-breakthrough-to').value = '';
+          document.getElementById('realm-breakthrough-xiuwei').value = '';
+          document.getElementById('realm-breakthrough-pill').value = '';
+          document.getElementById('realm-breakthrough-success').value = '';
+          document.getElementById('realm-breakthrough-penalty').value = '';
+          break;
+        case 'equipment-quality':
+          formTitle.textContent = '添加品质配置';
+          document.getElementById('equipment-quality-name').value = '';
+          document.getElementById('equipment-quality-color').value = '';
+          document.getElementById('equipment-quality-probability').value = '';
+          document.getElementById('equipment-quality-min').value = '';
+          document.getElementById('equipment-quality-max').value = '';
+          document.getElementById('equipment-quality-special').value = '';
+          break;
+        case 'pill-effect':
+          formTitle.textContent = '添加丹药配置';
+          document.getElementById('pill-effect-name').value = '';
+          document.getElementById('pill-effect-rank').value = '';
+          document.getElementById('pill-effect-effect').value = '';
+          document.getElementById('pill-effect-duration').value = '';
+          document.getElementById('pill-effect-cooldown').value = '';
+          document.getElementById('pill-effect-cost').value = '';
+          break;
+        case 'skill-upgrade':
+          formTitle.textContent = '添加技能升级配置';
+          document.getElementById('skill-upgrade-level').value = '';
+          document.getElementById('skill-upgrade-proficiency').value = '';
+          document.getElementById('skill-upgrade-effect').value = '';
+          document.getElementById('skill-upgrade-mana').value = '';
+          document.getElementById('skill-upgrade-cooldown').value = '';
+          break;
+      }
+      
+      form.style.display = 'block';
+    }
+    
+    // 隐藏表单
+    function hideForm(configType) {
+      document.getElementById(`${configType}-form`).style.display = 'none';
+    }
+    
+    // 编辑配置
+    function editConfig(configType, id) {
+      fetch(`${API_BASE_URL}/config/${configType.replace('-', '/')}/${id}`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('网络请求失败');
+          }
+          return response.json();
+        })
+        .then(data => {
+          const form = document.getElementById(`${configType}-form`);
+          const formTitle = document.getElementById(`${configType}-form-title`);
+          
+          formTitle.textContent = '编辑配置';
+          document.getElementById(`${configType}-id`).value = data.id;
+          
+          switch(configType) {
+            case 'realm-breakthrough':
+              document.getElementById('realm-breakthrough-from').value = data.fromRealm;
+              document.getElementById('realm-breakthrough-to').value = data.toRealm;
+              document.getElementById('realm-breakthrough-xiuwei').value = data.xiuweiRequirement;
+              document.getElementById('realm-breakthrough-pill').value = data.pillName;
+              document.getElementById('realm-breakthrough-success').value = data.successRate;
+              document.getElementById('realm-breakthrough-penalty').value = data.failurePenalty;
+              break;
+            case 'equipment-quality':
+              document.getElementById('equipment-quality-name').value = data.quality;
+              document.getElementById('equipment-quality-color').value = data.color;
+              document.getElementById('equipment-quality-probability').value = data.probability;
+              document.getElementById('equipment-quality-min').value = data.minBonus;
+              document.getElementById('equipment-quality-max').value = data.maxBonus;
+              document.getElementById('equipment-quality-special').value = data.specialEffectProbability;
+              break;
+            case 'pill-effect':
+              document.getElementById('pill-effect-name').value = data.pillName;
+              document.getElementById('pill-effect-rank').value = data.rank;
+              document.getElementById('pill-effect-effect').value = data.effect;
+              document.getElementById('pill-effect-duration').value = data.duration;
+              document.getElementById('pill-effect-cooldown').value = data.cooldown;
+              document.getElementById('pill-effect-cost').value = data.materialCost;
+              break;
+            case 'skill-upgrade':
+              document.getElementById('skill-upgrade-level').value = data.skillLevel;
+              document.getElementById('skill-upgrade-proficiency').value = data.proficiencyRequirement;
+              document.getElementById('skill-upgrade-effect').value = data.effectIncrease;
+              document.getElementById('skill-upgrade-mana').value = data.manaConsumption;
+              document.getElementById('skill-upgrade-cooldown').value = data.cooldown;
+              break;
+          }
+          
+          form.style.display = 'block';
+        })
+        .catch(error => {
+          alert(`加载配置失败: ${error.message}`);
+        });
+    }
+    
+    // 保存配置
+    function saveConfig(configType) {
+      const id = document.getElementById(`${configType}-id`).value;
+      let data;
+      
+      switch(configType) {
+        case 'realm-breakthrough':
+          data = {
+            fromRealm: document.getElementById('realm-breakthrough-from').value,
+            toRealm: document.getElementById('realm-breakthrough-to').value,
+            xiuweiRequirement: parseInt(document.getElementById('realm-breakthrough-xiuwei').value),
+            pillName: document.getElementById('realm-breakthrough-pill').value,
+            successRate: parseFloat(document.getElementById('realm-breakthrough-success').value),
+            failurePenalty: document.getElementById('realm-breakthrough-penalty').value
+          };
+          break;
+        case 'equipment-quality':
+          data = {
+            quality: document.getElementById('equipment-quality-name').value,
+            color: document.getElementById('equipment-quality-color').value,
+            probability: parseFloat(document.getElementById('equipment-quality-probability').value),
+            minBonus: parseInt(document.getElementById('equipment-quality-min').value),
+            maxBonus: parseInt(document.getElementById('equipment-quality-max').value),
+            specialEffectProbability: parseFloat(document.getElementById('equipment-quality-special').value)
+          };
+          break;
+        case 'pill-effect':
+          data = {
+            pillName: document.getElementById('pill-effect-name').value,
+            rank: parseInt(document.getElementById('pill-effect-rank').value),
+            effect: document.getElementById('pill-effect-effect').value,
+            duration: document.getElementById('pill-effect-duration').value,
+            cooldown: document.getElementById('pill-effect-cooldown').value,
+            materialCost: parseInt(document.getElementById('pill-effect-cost').value)
+          };
+          break;
+        case 'skill-upgrade':
+          data = {
+            skillLevel: document.getElementById('skill-upgrade-level').value,
+            proficiencyRequirement: parseInt(document.getElementById('skill-upgrade-proficiency').value),
+            effectIncrease: document.getElementById('skill-upgrade-effect').value,
+            manaConsumption: document.getElementById('skill-upgrade-mana').value,
+            cooldown: document.getElementById('skill-upgrade-cooldown').value
+          };
+          break;
+      }
+      
+      const url = id 
+        ? `${API_BASE_URL}/config/${configType.replace('-', '/')}/${id}` 
+        : `${API_BASE_URL}/config/${configType.replace('-', '/')}`;
+      const method = id ? 'PUT' : 'POST';
+      
+      fetch(url, {
+        method: method,
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('网络请求失败');
+          }
+          return response.json();
+        })
+        .then(() => {
+          hideForm(configType);
+          loadConfig(configType);
+          alert('保存成功！');
+        })
+        .catch(error => {
+          alert(`保存失败: ${error.message}`);
+        });
+    }
+    
+    // 删除配置
+    function deleteConfig(configType, id) {
+      if (confirm('确定要删除这个配置吗？')) {
+        fetch(`${API_BASE_URL}/config/${configType.replace('-', '/')}/${id}`, {
+          method: 'DELETE'
+        })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('网络请求失败');
+            }
+            return response.json();
+          })
+          .then(() => {
+            loadConfig(configType);
+            alert('删除成功！');
+          })
+          .catch(error => {
+            alert(`删除失败: ${error.message}`);
+          });
+      }
+    }
+    
+    // 刷新缓存
+    function refreshCache() {
+      fetch(`${API_BASE_URL}/config/refresh-cache`, {
+        method: 'POST'
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('网络请求失败');
+          }
+          return response.json();
+        })
+        .then(() => {
+          alert('缓存刷新成功！');
+        })
+        .catch(error => {
+          alert(`刷新缓存失败: ${error.message}`);
+        });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>食材购买管理系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+        body {
+            padding: 10px; /* 减小基础padding，适配小屏幕 */
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%; /* 确保容器占满屏幕宽度 */
+            padding: 0 10px;
+        }
+        .section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            width: 100%;
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            font-size: 1.5rem; /* 使用rem单位适配 */
+        }
+        h3 {
+            font-size: 1.2rem;
+        }
+        .form-group {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+        .form-group label {
+            width: 100px;
+            font-weight: 500;
+            color: #555;
+            flex-shrink: 0; /* 防止label被压缩 */
+        }
+        .form-group input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            width: 100%;
+        }
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+            margin-bottom: 10px; /* 增加底部margin，适配换行 */
+            flex-shrink: 0;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+        .btn-warning {
+            background-color: #ffc107;
+            color: #333;
+        }
+        /* 表格容器：添加横向滚动，适配小屏幕 */
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            min-width: 600px; /* 保证表格最小宽度，小屏幕可滚动 */
+            border-collapse: collapse;
+        }
+        table th, table td {
+            padding: 12px 8px; /* 减小左右padding，适配小屏幕 */
+            text-align: left;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+        table th {
+            background-color: #f8f9fa;
+            font-weight: 500;
+            color: #333;
+        }
+        .operation-btn {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap; /* 按钮换行 */
+        }
+        .search-box {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap; /* 适配小屏幕换行 */
+            width: 100%;
+        }
+        .search-box input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 300px;
+            margin-right: 10px;
+            margin-bottom: 10px; /* 增加底部margin */
+        }
+        .order-item {
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start; /* 调整对齐方式 */
+            flex-wrap: wrap; /* 小屏幕换行 */
+            gap: 10px; /* 增加间距 */
+        }
+        .order-item > div {
+            flex: 1;
+            min-width: 200px; /* 保证内容最小宽度 */
+        }
+        .total-amount-wrap {
+            margin-top: 20px; 
+            font-weight: 500; 
+            font-size: 16px;
+        }
+
+        /* ========== 响应式媒体查询 ========== */
+        /* 平板设备 (最大宽度768px) */
+        @media (max-width: 768px) {
+            .form-group {
+                flex-direction: column; /* 表单改为垂直排列 */
+                align-items: flex-start;
+            }
+            .form-group label {
+                width: 100%; /* label占满宽度 */
+                margin-bottom: 5px;
+            }
+            .search-box input {
+                width: 100%; /* 搜索框占满宽度 */
+                margin-right: 0;
+            }
+            .btn {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+        }
+
+        /* 手机设备 (最大宽度576px) */
+        @media (max-width: 576px) {
+            .section {
+                padding: 15px; /* 减小内边距 */
+            }
+            h2 {
+                font-size: 1.2rem;
+                margin-bottom: 15px;
+            }
+            .btn {
+                width: 100%; /* 按钮占满宽度 */
+                margin-right: 0;
+            }
+            .operation-btn {
+                flex-direction: column; /* 操作按钮垂直排列 */
+                gap: 5px;
+            }
+            .order-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .order-item .btn-danger {
+                width: 100%;
+                margin-right: 0;
+            }
+            table th, table td {
+                padding: 10px 5px;
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 食材管理区（增删改查） -->
+        <div class="section">
+            <h2>食材管理</h2>
+            
+            <!-- 搜索功能 -->
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="请输入食材名称搜索">
+                <button class="btn btn-primary" onclick="searchIngredient()">搜索</button>
+                <button class="btn btn-warning" onclick="resetSearch()">重置</button>
+            </div>
+
+            <!-- 新增/编辑食材表单 -->
+            <div class="form-group">
+                <label for="ingredientId">食材ID：</label>
+                <input type="text" id="ingredientId" readonly placeholder="新增时自动生成">
+            </div>
+            <div class="form-group">
+                <label for="ingredientName">食材名称：</label>
+                <input type="text" id="ingredientName" placeholder="请输入食材名称">
+            </div>
+            <div class="form-group">
+                <label for="ingredientPrice">单价(元)：</label>
+                <input type="number" id="ingredientPrice" step="0.01" min="0" placeholder="请输入单价">
+            </div>
+            <div class="form-group">
+                <label for="ingredientStock">库存：</label>
+                <input type="number" id="ingredientStock" min="0" placeholder="请输入库存数量">
+            </div>
+            <div>
+                <button class="btn btn-success" onclick="saveIngredient()">新增食材</button>
+                <button class="btn btn-warning" onclick="editIngredientCancel()">取消编辑</button>
+            </div>
+
+            <!-- 食材列表：添加表格容器，实现横向滚动 -->
+            <div class="table-container">
+                <table id="ingredientTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>食材名称</th>
+                            <th>单价(元)</th>
+                            <th>库存</th>
+                            <th>操作</th>
+                            <th>选购</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ingredientTableBody">
+                        <!-- 食材数据会通过JS动态渲染 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 订单生成区 -->
+        <div class="section">
+            <h2>订单生成</h2>
+            <div class="form-group">
+                <label for="selectedIngredient">已选食材：</label>
+                <input type="text" id="selectedIngredient" readonly placeholder="请先选择食材并输入购买数量">
+            </div>
+            <div class="form-group">
+                <label for="buyCount">购买数量：</label>
+                <input type="number" id="buyCount" min="1" placeholder="请输入购买数量">
+            </div>
+            <button class="btn btn-primary" onclick="addOrderItem()">添加到订单</button>
+            <button class="btn btn-danger" onclick="clearOrderItems()">清空订单</button>
+
+            <!-- 订单条目列表 -->
+            <h3 style="margin-top:20px;">订单条目</h3>
+            <div id="orderItemsList">
+                <!-- 订单条目会通过JS动态渲染 -->
+            </div>
+
+            <!-- 订单汇总 -->
+            <div class="total-amount-wrap">
+                订单总金额：<span id="totalAmount">0.00</span> 元
+            </div>
+            <button class="btn btn-success" style="margin-top:10px;" onclick="confirmOrder()">确认生成订单</button>
+        </div>
+    </div>
+
+    <script>
+        // 全局数据存储
+        let ingredients = [
+            // 初始化示例数据
+            { id: 1, name: "西红柿", price: 5.99, stock: 100 },
+            { id: 2, name: "鸡蛋", price: 10.5, stock: 200 },
+            { id: 3, name: "黄瓜", price: 3.99, stock: 150 }
+        ];
+        let orderItems = []; // 订单条目列表
+        let editStatus = false; // 是否处于编辑状态
+        let currentEditId = null; // 当前编辑的食材ID
+
+        // 页面加载时渲染食材列表
+        window.onload = function() {
+            renderIngredientTable();
+        };
+
+        // 渲染食材列表
+        function renderIngredientTable(filteredIngredients = null) {
+            const tableBody = document.getElementById("ingredientTableBody");
+            tableBody.innerHTML = "";
+            const data = filteredIngredients || ingredients;
+            
+            if (data.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">暂无食材数据</td></tr>';
+                return;
+            }
+
+            data.forEach(item => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>${item.id}</td>
+                    <td>${item.name}</td>
+                    <td>${item.price.toFixed(2)}</td>
+                    <td>${item.stock}</td>
+                    <td class="operation-btn">
+                        <button class="btn btn-warning" onclick="editIngredient(${item.id})">编辑</button>
+                        <button class="btn btn-danger" onclick="deleteIngredient(${item.id})">删除</button>
+                    </td>
+                    <td>
+                        <button class="btn btn-primary" onclick="selectIngredient(${item.id})">选择</button>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+
+        // 新增/编辑食材
+        function saveIngredient() {
+            const name = document.getElementById("ingredientName").value.trim();
+            const price = parseFloat(document.getElementById("ingredientPrice").value);
+            const stock = parseInt(document.getElementById("ingredientStock").value);
+
+            // 表单验证
+            if (!name) return alert("请输入食材名称");
+            if (isNaN(price) || price < 0) return alert("请输入有效的单价");
+            if (isNaN(stock) || stock < 0) return alert("请输入有效的库存数量");
+
+            if (editStatus) {
+                // 编辑模式
+                const index = ingredients.findIndex(item => item.id === currentEditId);
+                if (index !== -1) {
+                    ingredients[index] = { ...ingredients[index], name, price, stock };
+                    alert("食材信息编辑成功！");
+                }
+                editStatus = false;
+                currentEditId = null;
+                document.getElementById("ingredientId").value = "";
+                document.querySelector(".btn-success").textContent = "新增食材";
+            } else {
+                // 新增模式
+                const newId = ingredients.length > 0 ? Math.max(...ingredients.map(item => item.id)) + 1 : 1;
+                ingredients.push({ id: newId, name, price, stock });
+                alert("食材新增成功！");
+            }
+
+            // 重置表单并重新渲染列表
+            resetForm();
+            renderIngredientTable();
+        }
+
+        // 编辑食材
+        function editIngredient(id) {
+            const ingredient = ingredients.find(item => item.id === id);
+            if (!ingredient) return alert("食材不存在");
+
+            // 填充表单
+            document.getElementById("ingredientId").value = ingredient.id;
+            document.getElementById("ingredientName").value = ingredient.name;
+            document.getElementById("ingredientPrice").value = ingredient.price;
+            document.getElementById("ingredientStock").value = ingredient.stock;
+
+            // 切换到编辑状态
+            editStatus = true;
+            currentEditId = id;
+            document.querySelector(".btn-success").textContent = "保存修改";
+        }
+
+        // 取消编辑
+        function editIngredientCancel() {
+            editStatus = false;
+            currentEditId = null;
+            resetForm();
+            document.querySelector(".btn-success").textContent = "新增食材";
+        }
+
+        // 删除食材
+        function deleteIngredient(id) {
+            if (!confirm("确定要删除该食材吗？删除后不可恢复！")) return;
+            
+            // 检查是否已被加入订单
+            const isInOrder = orderItems.some(item => item.id === id);
+            if (isInOrder) return alert("该食材已被加入订单，无法删除！");
+
+            ingredients = ingredients.filter(item => item.id !== id);
+            alert("食材删除成功！");
+            renderIngredientTable();
+        }
+
+        // 搜索食材
+        function searchIngredient() {
+            const keyword = document.getElementById("searchInput").value.trim().toLowerCase();
+            if (!keyword) {
+                renderIngredientTable();
+                return;
+            }
+            const filtered = ingredients.filter(item => item.name.toLowerCase().includes(keyword));
+            renderIngredientTable(filtered);
+        }
+
+        // 重置搜索
+        function resetSearch() {
+            document.getElementById("searchInput").value = "";
+            renderIngredientTable();
+        }
+
+        // 选择食材（用于生成订单）
+        function selectIngredient(id) {
+            const ingredient = ingredients.find(item => item.id === id);
+            if (!ingredient) return alert("食材不存在");
+            document.getElementById("selectedIngredient").value = `${ingredient.name} (单价：${ingredient.price.toFixed(2)}元)`;
+            document.getElementById("selectedIngredient").setAttribute("data-id", id);
+            document.getElementById("buyCount").value = "";
+        }
+
+        // 添加订单条目
+        function addOrderItem() {
+            const selectedId = document.getElementById("selectedIngredient").getAttribute("data-id");
+            const buyCount = parseInt(document.getElementById("buyCount").value);
+
+            // 验证
+            if (!selectedId) return alert("请先选择食材");
+            if (isNaN(buyCount) || buyCount < 1) return alert("请输入有效的购买数量");
+
+            const ingredient = ingredients.find(item => item.id === parseInt(selectedId));
+            if (!ingredient) return alert("食材不存在");
+            if (buyCount > ingredient.stock) return alert(`库存不足！当前库存：${ingredient.stock}`);
+
+            // 检查是否已存在该食材的订单条目，存在则更新数量
+            const existingIndex = orderItems.findIndex(item => item.id === ingredient.id);
+            if (existingIndex !== -1) {
+                orderItems[existingIndex].count += buyCount;
+            } else {
+                orderItems.push({
+                    id: ingredient.id,
+                    name: ingredient.name,
+                    price: ingredient.price,
+                    count: buyCount,
+                    amount: ingredient.price * buyCount
+                });
+            }
+
+            // 更新订单列表和总金额
+            renderOrderItems();
+            calculateTotalAmount();
+            alert("已添加到订单！");
+        }
+
+        // 渲染订单条目
+        function renderOrderItems() {
+            const orderList = document.getElementById("orderItemsList");
+            orderList.innerHTML = "";
+
+            if (orderItems.length === 0) {
+                orderList.innerHTML = '<div style="text-align:center; color:#999; padding:20px;">暂无订单条目</div>';
+                return;
+            }
+
+            orderItems.forEach((item, index) => {
+                const orderItem = document.createElement("div");
+                orderItem.className = "order-item";
+                orderItem.innerHTML = `
+                    <div>
+                        ${item.name} - 单价：${item.price.toFixed(2)}元 × 数量：${item.count} = 小计：${item.amount.toFixed(2)}元
+                    </div>
+                    <button class="btn btn-danger" onclick="removeOrderItem(${index})">删除</button>
+                `;
+                orderList.appendChild(orderItem);
+            });
+        }
+
+        // 删除订单条目
+        function removeOrderItem(index) {
+            orderItems.splice(index, 1);
+            renderOrderItems();
+            calculateTotalAmount();
+        }
+
+        // 清空订单
+        function clearOrderItems() {
+            if (!confirm("确定要清空所有订单条目吗？")) return;
+            orderItems = [];
+            renderOrderItems();
+            calculateTotalAmount();
+            document.getElementById("selectedIngredient").value = "";
+            document.getElementById("buyCount").value = "";
+        }
+
+        // 计算订单总金额
+        function calculateTotalAmount() {
+            const total = orderItems.reduce((sum, item) => sum + item.amount, 0);
+            document.getElementById("totalAmount").textContent = total.toFixed(2);
+        }
+
+        // 确认生成订单
+        function confirmOrder() {
+            if (orderItems.length === 0) return alert("订单为空，无法生成！");
+
+            // 生成订单（这里仅做前端模拟，实际项目需对接后端）
+            const orderId = "ORD" + Date.now(); // 简单生成订单号
+            const totalAmount = orderItems.reduce((sum, item) => sum + item.amount, 0);
+
+            // 更新食材库存
+            orderItems.forEach(item => {
+                const ingredient = ingredients.find(ing => ing.id === item.id);
+                if (ingredient) {
+                    ingredient.stock -= item.count;
+                }
+            });
+
+            alert(`订单生成成功！
+订单号：${orderId}
+总金额：${totalAmount.toFixed(2)}元
+已扣减对应食材库存`);
+
+            // 重置订单并刷新食材列表
+            orderItems = [];
+            renderOrderItems();
+            calculateTotalAmount();
+            renderIngredientTable();
+            document.getElementById("selectedIngredient").value = "";
+            document.getElementById("buyCount").value = "";
+        }
+
+        // 重置表单
+        function resetForm() {
+            document.getElementById("ingredientName").value = "";
+            document.getElementById("ingredientPrice").value = "";
+            document.getElementById("ingredientStock").value = "";
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#4CAF50">
+    <title>保质期计算器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding-bottom: 120px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            color: #333;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .header p {
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+            margin-top: 5px;
+        }
+
+        .add-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+            cursor: pointer;
+            z-index: 200;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .add-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.5);
+        }
+
+        .add-btn img {
+            width: 30px;
+            height: 30px;
+            filter: brightness(0) invert(1);
+        }
+
+        .filter-tabs {
+            display: flex;
+            overflow-x: auto;
+            padding: 15px 10px;
+            background: rgba(255, 255, 255, 0.95);
+            margin: 10px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            white-space: nowrap;
+        }
+
+        .filter-tab {
+            padding: 10px 20px;
+            border-radius: 25px;
+            background: #f0f0f0;
+            margin-right: 10px;
+            font-size: 14px;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            outline: none;
+        }
+
+        .filter-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .stats-row {
+            display: flex;
+            padding: 15px;
+            gap: 10px;
+        }
+
+        .stat-card {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-number {
+            font-size: 28px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .stat-card.warning .stat-number {
+            color: #ff9800;
+        }
+
+        .stat-card.danger .stat-number {
+            color: #f44336;
+        }
+
+        .stat-card.success .stat-number {
+            color: #4CAF50;
+        }
+
+        .item-list {
+            padding: 10px;
+        }
+
+        .item-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .item-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .item-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .item-category {
+            font-size: 12px;
+            color: #666;
+            background: #f0f0f0;
+            padding: 4px 10px;
+            border-radius: 15px;
+        }
+
+        .item-days {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .item-days.safe {
+            color: #4CAF50;
+        }
+
+        .item-days.warning {
+            color: #ff9800;
+        }
+
+        .item-days.danger {
+            color: #f44336;
+        }
+
+        .item-expiry {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .item-bar {
+            height: 6px;
+            background: #f0f0f0;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .item-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s;
+        }
+
+        .item-bar-fill.safe {
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+        }
+
+        .item-bar-fill.warning {
+            background: linear-gradient(90deg, #ff9800, #ffc107);
+        }
+
+        .item-bar-fill.danger {
+            background: linear-gradient(90deg, #f44336, #ff5722);
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .action-btn.edit {
+            background: #f0f0f0;
+            color: #667eea;
+        }
+
+        .action-btn.delete {
+            background: #fff5f5;
+            color: #f44336;
+        }
+
+        .action-btn:hover {
+            opacity: 0.8;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: white;
+            width: 100%;
+            max-width: 400px;
+            border-radius: 20px 20px 0 0;
+            padding: 25px;
+            transform: translateY(100%);
+            transition: transform 0.3s;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .modal-close {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: #f0f0f0;
+            border: none;
+            font-size: 20px;
+            color: #666;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #f0f0f0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            outline: none;
+        }
+
+        .form-input:focus {
+            border-color: #667eea;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #f0f0f0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            outline: none;
+            background: white;
+        }
+
+        .form-select:focus {
+            border-color: #667eea;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            opacity: 0.5;
+        }
+
+        .empty-text {
+            font-size: 16px;
+            color: #666;
+        }
+
+        .category-color {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+
+        .nav-tabs {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.98);
+            display: flex;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+            z-index: 100;
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .nav-tab.active {
+            color: #667eea;
+        }
+
+        .nav-tab-icon {
+            font-size: 20px;
+        }
+
+        .nav-tab-label {
+            font-size: 12px;
+        }
+
+        @media (min-width: 768px) {
+            body {
+                max-width: 500px;
+                margin: 0 auto;
+                box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            }
+            
+            .header {
+                border-radius: 0 0 20px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📦 保质期计算器</h1>
+        <p>管理您的居家食品和日用品</p>
+    </div>
+
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-number" id="totalCount">0</div>
+            <div class="stat-label">物品总数</div>
+        </div>
+        <div class="stat-card warning">
+            <div class="stat-number" id="warningCount">0</div>
+            <div class="stat-label">即将过期</div>
+        </div>
+        <div class="stat-card danger">
+            <div class="stat-number" id="expiredCount">0</div>
+            <div class="stat-label">已过期</div>
+        </div>
+    </div>
+
+    <div class="filter-tabs">
+        <button class="filter-tab active" data-filter="all">全部</button>
+        <button class="filter-tab" data-filter="food">食品</button>
+        <button class="filter-tab" data-filter="drink">饮料</button>
+        <button class="filter-tab" data-filter="cosmetic">化妆品</button>
+        <button class="filter-tab" data-filter="medicine">药品</button>
+        <button class="filter-tab" data-filter="other">其他</button>
+    </div>
+
+    <div class="item-list" id="itemList">
+        <div class="empty-state">
+            <div class="empty-icon">📭</div>
+            <div class="empty-text">暂无物品，点击下方按钮添加</div>
+        </div>
+    </div>
+
+    <div class="nav-tabs">
+        <div class="nav-tab active" data-tab="list">
+            <span class="nav-tab-icon">📋</span>
+            <span class="nav-tab-label">列表</span>
+        </div>
+        <div class="nav-tab" data-tab="calendar">
+            <span class="nav-tab-icon">📅</span>
+            <span class="nav-tab-label">日历</span>
+        </div>
+        <div class="nav-tab" data-tab="settings">
+            <span class="nav-tab-icon">⚙️</span>
+            <span class="nav-tab-label">设置</span>
+        </div>
+    </div>
+
+    <div class="add-btn" id="addBtn">
+        <span style="font-size: 32px;">+</span>
+    </div>
+
+    <div class="modal-overlay" id="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">添加物品</h2>
+                <button class="modal-close" id="closeModal">×</button>
+            </div>
+            <form id="itemForm">
+                <div class="form-group">
+                    <label class="form-label">物品名称 *</label>
+                    <input type="text" class="form-input" id="itemName" placeholder="请输入物品名称" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">分类 *</label>
+                    <select class="form-select" id="itemCategory" required>
+                        <option value="">请选择分类</option>
+                        <option value="food">🍎 食品</option>
+                        <option value="drink">🥤 饮料</option>
+                        <option value="cosmetic">💄 化妆品</option>
+                        <option value="medicine">💊 药品</option>
+                        <option value="other">📦 其他</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">购买日期 *</label>
+                    <input type="date" class="form-input" id="purchaseDate" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">保质期（天）*</label>
+                        <input type="number" class="form-input" id="shelfLife" placeholder="天数" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">数量</label>
+                        <input type="number" class="form-input" id="quantity" placeholder="数量" min="1" value="1">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">备注</label>
+                    <input type="text" class="form-input" id="itemNote" placeholder="添加备注（可选）">
+                </div>
+                <button type="submit" class="submit-btn">保存</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const categories = {
+            food: { name: '食品', icon: '🍎' },
+            drink: { name: '饮料', icon: '🥤' },
+            cosmetic: { name: '化妆品', icon: '💄' },
+            medicine: { name: '药品', icon: '💊' },
+            other: { name: '其他', icon: '📦' }
+        };
+
+        let items = [];
+        let editingId = null;
+
+        function loadItems() {
+            const saved = localStorage.getItem('expiryItems');
+            if (saved) {
+                items = JSON.parse(saved);
+            } else {
+                items = [
+                    { id: 1, name: '牛奶', category: 'drink', purchaseDate: '2026-05-01', shelfLife: 7, quantity: 2, note: '冷藏' },
+                    { id: 2, name: '面包', category: 'food', purchaseDate: '2026-05-04', shelfLife: 3, quantity: 1, note: '' },
+                    { id: 3, name: '面霜', category: 'cosmetic', purchaseDate: '2025-12-01', shelfLife: 365, quantity: 1, note: '开封后6个月' },
+                    { id: 4, name: '感冒药', category: 'medicine', purchaseDate: '2024-06-01', shelfLife: 730, quantity: 1, note: '' },
+                    { id: 5, name: '鸡蛋', category: 'food', purchaseDate: '2026-04-28', shelfLife: 14, quantity: 10, note: '' }
+                ];
+                saveItems();
+            }
+        }
+
+        function saveItems() {
+            localStorage.setItem('expiryItems', JSON.stringify(items));
+        }
+
+        function calculateDaysLeft(purchaseDate, shelfLife) {
+            const purchase = new Date(purchaseDate);
+            const expiry = new Date(purchase);
+            expiry.setDate(expiry.getDate() + parseInt(shelfLife));
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            expiry.setHours(0, 0, 0, 0);
+            const diffTime = expiry - today;
+            return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        }
+
+        function getStatus(daysLeft) {
+            if (daysLeft < 0) return 'danger';
+            if (daysLeft <= 3) return 'danger';
+            if (daysLeft <= 7) return 'warning';
+            return 'safe';
+        }
+
+        function getStatusText(daysLeft) {
+            if (daysLeft < 0) return `已过期 ${Math.abs(daysLeft)} 天`;
+            if (daysLeft === 0) return '今天过期';
+            if (daysLeft === 1) return '明天过期';
+            return `还有 ${daysLeft} 天过期`;
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+        }
+
+        function getExpiryDate(purchaseDate, shelfLife) {
+            const purchase = new Date(purchaseDate);
+            const expiry = new Date(purchase);
+            expiry.setDate(expiry.getDate() + parseInt(shelfLife));
+            return expiry;
+        }
+
+        function renderItems(filter = 'all') {
+            const itemList = document.getElementById('itemList');
+            let filtered = items;
+            
+            if (filter !== 'all') {
+                filtered = items.filter(item => item.category === filter);
+            }
+
+            if (filtered.length === 0) {
+                itemList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📭</div>
+                        <div class="empty-text">暂无物品</div>
+                    </div>
+                `;
+                return;
+            }
+
+            filtered.sort((a, b) => {
+                const daysA = calculateDaysLeft(a.purchaseDate, a.shelfLife);
+                const daysB = calculateDaysLeft(b.purchaseDate, b.shelfLife);
+                return daysA - daysB;
+            });
+
+            itemList.innerHTML = filtered.map(item => {
+                const daysLeft = calculateDaysLeft(item.purchaseDate, item.shelfLife);
+                const status = getStatus(daysLeft);
+                const expiryDate = getExpiryDate(item.purchaseDate, item.shelfLife);
+                const maxDays = parseInt(item.shelfLife);
+                const usedDays = maxDays - daysLeft;
+                const percentage = Math.max(0, Math.min(100, (usedDays / maxDays) * 100));
+
+                return `
+                    <div class="item-card" data-id="${item.id}">
+                        <div class="item-header">
+                            <div>
+                                <div class="item-name">${categories[item.category].icon} ${item.name}</div>
+                                <div class="item-category">${categories[item.category].name}</div>
+                            </div>
+                            ${item.quantity > 1 ? `<div style="font-size: 12px; color: #666;">×${item.quantity}</div>` : ''}
+                        </div>
+                        <div class="item-days ${status}">${getStatusText(daysLeft)}</div>
+                        <div class="item-expiry">到期日：${formatDate(expiryDate)}</div>
+                        <div class="item-bar">
+                            <div class="item-bar-fill ${status}" style="width: ${percentage}%"></div>
+                        </div>
+                        ${item.note ? `<div style="font-size: 12px; color: #888; margin-bottom: 10px;">备注：${item.note}</div>` : ''}
+                        <div class="item-actions">
+                            <button class="action-btn edit" onclick="editItem(${item.id})">
+                                <span>✏️</span> 编辑
+                            </button>
+                            <button class="action-btn delete" onclick="deleteItem(${item.id})">
+                                <span>🗑️</span> 删除
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            updateStats();
+        }
+
+        function updateStats() {
+            const total = items.length;
+            let warning = 0;
+            let expired = 0;
+
+            items.forEach(item => {
+                const daysLeft = calculateDaysLeft(item.purchaseDate, item.shelfLife);
+                if (daysLeft < 0 || daysLeft <= 3) {
+                    expired++;
+                } else if (daysLeft <= 7) {
+                    warning++;
+                }
+            });
+
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('warningCount').textContent = warning;
+            document.getElementById('expiredCount').textContent = expired;
+        }
+
+        function addItem(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('itemName').value.trim();
+            const category = document.getElementById('itemCategory').value;
+            const purchaseDate = document.getElementById('purchaseDate').value;
+            const shelfLife = document.getElementById('shelfLife').value;
+            const quantity = document.getElementById('quantity').value || 1;
+            const note = document.getElementById('itemNote').value.trim();
+
+            if (!name || !category || !purchaseDate || !shelfLife) return;
+
+            if (editingId !== null) {
+                const index = items.findIndex(item => item.id === editingId);
+                if (index !== -1) {
+                    items[index] = {
+                        ...items[index],
+                        name,
+                        category,
+                        purchaseDate,
+                        shelfLife,
+                        quantity: parseInt(quantity),
+                        note
+                    };
+                }
+                editingId = null;
+            } else {
+                const newItem = {
+                    id: Date.now(),
+                    name,
+                    category,
+                    purchaseDate,
+                    shelfLife,
+                    quantity: parseInt(quantity),
+                    note
+                };
+                items.push(newItem);
+            }
+
+            saveItems();
+            renderItems();
+            closeModal();
+            resetForm();
+        }
+
+        function editItem(id) {
+            const item = items.find(item => item.id === id);
+            if (!item) return;
+
+            editingId = id;
+            document.getElementById('modalTitle').textContent = '编辑物品';
+            document.getElementById('itemName').value = item.name;
+            document.getElementById('itemCategory').value = item.category;
+            document.getElementById('purchaseDate').value = item.purchaseDate;
+            document.getElementById('shelfLife').value = item.shelfLife;
+            document.getElementById('quantity').value = item.quantity;
+            document.getElementById('itemNote').value = item.note;
+            openModal();
+        }
+
+        function deleteItem(id) {
+            if (confirm('确定要删除这个物品吗？')) {
+                items = items.filter(item => item.id !== id);
+                saveItems();
+                renderItems();
+            }
+        }
+
+        function openModal() {
+            document.getElementById('modal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+            document.body.style.overflow = '';
+            editingId = null;
+        }
+
+        function resetForm() {
+            document.getElementById('itemForm').reset();
+            document.getElementById('modalTitle').textContent = '添加物品';
+            document.getElementById('quantity').value = 1;
+        }
+
+        function setDefaultDate() {
+            const today = new Date();
+            const dateStr = today.toISOString().split('T')[0];
+            document.getElementById('purchaseDate').value = dateStr;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadItems();
+            renderItems();
+            setDefaultDate();
+
+            document.getElementById('addBtn').addEventListener('click', () => {
+                resetForm();
+                openModal();
+            });
+
+            document.getElementById('closeModal').addEventListener('click', closeModal);
+
+            document.getElementById('modal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('modal')) {
+                    closeModal();
+                }
+            });
+
+            document.getElementById('itemForm').addEventListener('submit', addItem);
+
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    renderItems(tab.dataset.filter);
+                });
+            });
+
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    if (tab.dataset.tab === 'calendar') {
+                        alert('日历视图功能开发中...');
+                        tab.classList.remove('active');
+                        document.querySelector('[data-tab="list"]').classList.add('active');
+                    } else if (tab.dataset.tab === 'settings') {
+                        alert('设置功能开发中...');
+                        tab.classList.remove('active');
+                        document.querySelector('[data-tab="list"]').classList.add('active');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

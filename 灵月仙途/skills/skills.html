@@ -1,0 +1,1830 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="../js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="../css/mobile-adapt.css">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>灵月仙途 - 功法阁</title>
+  <link rel="stylesheet" href="../css/avatar.css">
+  <style>
+    :root {
+      /* 修仙古风配色 */
+      --bg-paper: #f4f1ea;
+      --bg-paper-dark: #e6e2d8;
+      --ink-black: #2b2b2b;
+      --ink-light: #5a5a5a;
+      --cinnabar: #b22222; /* 朱砂红 */
+      --gold-dim: #8a7c5d;
+      --gold-bright: #d4af37;
+      
+      /* 品阶颜色 */
+      --rank-common: #5a5a5a;
+      --rank-rare: #4caf50;
+      --rank-epic: #9c27b0;
+      --rank-legend: #ff9800;
+      
+      --shadow-soft: 0 4px 12px rgba(43, 43, 43, 0.1);
+      --shadow-deep: 0 8px 24px rgba(43, 43, 43, 0.2);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      font-family: 'Microsoft YaHei', 'SimSun', serif;
+      background-color: #1a1a1a;
+      background-image: 
+        linear-gradient(to bottom, rgba(0,0,0,0.8), rgba(0,0,0,0.6)),
+        url('https://images.unsplash.com/photo-1518063319789-7217e6706b04?q=80&w=2070&auto=format&fit=crop');
+      background-size: cover;
+      background-position: center;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      color: var(--ink-black);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 主容器：模拟卷轴 */
+    .main-container {
+      flex: 1;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      max-width: 600px;
+      margin: 0 auto;
+      width: 100%;
+      background: var(--bg-paper);
+      box-shadow: 0 0 50px rgba(0,0,0,0.5);
+    }
+
+    /* 顶部状态栏 */
+    .header-panel {
+      background: var(--bg-paper-dark);
+      padding: 15px 20px;
+      border-bottom: 2px solid var(--gold-dim);
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      position: relative;
+      z-index: 10;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .player-info {
+      flex: 1;
+    }
+
+    .player-name {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: var(--ink-black);
+      font-family: 'SimSun', serif;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .cultivation-stage {
+      font-size: 0.85rem;
+      color: var(--cinnabar);
+      font-weight: bold;
+      background: rgba(178, 34, 34, 0.1);
+      padding: 2px 8px;
+      border-radius: 4px;
+      border: 1px solid rgba(178, 34, 34, 0.2);
+    }
+
+    .exp-bar-container {
+      width: 100%;
+      height: 6px;
+      background: rgba(0,0,0,0.1);
+      border-radius: 3px;
+      margin-top: 6px;
+      overflow: hidden;
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .exp-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold-dim), var(--gold-bright));
+      width: 45%;
+      position: relative;
+    }
+    
+    .exp-bar-fill::after {
+      content: '';
+      position: absolute;
+      right: 0; top: 0; bottom: 0;
+      width: 2px;
+      background: #fff;
+      box-shadow: 0 0 5px #fff;
+    }
+
+    .stats-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--ink-light);
+      margin-top: 4px;
+      font-family: 'Consolas', monospace;
+    }
+
+    /* 内容滚动区 */
+    .content-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23d4c4a5' fill-opacity='0.1'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z'/%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    .section-title {
+      text-align: center;
+      font-family: 'SimSun', serif;
+      font-size: 1.4rem;
+      color: var(--ink-black);
+      margin-bottom: 20px;
+      position: relative;
+      display: inline-block;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 0 20px;
+      white-space: nowrap;
+    }
+
+    .section-title::before, .section-title::after {
+      content: '✦';
+      position: absolute;
+      top: 50%;
+      color: var(--gold-dim);
+      font-size: 0.8rem;
+    }
+    .section-title::before { left: 0; }
+    .section-title::after { right: 0; }
+
+    /* 分类筛选标签 */
+    .filter-tabs {
+      display: flex;
+      gap: 8px;
+      padding: 10px 15px;
+      background: rgba(255, 255, 255, 0.5);
+      border: 1px solid var(--gold-dim);
+      border-radius: 8px;
+      margin-bottom: 15px;
+      overflow-x: auto;
+      white-space: nowrap;
+      scrollbar-width: thin;
+      scrollbar-color: var(--gold-dim) rgba(255, 255, 255, 0.5);
+    }
+    
+    /* 滚动条样式 */
+    .filter-tabs::-webkit-scrollbar {
+      height: 4px;
+    }
+    
+    .filter-tabs::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 2px;
+    }
+    
+    .filter-tabs::-webkit-scrollbar-thumb {
+      background: var(--gold-dim);
+      border-radius: 2px;
+    }
+    
+    .filter-tabs::-webkit-scrollbar-thumb:hover {
+      background: var(--gold-bright);
+    }
+
+    .filter-tab {
+      padding: 6px 14px;
+      background: rgba(178, 34, 34, 0.1);
+      border: 1px solid var(--gold-dim);
+      border-radius: 15px;
+      font-size: 0.85rem;
+      color: var(--ink-black);
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-family: 'SimSun', serif;
+      font-weight: bold;
+    }
+
+    .filter-tab.active {
+      background: var(--cinnabar);
+      color: white;
+      border-color: var(--cinnabar);
+      box-shadow: 0 2px 8px rgba(178, 34, 34, 0.3);
+    }
+
+    .filter-tab:hover {
+      background: rgba(178, 34, 34, 0.2);
+      transform: translateY(-1px);
+    }
+
+    /* 功法卡片 */
+    .skill-list {
+      display: grid;
+      gap: 15px;
+      padding-bottom: 80px;
+    }
+
+    .skill-card {
+      background: #fff;
+      border: 1px solid var(--gold-dim);
+      border-radius: 8px;
+      padding: 15px;
+      position: relative;
+      box-shadow: var(--shadow-soft);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      overflow: hidden;
+    }
+
+    .skill-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; width: 4px; height: 100%;
+      background: var(--rank-common);
+    }
+
+    .skill-card.rank-rare::before { background: var(--rank-rare); }
+    .skill-card.rank-epic::before { background: var(--rank-epic); }
+    .skill-card.rank-legend::before { background: var(--rank-legend); }
+
+    
+
+    .skill-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .skill-icon-box {
+      width: 48px;
+      height: 48px;
+      background: var(--bg-paper-dark);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      border: 1px solid rgba(0,0,0,0.1);
+      position: relative;
+    }
+    
+    .skill-icon-box::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 8px;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    .skill-details {
+      flex: 1;
+    }
+
+    .skill-name-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
+    .skill-name {
+      font-size: 1.1rem;
+      font-weight: bold;
+      font-family: 'SimSun', serif;
+      color: var(--ink-black);
+    }
+
+    .skill-rank {
+      font-size: 0.7rem;
+      padding: 1px 6px;
+      border-radius: 3px;
+      background: var(--rank-common);
+      color: #fff;
+      font-weight: bold;
+    }
+    .rank-rare .skill-rank { background: var(--rank-rare); }
+    .rank-epic .skill-rank { background: var(--rank-epic); }
+    .rank-legend .skill-rank { background: var(--rank-legend); }
+
+    .skill-desc-short {
+      font-size: 0.85rem;
+      color: var(--ink-light);
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2; /* 添加标准属性以实现兼容性 */
+      line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .skill-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px dashed var(--gold-dim);
+    }
+
+    .mastery-label {
+      font-size: 0.75rem;
+      color: var(--ink-light);
+    }
+
+    .mastery-bar {
+      width: 100px;
+      height: 6px;
+      background: #eee;
+      border-radius: 3px;
+      overflow: hidden;
+      display: inline-block;
+      vertical-align: middle;
+      margin: 0 6px;
+      border: 1px solid #ddd;
+    }
+
+    .mastery-fill {
+      height: 100%;
+      background: var(--gold-dim);
+      width: 0%;
+      transition: width 0.5s ease;
+    }
+
+    .btn-equip {
+      font-size: 0.8rem;
+      padding: 4px 12px;
+      border: 1px solid var(--gold-dim);
+      background: transparent;
+      color: var(--ink-black);
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: 'SimSun', serif;
+      transition: all 0.2s;
+    }
+
+    .btn-equip:hover {
+      background: var(--gold-dim);
+      color: #fff;
+    }
+
+    .btn-equip.active {
+      background: var(--cinnabar);
+      border-color: var(--cinnabar);
+      color: #fff;
+    }
+
+    /* 底部详情面板 (Bottom Sheet) */
+    .detail-panel {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+      background: var(--bg-paper);
+      border-top: 4px solid var(--gold-dim);
+      border-radius: 20px 20px 0 0;
+      padding: 20px;
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 100;
+      box-shadow: 0 -10px 30px rgba(0,0,0,0.3);
+      max-height: 70vh;
+      overflow-y: auto;
+      right: 0;
+    }
+
+    .detail-panel.open {
+      transform: translateY(0);
+    }
+
+    .panel-handle {
+      width: 40px;
+      height: 4px;
+      background: #ccc;
+      border-radius: 2px;
+      margin: 0 auto 15px;
+    }
+
+    .detail-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      border-bottom: 2px solid var(--gold-dim);
+      padding-bottom: 10px;
+    }
+
+    .detail-title {
+      font-size: 1.3rem;
+      font-weight: bold;
+      font-family: 'SimSun', serif;
+    }
+
+    .detail-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .stat-box {
+      background: rgba(0,0,0,0.03);
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid rgba(0,0,0,0.05);
+      text-align: center;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--ink-light);
+      margin-bottom: 4px;
+    }
+
+    .stat-val {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: var(--ink-black);
+      font-family: 'Consolas', monospace;
+    }
+    
+    .stat-val.bonus {
+      color: var(--cinnabar);
+    }
+
+    .detail-desc {
+      font-size: 0.9rem;
+      line-height: 1.6;
+      color: var(--ink-light);
+      background: rgba(0,0,0,0.02);
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      border-left: 3px solid var(--gold-dim);
+    }
+
+    .action-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .btn-action {
+      padding: 12px;
+      border: 1px solid var(--gold-dim);
+      background: #fff;
+      color: var(--ink-black);
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: 'SimSun', serif;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .btn-action.primary {
+      background: var(--ink-black);
+      color: #fff;
+      border-color: var(--ink-black);
+      grid-column: span 2;
+    }
+
+    .btn-action:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    /* 底部导航 */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 65px;
+      background: rgba(244, 241, 234, 0.95);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid var(--gold-dim);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 90;
+      box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+      max-width: 600px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-radius: 20px 20px 0 0;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--ink-light);
+      text-decoration: none;
+      padding: 5px 10px;
+      border-radius: 8px;
+      transition: all 0.3s;
+      width: 20%;
+    }
+
+    .nav-item.active {
+      color: var(--cinnabar);
+      background: rgba(178, 34, 34, 0.05);
+    }
+
+    .nav-icon { font-size: 1.4rem; }
+    .nav-text { font-size: 0.75rem; font-weight: bold; font-family: 'SimSun', serif; }
+
+    /* 遮罩层 */
+    .overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 95;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+      backdrop-filter: blur(2px);
+    }
+    .overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+  </style>
+
+  </head>
+<body>
+
+  <div class="main-container">
+    <!-- 顶部状态 -->
+    <div class="header-panel">
+      <div class="avatar" id="charAvatar">🧙‍♂️</div>
+      <div class="player-info">
+        <div class="player-name">
+          <span id="charName"></span>
+          <span class="cultivation-stage"></span>
+        </div>
+
+
+      </div>
+    </div>
+
+    <!-- 固定筛选和排序区域 -->
+    <div style="
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: var(--bg-paper);
+      border-bottom: 1px solid var(--gold-dim);
+      padding-bottom: 10px;
+    ">
+      <h2 class="section-title">功法</h2>
+      
+      <!-- 技能数量显示 -->
+      <div id="skillCapacityDisplay" style="
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 15px;
+        background: rgba(212, 175, 55, 0.1);
+        border: 1px solid var(--gold-dim);
+        border-radius: 8px;
+        margin-top: 10px;
+      ">
+        <div style="
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 0.9rem;
+          color: var(--ink-black);
+          font-weight: bold;
+          font-family: 'SimSun', serif;
+        ">
+          <span>📜 技能：</span>
+          <span id="currentSkillCount" style="color: var(--cinnabar); font-size: 1.1rem;">0</span>
+          <span>/</span>
+          <span id="maxSkillCount" style="color: var(--gold-bright); font-size: 1.1rem;">5</span>
+          <span id="realmCapacityPlus" style="
+            cursor: pointer;
+            color: var(--cinnabar);
+            font-weight: bold;
+            font-size: 1.2rem;
+            padding: 0 5px;
+            transition: all 0.2s;
+          " onclick="showRealmCapacityTip()">+</span>
+        </div>
+        <div id="realmDisplay" style="
+          font-size: 0.85rem;
+          color: var(--ink-light);
+          font-family: 'SimSun', serif;
+        ">境界：--</div>
+      </div>
+      
+      <!-- 分类筛选标签 -->
+      <div class="filter-tabs" id="skillFilterTabs">
+        <!-- 动态生成 -->
+      </div>
+      
+      <!-- 排序选项 -->
+      <div class="sort-options" style="
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 10px;
+        padding: 10px 15px;
+        background: rgba(255, 255, 255, 0.5);
+        border: 1px solid var(--gold-dim);
+        border-radius: 8px;
+        margin-bottom: 15px;
+      ">
+        <label style="font-size: 0.85rem; color: var(--ink-black); font-weight: bold; font-family: 'SimSun', serif;">排序：</label>
+        <select id="skillSortSelect" style="
+          padding: 6px 12px;
+          border: 1px solid var(--gold-dim);
+          border-radius: 4px;
+          background: #fff;
+          font-size: 0.85rem;
+          color: var(--ink-black);
+          font-family: 'SimSun', serif;
+          min-width: 120px;
+        ">
+          <option value="name">名称</option>
+          <option value="mastery">熟练度</option>
+          <option value="level">等级</option>
+          <option value="rank">品阶</option>
+        </select>
+      </div>
+    </div>
+    
+    <!-- 滚动内容 -->
+    <div class="content-scroll">
+      <div class="skill-list" id="skillList">
+        <!-- 动态生成 -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 详情弹窗 -->
+  <div class="overlay" id="overlay" onclick="closeDetail()"></div>
+  <div class="detail-panel" id="detailPanel">
+    <div class="panel-handle"></div>
+    <div class="detail-header">
+      <div class="detail-title" id="detailTitle">清心诀</div>
+      <div style="font-size:0.8rem; color:var(--ink-light)" id="detailRank">黄阶上品</div>
+    </div>
+    
+    <div class="detail-stats-grid">
+      <div class="stat-box">
+        <div class="stat-label">修炼效率</div>
+        <div class="stat-val bonus" id="detailEfficiency">+15/秒</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">当前层级</div>
+        <div class="stat-val" id="detailLevel">第十层</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">属性加成</div>
+        <div class="stat-val" id="detailBonus">灵力 +120</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">触发概率</div>
+        <div class="stat-val" id="detailTriggerRate">1%</div>
+      </div>
+    </div>
+
+    <div class="detail-desc" id="detailDesc">
+      使你的内力修炼速度增加 15 点/12 秒。心若止水，方能证道。
+    </div>
+
+    <div class="action-buttons">
+      <button class="btn-action" onclick="closeDetail()">返回</button>
+      <button class="btn-action primary" onclick="simulateCultivate()">开始闭关修炼</button>
+    </div>
+  </div>
+
+  <!-- 底部导航 -->
+  <nav class="bottom-nav" role="navigation" aria-label="主导航">
+    <a href="../index.html" class="nav-item" aria-label="修炼页面">
+      <div class="nav-icon">🧘</div>
+      <div class="nav-text">修炼</div>
+    </a>
+    <a href="skills.html" class="nav-item active" aria-label="功法页面" aria-current="page">
+      <div class="nav-icon">📜</div>
+      <div class="nav-text">功法</div>
+    </a>
+    <a href="javascript:void(0)" onclick="window.pageUtils.navigateToGuildPage()" class="nav-item" aria-label="宗门页面">
+      <div class="nav-icon">🏯</div>
+      <div class="nav-text">宗门</div>
+    </a>
+    <a href="../word/world.html" class="nav-item" aria-label="仙途页面">
+      <div class="nav-icon">🌌</div>
+      <div class="nav-text">仙途</div>
+    </a>
+    <a href="../map/map.html" class="nav-item" aria-label="云游页面">
+      <div class="nav-icon">🗺️</div>
+      <div class="nav-text">云游</div>
+    </a>
+  </nav>
+
+  <script>
+    // 强制禁用缓存的脚本加载
+    (function() {
+      const scripts = document.getElementsByTagName('script');
+      const timestamp = Date.now();
+      for (let script of scripts) {
+        if (script.src && script.src.includes('.js') && !script.src.includes('?')) {
+          script.src = script.src + (script.src.includes('?') ? '&' : '?') + 't=' + timestamp;
+        }
+      }
+    })();
+  </script>
+  <script src="../js/auth-check.js"></script>
+  <script src="../js/token-manager.js"></script>
+  <script src="../js/auth-service.js"></script>
+  <script src="../js/role-sync.js"></script>
+  <script src="../js/character-store.js"></script>
+  <script src="../js/character-service.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/login-manager.js"></script>
+  <script src="../js/store.js"></script>
+  <script src="../js/api-service.js?v=20241215140000"></script>
+  <script src="../js/common.js"></script>
+  <script src="../js/game-utils.js"></script>
+  <script>
+    // 技能数据
+    let skills = [];
+    let roleSkills = [];
+    let currentSkillId = null;
+    let roleId = null;
+    let roleData = null;
+    
+    // 分页和懒加载相关变量
+    let currentPage = 1;
+    let pageSize = 10;
+    let hasMoreData = true;
+    let isLoading = false;
+    let filteredSkills = [];
+    let sortedSkills = [];
+
+    // 初始化
+    window.addEventListener('DOMContentLoaded', async () => {
+      // 使用全局配置初始化
+      await window.APP_CONFIG.init();
+      roleId = window.getRoleId ? window.getRoleId() : (window.currentRoleId || window.APP_CONFIG?.currentRoleId || window.localStorage.getItem('currentRoleId'));
+      
+      console.log('技能页面 - 检查用户登录状态');
+      console.log('userId:', window.APP_CONFIG.currentUserId);
+      console.log('roleId:', roleId);
+      
+      // 不强制跳转，允许页面加载
+      if (!window.APP_CONFIG.currentUserId) {
+        console.warn('用户未登录，但允许浏览');
+        // 显示提示但不跳转
+        if (window.uiUtils) {
+          uiUtils.showToast('请先登录以查看技能信息', 'warning');
+        }
+      }
+      
+      if (!roleId) {
+        console.warn('未选择角色，但允许浏览');
+        // 显示提示但不跳转
+        if (window.uiUtils) {
+          uiUtils.showToast('请先创建角色', 'warning');
+        }
+      }
+      
+      // 尝试加载数据（如果未登录会失败，但不影响页面）
+      try {
+        await loadCharacter();
+        await loadSkills();
+        // 不再单独调用 loadRoleSkills，因为 loadSkills 中已经处理
+      } catch (error) {
+        // 静默失败，不显示错误
+        console.log('数据加载失败（可能是未登录）:', error.message);
+      }
+    });
+
+    async function loadCharacter() {
+      try {
+        console.log('开始加载角色信息，roleId:', roleId);
+        
+        // 检查 roleId 是否存在
+        if (!roleId) {
+          // 尝试从 localStorage 获取
+          roleId = localStorage.getItem('currentRoleId') || localStorage.getItem('roleId');
+          console.log('从 localStorage 获取 roleId:', roleId);
+        }
+        
+        let result = null;
+        let retryCount = 0;
+        const maxRetries = 2;
+        
+        // 尝试获取角色信息，最多重试 2 次
+        while (retryCount < maxRetries) {
+          try {
+            // 只有当 roleId 存在时才调用 API
+            if (roleId) {
+              result = await window.apiService.getUserProfile(roleId);
+              console.log('getUserProfile 返回结果:', result);
+              if (result && Object.keys(result).length > 0) {
+                break;
+              }
+            } else {
+              console.warn('roleId 不存在，跳过 API 调用');
+              break;
+            }
+          } catch (error) {
+            console.warn('API 调用失败，尝试重试:', error.message);
+            retryCount++;
+            // 等待 1000ms 后重试
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
+        }
+        
+        // 如果 API 调用失败，尝试从 localStorage 获取缓存的角色信息
+        if (!result || Object.keys(result).length === 0) {
+          console.log('API 调用失败或 roleId 不存在，尝试从 localStorage 获取角色信息');
+          const cachedRoleData = localStorage.getItem('roleData');
+          if (cachedRoleData) {
+            try {
+              result = JSON.parse(cachedRoleData);
+              console.log('从 localStorage 获取角色信息成功:', result);
+            } catch (parseError) {
+              console.error('解析 localStorage 角色数据失败:', parseError);
+            }
+          }
+        }
+        
+        if (result && Object.keys(result).length > 0) {
+          roleData = result;
+          
+          // 缓存角色信息到 localStorage
+          try {
+            localStorage.setItem('roleData', JSON.stringify(roleData));
+            console.log('角色信息已缓存到 localStorage');
+          } catch (cacheError) {
+            console.error('缓存角色信息失败:', cacheError);
+          }
+          
+          // 显示完整的角色数据用于调试
+          console.log('角色数据详情:', roleData);
+          
+          // 处理后端返回的结构
+          const roleInfo = roleData.role || roleData;
+          console.log('角色信息:', roleInfo);
+          
+          // 更新角色名称
+          const charNameEl = document.getElementById('charName');
+          if (charNameEl) {
+            charNameEl.textContent = roleInfo.roleName !== undefined && roleInfo.roleName !== null && roleInfo.roleName !== '' 
+              ? roleInfo.roleName 
+              : (roleInfo.name !== undefined && roleInfo.name !== null && roleInfo.name !== '' 
+                ? roleInfo.name 
+                : '');
+          }
+          
+          // 更新头像
+          const charAvatarEl = document.getElementById('charAvatar');
+          if (charAvatarEl) {
+            window.GameUtils.setAvatar(charAvatarEl, roleInfo.spiritRoot);
+            
+            // 添加点击事件，跳转到角色页面
+            charAvatarEl.style.cursor = 'pointer';
+            charAvatarEl.onclick = () => {
+              console.log('点击头像，跳转到角色页面');
+              window.location.href = '../character/character.html';
+            };
+          }
+          
+          // 更新境界信息
+          const cultivationStageEl = document.querySelector('.cultivation-stage');
+          if (cultivationStageEl) {
+            cultivationStageEl.textContent = roleInfo.realm !== undefined && roleInfo.realm !== null && roleInfo.realm !== '' 
+              ? roleInfo.realm 
+              : '';
+          }
+          
+          // 更新境界信息
+          const charRealmEl = document.getElementById('charRealm');
+          if (charRealmEl) {
+            charRealmEl.textContent = roleInfo.realm !== undefined && roleInfo.realm !== null && roleInfo.realm !== '' 
+              ? `境界: ${roleInfo.realm}` 
+              : '';
+          }
+          
+          console.log('✅ 角色信息加载完成');
+        } else {
+          console.warn('⚠️ 获取角色信息返回空数据');
+          // 即使没有获取到角色信息，也更新角色名称为空
+          const charNameEl = document.getElementById('charName');
+          if (charNameEl) {
+            charNameEl.textContent = '';
+          }
+          
+          // 更新境界信息
+          const cultivationStageEl = document.querySelector('.cultivation-stage');
+          if (cultivationStageEl) {
+            cultivationStageEl.textContent = '';
+          }
+          
+          // 更新境界信息
+          const charRealmEl = document.getElementById('charRealm');
+          if (charRealmEl) {
+            charRealmEl.textContent = '';
+          }
+          
+          if (window.uiUtils) {
+            uiUtils.showToast('获取角色信息失败：返回数据为空', 'error');
+          }
+        }
+      } catch (error) {
+        // 显示错误提示
+        console.error('❌ 获取角色信息失败:', error);
+        if (window.uiUtils) {
+          uiUtils.showToast('获取角色信息失败：' + error.message, 'error');
+        }
+        
+        // 尝试从 localStorage 获取角色信息作为备选
+        try {
+          const cachedRoleData = localStorage.getItem('roleData');
+          if (cachedRoleData) {
+            roleData = JSON.parse(cachedRoleData);
+            console.log('从 localStorage 加载角色信息作为备选:', roleData);
+            
+            // 处理后端返回的结构
+            const roleInfo = roleData.role || roleData;
+            
+            // 更新角色名称
+            const charNameEl = document.getElementById('charName');
+            if (charNameEl) {
+              charNameEl.textContent = roleInfo.roleName !== undefined && roleInfo.roleName !== null && roleInfo.roleName !== '' 
+                ? roleInfo.roleName 
+                : (roleInfo.name !== undefined && roleInfo.name !== null && roleInfo.name !== '' 
+                  ? roleInfo.name 
+                  : '');
+            }
+            
+            // 更新境界信息
+            const cultivationStageEl = document.querySelector('.cultivation-stage');
+            if (cultivationStageEl) {
+              cultivationStageEl.textContent = roleInfo.realm !== undefined && roleInfo.realm !== null && roleInfo.realm !== '' 
+                ? roleInfo.realm 
+                : '';
+            }
+            
+            // 更新境界信息
+            const charRealmEl = document.getElementById('charRealm');
+            if (charRealmEl) {
+              charRealmEl.textContent = roleInfo.realm !== undefined && roleInfo.realm !== null && roleInfo.realm !== '' 
+                ? `境界: ${roleInfo.realm}` 
+                : '';
+            }
+          } else {
+            // 如果 localStorage 中也没有角色信息，更新角色名称为空
+            const charNameEl = document.getElementById('charName');
+            if (charNameEl) {
+              charNameEl.textContent = '';
+            }
+            
+            // 更新境界信息
+            const cultivationStageEl = document.querySelector('.cultivation-stage');
+            if (cultivationStageEl) {
+              cultivationStageEl.textContent = '';
+            }
+            
+            // 更新境界信息
+            const charRealmEl = document.getElementById('charRealm');
+            if (charRealmEl) {
+              charRealmEl.textContent = '';
+            }
+          }
+        } catch (localStorageError) {
+          console.error('从 localStorage 加载角色信息失败:', localStorageError);
+          // 如果解析失败，更新角色名称为空
+          const charNameEl = document.getElementById('charName');
+          if (charNameEl) {
+            charNameEl.textContent = '';
+          }
+          
+          // 更新境界信息
+          const cultivationStageEl = document.querySelector('.cultivation-stage');
+          if (cultivationStageEl) {
+            cultivationStageEl.textContent = '';
+          }
+          
+          // 更新境界信息
+          const charRealmEl = document.getElementById('charRealm');
+          if (charRealmEl) {
+            charRealmEl.textContent = '';
+          }
+        }
+      }
+    }
+
+    // 加载技能数据（不分页，一次性加载所有）
+    async function loadSkills() {
+      try {
+        if (isLoading) {
+          console.log('正在加载中，跳过本次请求');
+          return;
+        }
+        
+        isLoading = true;
+        console.log('开始从 API 加载技能数据，roleId:', roleId);
+        
+        // 只有当 roleId 存在时才调用 API
+        if (roleId) {
+          const result = await window.apiService.getRoleSkills(roleId);
+          console.log('API 返回结果:', result);
+          
+          // 处理 Result 包装格式 - 只使用数据库真实数据
+          const data = (result && result.data) ? result.data : (Array.isArray(result) ? result : []);
+          skills = data.skills || [];
+          roleSkills = data.skills || [];
+          
+          // 更新技能容量显示
+          const currentSkillCount = data.currentSkillCount || skills.length;
+          const maxSkillCount = data.maxSkillCount || 5;
+          const realm = data.realm || roleData.realm || '凡人';
+          
+          // 更新 UI 显示
+          document.getElementById('currentSkillCount').textContent = currentSkillCount;
+          document.getElementById('maxSkillCount').textContent = maxSkillCount;
+          document.getElementById('realmDisplay').textContent = '境界：' + realm;
+          
+          console.log('获取角色技能数据，总数:', skills.length);
+          console.log('技能容量:', currentSkillCount + '/' + maxSkillCount);
+        } else {
+          console.warn('roleId 不存在，加载空技能列表');
+          skills = [];
+          document.getElementById('currentSkillCount').textContent = '0';
+          document.getElementById('maxSkillCount').textContent = '5';
+        }
+        
+        console.log('检查技能列表长度:', skills.length);
+        
+        if (skills.length === 0) {
+          renderFilterTabs();
+          initSortFunction();
+          initScrollListener();
+          // 直接在列表中显示空状态，不弹窗
+          const list = document.getElementById('skillList');
+          if (list) {
+            list.innerHTML = `
+              <div style="
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 60px 20px;
+                text-align: center;
+              ">
+                <div style="font-size: 3rem; margin-bottom: 15px; opacity: 0.6;">📜</div>
+                <div style="color: var(--ink-light); font-size: 1rem; font-weight: bold; margin-bottom: 8px; font-family: 'SimSun', serif;">
+                  暂无功法
+                </div>
+                <div style="color: var(--gold-dim); font-size: 0.85rem; line-height: 1.6; font-family: 'SimSun', serif;">
+                  你尚未习得任何功法<br>继续努力修行吧
+                </div>
+              </div>
+            `;
+          }
+        } else {
+          console.log('技能列表不为空，数量:', skills.length);
+          // 生成分类筛选标签
+          renderFilterTabs();
+          initSortFunction();
+          initScrollListener();
+          // 初始渲染技能列表
+          filterSkillsByType('all');
+        }
+      } catch (error) {
+        console.error('加载技能失败:', error);
+        skills = [];
+        // 显示错误提示
+        if (window.uiUtils) {
+          uiUtils.showToast('加载技能失败：' + error.message, 'error');
+        }
+      } finally {
+        isLoading = false;
+        console.log('加载完成，isLoading:', false);
+      }
+    }
+    
+    // 显示境界容量提示
+    function showRealmCapacityTip() {
+      const realm = document.getElementById('realmDisplay').textContent.replace('境界：', '');
+      const maxSkills = document.getElementById('maxSkillCount').textContent;
+      
+      const tipContent = `
+        <div style="text-align: center;">
+          <div style="font-size: 1.5rem; margin-bottom: 15px;">📖</div>
+          <div style="font-size: 1.1rem; color: var(--ink-black); font-weight: bold; margin-bottom: 15px; font-family: 'SimSun', serif;">
+            境界限制
+          </div>
+          <div style="font-size: 0.95rem; color: var(--ink-light); line-height: 1.8; font-family: 'SimSun', serif;">
+            当前境界为【${realm}】<br>
+            最多可携带 <span style="color: var(--gold-bright); font-weight: bold; font-size: 1.1rem;">${maxSkills}</span> 个技能<br><br>
+            请提升境界以解锁更多技能栏位
+          </div>
+          <button onclick="this.closest('.modal-overlay').remove()" style="
+            margin-top: 20px;
+            background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
+            color: #FFF8DC;
+            border: 2px solid #DAA520;
+            border-radius: 8px;
+            padding: 10px 30px;
+            font-size: 1rem;
+            font-family: 'STKaiti', 'KaiTi', serif;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(139, 69, 19, 0.4);
+            transition: all 0.3s ease;
+            letter-spacing: 2px;
+          "
+          onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(139, 69, 19, 0.6)';"
+          onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(139, 69, 19, 0.4)';"
+          >
+            知道了
+          </button>
+        </div>
+      `;
+      
+      showCustomModal('境界说明', tipContent);
+    }
+    
+    // 显示自定义弹窗
+    function showCustomModal(title, content) {
+      // 移除已存在的弹窗
+      const existingModal = document.querySelector('.modal-overlay');
+      if (existingModal) {
+        existingModal.remove();
+      }
+      
+      // 创建遮罩层
+      const overlay = document.createElement('div');
+      overlay.className = 'modal-overlay';
+      overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        animation: fadeIn 0.3s ease;
+      `;
+      
+      // 创建弹窗容器
+      const modal = document.createElement('div');
+      modal.style.cssText = `
+        position: relative;
+        background: linear-gradient(135deg, #f5e6d3 0%, #e8d5b5 100%);
+        border: 3px solid #8B4513;
+        border-radius: 12px;
+        padding: 30px;
+        max-width: 400px;
+        min-width: 320px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+        animation: slideDown 0.4s ease;
+        overflow: hidden;
+      `;
+      
+      modal.innerHTML = `
+        <div style="text-align: center; margin-bottom: 20px;">
+          <div style="font-size: 1.3rem; color: var(--ink-black); font-weight: bold; font-family: 'SimSun', serif;">${title}</div>
+        </div>
+        ${content}
+      `;
+      
+      overlay.appendChild(modal);
+      document.body.appendChild(overlay);
+    }
+    
+    // 显示遗忘技能确认弹窗
+    function showForgetSkillModal(skill) {
+      const tipContent = `
+        <div style="text-align: center;">
+          <div style="font-size: 1.5rem; margin-bottom: 15px;">⚠️</div>
+          <div style="font-size: 1rem; color: var(--ink-black); font-weight: bold; margin-bottom: 15px; font-family: 'SimSun', serif;">
+            遗忘技能：${skill.skillName}
+          </div>
+          <div style="font-size: 0.9rem; color: var(--ink-light); line-height: 1.6; margin-bottom: 20px; font-family: 'SimSun', serif;">
+            遗忘后技能将被移除<br>
+            需要消耗 1 个【技能书简】
+          </div>
+          <div style="display: flex; gap: 15px; justify-content: center;">
+            <button onclick="this.closest('.modal-overlay').remove()" style="
+              background: linear-gradient(135deg, #5a5a5a 0%, #3a3a3a 100%);
+              color: #fff;
+              border: 2px solid #888;
+              border-radius: 8px;
+              padding: 10px 30px;
+              font-size: 1rem;
+              font-family: 'STKaiti', 'KaiTi', serif;
+              font-weight: bold;
+              cursor: pointer;
+              box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+              transition: all 0.3s ease;
+              letter-spacing: 2px;
+            "
+            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(0, 0, 0, 0.5)';"
+            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(0, 0, 0, 0.3)';"
+            >
+              取消
+            </button>
+            <button onclick="confirmForgetSkill(${skill.skillId})" style="
+              background: linear-gradient(135deg, #b22222 0%, #8b0000 100%);
+              color: #fff;
+              border: 2px solid #ff6b6b;
+              border-radius: 8px;
+              padding: 10px 30px;
+              font-size: 1rem;
+              font-family: 'STKaiti', 'KaiTi', serif;
+              font-weight: bold;
+              cursor: pointer;
+              box-shadow: 0 4px 15px rgba(178, 34, 34, 0.4);
+              transition: all 0.3s ease;
+              letter-spacing: 2px;
+            "
+            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(178, 34, 34, 0.6)';"
+            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(178, 34, 34, 0.4)';"
+            >
+              确认遗忘
+            </button>
+          </div>
+        </div>
+      `;
+      
+      showCustomModal('确认遗忘', tipContent);
+    }
+    
+    // 确认遗忘技能
+    async function confirmForgetSkill(skillId) {
+      try {
+        const roleId = window.currentRoleId || window.APP_CONFIG?.currentRoleId || window.localStorage.getItem('currentRoleId');
+        const result = await window.apiService.forgetSkill(roleId, skillId);
+        
+        // 关闭确认弹窗
+        const modal = document.querySelector('.modal-overlay');
+        if (modal) modal.remove();
+        
+        if (result.code === 200) {
+          // 刷新技能列表
+          await loadSkills();
+          showToast('技能遗忘成功', 'success');
+        } else {
+          showToast(result.message || '遗忘失败', 'error');
+        }
+      } catch (error) {
+        console.error('遗忘技能失败:', error);
+        const modal = document.querySelector('.modal-overlay');
+        if (modal) modal.remove();
+        showToast('遗忘技能失败，请稍后重试', 'error');
+      }
+    }
+    
+    // 轻量级 Toast 提示
+    function showToast(message, type = 'info') {
+      const existing = document.querySelector('.toast-tip');
+      if (existing) existing.remove();
+      
+      const toast = document.createElement('div');
+      toast.className = 'toast-tip';
+      const bgColor = type === 'success' ? 'rgba(34,139,34,0.9)' : type === 'error' ? 'rgba(178,34,34,0.9)' : 'rgba(139,69,19,0.9)';
+      const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+      toast.style.cssText = `
+        position: fixed;
+        top: 20%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: ${bgColor};
+        color: #fff;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        font-family: 'SimSun', serif;
+        z-index: 9999;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        animation: fadeIn 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      `;
+      toast.innerHTML = `<span>${icon}</span><span>${message}</span>`;
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.style.animation = 'fadeOut 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+      }, 2000);
+    }
+    
+    // 渲染分类筛选标签
+    async function renderFilterTabs() {
+      const tabsContainer = document.getElementById('skillFilterTabs');
+      if (!tabsContainer) return;
+      
+      // 如果已经渲染过，不再重复渲染
+      if (tabsContainer.getAttribute('data-rendered') === 'true') {
+        return;
+      }
+      
+      try {
+        // 从后端获取技能类型配置
+        let types = [];
+        
+        // 检查 apiService 是否存在以及 getSkillTypes 方法是否存在
+        if (window.apiService && typeof window.apiService.getSkillTypes === 'function') {
+          try {
+            const result = await window.apiService.getSkillTypes();
+            // 处理 Result 包装格式
+            types = (result && Array.isArray(result.data)) ? result.data : (Array.isArray(result) ? result : []);
+          } catch (error) {
+            console.error('获取技能类型失败:', error);
+          }
+        }
+        
+        // 如果没有从后端获取到数据，使用默认配置
+        if (types.length === 0) {
+          types = [
+            { typeCode: '辅助', typeName: '辅助', displayName: '辅助' },
+            { typeCode: '身法', typeName: '身法', displayName: '身法' },
+            { typeCode: '攻击', typeName: '攻击', displayName: '攻击' },
+            { typeCode: '功法', typeName: '功法', displayName: '功法' }
+          ];
+        }
+        
+        // 生成标签 HTML
+        let tabsHtml = '<div class="filter-tab active" data-type="all">全部</div>';
+        types.forEach(type => {
+          const typeCode = type.typeCode || type.typeName;
+          const displayName = type.displayName || type.typeName;
+          const color = type.color ? `color: ${type.color};` : '';
+          tabsHtml += `<div class="filter-tab" data-type="${typeCode}" style="${color}">${displayName}</div>`;
+        });
+        
+        tabsContainer.innerHTML = tabsHtml;
+        tabsContainer.setAttribute('data-rendered', 'true');
+        
+        // 使用事件委托绑定点击事件
+        tabsContainer.addEventListener('click', (e) => {
+          const tab = e.target.closest('.filter-tab');
+          if (!tab || !tabsContainer.contains(tab)) return;
+          
+          // 移除所有激活状态
+          tabsContainer.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+          // 激活当前标签
+          tab.classList.add('active');
+          // 筛选技能
+          const type = tab.dataset.type;
+          filterSkillsByType(type);
+        });
+      } catch (error) {
+        console.error('加载技能类型失败:', error);
+        // 使用默认配置
+        const defaultTypes = ['辅助', '身法', '攻击', '功法'];
+        let tabsHtml = '<div class="filter-tab active" data-type="all">全部</div>';
+        defaultTypes.forEach(type => {
+          tabsHtml += `<div class="filter-tab" data-type="${type}">${type}</div>`;
+        });
+        tabsContainer.innerHTML = tabsHtml;
+        tabsContainer.setAttribute('data-rendered', 'true');
+      }
+    }
+    
+    // 初始化排序功能
+    function initSortFunction() {
+      const sortSelect = document.getElementById('skillSortSelect');
+      if (sortSelect) {
+        sortSelect.addEventListener('change', () => {
+          // 获取当前选中的分类
+          const activeTab = document.querySelector('.filter-tab.active');
+          const type = activeTab ? activeTab.dataset.type : 'all';
+          // 重新筛选并排序
+          filterSkillsByType(type);
+        });
+      }
+    }
+    
+    // 初始化下拉刷新功能
+    function initScrollListener() {
+      const contentScroll = document.querySelector('.content-scroll');
+      if (!contentScroll) return;
+      
+      let startY = 0;
+      let isRefreshing = false;
+      let pullDistance = 0;
+      
+      // 监听 touchstart 事件
+      contentScroll.addEventListener('touchstart', (e) => {
+        startY = e.touches[0].clientY;
+        pullDistance = 0;
+      }, { passive: true });
+      
+      // 监听 touchmove 事件
+      contentScroll.addEventListener('touchmove', (e) => {
+        const currentY = e.touches[0].clientY;
+        pullDistance = currentY - startY;
+        
+        // 当滚动到顶部且向下拉时
+        if (contentScroll.scrollTop <= 0 && pullDistance > 0) {
+          // 当下拉距离超过 80px 时触发刷新
+          if (pullDistance > 80 && !isRefreshing) {
+            isRefreshing = true;
+            showRefreshIndicator();
+          }
+        }
+      }, { passive: true });
+      
+      // 监听 touchend 事件
+      contentScroll.addEventListener('touchend', async () => {
+        if (isRefreshing) {
+          await refreshSkills();
+          hideRefreshIndicator();
+          isRefreshing = false;
+        }
+      }, { passive: true });
+    }
+    
+    // 显示刷新指示器
+    function showRefreshIndicator() {
+      const list = document.getElementById('skillList');
+      if (!list) return;
+      
+      // 移除已存在的指示器
+      hideRefreshIndicator();
+      
+      // 创建刷新指示器
+      const refreshElement = document.createElement('div');
+      refreshElement.id = 'refresh-indicator';
+      refreshElement.style.cssText = `
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        color: var(--gold-dim);
+        font-size: 0.9rem;
+        font-family: 'SimSun', serif;
+        background: linear-gradient(to bottom, rgba(212,175,55,0.2), transparent);
+        border-bottom: 1px solid var(--gold-dim);
+      `;
+      refreshElement.innerHTML = '🔄 正在刷新技能数据...';
+      
+      // 插入到列表最前面
+      list.insertBefore(refreshElement, list.firstChild);
+    }
+    
+    // 隐藏刷新指示器
+    function hideRefreshIndicator() {
+      const refreshElement = document.getElementById('refresh-indicator');
+      if (refreshElement) {
+        refreshElement.remove();
+      }
+    }
+    
+    // 刷新技能数据
+    async function refreshSkills() {
+      try {
+        console.log('开始刷新技能数据，roleId:', roleId);
+        
+        // 显示刷新指示器
+        showRefreshIndicator();
+        
+        // 只有当 roleId 存在时才调用 API
+        if (roleId) {
+          // 重新加载角色技能数据
+          const result = await window.apiService.getRoleSkills(roleId);
+          console.log('API 返回结果:', result);
+          
+          // 处理 Result 包装格式 - 与 loadSkills 保持一致
+          const data = (result && result.data) ? result.data : (Array.isArray(result) ? result : []);
+          skills = data.skills || [];
+          roleSkills = data.skills || [];
+          
+          // 更新技能容量显示
+          const currentSkillCount = data.currentSkillCount || skills.length;
+          const maxSkillCount = data.maxSkillCount || 5;
+          const realm = data.realm || roleData.realm || '凡人';
+          
+          // 更新 UI 显示
+          document.getElementById('currentSkillCount').textContent = currentSkillCount;
+          document.getElementById('maxSkillCount').textContent = maxSkillCount;
+          document.getElementById('realmDisplay').textContent = '境界：' + realm;
+          
+          console.log('刷新后技能数据，总数:', skills.length);
+          console.log('技能容量:', currentSkillCount + '/' + maxSkillCount);
+        } else {
+          console.warn('roleId 不存在，刷新空技能列表');
+          skills = [];
+          document.getElementById('currentSkillCount').textContent = '0';
+          document.getElementById('maxSkillCount').textContent = '5';
+        }
+        
+        // 重新渲染技能列表
+        const activeTab = document.querySelector('.filter-tab.active');
+        const type = activeTab ? activeTab.dataset.type : 'all';
+        filterSkillsByType(type);
+        
+        // 显示刷新成功的提示
+        if (window.uiUtils) {
+          uiUtils.showToast('✅ 技能数据已刷新', 'success');
+        }
+        
+        console.log('刷新完成');
+      } catch (error) {
+        console.error('刷新技能失败:', error);
+        if (window.uiUtils) {
+          uiUtils.showToast('❌ 刷新失败：' + error.message, 'error');
+        }
+      } finally {
+        // 确保隐藏指示器
+        setTimeout(() => {
+          hideRefreshIndicator();
+        }, 500);
+      }
+    }
+    
+    // 加载更多技能（不再需要，保留以防万一）
+    async function loadMoreSkills() {
+      // 已移除分页功能，不需要加载更多
+    }
+    
+    // 对技能进行排序
+    function sortSkills(skillList, sortBy) {
+      return [...skillList].sort((a, b) => {
+        switch (sortBy) {
+          case 'mastery':
+            return (b.experience || 0) - (a.experience || 0);
+          case 'level':
+            return (b.skillLevel || 0) - (a.skillLevel || 0);
+          case 'rank':
+            const rankOrder = { 'legend': 4, 'epic': 3, 'rare': 2, 'common': 1 };
+            return (rankOrder[b.rank] || 1) - (rankOrder[a.rank] || 1);
+          case 'name':
+          default:
+            const nameA = a.skillName || a.name || '';
+            const nameB = b.skillName || b.name || '';
+            return nameA.localeCompare(nameB);
+        }
+      });
+    }
+    
+    // 按类型筛选技能
+    function filterSkillsByType(type = 'all') {
+      console.log('筛选类型:', type);
+      
+      // 如果是全部类型，显示所有技能
+      if (type === 'all') {
+        filteredSkills = skills;
+      } else {
+        // 根据类型代码筛选技能
+        filteredSkills = skills.filter(s => s.skillType === type);
+      }
+      
+      console.log('筛选后数量:', filteredSkills.length);
+      
+      // 获取当前排序方式
+      const sortSelect = document.getElementById('skillSortSelect');
+      const sortBy = sortSelect ? sortSelect.value : 'name';
+      
+      // 对筛选后的技能进行排序
+      sortedSkills = sortSkills(filteredSkills, sortBy);
+      console.log('排序后技能数量:', sortedSkills.length);
+      
+      // 渲染技能列表
+      renderSkills(sortedSkills);
+    }
+
+    // 加载角色技能（已合并到 loadSkills 中，此函数仅用于兼容）
+    async function loadRoleSkills() {
+      // loadSkills 已经设置了 roleSkills，无需重复调用
+      // 如果需要刷新，请调用 loadSkills()
+    }
+
+    function renderSkills(skillListToRender = skills) {
+      const list = document.getElementById('skillList');
+      
+      // 清空列表
+      list.innerHTML = '';
+      
+      console.log('开始渲染技能列表，技能数量:', skillListToRender.length);
+      
+      if (skillListToRender.length === 0) {
+        // 显示空状态
+        list.innerHTML = `
+          <div style="
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            text-align: center;
+            background: rgba(0,0,0,0.03);
+            border: 1px solid rgba(0,0,0,0.05);
+            border-radius: 8px;
+            margin: 10px 0;
+          ">
+            <div style="font-size: 2.5rem; margin-bottom: 15px; color: var(--gold-dim);">📜</div>
+            <div style="color: var(--ink-light); font-size: 1rem; font-weight: bold; margin-bottom: 8px;">暂无功法</div>
+            <div style="color: var(--gold-dim); font-size: 0.8rem; line-height: 1.4;">你尚未习得任何功法<br>继续努力修行吧</div>
+          </div>
+        `;
+        return;
+      }
+      
+      skillListToRender.forEach(skill => {
+        const mastery = skill.experience || 0;
+        const level = skill.skillLevel || 1;
+        const isEquipped = skill.equipped === true || skill.equipped === 1 || skill.equipped === 'true';
+        
+        const card = document.createElement('div');
+        card.className = `skill-card rank-${skill.rank || 'common'}`;
+        card.onclick = (e) => {
+          openDetail(skill.id);
+        };
+
+        card.innerHTML = `
+          <div class="skill-header">
+            <div class="skill-icon-box">${skill.icon || '📜'}</div>
+            <div class="skill-details">
+              <div class="skill-name-row">
+                <span class="skill-name">${skill.skillName || skill.name || '未知功法'}</span>
+                <span class="skill-rank">${skill.rankName || getSkillTypeName(skill.skillType)}</span>
+              </div>
+              <div class="skill-desc-short">${skill.description || '暂无描述'}</div>
+            </div>
+            <button class="forget-btn" data-skill-id="${skill.id}" data-skill-name="${(skill.skillName || skill.name || '未知功法').replace(/"/g, '&quot;')}" style="
+              position: absolute;
+              top: 10px;
+              right: 10px;
+              width: 32px;
+              height: 32px;
+              border-radius: 50%;
+              background: linear-gradient(135deg, #b22222 0%, #8b0000 100%);
+              border: 2px solid #ff6b6b;
+              color: #fff;
+              font-size: 1.2rem;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              box-shadow: 0 2px 8px rgba(178, 34, 34, 0.4);
+              transition: all 0.2s;
+            "
+            onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 4px 12px rgba(178, 34, 34, 0.6)';"
+            onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 2px 8px rgba(178, 34, 34, 0.4)';"
+            title="遗忘技能">
+              ✕
+            </button>
+          </div>
+          <div class="skill-bonus" style="
+            display: flex;
+            gap: 8px;
+            padding: 6px 12px;
+            font-size: 0.75rem;
+            font-family: 'SimSun', serif;
+            flex-wrap: wrap;
+          ">
+            ${skill.attackBonus ? `<span style="color: #DC143C; background: rgba(220,20,60,0.1); padding: 2px 6px; border-radius: 4px;">⚔️攻击+${skill.attackBonus}</span>` : ''}
+            ${skill.defenseBonus ? `<span style="color: #4169E1; background: rgba(65,105,225,0.1); padding: 2px 6px; border-radius: 4px;">🛡️防御+${skill.defenseBonus}</span>` : ''}
+            ${skill.xiuweiBonus ? `<span style="color: #9370DB; background: rgba(147,112,219,0.1); padding: 2px 6px; border-radius: 4px;">✨修为+${skill.xiuweiBonus}</span>` : ''}
+          </div>
+          <div class="skill-footer">
+            <div class="mastery-label">
+              熟练度：${mastery} 
+              <div class="mastery-bar"><div class="mastery-fill" style="width:${Math.min(mastery / 100, 100)}%"></div></div>
+              Lv.${level}
+            </div>
+            <div class="skill-status" style="font-size: 0.8rem; color: var(--gold-bright); font-weight: bold;">
+              ${isEquipped ? '已装备' : '已学习'}
+            </div>
+          </div>
+        `;
+        list.appendChild(card);
+      });
+      
+      // 添加已加载全部技能的提示
+      const endElement = document.createElement('div');
+      endElement.style.cssText = `
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        color: var(--ink-light);
+        font-size: 0.85rem;
+        font-family: 'SimSun', serif;
+        margin-top: 10px;
+      `;
+      endElement.textContent = '已加载全部技能';
+      list.appendChild(endElement);
+      
+      console.log('技能列表渲染完成，技能数量:', skillListToRender.length);
+    }
+    
+    // 获取技能类型名称
+    function getSkillTypeName(type) {
+      const typeMap = {
+        '攻击': '攻击功法',
+        '防御': '防御功法',
+        '辅助': '辅助功法',
+        '身法': '身法功法',
+        '功法': '内功心法'
+      };
+      return typeMap[type] || '功法';
+    }
+
+
+
+    function openDetail(id) {
+      const skill = skills.find(s => s.id === id || s.skillId === id);
+      currentSkillId = id;
+      
+      if (!skill) {
+        console.warn('技能不存在');
+        return;
+      }
+      
+      document.getElementById('detailTitle').textContent = skill.skillName || skill.name || '未知功法';
+      document.getElementById('detailRank').textContent = `${skill.rankName || getSkillTypeName(skill.skillType)}`;
+      document.getElementById('detailEfficiency').textContent = skill.efficiency || '0/秒';
+      document.getElementById('detailLevel').textContent = skill.skillLevel ? `Lv.${skill.skillLevel}` : '一成';
+      document.getElementById('detailBonus').textContent = [
+        skill.attackBonus ? `攻击+${skill.attackBonus}` : '',
+        skill.defenseBonus ? `防御+${skill.defenseBonus}` : '',
+        skill.xiuweiBonus ? `修为+${skill.xiuweiBonus}` : ''
+      ].filter(Boolean).join('  ') || '无加成';
+      
+      const triggerRate = skill.triggerRate || 100;
+      const triggerPercent = (100 / triggerRate).toFixed(1);
+      document.getElementById('detailTriggerRate').textContent = `${triggerPercent}% (1/${triggerRate})`;
+      
+      document.getElementById('detailDesc').textContent = skill.description || '暂无描述';
+
+      document.getElementById('overlay').classList.add('active');
+      document.getElementById('detailPanel').classList.add('open');
+    }
+
+    function closeDetail() {
+      document.getElementById('overlay').classList.remove('active');
+      document.getElementById('detailPanel').classList.remove('open');
+      currentSkillId = null;
+    }
+
+
+
+    function simulateCultivate(event) {
+      if (event) event.preventDefault();
+      const btn = event?.currentTarget;
+      const originalText = btn?.textContent || '闭关修炼';
+      if (btn) {
+        btn.textContent = '修炼中...';
+        btn.disabled = true;
+      }
+      
+      setTimeout(() => {
+        if (btn) {
+          btn.textContent = originalText;
+          btn.disabled = false;
+        }
+        uiUtils.showToast('闭关修炼完成！修为略有精进。');
+        closeDetail();
+      }, 1500);
+    }
+
+    document.getElementById('skillList').addEventListener('click', function(e) {
+      const forgetBtn = e.target.closest('.forget-btn');
+      if (forgetBtn) {
+        e.stopPropagation();
+        const skillId = forgetBtn.getAttribute('data-skill-id');
+        const skillName = forgetBtn.getAttribute('data-skill-name');
+        showForgetSkillModal({ skillId: skillId, skillName: skillName });
+      }
+    });
+  </script>
+</body>
+</html>

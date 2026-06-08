@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="../js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="../css/mobile-adapt.css">
+    <title>我的贡献 - 灵月仙途</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-body: #f0f2f5;
+            --bg-card: #2c3e50;
+            --bg-card-light: #34495e;
+            --text-gold: #d4af37;
+            --text-gold-dim: #aa8c2c;
+            --text-white: #ecf0f1;
+            --text-grey: #95a5a6;
+            --border-radius: 8px;
+            --nav-height: 60px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-white);
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            background: rgba(44, 62, 80, 0.05);
+            min-height: 100vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            padding-bottom: calc(var(--nav-height) + 20px);
+        }
+
+        /* 头部 */
+        .header {
+            background: var(--bg-card);
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--text-gold-dim);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .header-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--text-gold);
+        }
+
+        .header-btn {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--text-gold-dim);
+            color: var(--text-gold);
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        /* 贡献概览 */
+        .contribution-overview {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(170, 140, 44, 0.1));
+            margin: 15px;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            text-align: center;
+        }
+
+        .contribution-label {
+            font-size: 14px;
+            color: var(--text-grey);
+            margin-bottom: 10px;
+        }
+
+        .contribution-value {
+            font-size: 42px;
+            font-weight: bold;
+            background: linear-gradient(135deg, var(--text-gold), #f1c40f);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
+        }
+
+        .contribution-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .stat-item {
+            background: rgba(0,0,0,0.2);
+            padding: 10px;
+            border-radius: 6px;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--text-gold);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-grey);
+            margin-top: 5px;
+        }
+
+        /* 快捷操作 */
+        .quick-actions {
+            padding: 0 15px;
+            margin-bottom: 15px;
+        }
+
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .action-card {
+            background: var(--bg-card);
+            border-radius: var(--border-radius);
+            padding: 15px;
+            text-align: center;
+            border: 1px solid rgba(212, 175, 55, 0.1);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .action-card:hover {
+            border-color: var(--text-gold);
+            transform: translateY(-2px);
+        }
+
+        .action-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .action-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--text-white);
+        }
+
+        .action-desc {
+            font-size: 11px;
+            color: var(--text-grey);
+            margin-top: 5px;
+        }
+
+        /* 贡献记录 */
+        .contribution-records {
+            padding: 0 15px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--text-white);
+            margin-bottom: 10px;
+            padding-left: 10px;
+            border-left: 3px solid var(--text-gold);
+        }
+
+        .record-list {
+            background: var(--bg-card);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+
+        .record-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .record-item:last-child {
+            border-bottom: none;
+        }
+
+        .record-info {
+            flex: 1;
+        }
+
+        .record-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--text-white);
+            margin-bottom: 5px;
+        }
+
+        .record-time {
+            font-size: 11px;
+            color: var(--text-grey);
+        }
+
+        .record-amount {
+            font-size: 18px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .record-amount.positive {
+            color: #4CAF50;
+        }
+
+        .record-amount.negative {
+            color: #F44336;
+        }
+
+        /* 宗门任务 */
+        .task-section {
+            padding: 0 15px;
+            margin-top: 15px;
+        }
+
+        .task-list {
+            background: var(--bg-card);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+
+        .task-item {
+            padding: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .task-item:last-child {
+            border-bottom: none;
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .task-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--text-white);
+        }
+
+        .task-reward {
+            font-size: 12px;
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        .task-desc {
+            font-size: 12px;
+            color: var(--text-grey);
+            margin-bottom: 10px;
+        }
+
+        .task-progress {
+            background: rgba(0,0,0,0.3);
+            height: 6px;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .task-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--text-gold), #f1c40f);
+            transition: width 0.3s;
+        }
+
+        .task-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .task-status {
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+
+        .status-available {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4CAF50;
+        }
+
+        .status-progress {
+            background: rgba(255, 152, 0, 0.2);
+            color: #FF9800;
+        }
+
+        .status-completed {
+            background: rgba(33, 150, 243, 0.2);
+            color: #2196F3;
+        }
+
+        .btn-claim {
+            padding: 5px 12px;
+            border-radius: 4px;
+            border: none;
+            font-size: 12px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background: var(--text-gold);
+            color: #1a252f;
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* 底部导航 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #1a252f;
+            border-top: 1px solid var(--text-gold-dim);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+            max-width: 480px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: var(--text-grey);
+            text-decoration: none;
+            font-size: 10px;
+            width: 20%;
+        }
+
+        .nav-item.active {
+            color: var(--text-gold);
+        }
+
+        .nav-icon {
+            font-size: 18px;
+        }
+
+        /* 通知 */
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(20, 30, 60, 0.95);
+            color: #aaccff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: 1px solid rgba(100, 150, 255, 0.4);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+            z-index: 3000;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .notification.show {
+            opacity: 1;
+        }
+    </style>
+
+  </head>
+<body>
+    <div class="app-container">
+        <!-- 头部 -->
+        <header class="header">
+            <button class="header-btn" onclick="history.back()">← 返回</button>
+            <div class="header-title">我的贡献</div>
+            <button class="header-btn" onclick="showHelp()">❓</button>
+        </header>
+
+        <!-- 贡献概览 -->
+        <div class="contribution-overview">
+            <div class="contribution-label">我的贡献值</div>
+            <div class="contribution-value" id="myContribution">0</div>
+            <div class="contribution-stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="todayContribution">0</div>
+                    <div class="stat-label">今日获得</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="weekContribution">0</div>
+                    <div class="stat-label">本周获得</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 快捷操作 -->
+        <div class="quick-actions">
+            <div class="action-grid">
+                <div class="action-card" onclick="showContributeModal()">
+                    <div class="action-icon">💰</div>
+                    <div class="action-title">捐赠资源</div>
+                    <div class="action-desc">向宗门捐赠资源获得贡献</div>
+                </div>
+                <div class="action-card" onclick="showExchangeModal()">
+                    <div class="action-icon">🏪</div>
+                    <div class="action-title">贡献兑换</div>
+                    <div class="action-desc">使用贡献兑换珍稀物品</div>
+                </div>
+                <div class="action-card" onclick="showRanking()">
+                    <div class="action-icon">📊</div>
+                    <div class="action-title">贡献排行</div>
+                    <div class="action-desc">查看宗门贡献排名</div>
+                </div>
+                <div class="action-card" onclick="showRecords()">
+                    <div class="action-icon">📝</div>
+                    <div class="action-title">贡献记录</div>
+                    <div class="action-desc">查看贡献获取明细</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 宗门任务 -->
+        <div class="task-section">
+            <div class="section-title">宗门任务</div>
+            <div class="task-list" id="taskList">
+                <!-- 任务列表将通过 JS 动态加载 -->
+            </div>
+        </div>
+
+        <!-- 贡献记录 -->
+        <div class="contribution-records" id="recordsSection" style="display: none; margin-top: 15px;">
+            <div class="section-title">贡献记录</div>
+            <div class="record-list" id="recordList">
+                <!-- 记录列表将通过 JS 动态加载 -->
+            </div>
+        </div>
+
+        <!-- 底部导航 -->
+        <nav class="bottom-nav" role="navigation" aria-label="主导航">
+            <a href="../index.html" class="nav-item" aria-label="修炼页面">
+                <div class="nav-icon">🧘</div>
+                <div class="nav-text">修炼</div>
+            </a>
+            <a href="../skills/skills.html" class="nav-item" aria-label="功法页面">
+                <div class="nav-icon">📜</div>
+                <div class="nav-text">功法</div>
+            </a>
+            <a href="clan.html" class="nav-item active" aria-label="宗门页面" aria-current="page">
+                <div class="nav-icon">🏯</div>
+                <div class="nav-text">宗门</div>
+            </a>
+            <a href="../word/world.html" class="nav-item" aria-label="仙途页面">
+                <div class="nav-icon">🌌</div>
+                <div class="nav-text">仙途</div>
+            </a>
+            <a href="../map/map.html" class="nav-item" aria-label="云游页面">
+                <div class="nav-icon">🗺️</div>
+                <div class="nav-text">云游</div>
+            </a>
+        </nav>
+    </div>
+
+    <script>
+        const API_BASE_URL = window.APP_CONFIG?.API_BASE_URL || 'http://localhost:8088/api';
+        const roleId = window.AuthService ? window.AuthService.getCurrentRoleId() : localStorage.getItem('currentRoleId');
+        let currentClanId = null;
+        let myContribution = 0;
+        let recordsData = [];
+        let tasksData = [];
+
+        // 页面加载
+        window.addEventListener('DOMContentLoaded', () => {
+            loadMyClanInfo();
+            loadTasks();
+        });
+
+        // 加载我的宗门信息
+        async function loadMyClanInfo() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/clan/member/role/${roleId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data && data.clanId) {
+                        currentClanId = data.clanId;
+                        myContribution = data.contribution || 0;
+                        updateContributionDisplay();
+                        loadRecords();
+                    } else {
+                        showNotification('您还未加入任何宗门');
+                        setTimeout(() => {
+                            window.location.href = 'clan-list.html';
+                        }, 1500);
+                    }
+                }
+            } catch (error) {
+                console.error('加载宗门信息失败:', error);
+                // 使用模拟数据
+                myContribution = 15000;
+                updateContributionDisplay();
+                loadMockData();
+            }
+        }
+
+        // 加载模拟数据
+        function loadMockData() {
+            recordsData = [
+                { id: 1, type: 'task', title: '完成日常任务', amount: 100, time: new Date(Date.now() - 3600000) },
+                { id: 2, type: 'donate', title: '捐赠灵石', amount: 500, time: new Date(Date.now() - 7200000) },
+                { id: 3, type: 'task', title: '完成宗门狩猎', amount: 200, time: new Date(Date.now() - 86400000) },
+                { id: 4, type: 'activity', title: '参与宗门大比', amount: 300, time: new Date(Date.now() - 172800000) },
+                { id: 5, type: 'exchange', title: '兑换丹药', amount: -1000, time: new Date(Date.now() - 259200000) }
+            ];
+
+            tasksData = [
+                {
+                    id: 1,
+                    title: '采集灵草',
+                    description: '采集 10 株灵草交给任务堂',
+                    reward: 100,
+                    progress: 7,
+                    target: 10,
+                    status: 'progress'
+                },
+                {
+                    id: 2,
+                    title: '猎杀妖兽',
+                    description: '猎杀 5 头筑基期妖兽',
+                    reward: 200,
+                    progress: 5,
+                    target: 5,
+                    status: 'completed'
+                },
+                {
+                    id: 3,
+                    title: '炼制丹药',
+                    description: '炼制 3 炉聚气丹',
+                    reward: 150,
+                    progress: 0,
+                    target: 3,
+                    status: 'available'
+                }
+            ];
+
+            renderRecords();
+            renderTasks();
+        }
+
+        // 更新贡献显示
+        function updateContributionDisplay() {
+            document.getElementById('myContribution').textContent = myContribution.toLocaleString();
+            
+            // 计算今日和本周获得
+            const today = new Date();
+            const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+            
+            let todayAmount = 0;
+            let weekAmount = 0;
+            
+            recordsData.forEach(record => {
+                if (record.amount > 0) {
+                    const recordDate = new Date(record.time);
+                    if (recordDate.toDateString() === today.toDateString()) {
+                        todayAmount += record.amount;
+                    }
+                    if (recordDate >= weekAgo) {
+                        weekAmount += record.amount;
+                    }
+                }
+            });
+            
+            document.getElementById('todayContribution').textContent = todayAmount.toLocaleString();
+            document.getElementById('weekContribution').textContent = weekAmount.toLocaleString();
+        }
+
+        // 加载贡献记录
+        async function loadRecords() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/clan/contribution/records/${roleId}`);
+                if (response.ok) {
+                    recordsData = await response.json();
+                    renderRecords();
+                }
+            } catch (error) {
+                console.error('加载记录失败:', error);
+            }
+        }
+
+        // 渲染记录列表
+        function renderRecords() {
+            const list = document.getElementById('recordList');
+            list.innerHTML = recordsData.slice(0, 10).map(record => `
+                <div class="record-item">
+                    <div class="record-info">
+                        <div class="record-title">${record.title || '未知操作'}</div>
+                        <div class="record-time">${formatTime(record.time)}</div>
+                    </div>
+                    <div class="record-amount ${record.amount >= 0 ? 'positive' : 'negative'}">
+                        ${record.amount >= 0 ? '+' : ''}${record.amount.toLocaleString()}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 加载任务列表
+        async function loadTasks() {
+            try {
+                if (!currentClanId) return;
+                const response = await fetch(`${API_BASE_URL}/clan/${currentClanId}/tasks`);
+                if (response.ok) {
+                    tasksData = await response.json();
+                    renderTasks();
+                }
+            } catch (error) {
+                console.error('加载任务失败:', error);
+            }
+        }
+
+        // 渲染任务列表
+        function renderTasks() {
+            const list = document.getElementById('taskList');
+            list.innerHTML = tasksData.map(task => {
+                const statusMap = {
+                    'available': { text: '可接取', class: 'status-available', btn: '接取任务' },
+                    'progress': { text: '进行中', class: 'status-progress', btn: '查看进度' },
+                    'completed': { text: '已完成', class: 'status-completed', btn: '领取奖励' }
+                };
+                
+                const status = statusMap[task.status] || statusMap['available'];
+                const progress = Math.floor((task.progress / task.target) * 100);
+
+                return `
+                    <div class="task-item">
+                        <div class="task-header">
+                            <div class="task-title">${task.title}</div>
+                            <div class="task-reward">+${task.reward} 贡献</div>
+                        </div>
+                        <div class="task-desc">${task.description}</div>
+                        <div class="task-progress">
+                            <div class="task-progress-bar" style="width: ${progress}%"></div>
+                        </div>
+                        <div class="task-footer">
+                            <span class="task-status ${status.class}">${status.text}</span>
+                            <button class="btn-claim btn-primary" 
+                                    onclick="handleTask(${task.id}, '${task.status}')"
+                                    ${task.status === 'progress' ? 'disabled' : ''}>
+                                ${status.btn}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 处理任务
+        function handleTask(taskId, status) {
+            if (status === 'available') {
+                acceptTask(taskId);
+            } else if (status === 'completed') {
+                claimTask(taskId);
+            }
+        }
+
+        // 接取任务
+        async function acceptTask(taskId) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/clan/task/${taskId}/accept`, {
+                    method: 'PUT'
+                });
+                if (response.ok) {
+                    showNotification('任务接取成功');
+                    loadTasks();
+                }
+            } catch (error) {
+                console.error('接取任务失败:', error);
+                showNotification('操作失败，请稍后重试');
+            }
+        }
+
+        // 领取任务奖励
+        async function claimTask(taskId) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/clan/task/${taskId}/complete`, {
+                    method: 'PUT'
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    myContribution += data.reward || 0;
+                    updateContributionDisplay();
+                    showNotification(`任务完成！获得 ${data.reward} 贡献`);
+                    loadTasks();
+                }
+            } catch (error) {
+                console.error('完成任务失败:', error);
+                showNotification('操作失败，请稍后重试');
+            }
+        }
+
+        // 显示捐赠弹窗
+        function showContributeModal() {
+            const amount = prompt('请输入捐赠的灵石数量：\n捐赠比例：100 灵石 = 10 贡献值');
+            if (amount && !isNaN(amount) && amount > 0) {
+                const contribution = Math.floor(amount / 10);
+                myContribution += contribution;
+                updateContributionDisplay();
+                showNotification(`捐赠成功！获得 ${contribution} 贡献值`);
+                
+                // 添加记录
+                recordsData.unshift({
+                    id: Date.now(),
+                    type: 'donate',
+                    title: '捐赠灵石',
+                    amount: contribution,
+                    time: new Date()
+                });
+                renderRecords();
+            }
+        }
+
+        // 显示兑换弹窗
+        function showExchangeModal() {
+            showToast('贡献兑换商店：聚气丹100贡献、筑基丹500贡献等，功能开发中');
+        }
+
+        // 显示排行
+        function showRanking() {
+            showToast('宗门贡献排行榜：功能开发中');
+        }
+
+        // 显示记录
+        function showRecords() {
+            const section = document.getElementById('recordsSection');
+            section.style.display = section.style.display === 'none' ? 'block' : 'none';
+            if (section.style.display === 'block') {
+                section.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // 显示帮助
+        function showHelp() {
+            showToast('贡献值系统说明：完成任务、捐赠资源、参与活动、战争奖励');
+            
+            // 可以在这里添加更详细的帮助模态框
+            // 暂时使用简单提示，后续可扩展为完整帮助系统
+        }
+
+        // 格式化时间
+        function formatTime(date) {
+            if (!date) return '未知';
+            const d = new Date(date);
+            const now = new Date();
+            const diff = now - d;
+            
+            if (diff < 3600000) return '刚刚';
+            if (diff < 86400000) return `${Math.floor(diff / 3600000)}小时前`;
+            if (diff < 604800000) return `${Math.floor(diff / 86400000)}天前`;
+            return `${d.getMonth() + 1}月${d.getDate()}日`;
+        }
+
+        // 显示通知
+        function showNotification(message, duration = 3000) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => notification.classList.add('show'), 10);
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 300);
+            }, duration);
+        }
+    </script>
+  <script src="../js/ui-components.js"></script>
+  <script src="../js/auth-service.js"></script>
+</body>
+</html>

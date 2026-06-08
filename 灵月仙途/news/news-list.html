@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="../js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="../css/mobile-adapt.css">
+  <title>灵月仙途 - 仙途快讯</title>
+  <style>
+    :root {
+      --gold-primary: #e6c749;
+      --gold-light: #f4d03f;
+      --gold-dim: #8a7525;
+      --text-main: #fdfbf7;
+      --text-dim: #d4c5a9;
+      --bg-dark: rgba(15, 20, 35, 0.95);
+      --bg-panel: rgba(20, 25, 45, 0.85);
+      --border-glow: 0 0 10px rgba(230, 199, 73, 0.3);
+      --success: #4CAF50;
+      --danger: #ff4444;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      font-family: 'Microsoft YaHei', 'SimSun', serif;
+      background: linear-gradient(to bottom, #0f1420, #1a202c), 
+                  url('https://images.unsplash.com/photo-1518063319789-7217e6706b04?q=80&w=2070&auto=format&fit=crop');
+      background-size: cover;
+      background-position: center;
+      min-height: 100vh;
+      width: 100vw;
+      overflow-x: hidden;
+      overflow-y: auto;
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      box-sizing: border-box;
+    }
+    
+    .particles {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      background-image: radial-gradient(var(--gold-primary) 1px, transparent 1px);
+      background-size: 60px 60px;
+      animation: particleFloat 60s linear infinite;
+      opacity: 0.1;
+      transform: translateZ(0);
+      will-change: background-position;
+    }
+
+    @keyframes particleFloat {
+      from { background-position: 0 0; }
+      to { background-position: 0 2000px; }
+    }
+
+    .main-container {
+      position: relative;
+      z-index: 10;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      gap: 20px;
+      overflow-y: auto;
+      padding-bottom: 80px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 0;
+      border-bottom: 1px solid rgba(230, 199, 73, 0.3);
+    }
+
+    .header-title {
+      font-size: 1.5rem;
+      color: var(--gold-primary);
+      font-weight: bold;
+      text-shadow: 0 0 10px rgba(230, 199, 73, 0.6);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .back-btn {
+      padding: 10px 20px;
+      background: rgba(230, 199, 73, 0.15);
+      border: 1px solid rgba(230, 199, 73, 0.3);
+      border-radius: 8px;
+      color: var(--gold-primary);
+      font-size: 0.9rem;
+      font-weight: bold;
+      text-decoration: none;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .back-btn:hover {
+      background: rgba(230, 199, 73, 0.25);
+      border-color: var(--gold-primary);
+      color: var(--gold-light);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(230, 199, 73, 0.2);
+    }
+
+    .announcement-list {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .announcement-item {
+      background: rgba(20, 25, 45, 0.8);
+      border: 1px solid rgba(230, 199, 73, 0.3);
+      border-radius: 12px;
+      padding: 20px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .announcement-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: linear-gradient(to bottom, var(--gold-primary), var(--gold-light));
+      border-radius: 12px 0 0 12px;
+    }
+
+    .announcement-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(230, 199, 73, 0.3);
+      border-color: var(--gold-primary);
+    }
+
+    .announcement-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .announcement-title {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: var(--gold-primary);
+      flex: 1;
+      margin-right: 10px;
+    }
+
+    .announcement-time {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      white-space: nowrap;
+    }
+
+    .announcement-content {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      line-height: 1.5;
+      margin-bottom: 10px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .announcement-footer {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+    }
+
+    .read-more {
+      font-size: 0.8rem;
+      color: var(--gold-primary);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.3s;
+    }
+
+    .read-more:hover {
+      color: var(--gold-light);
+      transform: translateX(5px);
+    }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      text-align: center;
+      background: rgba(20, 25, 45, 0.6);
+      border: 1px solid rgba(230, 199, 73, 0.3);
+      border-radius: 12px;
+      margin: 40px 0;
+    }
+
+    .empty-icon {
+      font-size: 4rem;
+      margin-bottom: 20px;
+      color: var(--text-dim);
+    }
+
+    .empty-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: var(--text-dim);
+      margin-bottom: 10px;
+    }
+
+    .empty-desc {
+      font-size: 0.9rem;
+      color: var(--gold-dim);
+      line-height: 1.5;
+    }
+
+    .loading-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      text-align: center;
+    }
+
+    .loading-icon {
+      font-size: 3rem;
+      margin-bottom: 20px;
+      color: var(--gold-primary);
+      animation: pulse 2s infinite;
+    }
+
+    .loading-text {
+      font-size: 1rem;
+      color: var(--gold-primary);
+      font-weight: bold;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.8; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .error-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      text-align: center;
+      background: rgba(20, 25, 45, 0.6);
+      border: 1px solid rgba(255, 68, 68, 0.3);
+      border-radius: 12px;
+      margin: 40px 0;
+    }
+
+    .error-icon {
+      font-size: 3rem;
+      margin-bottom: 20px;
+      color: var(--danger);
+    }
+
+    .error-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: var(--danger);
+      margin-bottom: 10px;
+    }
+
+    .error-desc {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .retry-btn {
+      padding: 10px 20px;
+      background: rgba(255, 68, 68, 0.15);
+      border: 1px solid var(--danger);
+      border-radius: 8px;
+      color: var(--danger);
+      font-size: 0.9rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .retry-btn:hover {
+      background: rgba(255, 68, 68, 0.25);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 68, 68, 0.2);
+    }
+
+    /* 公告详情弹窗 */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      z-index: 2000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      backdrop-filter: blur(5px);
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal-content {
+      background: var(--bg-panel);
+      border: 2px solid var(--gold-primary);
+      border-radius: 12px;
+      padding: 20px;
+      width: 90%;
+      max-width: 500px;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 0 30px rgba(230, 199, 73, 0.4);
+      transform: scale(0.9) translateY(-20px);
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+    }
+
+    .modal-overlay.active .modal-content {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+      box-shadow: 0 0 40px rgba(230, 199, 73, 0.6);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(230, 199, 73, 0.2);
+    }
+
+    .modal-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: var(--gold-primary);
+      flex: 1;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      padding: 0;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+
+    .close-btn:hover {
+      color: var(--gold-primary);
+      background: rgba(230, 199, 73, 0.1);
+    }
+
+    .modal-body {
+      margin-bottom: 20px;
+    }
+
+    .modal-time {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      margin-bottom: 15px;
+    }
+
+    .modal-content-text {
+      font-size: 0.95rem;
+      color: var(--text-main);
+      line-height: 1.6;
+      white-space: pre-line;
+    }
+
+    @media (max-width: 768px) {
+      .main-container {
+        padding: 15px;
+        gap: 15px;
+      }
+
+      .header-title {
+        font-size: 1.3rem;
+      }
+
+      .back-btn {
+        padding: 8px 16px;
+        font-size: 0.8rem;
+      }
+
+      .announcement-item {
+        padding: 15px;
+      }
+
+      .announcement-title {
+        font-size: 1rem;
+      }
+
+      .empty-state,
+      .loading-state,
+      .error-state {
+        padding: 40px 15px;
+        margin: 30px 0;
+      }
+
+      .modal-content {
+        width: 95%;
+        padding: 15px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .back-btn {
+        align-self: flex-start;
+      }
+
+      .announcement-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+      }
+
+      .announcement-time {
+        align-self: flex-start;
+      }
+    }
+  </style>
+
+  </head>
+<body>
+
+  <div class="particles"></div>
+
+  <div class="main-container">
+    <div class="header">
+      <a href="javascript:void(0)" class="back-btn" onclick="goBackToHome()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+        返回洞府
+      </a>
+      <div class="header-title">
+        <span>📢</span>
+        仙途快讯
+      </div>
+      <div style="width: 100px;"></div>
+    </div>
+
+    <div class="announcement-list" id="announcementList">
+      <!-- 公告列表将通过JavaScript动态生成 -->
+    </div>
+  </div>
+
+  <!-- 公告详情弹窗 -->
+  <div class="modal-overlay" id="announcementModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title" id="modalTitle"></div>
+        <button class="close-btn" onclick="closeAnnouncementModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-time" id="modalTime"></div>
+        <div class="modal-content-text" id="modalContent"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/token-manager.js"></script>
+  <script src="../js/auth-service.js"></script>
+  <script src="../js/role-sync.js"></script>
+  <script src="../js/character-store.js"></script>
+  <script src="../js/character-service.js"></script>
+  <script src="../js/api-service.js"></script>
+  <script src="../js/login-manager.js"></script>
+  <script>
+    // 页面加载时检查登录状态（但不强制跳转）
+    (function checkLoginStatus() {
+      const token = localStorage.getItem('token');
+      const userId = localStorage.getItem('userId');
+      
+      if (!token || !userId) {
+        console.warn('未登录，但允许浏览公告');
+        // 不强制跳转，允许用户查看公开信息
+      } else {
+        console.log('已登录，用户 ID:', userId);
+      }
+    })();
+    
+    // 错误处理工具
+    const ErrorHandler = {
+      showToast(message, type = 'info', duration = 3000) {
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+          position: fixed;
+          top: 20px;
+          left: 50%;
+          transform: translateX(-50%);
+          background: ${type === 'error' ? '#f44336' : type === 'success' ? '#4CAF50' : '#2196F3'};
+          color: white;
+          padding: 12px 24px;
+          border-radius: 8px;
+          font-size: 14px;
+          font-weight: bold;
+          z-index: 10000;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        `;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), duration);
+      },
+      showSuccess(message) { this.showToast(message, 'success'); },
+      showInfo(message) { this.showToast(message, 'info'); },
+      handleApiError(error, action) {
+        console.error(`${action}失败:`, error);
+        this.showToast(`${action}失败，请稍后重试`, 'error');
+      }
+    };
+
+    // 加载公告列表
+    async function loadAnnouncements() {
+      const announcementList = document.getElementById('announcementList');
+      
+      // 显示加载状态
+      announcementList.innerHTML = `
+        <div class="loading-state">
+          <div class="loading-icon">🔮</div>
+          <div class="loading-text">仙途快讯加载中...</div>
+        </div>
+      `;
+      
+      try {
+        // 调用API获取公告列表
+        const response = await apiService.getAnnouncements();
+        const announcements = response.announcements || [];
+        
+        if (announcements.length === 0) {
+          // 显示空状态
+          announcementList.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-icon">📢</div>
+              <div class="empty-title">暂无公告</div>
+              <div class="empty-desc">仙途平静，暂无最新消息</div>
+            </div>
+          `;
+          return;
+        }
+        
+        // 渲染公告列表
+        const html = announcements.map(announcement => {
+          const content = announcement.content || '';
+          const truncatedContent = content.length > 100 ? content.substring(0, 100) + '...' : content;
+          
+          return `
+            <div class="announcement-item" onclick="openAnnouncementModal(${announcement.id})">
+              <div class="announcement-header">
+                <div class="announcement-title">${announcement.title || '公告'}</div>
+                <div class="announcement-time">${formatDate(announcement.createdAt)}</div>
+              </div>
+              <div class="announcement-content">${truncatedContent}</div>
+              <div class="announcement-footer">
+                <a href="javascript:void(0)" class="read-more" onclick="event.stopPropagation(); openAnnouncementModal(${announcement.id})">
+                  查看详情
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 18l6-6-6-6"/>
+                  </svg>
+                </a>
+              </div>
+            </div>
+          `;
+        }).join('');
+        
+        announcementList.innerHTML = html;
+      } catch (error) {
+        console.error('加载公告失败:', error);
+        // 显示错误状态
+        announcementList.innerHTML = `
+          <div class="error-state">
+            <div class="error-icon">❌</div>
+            <div class="error-title">加载失败</div>
+            <div class="error-desc">获取仙途快讯失败，请检查网络连接后重试</div>
+            <button class="retry-btn" onclick="loadAnnouncements()">重试</button>
+          </div>
+        `;
+      }
+    }
+
+    // 打开公告详情弹窗
+    async function openAnnouncementModal(id) {
+      try {
+        // 调用API获取公告详情
+        const response = await apiService.getAnnouncement(id);
+        const announcement = response.announcement;
+        
+        if (!announcement) {
+          ErrorHandler.showInfo('公告不存在');
+          return;
+        }
+        
+        // 填充弹窗内容
+        document.getElementById('modalTitle').textContent = announcement.title || '公告';
+        document.getElementById('modalTime').textContent = formatDate(announcement.createdAt);
+        document.getElementById('modalContent').textContent = announcement.content || '暂无内容';
+        
+        // 显示弹窗
+        document.getElementById('announcementModal').classList.add('active');
+      } catch (error) {
+        ErrorHandler.handleApiError(error, '获取公告详情');
+      }
+    }
+
+    // 关闭公告详情弹窗
+    function closeAnnouncementModal() {
+      document.getElementById('announcementModal').classList.remove('active');
+    }
+
+    // 返回洞府
+    function goBackToHome() {
+      // 检查是否有保存的重定向路径
+      const redirectPath = localStorage.getItem('redirectAfterLogin');
+      if (redirectPath) {
+        localStorage.removeItem('redirectAfterLogin');
+        window.location.href = redirectPath;
+        return;
+      }
+      
+      // 默认返回首页
+      window.location.href = '../index.html';
+    }
+
+    // 格式化日期
+    function formatDate(dateString) {
+      if (!dateString) return '';
+      
+      const date = new Date(dateString);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      
+      return `${year}-${month}-${day} ${hours}:${minutes}`;
+    }
+
+    // 初始化页面
+    window.addEventListener('DOMContentLoaded', function() {
+      loadAnnouncements();
+    });
+  </script>
+</body>
+</html>

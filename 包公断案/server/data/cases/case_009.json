@@ -1,0 +1,191 @@
+{
+  "id": "case_009",
+  "title": "血手印",
+  "subtitle": "第九案",
+  "difficulty": 2,
+  "description": "富家千金与穷书生私会，丫鬟被杀嫁祸书生，包拯巧破血手印奇案！",
+  "background": "富家女王千金与穷书生林招得相爱，约定夜间相会。丫鬟被人杀害，书生手上沾满鲜血，门上留有血手印，被诬陷为凶手。",
+  "stages": {
+    "report": {
+      "id": "report",
+      "name": "报案",
+      "dialogues": [
+        {
+          "speaker": "系统",
+          "speakerTitle": "旁白",
+          "content": "深夜，王家后花园发生命案，丫鬟被人杀害。穷书生林招得被发现时浑身是血，手上沾满血迹。",
+          "emotion": "narrator"
+        },
+        {
+          "speaker": "王员外",
+          "speakerTitle": "报案人",
+          "content": "包大人！这个穷小子杀了我的丫鬟！把他抓起来！",
+          "emotion": "angry"
+        },
+        {
+          "speaker": "林招得",
+          "speakerTitle": "嫌疑人",
+          "content": "大人冤枉！我没有杀人！我是来见千金小姐的……",
+          "emotion": "cry"
+        },
+        {
+          "speaker": "王千金",
+          "speakerTitle": "证人",
+          "content": "大人……民女确实与林公子有约……但我没看到他杀人……",
+          "emotion": "cry"
+        },
+        {
+          "speaker": "包拯",
+          "speakerTitle": "包青天",
+          "content": "此事必有蹊跷！来人，保护现场，带所有人回县衙！",
+          "emotion": "serious"
+        }
+      ]
+    },
+    "investigation": {
+      "id": "investigation",
+      "name": "取证",
+      "scenes": [
+        {
+          "id": "garden",
+          "name": "后花园",
+          "description": "命案现场，丫鬟倒在地上，地上有血迹。",
+          "searchHints": ["检查尸体", "查看血迹", "寻找凶器"]
+        },
+        {
+          "id": "wang_family",
+          "name": "王家",
+          "description": "王员外府邸，可能藏有重要线索。",
+          "searchHints": ["询问家人", "检查房间", "寻找动机"]
+        }
+      ],
+      "evidences": [
+        {
+          "id": "ev_801",
+          "name": "血手印",
+          "icon": "cloth",
+          "description": "门上的血手印，经比对并非林招得的手印。",
+          "sceneId": "garden",
+          "isKey": true,
+          "clue": "手印比林招得的手小，说明凶手另有其人。"
+        },
+        {
+          "id": "ev_802",
+          "name": "凶器",
+          "icon": "knife",
+          "description": "在管家房间找到的带血匕首，上面有管家的指纹。",
+          "sceneId": "wang_family",
+          "isKey": true,
+          "clue": "凶器属于管家，他有重大嫌疑。"
+        },
+        {
+          "id": "ev_803",
+          "name": "管家证词",
+          "icon": "witness",
+          "description": "管家承认因贪图丫鬟美色不成，恼羞成怒杀了她。",
+          "sceneId": "wang_family",
+          "isKey": true,
+          "clue": "管家是真正的凶手。"
+        },
+        {
+          "id": "ev_804",
+          "name": "脚印",
+          "icon": "wheel",
+          "description": "现场发现一双男人的脚印，尺码与管家的鞋相符。",
+          "sceneId": "garden",
+          "isKey": false,
+          "clue": "脚印证实管家当晚确实到过后花园。"
+        }
+      ]
+    },
+    "interrogation": {
+      "id": "interrogation",
+      "name": "审讯",
+      "suspects": [
+        {
+          "id": "sus_801",
+          "name": "林招得",
+          "role": "书生",
+          "description": "穷书生，与王千金相爱，被诬陷为凶手。",
+          "dialogues": [
+            {
+              "speaker": "林招得",
+              "speakerTitle": "嫌疑人",
+              "content": "大人，我真的没有杀人！我只是按照约定来见小姐……",
+              "emotion": "cry"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "你手上的血是怎么回事？",
+              "emotion": "serious"
+            },
+            {
+              "speaker": "林招得",
+              "speakerTitle": "嫌疑人",
+              "content": "我到的时候丫鬟已经死了……我不小心滑倒在血里……",
+              "emotion": "fear"
+            }
+          ],
+          "isGuilty": false,
+          "hint": "书生是被冤枉的，真正的凶手另有其人"
+        },
+        {
+          "id": "sus_802",
+          "name": "管家",
+          "role": "管家",
+          "description": "王家家丁总管，为人好色，垂涎丫鬟美色。",
+          "dialogues": [
+            {
+              "speaker": "管家",
+              "speakerTitle": "嫌疑人",
+              "content": "大人！这书生就是凶手！我亲眼看到他跑出来！",
+              "emotion": "defensive"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "哦？那这把带血的匕首是怎么回事？上面有你的指纹！",
+              "emotion": "angry"
+            },
+            {
+              "speaker": "管家",
+              "speakerTitle": "嫌疑人",
+              "content": "这……这是……",
+              "emotion": "panic"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "事到如今还敢狡辩？门上的血手印是你的！你贪图丫鬟美色不成，就杀了她！",
+              "emotion": "angry"
+            },
+            {
+              "speaker": "管家",
+              "speakerTitle": "嫌疑人",
+              "content": "大人饶命！是我……是我一时糊涂……",
+              "emotion": "surrender"
+            }
+          ],
+          "isGuilty": true
+        }
+      ]
+    },
+    "judgment": {
+      "id": "judgment",
+      "name": "断案",
+      "correctSuspectId": "sus_802",
+      "requiredEvidenceIds": ["ev_801", "ev_802", "ev_803"],
+      "judgmentText": {
+        "correct": "经查明，管家因贪图丫鬟美色，趁夜色潜入后花园欲行不轨，被丫鬟拒绝后恼羞成怒，持刀杀害丫鬟。恰逢林招得赴约，管家趁机逃跑，嫁祸给林招得。判管家斩立决！林招得无罪释放。王员外被责令善待林招得与王千金，成全二人婚事。",
+        "wrong": "证据不足，请继续调查。",
+        "partial": "已掌握部分证据，但还需进一步查证。"
+      }
+    }
+  },
+  "hints": [
+    { "id": "hint_9_1", "content": "血手印是关键，比对大小找出真凶。", "cost": 1 },
+    { "id": "hint_9_2", "content": "检查凶器，寻找指纹或其他痕迹。", "cost": 1 },
+    { "id": "hint_9_3", "content": "询问丫鬟的人际关系，寻找作案动机。", "cost": 1 }
+  ]
+}

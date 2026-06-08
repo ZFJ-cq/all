@@ -1,0 +1,235 @@
+{
+  "id": "case_015",
+  "title": "屈杀英才",
+  "subtitle": "第十五案",
+  "difficulty": 2,
+  "description": "科举考场有人作弊陷害英才，包拯智破科场沉冤！",
+  "background": "十年寒窗的秀才在科举考试中被人陷害，答卷被篡改，名次被顶替。包拯不畏权贵，为被屈杀的英才平反昭雪。",
+  "stages": {
+    "report": {
+      "id": "report",
+      "name": "报案",
+      "dialogues": [
+        {
+          "speaker": "系统",
+          "speakerTitle": "旁白",
+          "content": "一衣衫破旧的秀才跪在开封府门前，手中捧着血书。",
+          "emotion": "narrator"
+        },
+        {
+          "speaker": "秀才",
+          "speakerTitle": "告状人",
+          "content": "包大人！学生十年寒窗，却在科举中被人陷害，答卷被篡改，名次被顶替！",
+          "emotion": "cry"
+        },
+        {
+          "speaker": "包拯",
+          "speakerTitle": "包青天",
+          "content": "你是何人？有何冤情，一一道来。",
+          "emotion": "serious"
+        },
+        {
+          "speaker": "秀才",
+          "speakerTitle": "告状人",
+          "content": "学生姓柳名青云，今科应试，文章写得花团锦簇，却被告知落榜！",
+          "emotion": "cry"
+        },
+        {
+          "speaker": "秀才",
+          "speakerTitle": "告状人",
+          "content": "后来学生买通书办，查阅试卷，发现自己的好文章被人换成了烂文章！",
+          "emotion": "angry"
+        },
+        {
+          "speaker": "包拯",
+          "speakerTitle": "包青天",
+          "content": "竟有科场舞弊之事！你可知是何人陷害于你？",
+          "emotion": "serious"
+        },
+        {
+          "speaker": "秀才",
+          "speakerTitle": "告状人",
+          "content": "学生怀疑是同窗王生所为，他家与主考官有旧！",
+          "emotion": "fear"
+        },
+        {
+          "speaker": "包拯",
+          "speakerTitle": "包青天",
+          "content": "科场舞弊，害尽天下英才！本官定要查个水落石出！",
+          "emotion": "angry"
+        }
+      ]
+    },
+    "investigation": {
+      "id": "investigation",
+      "name": "取证",
+      "scenes": [
+        {
+          "id": "exam_hall",
+          "name": "贡院",
+          "description": "科举考试场所，试卷流转处。",
+          "searchHints": ["查阅试卷", "询问书办", "寻找证据"]
+        },
+        {
+          "id": "wang_home",
+          "name": "王家",
+          "description": "王生的府邸，可能藏有证据。",
+          "searchHints": ["调查王生", "寻找关系证据", "询问王家下人"]
+        },
+        {
+          "id": "examiner_home",
+          "name": "主考官府",
+          "description": "主考官的住所，权贵勾结之地。",
+          "searchHints": ["调查主考官", "寻找行贿证据", "询问府中人"]
+        }
+      ],
+      "evidences": [
+        {
+          "id": "ev_1501",
+          "name": "试卷对比",
+          "icon": "note",
+          "description": "柳青云的原始文章与被替换的试卷对比，水平相差悬殊。",
+          "sceneId": "exam_hall",
+          "isKey": true,
+          "clue": "两篇文章水平天壤之别，明显被篡改。"
+        },
+        {
+          "id": "ev_1502",
+          "name": "书办证词",
+          "icon": "witness",
+          "description": "书办承认受人指使，调换了柳青云的试卷。",
+          "sceneId": "exam_hall",
+          "isKey": true,
+          "clue": "书办是执行者，知道幕后主使。"
+        },
+        {
+          "id": "ev_1503",
+          "name": "王生文章",
+          "icon": "note",
+          "description": "王生的试卷文章拙劣，却名列前茅。",
+          "sceneId": "wang_home",
+          "isKey": true,
+          "clue": "王生文章平庸，却能高中，必有蹊跷。"
+        },
+        {
+          "id": "ev_1504",
+          "name": "行贿书信",
+          "icon": "note",
+          "description": "王生家与主考官来往的行贿书信。",
+          "sceneId": "wang_home",
+          "isKey": true,
+          "clue": "书信证明王生行贿主考官。"
+        },
+        {
+          "id": "ev_1505",
+          "name": "主考官收据",
+          "icon": "money",
+          "description": "主考官收受王生家银两的收据。",
+          "sceneId": "examiner_home",
+          "isKey": false,
+          "clue": "收据证明主考官受贿。"
+        }
+      ]
+    },
+    "interrogation": {
+      "id": "interrogation",
+      "name": "审讯",
+      "suspects": [
+        {
+          "id": "sus_1501",
+          "name": "王生",
+          "role": "考生",
+          "description": "权贵之子，科场舞弊的主谋。",
+          "dialogues": [
+            {
+              "speaker": "王生",
+              "speakerTitle": "嫌疑人",
+              "content": "包大人，我只是凭真本事高中的！",
+              "emotion": "defensive"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "真本事？你那篇文章的水平，恐怕连童生都不如！",
+              "emotion": "serious"
+            },
+            {
+              "speaker": "王生",
+              "speakerTitle": "嫌疑人",
+              "content": "这……这……",
+              "emotion": "nervous"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "你与主考官勾结，行贿舞弊，换人试卷，证据确凿！",
+              "emotion": "angry"
+            },
+            {
+              "speaker": "王生",
+              "speakerTitle": "嫌疑人",
+              "content": "大人饶命……是我父亲的主意……",
+              "emotion": "surrender"
+            }
+          ],
+          "isGuilty": true
+        },
+        {
+          "id": "sus_1502",
+          "name": "主考官",
+          "role": "考官",
+          "description": "收受贿赂，徇私舞弊的考官。",
+          "dialogues": [
+            {
+              "speaker": "主考官",
+              "speakerTitle": "嫌疑人",
+              "content": "包大人，科举之事关系重大，我岂敢徇私？",
+              "emotion": "defensive"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "你收受王生家多少银子？以为本官不知？",
+              "emotion": "angry"
+            },
+            {
+              "speaker": "主考官",
+              "speakerTitle": "嫌疑人",
+              "content": "我……我是被迫的……",
+              "emotion": "panic"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "被迫？收据在此！",
+              "emotion": "serious"
+            },
+            {
+              "speaker": "主考官",
+              "speakerTitle": "嫌疑人",
+              "content": "大人饶命……是我一时糊涂……",
+              "emotion": "surrender"
+            }
+          ],
+          "isGuilty": true
+        }
+      ]
+    },
+    "judgment": {
+      "id": "judgment",
+      "name": "断案",
+      "correctSuspectId": "sus_1501",
+      "requiredEvidenceIds": ["ev_1501", "ev_1502", "ev_1503", "ev_1504"],
+      "judgmentText": {
+        "correct": "经查明，王生才疏学浅，其父与主考官勾结，以银两行贿，换走柳青云的试卷，使柳青云十年寒窗付之东流。科场乃国家取士之本，舞弊如此，何以服众？判王生革去功名，徒三年；主考官受贿舞弊，革职查办；柳青云文章还原本貌，重新评定名次。此案彰显包拯不畏权贵，为英才平反之精神！",
+        "wrong": "案情复杂，需继续调查。",
+        "partial": "已掌握部分证据，需深挖。"
+      }
+    }
+  },
+  "hints": [
+    { "id": "hint_15_1", "content": "对比两份试卷，水平相差悬殊。", "cost": 1 },
+    { "id": "hint_15_2", "content": "书办是关键证人，他承认了调换试卷。", "cost": 1 },
+    { "id": "hint_15_3", "content": "王生家的书信可能藏有行贿证据。", "cost": 1 }
+  ]
+}

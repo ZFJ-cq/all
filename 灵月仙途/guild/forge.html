@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="../js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="../css/mobile-adapt.css">
+  <title>灵月仙途 - 锻器室</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Microsoft YaHei", sans-serif;
+    }
+
+    :root {
+      --primary: #8b5cf6;
+      --bg: #121a29;
+      --card: #1e293b;
+      --text: #f0f3f5;
+      --sub: #94a3b8;
+      --line: rgba(255,255,255,0.1);
+      --success: #4ade80;
+      --danger: #ef4444;
+      --warn: #f59e0b;
+      --rare: #3b82f6;
+      --epic: #8b5cf6;
+      --legendary: #f59e0b;
+    }
+
+    body {
+      background: #0f172a;
+      background-image: url('https://picsum.photos/id/180/1920/1080');
+      background-size: cover;
+      background-attachment: fixed;
+      background-blend-mode: overlay;
+      color: var(--text);
+      min-height: 100vh;
+      padding: 15px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 500px;
+      margin: 0 auto;
+      background: rgba(18,26,41,0.95);
+      border-radius: 12px;
+      padding: 20px 15px;
+      border: 1px solid rgba(139,92,246,0.2);
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .title {
+      font-size: 24px;
+      font-weight: bold;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .title::before {
+      content: "⚒️";
+      font-size: 28px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .info-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(139,92,246,0.1);
+      border: 1px solid var(--primary);
+      color: var(--primary);
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .info-btn:hover {
+      background: var(--primary);
+      color: #111;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .spirit-stone {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(139,92,246,0.1);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 13px;
+    }
+
+    .btn-back {
+      background: #334155;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 13px;
+    }
+
+    .btn-back:hover {
+      background: #475569;
+    }
+
+    .tab-group {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      background: rgba(0,0,0,0.2);
+      padding: 6px;
+      border-radius: 10px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .tab-group::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tab {
+      padding: 10px 16px;
+      background: #1e293b;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+      font-size: 14px;
+    }
+
+    .tab.active {
+      background: var(--primary);
+      color: #111;
+      font-weight: bold;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(139,92,246,0.3);
+    }
+
+    .panel {
+      display: none;
+    }
+
+    .panel.active {
+      display: block;
+      animation: fade 0.3s;
+    }
+
+    @keyframes fade {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 10px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      transition: all 0.2s;
+      margin-bottom: 15px;
+    }
+
+    .card:last-child {
+      margin-bottom: 0;
+    }
+
+    .card:hover {
+      border-color: rgba(139,92,246,0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+    }
+
+    .card h3 {
+      color: var(--primary);
+      margin-bottom: 12px;
+      font-size: 17px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card p {
+      color: var(--sub);
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .list {
+      margin-top: 10px;
+      padding-left: 20px;
+      color: var(--sub);
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    .list li {
+      margin-bottom: 5px;
+    }
+
+    .grade {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .tag {
+      padding: 5px 10px;
+      background: rgba(139,92,246,0.15);
+      color: var(--primary);
+      border-radius: 20px;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+
+    .tag:hover {
+      background: rgba(139,92,246,0.3);
+    }
+
+    .tag.success {
+      background: rgba(74,222,128,0.15);
+      color: var(--success);
+    }
+
+    .tag.rare {
+      background: rgba(59,130,246,0.15);
+      color: var(--rare);
+    }
+
+    .tag.epic {
+      background: rgba(139,92,246,0.15);
+      color: var(--epic);
+    }
+
+    .tag.legendary {
+      background: rgba(245,158,11,0.15);
+      color: var(--legendary);
+    }
+
+    .platform-list {
+      margin-top: 12px;
+    }
+
+    .platform-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 12px;
+      border-bottom: 1px dashed var(--line);
+      cursor: pointer;
+      transition: all 0.2s;
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+
+    .platform-item:last-child {
+      border: none;
+    }
+
+    .platform-item:hover {
+      background: rgba(255,255,255,0.05);
+    }
+
+    .platform-item.active {
+      background: rgba(139,92,246,0.1);
+      border: 1px solid var(--primary);
+    }
+
+    .platform-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .platform-name {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .platform-level {
+      font-size: 12px;
+      color: var(--sub);
+      margin-top: 2px;
+    }
+
+    .platform-cost {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-weight: bold;
+    }
+
+    .control-area {
+      background: var(--card);
+      padding: 20px 15px;
+      border-radius: 10px;
+      text-align: center;
+      margin-top: 15px;
+      border: 1px solid var(--line);
+    }
+
+    .weapon-selector {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+
+    .weapon-option {
+      padding: 8px 12px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid transparent;
+      font-size: 14px;
+      flex: 1;
+      min-width: 80px;
+    }
+
+    .weapon-option.active {
+      background: rgba(139,92,246,0.1);
+      border-color: var(--primary);
+      color: var(--primary);
+      font-weight: bold;
+    }
+
+    .forge-game {
+      margin: 20px 0;
+    }
+
+    .forge-tips {
+      font-size: 13px;
+      color: var(--warn);
+      margin-bottom: 12px;
+      padding: 8px;
+      background: rgba(245,158,11,0.1);
+      border-radius: 8px;
+      text-align: left;
+    }
+
+    .forge-bar {
+      width: 100%;
+      height: 20px;
+      background: #334155;
+      border-radius: 8px;
+      margin: 15px 0;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .forge-progress {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #8b5cf6, #a78bfa);
+      transition: width 0.1s linear;
+      border-radius: 8px;
+      position: relative;
+    }
+
+    .forge-mark {
+      position: absolute;
+      top: -25px;
+      width: 2px;
+      height: 10px;
+      background: var(--warn);
+    }
+
+    .forge-mark:nth-child(1) { left: 25%; }
+    .forge-mark:nth-child(2) { left: 50%; }
+    .forge-mark:nth-child(3) { left: 75%; }
+
+    .forge-mark-text {
+      position: absolute;
+      top: -45px;
+      font-size: 12px;
+      color: var(--warn);
+    }
+
+    .forge-mark-text.chuilian { left: 12%; }
+    .forge-mark-text.cuihuo { left: 45%; }
+    .forge-mark-text.kaiguang { left: 70%; }
+
+    .forge-btns {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin: 15px 0;
+    }
+
+    .forge-btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+      flex: 1;
+      max-width: 100px;
+      font-size: 14px;
+    }
+
+    .forge-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    .btn-chuilian { background: #3b82f6; color: #000; }
+    .btn-cuihuo { background: #f97316; color: #000; }
+    .btn-kaiguang { background: #8b5cf6; color: white; }
+
+    .forge-timer {
+      font-size: 15px;
+      font-weight: bold;
+      color: var(--warn);
+      margin: 12px 0;
+    }
+
+    .result {
+      margin-top: 15px;
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: bold;
+      display: none;
+      animation: pop 0.3s;
+      font-size: 14px;
+    }
+
+    @keyframes pop {
+      0% { transform: scale(0.8); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .result.success {
+      background: rgba(74,222,128,0.1);
+      color: var(--success);
+      display: block;
+      border: 1px solid var(--success);
+    }
+
+    .result.fail {
+      background: rgba(239,68,68,0.1);
+      color: var(--danger);
+      display: block;
+      border: 1px solid var(--danger);
+    }
+
+    .action {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .btn-start {
+      background: var(--primary);
+      color: #111;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+      width: 100%;
+    }
+
+    .btn-start:hover {
+      background: #a78bfa;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(139,92,246,0.3);
+    }
+
+    .btn-start:disabled {
+      background: #64748b;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .material-check {
+      margin: 12px 0;
+      padding: 8px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 8px;
+      text-align: left;
+    }
+
+    .material-item {
+      display: flex;
+      justify-content: space-between;
+      margin: 4px 0;
+      font-size: 13px;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-content {
+      width: 90%;
+      max-width: 400px;
+      background: var(--bg);
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid var(--primary);
+      transform: translateY(-20px);
+      transition: all 0.3s;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .modal-overlay.active .modal-content {
+      transform: translateY(0);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .modal-title {
+      font-size: 18px;
+      color: var(--primary);
+      font-weight: bold;
+    }
+
+    .close-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #334155;
+      color: white;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .modal-body {
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .modal-card {
+      background: var(--card);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+
+    .modal-card h4 {
+      color: var(--primary);
+      margin-bottom: 8px;
+      font-size: 15px;
+    }
+
+    .recycle-list {
+      margin-top: 12px;
+    }
+
+    .recycle-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 12px;
+      border-bottom: 1px dashed var(--line);
+      cursor: pointer;
+      transition: all 0.2s;
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+
+    .recycle-item:last-child {
+      border: none;
+    }
+
+    .recycle-item:hover {
+      background: rgba(255,255,255,0.05);
+    }
+
+    .recycle-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .recycle-name {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .recycle-return {
+      font-size: 12px;
+      color: var(--success);
+      margin-top: 2px;
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 15px 10px;
+      }
+      
+      .forge-btns {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .forge-btn {
+        max-width: 100%;
+        width: 100%;
+      }
+      
+      .tab-group {
+        padding: 4px;
+      }
+      
+      .tab {
+        padding: 8px 12px;
+        font-size: 13px;
+      }
+    }
+  </style>
+
+  </head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="title">锻器室 · 炼器大殿</div>
+      <div class="header-actions">
+        <button class="info-btn" id="info-btn">?</button>
+        <div class="user-info">
+          <div class="spirit-stone">
+            <span>💎</span>
+            <span id="stone-count">9999</span>
+          </div>
+          <button class="btn-back" onclick="history.back()">← 返回</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-group">
+      <div class="tab active" data-target="platform">锻造台</div>
+      <div class="tab" data-target="make">开始锻造</div>
+      <div class="tab" data-target="recycle">熔炼回收</div>
+    </div>
+
+    <!-- 锻造台 -->
+    <div class="panel active" id="platform">
+      <div class="card">
+        <h3>🔥 锻造台等级（决定装备品质上限）</h3>
+        <div class="platform-list">
+          <div class="platform-item active" data-platform="1" data-level="凡铁台" data-max="下品">
+            <div class="platform-info">
+              <div class="platform-name">凡铁锻造台</div>
+              <div class="platform-level">最高可打造：下品法器</div>
+            </div>
+            <div class="platform-cost">
+              <span class="tag free">免费</span>
+            </div>
+          </div>
+          <div class="platform-item" data-platform="2" data-level="青铜台" data-max="中品">
+            <div class="platform-info">
+              <div class="platform-name">青铜锻造台</div>
+              <div class="platform-level">最高可打造：中品法器</div>
+            </div>
+            <div class="platform-cost">
+              <span class="tag pay">1000 灵石</span>
+            </div>
+          </div>
+          <div class="platform-item" data-platform="3" data-level="地火台" data-max="上品">
+            <div class="platform-info">
+              <div class="platform-name">地火锻造台</div>
+              <div class="platform-level">最高可打造：上品法器</div>
+            </div>
+            <div class="platform-cost">
+              <span class="tag pay">5000 灵石</span>
+            </div>
+          </div>
+          <div class="platform-item" data-platform="4" data-level="天雷台" data-max="极品">
+            <div class="platform-info">
+              <div class="platform-name">天雷锻造台</div>
+              <div class="platform-level">最高可打造：极品法宝</div>
+            </div>
+            <div class="platform-cost">
+              <span class="tag pay">20000 灵石</span>
+            </div>
+          </div>
+        </div>
+        <p style="margin-top: 15px; color: var(--sub); font-size: 14px;">
+          ⚡ 点击选择锻造台，锻造台等级决定可打造装备的品质上限
+        </p>
+      </div>
+    </div>
+
+    <!-- 开始锻造 -->
+    <div class="panel" id="make">
+      <div class="card">
+        <h3>⚔️ 锻造准备</h3>
+        
+        <!-- 武器类型选择 -->
+        <div class="weapon-selector">
+          <div class="weapon-option active" data-weapon="sword">剑</div>
+          <div class="weapon-option" data-weapon="blade">刀</div>
+          <div class="weapon-option" data-weapon="fan">幡</div>
+        </div>
+        
+        <!-- 材料检查 -->
+        <div class="material-check">
+          <h4 style="margin-bottom: 10px; color: var(--primary);">📦 所需材料</h4>
+          <div class="material-item">
+            <span>精铁</span>
+            <span>10/10</span>
+          </div>
+          <div class="material-item">
+            <span>妖兽魂石</span>
+            <span>3/3</span>
+          </div>
+          <div class="material-item">
+            <span>锻造符</span>
+            <span>1/1</span>
+          </div>
+        </div>
+        
+        <!-- 已选锻造台 -->
+        <div style="margin: 15px 0; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+          <h4 style="color: var(--primary); margin-bottom: 8px;">🔥 已选锻造台</h4>
+          <div id="selected-platform">凡铁锻造台（最高品质：下品 · 免费）</div>
+        </div>
+      </div>
+
+      <div class="control-area">
+        <h3>🔥 锻造工序</h3>
+        <div class="forge-tips">
+          💡 提示：锻造分为锤炼（25%）、淬火（50%）、开光（75%）三道工序，需按顺序完成
+        </div>
+        
+        <div class="forge-timer">锻造进度：<span id="progress">0</span>%</div>
+        
+        <div class="forge-game">
+          <div class="forge-bar">
+            <div class="forge-progress" id="forge"></div>
+            <div class="forge-mark"></div>
+            <div class="forge-mark"></div>
+            <div class="forge-mark"></div>
+            <div class="forge-mark-text chuilian">锤炼</div>
+            <div class="forge-mark-text cuihuo">淬火</div>
+            <div class="forge-mark-text kaiguang">开光</div>
+          </div>
+          
+          <div class="forge-btns">
+            <button class="forge-btn btn-chuilian" onclick="doStep('chuilian')">锤炼</button>
+            <button class="forge-btn btn-cuihuo" onclick="doStep('cuihuo')">淬火</button>
+            <button class="forge-btn btn-kaiguang" onclick="doStep('kaiguang')">开光</button>
+          </div>
+        </div>
+        
+        <div class="result" id="result"></div>
+        
+        <div class="action">
+          <button class="btn-start" id="start-btn" onclick="startForge()">开始锻造 · 炼器</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 熔炼回收 -->
+    <div class="panel" id="recycle">
+      <div class="card">
+        <h3>♻️ 可回收法器</h3>
+        <div class="recycle-list">
+          <div class="recycle-item" onclick="recycleItem(this, '精铁×3', 50)">
+            <div class="recycle-info">
+              <div class="recycle-name">破损的铁剑（下品）</div>
+              <div class="recycle-return">可返还：精铁×3 + 50 锻道经验</div>
+            </div>
+            <div class="tag">回收</div>
+          </div>
+          <div class="recycle-item" onclick="recycleItem(this, '玄铁×5', 100)">
+            <div class="recycle-info">
+              <div class="recycle-name">老旧的钢刀（中品）</div>
+              <div class="recycle-return">可返还：玄铁×5 + 100 锻道经验</div>
+            </div>
+            <div class="tag">回收</div>
+          </div>
+          <div class="recycle-item" onclick="recycleItem(this, '秘银×8', 200)">
+            <div class="recycle-info">
+              <div class="recycle-name">褪色的银幡（上品）</div>
+              <div class="recycle-return">可返还：秘银×8 + 200 锻道经验</div>
+            </div>
+            <div class="tag">回收</div>
+          </div>
+        </div>
+        <p style="margin-top: 15px; color: var(--sub); font-size: 14px;">
+          🔄 点击回收闲置法器，返还部分稀有材料及锻道经验
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 介绍弹窗 -->
+  <div class="modal-overlay" id="info-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">📜 锻器介绍</div>
+        <button class="close-btn" id="close-modal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-card">
+          <h4>📜 锻造流程</h4>
+          <ul class="list">
+            <li>选择武器胚子：剑/刀/幡</li>
+            <li>准备材料：矿石、妖兽魂石、锻造符</li>
+            <li>选择锻造台：等级决定品质上限</li>
+            <li>锻造工序：锤炼→淬火→开光</li>
+            <li>成品鉴定：根据综合条件判定品质</li>
+          </ul>
+        </div>
+        
+        <div class="modal-card">
+          <h4>⭐ 装备品质</h4>
+          <div class="grade">
+            <span class="tag">凡品</span>
+            <span class="tag rare">下品</span>
+            <span class="tag epic">中品</span>
+            <span class="tag">上品</span>
+            <span class="tag legendary">极品</span>
+            <span class="tag success">仙器</span>
+          </div>
+          <ul class="list" style="margin-top:12px">
+            <li>品质越高，基础属性越强</li>
+            <li>极品以上装备自带器灵</li>
+            <li>仙器可独立出战或提供被动光环</li>
+          </ul>
+        </div>
+        
+        <div class="modal-card">
+          <h4>🔥 特殊词条</h4>
+          <ul class="list">
+            <li>吸血：攻击时恢复生命值</li>
+            <li>暴击：概率造成双倍伤害</li>
+            <li>雷霆：附加雷电伤害</li>
+            <li>冰冻：概率冻结敌人</li>
+            <li>烈焰：附加火焰伤害</li>
+          </ul>
+        </div>
+        
+        <div class="modal-card">
+          <h4>⚡ 锻道经验</h4>
+          <p>通过熔炼回收法器获得，用于升级锻造台等级：</p>
+          <ul class="list" style="margin-top:10px">
+            <li>凡铁台→青铜台：1000 经验</li>
+            <li>青铜台→地火台：5000 经验</li>
+            <li>地火台→天雷台：20000 经验</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let selectedPlatform = {
+      id: 1,
+      name: "凡铁锻造台",
+      level: "凡铁台",
+      max: "下品",
+      cost: 0
+    };
+    let forgeProgress = 0;
+    let forgeSteps = [];
+    let selectedWeapon = "sword";
+    let isForging = false;
+    
+    const tabs = document.querySelectorAll('.tab');
+    tabs.forEach(t => {
+      t.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+        document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
+        t.classList.add('active');
+        document.getElementById(t.dataset.target).classList.add('active');
+        
+        if (t.dataset.target === 'make') {
+          resetForgeGame();
+        }
+      })
+    })
+
+    const platformItems = document.querySelectorAll('.platform-item');
+    platformItems.forEach(item => {
+      item.addEventListener('click', () => {
+        platformItems.forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+        
+        selectedPlatform = {
+          id: item.dataset.platform,
+          name: item.querySelector('.platform-name').textContent,
+          level: item.dataset.level,
+          max: item.dataset.max,
+          cost: parseInt(item.querySelector('.platform-cost .tag').textContent) || 0
+        };
+        
+        document.getElementById('selected-platform').textContent = 
+          `${selectedPlatform.name}（最高品质：${selectedPlatform.max} · ${selectedPlatform.cost > 0 ? selectedPlatform.cost + '灵石' : '免费'}）`;
+      });
+    });
+
+    const weaponOptions = document.querySelectorAll('.weapon-option');
+    weaponOptions.forEach(option => {
+      option.addEventListener('click', () => {
+        weaponOptions.forEach(o => o.classList.remove('active'));
+        option.classList.add('active');
+        selectedWeapon = option.dataset.weapon;
+        
+        updateWeaponMaterials(selectedWeapon);
+      });
+    });
+
+    function updateWeaponMaterials(weaponType) {
+      const materialCheck = document.querySelector('.material-check');
+      let materials = '';
+      
+      switch(weaponType) {
+        case 'sword':
+          materials = `
+            <h4 style="margin-bottom: 10px; color: var(--primary);">📦 所需材料</h4>
+            <div class="material-item">
+              <span>精铁</span>
+              <span>10/10</span>
+            </div>
+            <div class="material-item">
+              <span>妖兽魂石</span>
+              <span>3/3</span>
+            </div>
+            <div class="material-item">
+              <span>锻造符</span>
+              <span>1/1</span>
+            </div>
+          `;
+          break;
+        case 'blade':
+          materials = `
+            <h4 style="margin-bottom: 10px; color: var(--primary);">📦 所需材料</h4>
+            <div class="material-item">
+              <span>玄铁</span>
+              <span>15/15</span>
+            </div>
+            <div class="material-item">
+              <span>妖兽魂石</span>
+              <span>5/5</span>
+            </div>
+            <div class="material-item">
+              <span>锻造符</span>
+              <span>1/1</span>
+            </div>
+          `;
+          break;
+        case 'fan':
+          materials = `
+            <h4 style="margin-bottom: 10px; color: var(--primary);">📦 所需材料</h4>
+            <div class="material-item">
+              <span>秘银</span>
+              <span>8/8</span>
+            </div>
+            <div class="material-item">
+              <span>妖兽魂石</span>
+              <span>4/4</span>
+            </div>
+            <div class="material-item">
+              <span>锻造符</span>
+              <span>1/1</span>
+            </div>
+          `;
+          break;
+      }
+      
+      materialCheck.innerHTML = materials;
+    }
+
+    function doStep(step) {
+      if (!isForging) {
+        showToast('请先点击"开始锻造"按钮', 'warning');
+        return;
+      }
+      
+      forgeSteps.push(step);
+      
+      switch(step) {
+        case 'chuilian':
+          if (forgeProgress < 25) {
+            forgeProgress = 25;
+            showToast('锤炼完成！', 'success');
+          }
+          break;
+        case 'cuihuo':
+          if (forgeProgress >= 25 && forgeProgress < 50) {
+            forgeProgress = 50;
+            showToast('淬火完成！', 'success');
+          } else if (forgeProgress < 25) {
+            showToast('请先完成锤炼！', 'warning');
+            return;
+          }
+          break;
+        case 'kaiguang':
+          if (forgeProgress >= 50 && forgeProgress < 75) {
+            forgeProgress = 75;
+            showToast('开光完成！', 'success');
+          } else if (forgeProgress < 50) {
+            showToast('请先完成淬火！', 'warning');
+            return;
+          }
+          break;
+      }
+      
+      document.getElementById('progress').textContent = forgeProgress;
+      document.getElementById('forge').style.width = forgeProgress + '%';
+      
+      if (forgeProgress >= 75) {
+        completeForge();
+      }
+    }
+
+    function resetForgeGame() {
+      forgeProgress = 0;
+      forgeSteps = [];
+      isForging = false;
+      document.getElementById('progress').textContent = 0;
+      document.getElementById('forge').style.width = '0%';
+      document.getElementById('result').style.display = 'none';
+      document.getElementById('start-btn').disabled = false;
+    }
+
+    function deductStone(amount) {
+      if (amount <= 0) return true;
+      
+      let currentStone = parseInt(document.getElementById('stone-count').textContent);
+      if (currentStone >= amount) {
+        document.getElementById('stone-count').textContent = currentStone - amount;
+        return true;
+      } else {
+        showToast('灵石不足！', 'warning');
+        return false;
+      }
+    }
+
+    function startForge() {
+      if (!deductStone(selectedPlatform.cost)) {
+        return;
+      }
+      
+      isForging = true;
+      document.getElementById('start-btn').disabled = true;
+      document.getElementById('result').style.display = 'none';
+      forgeProgress = 0;
+      forgeSteps = [];
+      document.getElementById('progress').textContent = 0;
+      document.getElementById('forge').style.width = '0%';
+      
+      showToast('锻造开始！请按顺序完成三道工序', 'info');
+    }
+
+    function completeForge() {
+      const res = document.getElementById('result');
+      
+      let qualityScore = 0;
+      
+      const correctOrder = ['chuilian', 'cuihuo', 'kaiguang'];
+      let orderCorrect = true;
+      forgeSteps.forEach((step, index) => {
+        if (step !== correctOrder[index]) {
+          orderCorrect = false;
+        }
+      });
+      
+      if (orderCorrect && forgeSteps.length === 3) {
+        qualityScore = 0.8;
+      } else {
+        qualityScore = 0.3;
+      }
+      
+      const platformBonus = selectedPlatform.id * 0.1;
+      qualityScore += platformBonus;
+      
+      const rand = Math.random();
+      
+      if (rand < qualityScore) {
+        let quality = '';
+        const qualityRand = Math.random();
+        
+        const maxQuality = selectedPlatform.max;
+        if (maxQuality === '下品') {
+          if (qualityRand < 0.5) quality = '凡品';
+          else quality = '下品';
+        } else if (maxQuality === '中品') {
+          if (qualityRand < 0.3) quality = '下品';
+          else if (qualityRand < 0.7) quality = '中品';
+          else quality = '上品';
+        } else if (maxQuality === '上品') {
+          if (qualityRand < 0.2) quality = '中品';
+          else if (qualityRand < 0.6) quality = '上品';
+          else if (qualityRand < 0.9) quality = '极品';
+          else quality = '仙器';
+        } else {
+          if (qualityRand < 0.15) quality = '上品';
+          else if (qualityRand < 0.5) quality = '极品';
+          else if (qualityRand < 0.85) quality = '仙器';
+          else quality = '神器';
+        }
+        
+        const weaponName = selectedWeapon === 'sword' ? '剑' : selectedWeapon === 'blade' ? '刀' : '幡';
+        
+        res.className = 'result success';
+        res.innerHTML = `✅ 锻造成功！获得：${weaponName}（${quality}）<br>🔥 工序完成度：${forgeSteps.length}/3`;
+        
+        if (quality === '极品' || quality === '仙器' || quality === '神器') {
+          res.innerHTML += `<br>✨ 恭喜！获得自带器灵的极品装备！`;
+        }
+      } else {
+        res.className = 'result fail';
+        res.innerHTML = `❌ 锻造失败！材料损失<br>💡 建议：提升锻造台等级或按正确顺序完成工序`;
+      }
+      
+      isForging = false;
+    }
+
+    function recycleItem(element, returnItem, exp) {
+      const confirmMsg = `确定要回收这件法器吗？\n返还：${returnItem} + ${exp} 锻道经验`;
+      
+      if (confirm(confirmMsg)) {
+        element.style.opacity = '0';
+        element.style.transform = 'translateX(-20px)';
+        
+        setTimeout(() => {
+          element.remove();
+          showToast(`回收成功！获得 ${returnItem} + ${exp} 锻道经验`, 'success');
+        }, 300);
+      }
+    }
+
+    const infoBtn = document.getElementById('info-btn');
+    const infoModal = document.getElementById('info-modal');
+    const closeModal = document.getElementById('close-modal');
+
+    infoBtn.addEventListener('click', () => {
+      infoModal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    });
+
+    closeModal.addEventListener('click', () => {
+      infoModal.classList.remove('active');
+      document.body.style.overflow = 'auto';
+    });
+
+    infoModal.addEventListener('click', (e) => {
+      if (e.target === infoModal) {
+        infoModal.classList.remove('active');
+        document.body.style.overflow = 'auto';
+      }
+    });
+  </script>
+  <script src="../js/ui-components.js"></script>
+  <script src="../js/auth-service.js"></script>
+</body>
+</html>

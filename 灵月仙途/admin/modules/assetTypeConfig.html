@@ -1,0 +1,919 @@
+<div class="section active">
+  <div class="status-message" id="assetTypeStatusMessage"></div>
+  
+  <!-- Tab 切换 -->
+  <div class="tabs" style="margin-bottom: 20px; border-bottom: 1px solid #e0e0e0;">
+    <button class="tab-btn active" onclick="window.switchAssetTypeTab('config')">类型配置</button>
+    <button class="tab-btn" onclick="window.switchAssetTypeTab('logs')">操作日志</button>
+  </div>
+
+  <!-- 类型配置 Tab -->
+  <div id="configTabContent" class="tab-content active">
+    <!-- 资产类型列表卡片 -->
+    <div class="card" style="border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); overflow: hidden;">
+      <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; padding: 20px; background: #f8f9fa; border-bottom: 1px solid #e0e0e0;">
+        <h2 class="card-title" style="margin: 0; font-size: 1.2rem; color: #333;">资产类型列表</h2>
+        <button class="btn btn-primary" onclick="window.openAddAssetTypeModal()">+ 新增资产类型</button>
+      </div>
+
+      <!-- 筛选条件 -->
+      <div style="display: flex; gap: 15px; margin: 20px; flex-wrap: wrap; align-items: center;">
+        <input type="text" id="assetTypeSearchName" placeholder="类型名称筛选" onkeyup="window.loadAssetTypes()" 
+               style="padding: 10px 15px; border: 1px solid #ddd; border-radius: 6px; min-width: 200px; transition: border 0.3s;">
+        <select id="assetTypeFilterCategory" onchange="window.loadAssetTypes()" 
+                style="padding: 10px 15px; border: 1px solid #ddd; border-radius: 6px; min-width: 180px; transition: border 0.3s;">
+          <option value="">全部大类</option>
+          <option value="currency">货币</option>
+          <option value="material">材料</option>
+          <option value="task">任务</option>
+          <option value="equipment">装备</option>
+          <option value="consumable">消耗品</option>
+          <option value="special">特殊</option>
+        </select>
+        <select id="assetTypeFilterStatus" onchange="window.loadAssetTypes()" 
+                style="padding: 10px 15px; border: 1px solid #ddd; border-radius: 6px; min-width: 150px; transition: border 0.3s;">
+          <option value="">全部状态</option>
+          <option value="enabled">启用</option>
+          <option value="disabled">禁用</option>
+        </select>
+        <button class="btn btn-secondary" onclick="window.loadAssetTypes()" style="margin-left: auto;">刷新</button>
+      </div>
+
+      <!-- 数据表格 -->
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr style="background: linear-gradient(to right, #f8f9fa, #e9ecef);">
+              <th>ID</th>
+              <th>图标</th>
+              <th>类型名称</th>
+              <th>唯一编码</th>
+              <th>所属大类</th>
+              <th>可交易</th>
+              <th>可丢弃</th>
+              <th>堆叠上限</th>
+              <th>状态</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="assetTypeTableBody">
+            <!-- JS 动态生成 -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 分页 -->
+      <div id="assetTypePagination" class="pagination" style="display: flex; justify-content: center; align-items: center; padding: 20px; background: #f8f9fa; border-top: 1px solid #e0e0e0;"></div>
+    </div>
+  </div>
+
+  <!-- 操作日志 Tab -->
+  <div id="logsTabContent" class="tab-content">
+    <div class="card" style="border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); overflow: hidden;">
+      <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; padding: 20px; background: #f8f9fa; border-bottom: 1px solid #e0e0e0;">
+        <h2 class="card-title" style="margin: 0; font-size: 1.2rem; color: #333;">操作日志</h2>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <input type="date" id="assetTypeLogStartDate" onchange="window.loadAssetTypeLogs()" 
+                 style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px;">
+          <input type="date" id="assetTypeLogEndDate" onchange="window.loadAssetTypeLogs()" 
+                 style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px;">
+          <button class="btn btn-secondary" onclick="window.loadAssetTypeLogs()">刷新</button>
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr style="background: linear-gradient(to right, #f8f9fa, #e9ecef);">
+              <th>时间</th>
+              <th>操作人</th>
+              <th>操作类型</th>
+              <th>资产类型</th>
+              <th>详情</th>
+            </tr>
+          </thead>
+          <tbody id="assetTypeLogTableBody">
+            <!-- JS 动态生成 -->
+          </tbody>
+        </table>
+      </div>
+
+      <div id="assetTypeLogPagination" class="pagination" style="display: flex; justify-content: center; align-items: center; padding: 20px; background: #f8f9fa; border-top: 1px solid #e0e0e0;"></div>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* 标签页样式 */
+  .tabs .tab-btn {
+    padding: 12px 24px;
+    border: none;
+    background: none;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-bottom: 3px solid transparent;
+    margin-right: 10px;
+  }
+  
+  .tabs .tab-btn.active {
+    color: var(--primary-gold);
+    border-bottom-color: var(--primary-gold);
+    font-weight: bold;
+  }
+  
+  .tabs .tab-btn:hover {
+    color: var(--primary-gold-hover);
+  }
+  
+  /* 标签内容 */
+  .tab-content {
+    display: none;
+  }
+  
+  .tab-content.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+  }
+  
+  /* 表格样式增强 */
+  .data-table {
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+  
+  .data-table th {
+    font-weight: 600;
+    color: #555;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+  }
+  
+  .data-table td {
+    vertical-align: middle;
+  }
+  
+  .data-table tr:hover {
+    background: #f9f9f9;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  }
+  
+  /* 按钮组样式 */
+  .btn-group {
+    display: flex;
+    gap: 5px;
+  }
+  
+  .btn-sm {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+  }
+  
+  /* 徽章样式 */
+  .badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  
+  .badge-success {
+    background: #d4edda;
+    color: #155724;
+  }
+  
+  .badge-danger {
+    background: #f8d7da;
+    color: #721c24;
+  }
+  
+  /* 图标预览 */
+  .icon-preview {
+    width: 60px;
+    height: 60px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    background: #f8f9fa;
+  }
+  
+  /* 表单样式增强 */
+  .form-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  
+  .form-row > div {
+    flex: 1;
+    min-width: 200px;
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #555;
+  }
+  
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border 0.3s, box-shadow 0.3s;
+  }
+  
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-gold);
+    box-shadow: 0 0 0 3px rgba(230, 199, 73, 0.2);
+  }
+  
+  .form-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #e0e0e0;
+  }
+  
+  /* 帮助文本 */
+  .help-text {
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 5px;
+  }
+  
+  /* 必选标记 */
+  .required {
+    color: var(--danger-color);
+    margin-left: 5px;
+  }
+  
+  /* 加载状态 */
+  .loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    color: #666;
+  }
+  
+  .loading::after {
+    content: '';
+    width: 20px;
+    height: 20px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid var(--primary-gold);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-left: 10px;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  /* 响应式设计 */
+  @media (max-width: 768px) {
+    .form-row {
+      flex-direction: column;
+    }
+    
+    .form-row > div {
+      width: 100%;
+    }
+    
+    .tabs {
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+    
+    .tabs .tab-btn {
+      margin-right: 5px;
+      padding: 10px 15px;
+    }
+  }
+</style>
+
+<!-- 新增/编辑模态框 -->
+<div id="assetTypeModal" class="modal">
+  <div class="modal-content" style="max-width: 700px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+    <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid #e0e0e0; background: #f8f9fa;">
+      <h3 class="modal-title" id="assetTypeModalTitle" style="margin: 0; font-size: 1.2rem; color: #333;">新增资产类型</h3>
+      <span class="close" onclick="window.closeAssetTypeModal()" style="font-size: 24px; cursor: pointer; color: #666; transition: color 0.3s;">&times;</span>
+    </div>
+    <form id="assetTypeForm" style="padding: 20px;">
+      <input type="hidden" id="assetTypeId">
+      
+      <!-- 基础信息 -->
+      <div class="form-group">
+        <label style="font-size: 1.1rem; font-weight: 600; margin-bottom: 15px; display: block; color: #333;">基础信息<span class="required">*</span></label>
+        <div class="form-row">
+          <div>
+            <label>类型名称<span class="required">*</span></label>
+            <input type="text" id="assetTypeName" required placeholder="如：灵石、法宝">
+          </div>
+          <div>
+            <label>唯一编码<span class="required">*</span></label>
+            <input type="text" id="assetTypeCode" required placeholder="如：lingshi、fabao" 
+                   pattern="[a-z_]+" title="只能使用小写字母和下划线">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>图标路径/Emoji</label>
+          <input type="text" id="assetTypeIcon" placeholder="如：💎 或 /images/icons/coin.png" 
+                 oninput="window.updateAssetTypeIconPreview()">
+          <div class="help-text">支持 Emoji 表情或图片 URL</div>
+        </div>
+        <div class="form-group">
+          <label>图标预览</label>
+          <div id="assetTypeIconPreview" class="icon-preview">💎</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>描述说明</label>
+        <textarea id="assetTypeDescription" rows="3" placeholder="描述该资产的用途和特性"></textarea>
+      </div>
+
+      <!-- 属性配置 -->
+      <div class="form-group">
+        <label style="font-size: 1.1rem; font-weight: 600; margin-bottom: 15px; display: block; color: #333;">属性配置<span class="required">*</span></label>
+        <div class="form-row">
+          <div>
+            <label>所属大类<span class="required">*</span></label>
+            <select id="assetTypeCategory" required onchange="window.updateAssetTypeModuleOptions()">
+              <option value="">请选择</option>
+              <option value="currency">货币</option>
+              <option value="material">材料</option>
+              <option value="task">任务物品</option>
+              <option value="equipment">装备</option>
+              <option value="consumable">消耗品</option>
+              <option value="special">特殊</option>
+            </select>
+          </div>
+          <div>
+            <label>最大堆叠上限<span class="required">*</span></label>
+            <input type="number" id="assetTypeMaxStack" required min="1" value="999" 
+                   placeholder="单个堆叠最大数量">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="assetTypeTradable" checked> 可交易
+          </label>
+          <div class="help-text">允许玩家之间交易</div>
+        </div>
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="assetTypeDroppable" checked> 可丢弃
+          </label>
+          <div class="help-text">允许玩家丢弃</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>销毁策略</label>
+        <select id="assetTypeDestroyPolicy">
+          <option value="none">不销毁</option>
+          <option value="auto">自动销毁（数量归零时）</option>
+          <option value="manual">手动销毁</option>
+          <option value="time">定时销毁（需配置时间）</option>
+        </select>
+      </div>
+
+      <!-- 关联规则 -->
+      <div class="form-group">
+        <label style="font-size: 1.1rem; font-weight: 600; margin-bottom: 15px; display: block; color: #333;">关联系统模块</label>
+        <div id="assetTypeModuleCheckboxes" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 10px; padding: 15px; background: #f8f9fa; border-radius: 6px;">
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.2s;"><input type="checkbox" name="assetTypeModules" value="cultivation"> 修炼</label>
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.2s;"><input type="checkbox" name="assetTypeModules" value="body"> 锻体</label>
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.2s;"><input type="checkbox" name="assetTypeModules" value="skill"> 技能</label>
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.2s;"><input type="checkbox" name="assetTypeModules" value="auction"> 拍卖行</label>
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.2s;"><input type="checkbox" name="assetTypeModules" value="shop"> 商店</label>
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.2s;"><input type="checkbox" name="assetTypeModules" value="task"> 任务</label>
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.2s;"><input type="checkbox" name="assetTypeModules" value="dungeon"> 副本</label>
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.2s;"><input type="checkbox" name="assetTypeModules" value="pvp"> PVP</label>
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.2s;"><input type="checkbox" name="assetTypeModules" value="all"> 全系统通用</label>
+        </div>
+        <div class="help-text">配置该资产类型适用的系统模块，实现权限隔离</div>
+      </div>
+
+      <!-- 状态设置 -->
+      <div class="form-group">
+        <label>状态</label>
+        <select id="assetTypeStatus">
+          <option value="enabled">启用</option>
+          <option value="disabled">禁用</option>
+        </select>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" onclick="window.closeAssetTypeModal()">取消</button>
+        <button type="submit" class="btn btn-primary">保存</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  (function() {
+    const API_BASE_URL = 'http://localhost:8088/api';
+    let assetTypeCurrentPage = 1;
+    let assetTypeTotalPages = 1;
+    let assetTypeCurrentLogPage = 1;
+    let assetTypeLogTotalPages = 1;
+    let isLoading = false;
+
+    function switchAssetTypeTab(tabName) {
+      document.querySelectorAll('.tabs .tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+      
+      event.target.classList.add('active');
+      document.getElementById(tabName + 'TabContent').classList.add('active');
+      
+      if (tabName === 'logs') {
+        loadAssetTypeLogs();
+      }
+    }
+
+    async function loadAssetTypes() {
+      if (isLoading) return;
+      
+      const tbody = document.getElementById('assetTypeTableBody');
+      tbody.innerHTML = '<tr><td colspan="10" class="loading">加载中...</td></tr>';
+      
+      try {
+        isLoading = true;
+        const name = document.getElementById('assetTypeSearchName').value;
+        const category = document.getElementById('assetTypeFilterCategory').value;
+        const status = document.getElementById('assetTypeFilterStatus').value;
+        
+        let url = `${API_BASE_URL}/asset-type/list?page=${assetTypeCurrentPage}&size=10`;
+        if (name) url += `&name=${encodeURIComponent(name)}`;
+        if (category) url += `&category=${category}`;
+        if (status) url += `&status=${status}`;
+        
+        const response = await fetch(url);
+        const data = await handleAssetTypeResponse(response);
+        
+        tbody.innerHTML = '';
+        if (data && data.list && data.list.length > 0) {
+          data.list.forEach(item => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${item.id}</td>
+              <td><span style="font-size: 1.5rem;">${item.icon || '📦'}</span></td>
+              <td>${item.name}</td>
+              <td><code>${item.code}</code></td>
+              <td>${getAssetTypeCategoryText(item.category)}</td>
+              <td>${item.tradable ? '<span style="color: var(--success-color); font-weight: bold;">✓</span>' : '<span style="color: var(--danger-color);">✗</span>'}</td>
+              <td>${item.droppable ? '<span style="color: var(--success-color); font-weight: bold;">✓</span>' : '<span style="color: var(--danger-color);">✗</span>'}</td>
+              <td>${item.maxStack}</td>
+              <td>
+                <span class="badge ${item.status === 'enabled' ? 'badge-success' : 'badge-danger'}">
+                  ${item.status === 'enabled' ? '启用' : '禁用'}
+                </span>
+              </td>
+              <td class="btn-group">
+                <button class="btn btn-primary btn-sm" onclick="window.editAssetType('${item.id}')">编辑</button>
+                <button class="btn btn-${item.status === 'enabled' ? 'warning' : 'success'} btn-sm" 
+                        onclick="window.toggleAssetTypeStatus('${item.id}', '${item.status}')">
+                  ${item.status === 'enabled' ? '禁用' : '启用'}
+                </button>
+                <button class="btn btn-danger btn-sm" onclick="window.deleteAssetType('${item.id}')">删除</button>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          });
+          
+          assetTypeTotalPages = data.totalPages || 1;
+          updateAssetTypePagination(data.total || 0, data.size || 10);
+        } else {
+          tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; color:#999; padding: 40px;">暂无数据</td></tr>';
+        }
+      } catch (error) {
+        console.error('加载资产类型失败:', error);
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; color:#e74c3c; padding: 40px;">加载失败，请刷新重试</td></tr>';
+        showAssetTypeStatus('加载失败：' + error.message, 'error');
+      } finally {
+        isLoading = false;
+      }
+    }
+
+    async function loadAssetTypeLogs() {
+      if (isLoading) return;
+      
+      const tbody = document.getElementById('assetTypeLogTableBody');
+      tbody.innerHTML = '<tr><td colspan="5" class="loading">加载中...</td></tr>';
+      
+      try {
+        isLoading = true;
+        const startDate = document.getElementById('assetTypeLogStartDate').value;
+        const endDate = document.getElementById('assetTypeLogEndDate').value;
+        
+        let url = `${API_BASE_URL}/asset-type/logs?page=${assetTypeCurrentLogPage}&size=20`;
+        if (startDate) url += `&startDate=${startDate}`;
+        if (endDate) url += `&endDate=${endDate}`;
+        
+        const response = await fetch(url);
+        const data = await handleAssetTypeResponse(response);
+        
+        tbody.innerHTML = '';
+        if (data && data.list && data.list.length > 0) {
+          data.list.forEach(item => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td class="log-timestamp">${formatAssetTypeDateTime(item.operateTime)}</td>
+              <td class="log-operator">${item.operator || '系统'}</td>
+              <td class="log-action ${item.actionType}">
+                <span class="badge ${getActionBadgeClass(item.actionType)}">
+                  ${getAssetTypeActionText(item.actionType)}
+                </span>
+              </td>
+              <td>${item.assetTypeName || '-'}</td>
+              <td>${item.details || '-'}</td>
+            `;
+            tbody.appendChild(tr);
+          });
+          
+          assetTypeLogTotalPages = data.totalPages || 1;
+          updateAssetTypeLogPagination(data.total || 0, data.size || 20);
+        } else {
+          tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999; padding: 40px;">暂无日志</td></tr>';
+        }
+      } catch (error) {
+        console.error('加载日志失败:', error);
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#e74c3c; padding: 40px;">加载失败</td></tr>';
+        showAssetTypeStatus('加载日志失败：' + error.message, 'error');
+      } finally {
+        isLoading = false;
+      }
+    }
+
+    function openAddAssetTypeModal() {
+      document.getElementById('assetTypeModalTitle').textContent = '新增资产类型';
+      document.getElementById('assetTypeForm').reset();
+      document.getElementById('assetTypeId').value = '';
+      document.getElementById('assetTypeIconPreview').textContent = '💎';
+      document.getElementById('assetTypeModal').style.display = 'flex';
+    }
+
+    async function editAssetType(id) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/asset-type/${id}`);
+        const data = await handleAssetTypeResponse(response);
+        
+        document.getElementById('assetTypeModalTitle').textContent = '编辑资产类型';
+        document.getElementById('assetTypeId').value = data.id;
+        document.getElementById('assetTypeName').value = data.name;
+        document.getElementById('assetTypeCode').value = data.code;
+        document.getElementById('assetTypeIcon').value = data.icon || '';
+        document.getElementById('assetTypeDescription').value = data.description || '';
+        document.getElementById('assetTypeCategory').value = data.category || '';
+        document.getElementById('assetTypeMaxStack').value = data.maxStack || 999;
+        document.getElementById('assetTypeTradable').checked = data.tradable || false;
+        document.getElementById('assetTypeDroppable').checked = data.droppable || false;
+        document.getElementById('assetTypeDestroyPolicy').value = data.destroyPolicy || 'none';
+        document.getElementById('assetTypeStatus').value = data.status || 'enabled';
+        
+        if (data.modules) {
+          const modules = data.modules.split(',');
+          document.querySelectorAll('input[name="assetTypeModules"]').forEach(cb => {
+            cb.checked = modules.includes(cb.value) || modules.includes('all');
+          });
+        } else {
+          document.querySelectorAll('input[name="assetTypeModules"]').forEach(cb => {
+            cb.checked = false;
+          });
+        }
+        
+        updateAssetTypeIconPreview();
+        document.getElementById('assetTypeModal').style.display = 'flex';
+      } catch (error) {
+        console.error('获取资产类型详情失败:', error);
+        showAssetTypeStatus('获取详情失败：' + error.message, 'error');
+      }
+    }
+
+    async function handleAssetTypeSubmit(e) {
+      e.preventDefault();
+      
+      // 表单验证
+      if (!validateAssetTypeForm()) {
+        return;
+      }
+      
+      const formData = {
+        name: document.getElementById('assetTypeName').value,
+        code: document.getElementById('assetTypeCode').value,
+        icon: document.getElementById('assetTypeIcon').value,
+        description: document.getElementById('assetTypeDescription').value,
+        category: document.getElementById('assetTypeCategory').value,
+        maxStack: parseInt(document.getElementById('assetTypeMaxStack').value),
+        tradable: document.getElementById('assetTypeTradable').checked,
+        droppable: document.getElementById('assetTypeDroppable').checked,
+        destroyPolicy: document.getElementById('assetTypeDestroyPolicy').value,
+        status: document.getElementById('assetTypeStatus').value,
+        modules: Array.from(document.querySelectorAll('input[name="assetTypeModules"]:checked'))
+                        .map(cb => cb.value).join(',')
+      };
+      
+      const id = document.getElementById('assetTypeId').value;
+      const url = id ? `${API_BASE_URL}/asset-type/${id}` : `${API_BASE_URL}/asset-type`;
+      const method = id ? 'PUT' : 'POST';
+      
+      // 禁用提交按钮
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      const originalText = submitBtn.textContent;
+      submitBtn.disabled = true;
+      submitBtn.textContent = '保存中...';
+      
+      try {
+        const response = await fetch(url, {
+          method: method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        });
+        
+        await handleAssetTypeResponse(response);
+        
+        showAssetTypeStatus(id ? '更新成功！' : '创建成功！', 'success');
+        closeAssetTypeModal();
+        loadAssetTypes();
+      } catch (error) {
+        console.error('保存失败:', error);
+        showAssetTypeStatus('保存失败：' + error.message, 'error');
+      } finally {
+        // 恢复提交按钮
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+      }
+    }
+
+    async function toggleAssetTypeStatus(id, currentStatus) {
+      const newStatus = currentStatus === 'enabled' ? 'disabled' : 'enabled';
+      
+      try {
+        const response = await fetch(`${API_BASE_URL}/asset-type/${id}/status`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatus })
+        });
+        
+        await handleAssetTypeResponse(response);
+        showAssetTypeStatus('状态更新成功！', 'success');
+        loadAssetTypes();
+      } catch (error) {
+        console.error('更新状态失败:', error);
+        showAssetTypeStatus('更新失败：' + error.message, 'error');
+      }
+    }
+
+    async function deleteAssetType(id) {
+      if (!confirm('确定删除该资产类型吗？此操作不可恢复！')) {
+        return;
+      }
+      
+      try {
+        const response = await fetch(`${API_BASE_URL}/asset-type/${id}`, {
+          method: 'DELETE'
+        });
+        
+        await handleAssetTypeResponse(response);
+        showAssetTypeStatus('删除成功！', 'success');
+        loadAssetTypes();
+      } catch (error) {
+        console.error('删除失败:', error);
+        showAssetTypeStatus('删除失败：' + error.message, 'error');
+      }
+    }
+
+    function closeAssetTypeModal() {
+      document.getElementById('assetTypeModal').style.display = 'none';
+      document.getElementById('assetTypeForm').reset();
+    }
+
+    function updateAssetTypeIconPreview() {
+      const iconValue = document.getElementById('assetTypeIcon').value;
+      const preview = document.getElementById('assetTypeIconPreview');
+      
+      if (iconValue) {
+        if (iconValue.startsWith('/') || iconValue.startsWith('http')) {
+          preview.innerHTML = `<img src="${iconValue}" style="width: 100%; height: 100%; object-fit: contain;" alt="图标">`;
+        } else {
+          preview.textContent = iconValue;
+        }
+      } else {
+        preview.textContent = '💎';
+      }
+    }
+
+    function updateAssetTypeModuleOptions() {
+      const category = document.getElementById('assetTypeCategory').value;
+      const checkboxes = document.querySelectorAll('input[name="assetTypeModules"]');
+      
+      if (category === 'currency') {
+        checkboxes.forEach(cb => cb.checked = true);
+      } else {
+        checkboxes.forEach(cb => cb.checked = false);
+      }
+    }
+
+    function showAssetTypeStatus(message, type) {
+      const statusEl = document.getElementById('assetTypeStatusMessage');
+      statusEl.textContent = message;
+      statusEl.className = `status-message ${type}`;
+      statusEl.style.display = 'block';
+      
+      setTimeout(() => {
+        statusEl.style.display = 'none';
+      }, 3000);
+    }
+
+    function updateAssetTypePagination(total, size) {
+      const pagination = document.getElementById('assetTypePagination');
+      pagination.innerHTML = '';
+      
+      const prevDisabled = assetTypeCurrentPage === 1 ? 'disabled' : '';
+      const nextDisabled = assetTypeCurrentPage === assetTypeTotalPages ? 'disabled' : '';
+      
+      pagination.innerHTML = `
+        <button ${prevDisabled} onclick="window.changeAssetTypePage(${assetTypeCurrentPage - 1})" class="btn ${prevDisabled ? 'btn-secondary' : 'btn-primary'}">上一页</button>
+        <span class="pagination-info" style="margin: 0 20px;">第 ${assetTypeCurrentPage} / ${assetTypeTotalPages} 页，共 ${total} 条</span>
+        <button ${nextDisabled} onclick="window.changeAssetTypePage(${assetTypeCurrentPage + 1})" class="btn ${nextDisabled ? 'btn-secondary' : 'btn-primary'}">下一页</button>
+      `;
+    }
+
+    function updateAssetTypeLogPagination(total, size) {
+      const pagination = document.getElementById('assetTypeLogPagination');
+      pagination.innerHTML = '';
+      
+      const prevDisabled = assetTypeCurrentLogPage === 1 ? 'disabled' : '';
+      const nextDisabled = assetTypeCurrentLogPage === assetTypeLogTotalPages ? 'disabled' : '';
+      
+      pagination.innerHTML = `
+        <button ${prevDisabled} onclick="window.changeAssetTypeLogPage(${assetTypeCurrentLogPage - 1})" class="btn ${prevDisabled ? 'btn-secondary' : 'btn-primary'}">上一页</button>
+        <span class="pagination-info" style="margin: 0 20px;">第 ${assetTypeCurrentLogPage} / ${assetTypeLogTotalPages} 页，共 ${total} 条</span>
+        <button ${nextDisabled} onclick="window.changeAssetTypeLogPage(${assetTypeCurrentLogPage + 1})" class="btn ${nextDisabled ? 'btn-secondary' : 'btn-primary'}">下一页</button>
+      `;
+    }
+
+    function changeAssetTypePage(page) {
+      if (page < 1 || page > assetTypeTotalPages) return;
+      assetTypeCurrentPage = page;
+      loadAssetTypes();
+    }
+
+    function changeAssetTypeLogPage(page) {
+      if (page < 1 || page > assetTypeLogTotalPages) return;
+      assetTypeCurrentLogPage = page;
+      loadAssetTypeLogs();
+    }
+
+    function getAssetTypeCategoryText(category) {
+      const map = {
+        'currency': '货币',
+        'material': '材料',
+        'task': '任务',
+        'equipment': '装备',
+        'consumable': '消耗品',
+        'special': '特殊'
+      };
+      return map[category] || category;
+    }
+
+    function getAssetTypeActionText(action) {
+      const map = {
+        'create': '新增',
+        'update': '修改',
+        'delete': '删除',
+        'toggle': '切换状态'
+      };
+      return map[action] || action;
+    }
+
+    function getActionBadgeClass(action) {
+      const map = {
+        'create': 'badge-success',
+        'update': 'badge-warning',
+        'delete': 'badge-danger',
+        'toggle': 'badge-info'
+      };
+      return map[action] || 'badge-secondary';
+    }
+
+    function formatAssetTypeDateTime(dateStr) {
+      if (!dateStr) return '-';
+      const date = new Date(dateStr);
+      return date.toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+    }
+
+    async function handleAssetTypeResponse(response) {
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ message: '请求失败' }));
+        throw new Error(error.message || `HTTP ${response.status}`);
+      }
+      return response.json();
+    }
+
+    function validateAssetTypeForm() {
+      const name = document.getElementById('assetTypeName').value.trim();
+      const code = document.getElementById('assetTypeCode').value.trim();
+      const category = document.getElementById('assetTypeCategory').value;
+      const maxStack = document.getElementById('assetTypeMaxStack').value;
+      
+      if (!name) {
+        showAssetTypeStatus('请输入类型名称', 'error');
+        return false;
+      }
+      
+      if (!code) {
+        showAssetTypeStatus('请输入唯一编码', 'error');
+        return false;
+      }
+      
+      if (!/^[a-z_]+$/.test(code)) {
+        showAssetTypeStatus('唯一编码只能使用小写字母和下划线', 'error');
+        return false;
+      }
+      
+      if (!category) {
+        showAssetTypeStatus('请选择所属大类', 'error');
+        return false;
+      }
+      
+      if (!maxStack || isNaN(maxStack) || parseInt(maxStack) < 1) {
+        showAssetTypeStatus('请输入有效的堆叠上限', 'error');
+        return false;
+      }
+      
+      return true;
+    }
+
+    function initAssetTypeConfig() {
+      loadAssetTypes();
+      document.getElementById('assetTypeForm').addEventListener('submit', handleAssetTypeSubmit);
+      
+      // 添加键盘事件支持
+      document.getElementById('assetTypeSearchName').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          assetTypeCurrentPage = 1;
+          loadAssetTypes();
+        }
+      });
+    }
+
+    window.switchAssetTypeTab = switchAssetTypeTab;
+    window.loadAssetTypes = loadAssetTypes;
+    window.loadAssetTypeLogs = loadAssetTypeLogs;
+    window.openAddAssetTypeModal = openAddAssetTypeModal;
+    window.editAssetType = editAssetType;
+    window.toggleAssetTypeStatus = toggleAssetTypeStatus;
+    window.deleteAssetType = deleteAssetType;
+    window.closeAssetTypeModal = closeAssetTypeModal;
+    window.updateAssetTypeIconPreview = updateAssetTypeIconPreview;
+    window.updateAssetTypeModuleOptions = updateAssetTypeModuleOptions;
+    window.changeAssetTypePage = changeAssetTypePage;
+    window.changeAssetTypeLogPage = changeAssetTypeLogPage;
+    window.initAssetTypeConfig = initAssetTypeConfig;
+  })();
+</script>

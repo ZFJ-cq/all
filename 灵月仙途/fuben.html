@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="css/mobile-adapt.css">
+  <title>草坪大冒险</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Microsoft YaHei", sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    :root {
+      --grass: #60b964;
+      --grass-light: #86d18a;
+      --grass-dark: #4a944e;
+      --player: #42a5f5;
+      --enemy: #ef5350;
+      --boss: #ffb74d;
+      --exit: #ab47bc;
+      --path: #ffeb3b;
+    }
+
+    body {
+      background: #1a1a1a;
+      color: #fff;
+      min-height: 100vh;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .game-container {
+      width: 100%;
+      max-width: 440px;
+      background: #242424;
+      border-radius: 20px;
+      padding: 16px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .game-header {
+      text-align: center;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #333;
+    }
+
+    .game-title {
+      font-size: 22px;
+      color: var(--grass);
+      text-shadow: 0 0 10px rgba(96, 185, 100, 0.4);
+    }
+
+    .game-tips {
+      font-size: 13px;
+      color: #aaa;
+      margin-top: 4px;
+      min-height: 16px;
+    }
+
+    .map-container {
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #333;
+      border: 2px solid #444;
+    }
+
+    .grid-map {
+      display: grid;
+      grid-template-columns: repeat(15, 1fr);
+      grid-template-rows: repeat(10, 1fr);
+      gap: 1px;
+      background: #3a3a3a;
+      padding: 1px;
+    }
+
+    .grid-cell {
+      aspect-ratio: 1/1;
+      background: linear-gradient(145deg, var(--grass), var(--grass-light));
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      cursor: pointer;
+      position: relative;
+      box-shadow: inset 0 0.5px 1px rgba(255,255,255,0.15);
+    }
+
+    .grid-cell.path {
+      background: linear-gradient(145deg, #ffd740, #ffab00);
+      box-shadow: 0 0 6px rgba(255, 215, 64, 0.5);
+    }
+
+    .cell-player {
+      background: linear-gradient(145deg, #42a5f5, #64b5f6);
+      box-shadow: 0 0 10px rgba(66, 165, 245, 0.7), inset 0 0.5px 2px rgba(255,255,255,0.3);
+      z-index: 5;
+    }
+
+    .cell-enemy {
+      background: linear-gradient(145deg, #ef5350, #ef9a9a);
+      box-shadow: 0 0 8px rgba(239, 83, 80, 0.6);
+    }
+
+    .cell-boss {
+      background: linear-gradient(145deg, #ffb74d, #ffcc80);
+      box-shadow: 0 0 12px rgba(255, 183, 77, 0.8);
+      animation: pulse 1.3s infinite alternate;
+    }
+
+    .cell-exit {
+      background: linear-gradient(145deg, #ab47bc, #ce93d8);
+      box-shadow: 0 0 8px rgba(171, 71, 188, 0.6);
+    }
+
+    @keyframes pulse {
+      from { transform: scale(1); }
+      to { transform: scale(1.06); }
+    }
+
+    .game-info {
+      margin-top: 12px;
+      padding: 10px;
+      background: #2a2a2a;
+      border-radius: 10px;
+      font-size: 13px;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 4px 0;
+    }
+
+    .game-controls {
+      margin-top: 12px;
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: bold;
+      background: #333;
+      color: white;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .btn-restart {
+      background: linear-gradient(145deg, var(--grass), var(--grass-dark));
+    }
+
+    .btn-exit {
+      background: linear-gradient(145deg, #ef5350, #c62828);
+    }
+
+    /* 弹窗 */
+    .modal {
+      position: fixed;
+      top:0; left:0; width:100%; height:100%;
+      background: rgba(0,0,0,0.85);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 999;
+      opacity: 0;
+      visibility: hidden;
+      transition: 0.3s;
+    }
+
+    .modal.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-box {
+      background: #292929;
+      width: 85%;
+      max-width: 340px;
+      border-radius: 16px;
+      padding: 24px;
+      text-align: center;
+      border: 1px solid #444;
+    }
+
+    .modal-title {
+      font-size: 22px;
+      margin-bottom: 12px;
+      color: var(--grass);
+    }
+
+    .modal-text {
+      font-size: 15px;
+      margin: 10px 0 20px;
+      line-height: 1.4;
+    }
+
+    .modal-btn {
+      padding: 10px 24px;
+      border-radius: 10px;
+      border: none;
+      background: var(--grass);
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  </style>
+
+  </head>
+<body>
+
+<div class="game-container">
+  <div class="game-header">
+    <div class="game-title">🌿 草坪大冒险</div>
+    <div class="game-tips" id="tip">点击任意格子自动行走</div>
+  </div>
+
+  <div class="map-container">
+    <div class="grid-map" id="map"></div>
+  </div>
+
+  <div class="game-info">
+    <div class="info-row"><span>👑 BOSS：</span><span id="bossStatus">未击败</span></div>
+    <div class="info-row"><span>👹 剩余怪物：</span><span id="enemyLeft">0</span></div>
+  </div>
+
+  <div class="game-controls">
+    <button class="btn btn-restart" onclick="restart()">🔄 重新开始</button>
+    <button class="btn btn-exit" onclick="exitGame()">🚪 退出游戏</button>
+  </div>
+</div>
+
+<!-- 战斗弹窗 -->
+<div class="modal" id="battleModal">
+  <div class="modal-box">
+    <div class="modal-title" id="battleTitle">遭遇敌人</div>
+    <div style="font-size: 50px; margin:10px 0;" id="battleIcon">👹</div>
+    <div class="modal-text" id="battleText">遇到怪物，是否战斗？</div>
+    <div style="display:flex; gap:10px;">
+      <button class="modal-btn" style="flex:1;background:var(--player)" onclick="fight()">⚔️ 战斗</button>
+      <button class="modal-btn" style="flex:1;background:#666" onclick="closeBattle()">🏃 逃跑</button>
+    </div>
+  </div>
+</div>
+
+<!-- 胜利弹窗 -->
+<div class="modal" id="winModal">
+  <div class="modal-box">
+    <div class="modal-title" style="color:var(--grass)">🎉 通关成功！</div>
+    <div class="modal-text">你已击败BOSS，逃出草坪！</div>
+    <button class="modal-btn" onclick="restart()">🔄 再来一局</button>
+  </div>
+</div>
+
+<script>
+// ================= 配置 =================
+const R = 10  // 行
+const C = 15 // 列
+const ENEMY_COUNT = 14
+const MOVE_SPEED = 180
+
+// ================= 状态 =================
+let grid = []
+let player = {x:0, y:0}
+let enemyList = []
+let boss = null
+let exit = null
+let bossDefeated = false
+let moving = false
+let gameOver = false
+
+let battleTarget = null
+
+// ================= 初始化 =================
+function init() {
+  grid = Array(R).fill().map(()=>Array(C).fill('empty'))
+  player = {x:0, y:0}
+  enemyList = []
+  boss = null
+  exit = null
+  bossDefeated = false
+  moving = false
+  gameOver = false
+
+  grid[0][0] = 'player'
+  randomPlace('enemy', ENEMY_COUNT)
+  randomPlace('boss', 1)
+  randomPlace('exit', 1)
+  renderMapOnce()
+  updateUI()
+}
+
+// 只渲染一次地图，不重复创建DOM！！解决闪烁！！
+function renderMapOnce() {
+  const map = document.getElementById('map')
+  map.innerHTML = ''
+  for(let i=0;i<R;i++){
+    for(let j=0;j<C;j++){
+      let d = document.createElement('div')
+      d.className = 'grid-cell'
+      d.dataset.x = i
+      d.dataset.y = j
+      d.onclick = ()=>onClick(i,j)
+      map.appendChild(d)
+    }
+  }
+  refreshAllCells()
+}
+
+// 只更新样式，不重建DOM → 完全不闪
+function refreshAllCells() {
+  document.querySelectorAll('.grid-cell').forEach(d=>{
+    let x = +d.dataset.x
+    let y = +d.dataset.y
+    let t = grid[x][y]
+    d.className = 'grid-cell'
+    d.textContent = ''
+    if(t==='player'){ d.classList.add('cell-player'); d.textContent='🧝' }
+    if(t==='enemy'){ d.classList.add('cell-enemy'); d.textContent='👹' }
+    if(t==='boss'){ d.classList.add('cell-boss'); d.textContent='👑' }
+    if(t==='exit'){ d.classList.add('cell-exit'); d.textContent='🚪' }
+  })
+}
+
+// 随机生成
+function randomPlace(type, n) {
+  let count = 0
+  while(count < n) {
+    let x = Math.floor(Math.random()*R)
+    let y = Math.floor(Math.random()*C)
+    if(grid[x][y]==='empty' && !(x===0&&y===0)) {
+      grid[x][y] = type
+      if(type==='enemy') enemyList.push({x,y})
+      if(type==='boss') boss = {x,y}
+      if(type==='exit') exit = {x,y}
+      count++
+    }
+  }
+}
+
+// 点击移动
+async function onClick(tx, ty) {
+  if(gameOver || moving) return
+  if(tx===player.x && ty===player.y) return
+  let path = getPath(player.x, player.y, tx, ty)
+  showPath(path)
+  await movePath(path)
+  hidePath()
+}
+
+// 路径（曼哈顿）
+function getPath(x1,y1,x2,y2) {
+  let p = []
+  let x=x1, y=y1
+  while(y!==y2){ y += y<y2 ? 1 : -1; p.push({x,y}) }
+  while(x!==x2){ x += x<x2 ? 1 : -1; p.push({x,y}) }
+  return p
+}
+
+// 显示路径
+function showPath(path) {
+  path.forEach(p=>{
+    let d = document.querySelector(`[data-x="${p.x}"][data-y="${p.y}"]`)
+    if(d) d.classList.add('path')
+  })
+}
+
+// 隐藏路径
+function hidePath() {
+  document.querySelectorAll('.grid-cell.path').forEach(d=>d.classList.remove('path'))
+}
+
+// 移动
+async function movePath(path) {
+  moving = true
+  for(let p of path) {
+    let t = grid[p.x][p.y]
+    if(t==='enemy' || t==='boss' || t==='exit') {
+      if(t==='enemy') openBattle('enemy', p.x, p.y)
+      if(t==='boss') openBattle('boss', p.x, p.y)
+      if(t==='exit') checkExit()
+      break
+    }
+    await moveTo(p.x, p.y)
+  }
+  moving = false
+}
+
+// 单步移动（只改数据，不重建DOM）
+function moveTo(x,y) {
+  return new Promise(res=>{
+    grid[player.x][player.y] = 'empty'
+    player = {x,y}
+    grid[x][y] = 'player'
+    refreshAllCells()
+    updateUI()
+    setTimeout(res, MOVE_SPEED)
+  })
+}
+
+// 战斗
+function openBattle(type, x,y) {
+  battleTarget = {type,x,y}
+  const m = document.getElementById('battleModal')
+  document.getElementById('battleTitle').textContent = type==='boss' ? '遭遇BOSS！' : '遭遇小怪！'
+  document.getElementById('battleIcon').textContent = type==='boss' ? '👑' : '👹'
+  document.getElementById('battleText').textContent = type==='boss' ? 'BOSS很强，小心！' : '遇到小怪，击败它！'
+  m.classList.add('show')
+}
+
+function closeBattle() {
+  document.getElementById('battleModal').classList.remove('show')
+}
+
+async function fight() {
+  let {type,x,y} = battleTarget
+  
+  // 调用战斗API
+    try {
+      const roleId = window.AuthService ? window.AuthService.getCurrentRoleId() : localStorage.getItem('currentRoleId');
+      const enemyType = type === 'boss' ? 'boss' : 'goblin';
+      
+      const response = await window.AuthService.post('http://localhost:8088/api/combat/simulate', {
+        roleId: roleId,
+        enemyType: enemyType
+      });
+    
+    const result = await response.json();
+    
+    if (result.success && result.victory) {
+      grid[x][y] = 'empty'
+      if(type==='enemy') enemyList = enemyList.filter(e=>e.x!==x||e.y!==y)
+      if(type==='boss') { bossDefeated = true; boss=null }
+      moveTo(x,y)
+      closeBattle()
+      updateUI()
+      tip('击败成功！获得奖励：' + JSON.stringify(result.rewards));
+    } else {
+      closeBattle()
+      tip('战斗失败！' + (result.message || '请提升实力后再尝试'));
+    }
+  } catch (error) {
+    console.error('战斗失败:', error);
+    // API调用失败时，使用本地逻辑
+    grid[x][y] = 'empty'
+    if(type==='enemy') enemyList = enemyList.filter(e=>e.x!==x||e.y!==y)
+    if(type==='boss') { bossDefeated = true; boss=null }
+    moveTo(x,y)
+    closeBattle()
+    updateUI()
+    tip('击败成功！');
+  }
+}
+
+// 出口
+function checkExit() {
+  if(bossDefeated) {
+    gameOver = true
+    document.getElementById('winModal').classList.add('show')
+  } else {
+    tip('必须先击败BOSS才能离开！')
+  }
+}
+
+// UI
+function updateUI() {
+  document.getElementById('bossStatus').textContent = bossDefeated ? '已击败' : '未击败'
+  document.getElementById('enemyLeft').textContent = enemyList.length
+}
+
+function tip(msg) {
+  document.getElementById('tip').textContent = msg
+  setTimeout(()=>{ document.getElementById('tip').textContent = '点击任意格子自动行走' }, 2500)
+}
+
+function restart() {
+  document.querySelectorAll('.modal').forEach(m=>m.classList.remove('show'))
+  init()
+}
+
+function exitGame() {
+  showConfirm('确定退出？', () => showToast('欢迎下次游玩！'))
+}
+
+window.onload = init
+</script>
+  <script src="js/ui-components.js"></script>
+  <script src="../js/auth-service.js"></script>
+</body>
+</html>

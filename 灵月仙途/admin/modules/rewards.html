@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>奖励管理</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <div class="module-content">
+        <h2>奖励管理</h2>
+        <div class="module-description">
+            管理游戏中的奖励配置和发放
+        </div>
+        
+        <div class="search-bar">
+            <input type="text" id="searchKeyword" placeholder="搜索奖励...">
+            <button onclick="searchRewards()">搜索</button>
+        </div>
+        
+        <div class="filter-bar">
+            <select id="rewardType">
+                <option value="">所有类型</option>
+                <option value="resource">资源奖励</option>
+                <option value="item">物品奖励</option>
+                <option value="special">特殊奖励</option>
+            </select>
+            <button onclick="filterRewards()">筛选</button>
+        </div>
+        
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>奖励名称</th>
+                        <th>类型</th>
+                        <th>数量</th>
+                        <th>发放条件</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="rewardsTableBody">
+                    <!-- 数据将通过JS动态加载 -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="pagination" id="pagination">
+            <!-- 分页将通过JS动态生成 -->
+        </div>
+    </div>
+    
+    <script>
+        function initRewards() {
+            console.log('初始化奖励管理模块');
+            loadRewardData();
+        }
+        
+        function loadRewardData(page = 1) {
+            const tableBody = document.getElementById('rewardsTableBody');
+            tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px;">加载中...</td></tr>';
+            
+            // 模拟数据加载
+            setTimeout(() => {
+                tableBody.innerHTML = '';
+                for (let i = 1; i <= 10; i++) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${(page - 1) * 10 + i}</td>
+                        <td>奖励${i}</td>
+                        <td>${['资源奖励', '物品奖励', '特殊奖励'][Math.floor(Math.random() * 3)]}</td>
+                        <td>${Math.floor(Math.random() * 1000) + 100}</td>
+                        <td>完成任务 ${i}</td>
+                        <td>${Math.random() > 0.5 ? '启用' : '禁用'}</td>
+                        <td>
+                            <button onclick="editReward(${i})">编辑</button>
+                            <button onclick="deleteReward(${i})">删除</button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                }
+                
+                // 生成分页
+                generatePagination(page, 5);
+            }, 1000);
+        }
+        
+        function searchRewards() {
+            const keyword = document.getElementById('searchKeyword').value;
+            console.log('搜索奖励:', keyword);
+            loadRewardData();
+        }
+        
+        function filterRewards() {
+            const type = document.getElementById('rewardType').value;
+            console.log('筛选奖励:', type);
+            loadRewardData();
+        }
+        
+        function editReward(id) {
+            console.log('编辑奖励:', id);
+            alert('编辑奖励功能开发中');
+        }
+        
+        function deleteReward(id) {
+            if (confirm('确定要删除奖励吗？')) {
+                console.log('删除奖励:', id);
+                alert('删除成功');
+            }
+        }
+        
+        function generatePagination(currentPage, totalPages) {
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+            
+            for (let i = 1; i <= totalPages; i++) {
+                const button = document.createElement('button');
+                button.textContent = i;
+                button.className = i === currentPage ? 'active' : '';
+                button.onclick = () => loadRewardData(i);
+                pagination.appendChild(button);
+            }
+        }
+    </script>
+</body>
+</html>

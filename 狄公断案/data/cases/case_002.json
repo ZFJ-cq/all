@@ -1,0 +1,221 @@
+{
+  "id": "case_002",
+  "title": "漕运迷踪",
+  "subtitle": "第二案",
+  "difficulty": 2,
+  "description": "江南漕运官银在运输途中凭空消失，押运官兵全部昏迷。狄仁杰奉旨南下查案，揭开漕运黑幕……",
+  "background": "唐武则天时期，江南漕运十万两官银在运往洛阳途中，于丹阳段全部失踪。押运的二十名官兵集体昏迷，醒来时银两已不翼而飞。朝廷震怒，命狄仁杰南下彻查。",
+  "stages": {
+    "report": {
+      "id": "report",
+      "name": "报案",
+      "dialogues": [
+        {
+          "speaker": "系统",
+          "speakerTitle": "旁白",
+          "content": "圣旨到！命狄仁杰即刻南下丹阳，彻查漕运官银失踪一案。",
+          "emotion": "narrator"
+        },
+        {
+          "speaker": "狄仁杰",
+          "speakerTitle": "大理寺丞",
+          "content": "十万两官银凭空消失，二十名官兵集体昏迷……此案蹊跷，必有内鬼！",
+          "emotion": "serious"
+        },
+        {
+          "speaker": "系统",
+          "speakerTitle": "旁白",
+          "content": "狄仁杰抵达丹阳，只见漕船停靠在码头，船上空空如也。押运官刘校尉满脸惶恐地迎上前来。",
+          "emotion": "narrator"
+        },
+        {
+          "speaker": "刘校尉",
+          "speakerTitle": "押运官",
+          "content": "大人！那夜小人与弟兄们在船上值守，喝了些酒便不省人事，醒来银两就……就不见了！",
+          "emotion": "fear"
+        },
+        {
+          "speaker": "狄仁杰",
+          "speakerTitle": "大理寺丞",
+          "content": "二十人同时昏迷，绝非寻常醉酒。来人，勘察船只，搜查码头！",
+          "emotion": "serious"
+        }
+      ]
+    },
+    "investigation": {
+      "id": "investigation",
+      "name": "取证",
+      "scenes": [
+        {
+          "id": "barge",
+          "name": "漕船",
+          "description": "装运官银的漕船，船舱底部仍有残余的银粉痕迹，甲板上散落着酒壶。",
+          "searchHints": ["检查酒壶残液", "查看船底暗舱", "注意银粉痕迹方向"]
+        },
+        {
+          "id": "dock",
+          "name": "丹阳码头",
+          "description": "官银失踪的码头，夜间有货船出入记录，码头仓库就在旁边。",
+          "searchHints": ["查看仓库出入记录", "检查码头地面的车辙", "询问码头更夫"]
+        }
+      ],
+      "evidences": [
+        {
+          "id": "ev_001",
+          "name": "酒壶中的迷药残渣",
+          "icon": "teacup",
+          "description": "船上酒壶中检测出曼陀罗花粉的残渣，这是一种强效迷药。",
+          "sceneId": "barge",
+          "isKey": true,
+          "clue": "酒中被下了曼陀罗花粉，这是导致官兵集体昏迷的原因！"
+        },
+        {
+          "id": "ev_002",
+          "name": "船底暗舱的银粉",
+          "icon": "money",
+          "description": "船底有一个隐蔽的暗舱，舱内残留大量银粉，说明官银曾在此暂存。",
+          "sceneId": "barge",
+          "isKey": true,
+          "clue": "漕船本身就有暗舱，官银可能先被藏入暗舱，再伺机转移！"
+        },
+        {
+          "id": "ev_003",
+          "name": "码头的车辙印",
+          "icon": "wheel",
+          "description": "码头地面有深重的车辙印，从仓库方向延伸到河边，说明有重物被运走。",
+          "sceneId": "dock",
+          "isKey": true,
+          "clue": "重车辙印说明官银是从仓库被运走的，而非直接从船上运走。"
+        },
+        {
+          "id": "ev_004",
+          "name": "仓库出入记录",
+          "icon": "book",
+          "description": "码头仓库的出入记录显示，案发当夜有一批'丝绸'被运出，签收人为'周记商行'。",
+          "sceneId": "dock",
+          "isKey": true,
+          "clue": "深夜运出'丝绸'实为官银，签收的周记商行有重大嫌疑！"
+        },
+        {
+          "id": "ev_005",
+          "name": "更夫的证词",
+          "icon": "witness",
+          "description": "码头更夫称，案发当夜确实看到数辆大车从仓库驶出，车上盖着丝绸。",
+          "sceneId": "dock",
+          "isKey": false,
+          "clue": "更夫的证词证实了深夜有重物从仓库运出。"
+        },
+        {
+          "id": "ev_006",
+          "name": "曼陀罗花采购单",
+          "icon": "note",
+          "description": "在码头附近药铺发现一张曼陀罗花采购单，买家署名为'周记商行'。",
+          "sceneId": "dock",
+          "isKey": false,
+          "clue": "曼陀罗花的买家与仓库签收人都是周记商行，绝非巧合！"
+        }
+      ]
+    },
+    "interrogation": {
+      "id": "interrogation",
+      "name": "审讯",
+      "suspects": [
+        {
+          "id": "sus_001",
+          "name": "周掌柜",
+          "role": "商行掌柜",
+          "description": "周记商行掌柜，经营丝绸生意，与漕运官员有密切往来。",
+          "dialogues": [
+            {
+              "speaker": "周掌柜",
+              "speakerTitle": "嫌疑人",
+              "content": "大人，小人只是做丝绸生意的，与官银失踪毫无关系！",
+              "emotion": "fear"
+            },
+            {
+              "speaker": "狄仁杰",
+              "speakerTitle": "大理寺丞",
+              "content": "那码头仓库的出入记录上，签收人可是你的周记商行？",
+              "emotion": "serious"
+            },
+            {
+              "speaker": "周掌柜",
+              "speakerTitle": "嫌疑人",
+              "content": "那……那是小人进的丝绸，与官银无关！",
+              "emotion": "panic"
+            },
+            {
+              "speaker": "狄仁杰",
+              "speakerTitle": "大理寺丞",
+              "content": "深夜运丝绸？药铺的曼陀罗花采购单也是你周记商行所买！你还有何话可说？",
+              "emotion": "angry"
+            },
+            {
+              "speaker": "周掌柜",
+              "speakerTitle": "嫌疑人",
+              "content": "大人饶命！小人……小人只是受人指使，并非主谋！",
+              "emotion": "surrender"
+            }
+          ],
+          "isGuilty": true
+        },
+        {
+          "id": "sus_002",
+          "name": "刘校尉",
+          "role": "押运官",
+          "description": "漕运押运官，负责官银运输安全，自称当夜醉酒昏迷。",
+          "dialogues": [
+            {
+              "speaker": "刘校尉",
+              "speakerTitle": "嫌疑人",
+              "content": "大人明鉴！小人失职，甘愿受罚，但绝非内鬼！",
+              "emotion": "fear"
+            },
+            {
+              "speaker": "狄仁杰",
+              "speakerTitle": "大理寺丞",
+              "content": "二十人同时昏迷，你身为押运官，竟毫无警觉？",
+              "emotion": "serious"
+            },
+            {
+              "speaker": "刘校尉",
+              "speakerTitle": "嫌疑人",
+              "content": "那酒是周掌柜送来犒劳弟兄们的……小人一时贪杯，铸成大错！",
+              "emotion": "nervous"
+            },
+            {
+              "speaker": "狄仁杰",
+              "speakerTitle": "大理寺丞",
+              "content": "周掌柜送酒？你与周掌柜何时有了交情？",
+              "emotion": "serious"
+            },
+            {
+              "speaker": "刘校尉",
+              "speakerTitle": "嫌疑人",
+              "content": "周掌柜说他是做丝绸生意的，想结交官府中人……小人不知他有此歹心啊！",
+              "emotion": "surrender"
+            }
+          ],
+          "isGuilty": false,
+          "hint": "刘校尉虽失职，但他是被周掌柜利用，并非主谋"
+        }
+      ]
+    },
+    "judgment": {
+      "id": "judgment",
+      "name": "断案",
+      "correctSuspectId": "sus_001",
+      "requiredEvidenceIds": ["ev_001", "ev_002", "ev_003", "ev_004"],
+      "judgmentText": {
+        "correct": "经查明，周记商行掌柜周掌柜蓄谋已久，先以犒劳为名向押运官兵送下迷药之酒，待官兵昏迷后将官银藏入船底暗舱，再趁夜将官银转移至码头仓库，最终以丝绸之名运走。十万两官银已从周记商行地下密室起获。判周掌柜斩立决，抄没家产！刘校尉失职之罪，降级留用。此案彰显狄公神断之明！",
+        "wrong": "本案证据尚不充分，大人还需仔细查证，切莫冤枉了好人。",
+        "partial": "大人所断有部分道理，但仍有关键证据未纳入考量，请重新审视所有证据。"
+      }
+    }
+  },
+  "hints": [
+    { "id": "hint_1", "content": "官兵集体昏迷绝非偶然——检查他们喝过的酒。", "cost": 1 },
+    { "id": "hint_2", "content": "漕船本身可能藏有玄机，仔细查看船底。", "cost": 1 },
+    { "id": "hint_3", "content": "码头仓库的出入记录是关键——谁在深夜运走了'丝绸'？", "cost": 1 }
+  ]
+}

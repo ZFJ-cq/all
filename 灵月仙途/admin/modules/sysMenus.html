@@ -1,0 +1,319 @@
+<div class="section active">
+  <div class="status-message" id="sysMenuMessage"></div>
+  <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+    <h2 class="section-title">公共菜单</h2>
+    <button class="btn btn-primary" onclick="window.openAddSysMenuModal()">新增菜单</button>
+  </div>
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>菜单名称</th>
+        <th>父菜单</th>
+        <th>类型</th>
+        <th>路由</th>
+        <th>组件</th>
+        <th>权限标识</th>
+        <th>排序</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody id="sysMenuTableBody">
+      <!-- JS 生成 -->
+    </tbody>
+  </table>
+  <div id="sysMenuPagination"></div>
+</div>
+
+<!-- 新增/编辑系统菜单模态框 -->
+<div id="sysMenuModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="sysMenuModalTitle">新增系统菜单</h3>
+      <span class="close" onclick="closeModal()">&times;</span>
+    </div>
+    <form id="sysMenuForm">
+      <input type="hidden" id="sysMenuId">
+      <div class="form-group">
+        <label>菜单名称</label>
+        <input type="text" id="sysMenuName" required>
+      </div>
+      <div class="form-group">
+        <label>父菜单</label>
+        <select id="sysMenuParent">
+          <option value="0">无</option>
+          <!-- 动态加载菜单 -->
+        </select>
+      </div>
+      <div class="form-group">
+        <label>类型</label>
+        <select id="sysMenuType" required>
+          <option value="menu">菜单</option>
+          <option value="button">按钮</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>路由</label>
+        <input type="text" id="sysMenuRoute">
+      </div>
+      <div class="form-group">
+        <label>组件</label>
+        <input type="text" id="sysMenuComponent">
+      </div>
+      <div class="form-group">
+        <label>权限标识</label>
+        <input type="text" id="sysMenuPermission">
+      </div>
+      <div class="form-group">
+        <label>排序</label>
+        <input type="number" id="sysMenuSort" value="0" required>
+      </div>
+      <div style="text-align: right; margin-top: 20px;">
+        <button type="button" class="btn btn-secondary" onclick="closeModal()">取消</button>
+        <button type="submit" class="btn btn-primary">保存</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  (function() {
+    let menus = [];
+
+    function initSysMenus() {
+      loadSysMenus();
+      bindSysMenuFormEvents();
+    }
+
+    async function loadSysMenus() {
+      const tableBody = document.getElementById('sysMenuTableBody');
+      tableBody.innerHTML = '<tr><td colspan="9" style="text-align:center; color:#999;">加载中...</td></tr>';
+      
+      try {
+        const result = await apiService.get('/sys/menu');
+        menus = result.data || result;
+        
+        tableBody.innerHTML = '';
+        if (Array.isArray(menus) && menus.length > 0) {
+          menus.forEach(menu => {
+            const row = document.createElement('tr');
+            row.id = `menu-${menu.id}`;
+            row.draggable = true;
+            row.setAttribute('data-menu-id', menu.id);
+            row.setAttribute('data-menu-sort', menu.sort);
+            row.innerHTML = `
+              <td>${menu.id}</td>
+              <td>${menu.name}</td>
+              <td>${menu.parent === '0' ? '无' : menu.parent}</td>
+              <td>${menu.type}</td>
+              <td>${menu.route}</td>
+              <td>${menu.component}</td>
+              <td>${menu.permission || '-'}</td>
+              <td>${menu.sort}</td>
+              <td>
+                <button class="btn btn-primary" onclick="window.editSysMenu(${menu.id})">编辑</button>
+                <button class="btn btn-danger" onclick="window.deleteSysMenu(${menu.id})">删除</button>
+              </td>
+            `;
+            tableBody.appendChild(row);
+          });
+          loadParentMenus();
+          initDragAndDrop();
+        } else {
+          tableBody.innerHTML = '<tr><td colspan="9" style="text-align:center; color:#999;">暂无数据</td></tr>';
+        }
+      } catch (error) {
+        console.error('加载公共菜单列表失败:', error);
+        tableBody.innerHTML = '<tr><td colspan="9" style="text-align:center; color:#e74c3c;">加载失败</td></tr>';
+      }
+    }
+
+    function initDragAndDrop() {
+      const rows = document.querySelectorAll('#sysMenuTableBody tr');
+      let draggedElement = null;
+      
+      rows.forEach(row => {
+        row.addEventListener('dragstart', function(e) {
+          draggedElement = this;
+          this.style.opacity = '0.5';
+          this.style.transform = 'scale(1.02)';
+        });
+        
+        row.addEventListener('dragend', function(e) {
+          this.style.opacity = '1';
+          this.style.transform = 'scale(1)';
+          draggedElement = null;
+        });
+        
+        row.addEventListener('dragover', function(e) {
+          e.preventDefault();
+          this.style.backgroundColor = 'rgba(230, 199, 73, 0.1)';
+        });
+        
+        row.addEventListener('dragleave', function(e) {
+          this.style.backgroundColor = '';
+        });
+        
+        row.addEventListener('drop', async function(e) {
+          e.preventDefault();
+          this.style.backgroundColor = '';
+          
+          if (draggedElement !== this) {
+            const tableBody = document.getElementById('sysMenuTableBody');
+            const draggedId = parseInt(draggedElement.getAttribute('data-menu-id'));
+            const targetId = parseInt(this.getAttribute('data-menu-id'));
+            
+            // 重新排序
+            const rowsArray = Array.from(tableBody.children);
+            const draggedIndex = rowsArray.indexOf(draggedElement);
+            const targetIndex = rowsArray.indexOf(this);
+            
+            if (draggedIndex < targetIndex) {
+              tableBody.insertBefore(draggedElement, this.nextSibling);
+            } else {
+              tableBody.insertBefore(draggedElement, this);
+            }
+            
+            // 更新排序值
+            await updateMenuOrders();
+          }
+        });
+      });
+    }
+
+    async function updateMenuOrders() {
+      const rows = document.querySelectorAll('#sysMenuTableBody tr');
+      const updatePromises = [];
+      
+      rows.forEach((row, index) => {
+        const menuId = parseInt(row.getAttribute('data-menu-id'));
+        const newSort = index + 1;
+        
+        updatePromises.push(
+          apiService.put(`/sys/menu/${menuId}`, {
+            sort: newSort
+          })
+        );
+      });
+      
+      try {
+        await Promise.all(updatePromises);
+        showMessage('sysMenuMessage', '排序更新成功', 'success');
+        // 重新加载以显示更新后的排序值
+        setTimeout(() => loadSysMenus(), 500);
+      } catch (error) {
+        console.error('更新菜单排序失败:', error);
+        showMessage('sysMenuMessage', '排序更新失败', 'error');
+      }
+    }
+
+    function loadParentMenus() {
+      const parentSelect = document.getElementById('sysMenuParent');
+      if (parentSelect) {
+        parentSelect.innerHTML = '<option value="0">无</option>';
+        menus.forEach(menu => {
+          const option = document.createElement('option');
+          option.value = menu.id;
+          option.textContent = menu.name;
+          parentSelect.appendChild(option);
+        });
+      }
+    }
+
+    function openAddSysMenuModal() {
+      document.getElementById('sysMenuModalTitle').textContent = '新增系统菜单';
+      document.getElementById('sysMenuForm').reset();
+      document.getElementById('sysMenuId').value = '';
+      openModal('sysMenuModal');
+    }
+
+    async function editSysMenu(id) {
+      try {
+        const menu = await apiService.get(`/sys/menu/${id}`);
+        document.getElementById('sysMenuModalTitle').textContent = '编辑系统菜单';
+        document.getElementById('sysMenuId').value = menu.id;
+        document.getElementById('sysMenuName').value = menu.name;
+        document.getElementById('sysMenuParent').value = menu.parent || '0';
+        document.getElementById('sysMenuType').value = menu.type;
+        document.getElementById('sysMenuRoute').value = menu.route || '';
+        document.getElementById('sysMenuComponent').value = menu.component || '';
+        document.getElementById('sysMenuPermission').value = menu.permission || '';
+        document.getElementById('sysMenuSort').value = menu.sort || 0;
+        openModal('sysMenuModal');
+      } catch (error) {
+        console.error('获取菜单信息失败:', error);
+        showMessage('sysMenuMessage', '获取菜单信息失败', 'error');
+      }
+    }
+
+    async function deleteSysMenu(id) {
+      if (confirm('确定要删除这个菜单吗？')) {
+        try {
+          await apiService.delete(`/sys/menu/${id}`);
+          showMessage('sysMenuMessage', '删除成功', 'success');
+          loadSysMenus();
+        } catch (error) {
+          console.error('删除菜单失败:', error);
+          showMessage('sysMenuMessage', '删除失败: ' + error.message, 'error');
+        }
+      }
+    }
+
+    function bindSysMenuFormEvents() {
+      const form = document.getElementById('sysMenuForm');
+      if (form) {
+        form.addEventListener('submit', async function(e) {
+          e.preventDefault();
+          await saveSysMenu();
+        });
+      }
+    }
+
+    async function saveSysMenu() {
+      const id = document.getElementById('sysMenuId').value;
+      const menu = {
+        name: document.getElementById('sysMenuName').value,
+        parent: document.getElementById('sysMenuParent').value,
+        type: document.getElementById('sysMenuType').value,
+        route: document.getElementById('sysMenuRoute').value,
+        component: document.getElementById('sysMenuComponent').value,
+        permission: document.getElementById('sysMenuPermission').value,
+        sort: parseInt(document.getElementById('sysMenuSort').value)
+      };
+      
+      try {
+        if (id) {
+          await apiService.put(`/sys/menu/${id}`, menu);
+          showMessage('sysMenuMessage', '更新成功', 'success');
+        } else {
+          await apiService.post('/sys/menu', menu);
+          showMessage('sysMenuMessage', '新增成功', 'success');
+        }
+        closeModal();
+        loadSysMenus();
+      } catch (error) {
+        console.error('保存菜单失败:', error);
+        showMessage('sysMenuMessage', '保存失败: ' + error.message, 'error');
+      }
+    }
+
+    function showMessage(elementId, message, type) {
+      const statusEl = document.getElementById(elementId);
+      if (statusEl) {
+        statusEl.textContent = message;
+        statusEl.className = `status-message ${type}`;
+        statusEl.style.display = 'block';
+        
+        setTimeout(() => {
+          statusEl.style.display = 'none';
+        }, 3000);
+      }
+    }
+
+    window.initSysMenus = initSysMenus;
+    window.loadSysMenus = loadSysMenus;
+    window.openAddSysMenuModal = openAddSysMenuModal;
+    window.editSysMenu = editSysMenu;
+    window.deleteSysMenu = deleteSysMenu;
+  })();
+</script>

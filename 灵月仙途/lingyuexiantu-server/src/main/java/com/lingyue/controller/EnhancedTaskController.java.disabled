@@ -1,0 +1,59 @@
+package com.lingyue.controller;
+
+import org.springframework.web.bind.annotation.CrossOrigin;
+import com.lingyue.dto.*;
+import com.lingyue.service.EnhancedTaskService;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/enhanced-task")
+public class EnhancedTaskController {
+    
+    private final EnhancedTaskService enhancedTaskService;
+    
+    public EnhancedTaskController(EnhancedTaskService enhancedTaskService) {
+        this.enhancedTaskService = enhancedTaskService;
+    }
+    
+    @GetMapping("/daily")
+    public List<TaskDTO> getDailyTasks() {
+        return enhancedTaskService.getDailyTasks();
+    }
+    
+    @GetMapping("/role/{roleId}")
+    public List<RoleTaskDTO> getRoleTasks(@PathVariable Long roleId) {
+        return enhancedTaskService.getRoleTasks(roleId);
+    }
+    
+    @PostMapping("/accept")
+    public RoleTaskDTO acceptTask(@RequestBody TaskAcceptRequest request) {
+        return enhancedTaskService.acceptTask(request);
+    }
+    
+    @PostMapping("/progress")
+    public RoleTaskDTO updateTaskProgress(@RequestBody TaskProgressRequest request) {
+        return enhancedTaskService.updateTaskProgress(request);
+    }
+    
+    @PostMapping("/claim/{roleId}/{taskId}")
+    public TaskRewardDTO claimTaskReward(@PathVariable Long roleId, @PathVariable Long taskId) {
+        return enhancedTaskService.claimTaskReward(roleId, taskId);
+    }
+    
+    @GetMapping("/activity/{roleId}")
+    public ActivityDTO getActivityInfo(@PathVariable Long roleId) {
+        return enhancedTaskService.getActivityInfo(roleId);
+    }
+    
+    @PostMapping("/activity/claim/{roleId}/{rewardId}")
+    public TaskRewardDTO claimActivityReward(@PathVariable Long roleId, @PathVariable Long rewardId) {
+        return enhancedTaskService.claimActivityReward(roleId, rewardId);
+    }
+    
+    @PostMapping("/refresh/{roleId}")
+    public void refreshDailyTasks(@PathVariable Long roleId) {
+        enhancedTaskService.refreshDailyTasks(roleId);
+    }
+}

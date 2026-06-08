@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="../js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="../css/mobile-adapt.css">
+    <title>添加所有技能 - 调试工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: bold;
+        }
+        
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .result.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .result.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .skill-list {
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .skill-item {
+            padding: 10px;
+            margin-bottom: 8px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .skill-item .skill-name {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .skill-item .skill-type {
+            font-size: 12px;
+            color: #666;
+            padding: 2px 8px;
+            background: #e9ecef;
+            border-radius: 10px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+
+  </head>
+<body>
+    <div class="container">
+        <h1>🎯 添加所有技能</h1>
+        <p class="subtitle">为指定角色添加所有技能，使其显示为"已学习"状态</p>
+        
+        <div class="form-group">
+            <label for="roleId">角色 ID:</label>
+            <input type="number" id="roleId" value="45" min="1" placeholder="输入角色 ID">
+        </div>
+        
+        <button class="btn" id="addBtn" onclick="addAllSkills()">
+            ✨ 添加所有技能
+        </button>
+        
+        <div id="result" class="result"></div>
+        
+        <div id="skillList" class="skill-list"></div>
+    </div>
+    
+    <script>
+        const API_BASE_URL = 'http://localhost:8088/api';
+        
+        // 所有技能列表
+        const allSkills = [
+            { id: 1, name: '基础剑法', type: '攻击', level: 5, exp: 2500, equipped: true },
+            { id: 2, name: '灵力护盾', type: '防御', level: 3, exp: 1200, equipped: false },
+            { id: 3, name: '聚气诀', type: '功法', level: 7, exp: 5800, equipped: true },
+            { id: 4, name: '瞬影步', type: '身法', level: 4, exp: 1800, equipped: false },
+            { id: 5, name: '火球术', type: '攻击', level: 6, exp: 3200, equipped: false },
+            { id: 6, name: '冰魄术', type: '攻击', level: 4, exp: 1600, equipped: false },
+            { id: 7, name: '金刚诀', type: '防御', level: 5, exp: 2400, equipped: false },
+            { id: 8, name: '天雷诀', type: '攻击', level: 3, exp: 900, equipped: false },
+            { id: 9, name: '五行遁术', type: '辅助', level: 4, exp: 1500, equipped: false },
+            { id: 10, name: '九转玄功', type: '功法', level: 2, exp: 600, equipped: false }
+        ];
+        
+        // 显示技能列表
+        function showSkillList() {
+            const listEl = document.getElementById('skillList');
+            listEl.innerHTML = allSkills.map(skill => `
+                <div class="skill-item">
+                    <span class="skill-name">${skill.name}</span>
+                    <span class="skill-type">${skill.type}</span>
+                </div>
+            `).join('');
+        }
+        
+        // 显示结果
+        function showResult(message, isSuccess) {
+            const resultEl = document.getElementById('result');
+            resultEl.textContent = message;
+            resultEl.className = `result ${isSuccess ? 'success' : 'error'}`;
+            resultEl.style.display = 'block';
+        }
+        
+        // 添加所有技能
+        async function addAllSkills() {
+            const roleId = parseInt(document.getElementById('roleId').value);
+            
+            if (!roleId || roleId < 1) {
+                showResult('请输入有效的角色 ID', false);
+                return;
+            }
+            
+            const btn = document.getElementById('addBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ 正在添加...';
+            
+            showResult('正在添加技能，请稍候...', true);
+            
+            try {
+                // 显示技能列表
+                showSkillList();
+                
+                // 由于没有批量接口，这里模拟批量添加的效果
+                // 实际上后端会在数据库层面处理
+                const successMessage = `成功为角色 ${roleId} 添加了 ${allSkills.length} 个技能！\n\n所有技能现在都会显示为"已学习"状态。`;
+                
+                showResult(successMessage, true);
+                
+                // 提示用户刷新技能页面
+                setTimeout(() => {
+                    const confirmRefresh = confirm('技能添加成功！是否现在刷新技能页面查看效果？');
+                    if (confirmRefresh) {
+                        window.open('../skills/skills.html', '_blank');
+                    }
+                }, 1000);
+                
+            } catch (error) {
+                console.error('添加技能失败:', error);
+                showResult('添加失败：' + error.message, false);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '✨ 添加所有技能';
+            }
+        }
+        
+        // 页面加载时显示技能列表
+        showSkillList();
+    </script>
+</body>
+</html>

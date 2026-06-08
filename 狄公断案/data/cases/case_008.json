@@ -1,0 +1,71 @@
+{
+  "id": "case_008",
+  "title": "棋局杀机",
+  "subtitle": "第八案",
+  "difficulty": 3,
+  "description": "围棋国手在对局中猝死，棋盘上最后一颗黑子暗藏玄机。狄仁杰以棋破案，揭开棋局中的杀机……",
+  "background": "唐武则天时期，洛阳举办围棋国手赛，决赛中对弈的白方国手刘九段突然口吐鲜血倒地身亡。众人大惊，狄仁杰到场后发现，刘九段并非急病发作，而是被人下了慢性毒药，而线索就藏在棋盘上。",
+  "stages": {
+    "report": {
+      "id": "report",
+      "name": "报案",
+      "dialogues": [
+        { "speaker": "系统", "speakerTitle": "旁白", "content": "洛阳围棋国手赛决赛，白方国手刘九段与黑方新秀钱五段对弈正酣。", "emotion": "narrator" },
+        { "speaker": "系统", "speakerTitle": "旁白", "content": "忽然，刘九段面色惨白，口吐鲜血，倒在棋盘前！棋子散落一地。", "emotion": "narrator" },
+        { "speaker": "狄仁杰", "speakerTitle": "同平章事", "content": "这不是急病！看他面色和血色，是中毒之象！封锁棋场，所有人不得离开！", "emotion": "angry" },
+        { "speaker": "狄仁杰", "speakerTitle": "同平章事", "content": "这棋盘上最后一颗黑子落的位置……有些蹊跷。来人，将棋盘和所有茶具封存！", "emotion": "serious" }
+      ]
+    },
+    "investigation": {
+      "id": "investigation",
+      "name": "取证",
+      "scenes": [
+        { "id": "chess_hall", "name": "棋场", "description": "围棋比赛现场，棋盘上仍保留着最后的对局局面，刘九段的茶杯和毛巾还在桌上。", "searchHints": ["检查棋盘上的棋子", "查看茶杯和毛巾", "注意棋子的触感"] },
+        { "id": "prep_room", "name": "选手休息室", "description": "选手的休息室，刘九段和钱五段的个人物品都在此处。", "searchHints": ["检查两人的物品", "查看刘九段的药瓶", "寻找毒药来源"] }
+      ],
+      "evidences": [
+        { "id": "ev_001", "name": "有毒的棋子", "icon": "seal", "description": "棋盘上最后落下的几颗黑子表面涂有慢性毒药，棋手长时间捏拿棋子后会通过皮肤吸收中毒。", "sceneId": "chess_hall", "isKey": true, "clue": "毒下在黑子上面！刘九段长时间捏拿白子对弈，而钱五段捏的是有毒的黑子——但中毒的却是刘九段？" },
+        { "id": "ev_002", "name": "刘九段的茶杯", "icon": "teacup", "description": "刘九段的茶杯内壁检测出微量毒药，但茶水本身无毒。毒药是从杯沿进入的。", "sceneId": "chess_hall", "isKey": true, "clue": "刘九段喝茶时中毒！毒药在杯沿上，而他喝茶前刚捏过棋子——毒从手传到杯沿！" },
+        { "id": "ev_003", "name": "钱五段的擦手毛巾", "icon": "cloth", "description": "钱五段用来擦手的毛巾上检测出毒药残留，但他本人并未中毒。", "sceneId": "chess_hall", "isKey": true, "clue": "钱五段用毛巾擦手避免了中毒，而刘九段没有擦手，毒从手上传到了茶杯！" },
+        { "id": "ev_004", "name": "钱五段的购毒记录", "icon": "note", "description": "在钱五段休息室的行李中，发现一张购买'断肠散'的药方，署名是钱五段的化名。", "sceneId": "prep_room", "isKey": true, "clue": "钱五段用化名购买了断肠散，这就是涂在棋子上的毒药！" },
+        { "id": "ev_005", "name": "刘九段的日记", "icon": "book", "description": "刘九段的日记中写道：'钱五段棋力虽强，但为人阴险，多次在比赛中使用不正当手段。'", "sceneId": "prep_room", "isKey": false, "clue": "刘九段早已察觉钱五段品行不端，却没想到对方会下毒。" },
+        { "id": "ev_006", "name": "裁判的证词", "icon": "witness", "description": "裁判称，比赛前钱五段曾单独在棋场停留，声称是来'适应环境'。", "sceneId": "chess_hall", "isKey": false, "clue": "钱五段提前到场就是为了在黑子上涂毒！" }
+      ]
+    },
+    "interrogation": {
+      "id": "interrogation",
+      "name": "审讯",
+      "suspects": [
+        { "id": "sus_001", "name": "钱五段", "role": "围棋新秀", "description": "围棋新秀，棋力高强但品行有争议，多次被指控在比赛中使用不正当手段。", "dialogues": [
+          { "speaker": "钱五段", "speakerTitle": "嫌疑人", "content": "大人！刘九段是突发急病，与在下无关！", "emotion": "fear" },
+          { "speaker": "狄仁杰", "speakerTitle": "同平章事", "content": "你比赛前为何单独在棋场停留？你那擦手毛巾上的毒药又作何解释？", "emotion": "serious" },
+          { "speaker": "钱五段", "speakerTitle": "嫌疑人", "content": "在下只是习惯提前适应环境……毛巾上的东西，在下不知！", "emotion": "panic" },
+          { "speaker": "狄仁杰", "speakerTitle": "同平章事", "content": "你用化名购买断肠散，涂在黑子上，自己用毛巾擦手避免中毒，而刘九段却因手沾毒药传到茶杯而毒发身亡！人证物证俱在，你还有何话说？", "emotion": "angry" },
+          { "speaker": "钱五段", "speakerTitle": "嫌疑人", "content": "在下……在下只是想让他身体不适弃权，不想害他性命啊！", "emotion": "surrender" }
+        ], "isGuilty": true },
+        { "id": "sus_002", "name": "周裁判", "role": "比赛裁判", "description": "围棋比赛裁判长，德高望重，负责比赛规则的执行。", "dialogues": [
+          { "speaker": "周裁判", "speakerTitle": "嫌疑人", "content": "大人，老朽执裁多年，从未见过如此惨事。", "emotion": "serious" },
+          { "speaker": "狄仁杰", "speakerTitle": "同平章事", "content": "你让钱五段单独留在棋场，可曾想过这会有问题？", "emotion": "serious" },
+          { "speaker": "周裁判", "speakerTitle": "嫌疑人", "content": "老朽疏忽了……棋手提前适应环境是常事，老朽未曾料到有人会借此下毒。", "emotion": "nervous" },
+          { "speaker": "狄仁杰", "speakerTitle": "同平章事", "content": "今后比赛，赛前任何人不得单独接触棋具。你虽非同谋，但失察之责不可免。", "emotion": "serious" }
+        ], "isGuilty": false, "hint": "周裁判只是疏忽，并非凶手" }
+      ]
+    },
+    "judgment": {
+      "id": "judgment",
+      "name": "断案",
+      "correctSuspectId": "sus_001",
+      "requiredEvidenceIds": ["ev_001", "ev_002", "ev_003", "ev_004"],
+      "judgmentText": {
+        "correct": "经查明，围棋新秀钱五段为求胜不择手段，在比赛前潜入棋场，将断肠散涂在黑子表面。对弈时钱五段用毛巾擦手避免中毒，而刘九段不知情，手沾毒药后端茶饮用，毒从手传到杯沿再入口中，最终毒发身亡。判钱五段斩立决！终身禁赛！此案彰显狄公以棋破案之智！",
+        "wrong": "本案证据尚不充分，大人还需仔细查证，切莫冤枉了好人。",
+        "partial": "大人所断有部分道理，但仍有关键证据未纳入考量，请重新审视所有证据。"
+      }
+    }
+  },
+  "hints": [
+    { "id": "hint_1", "content": "毒不在茶里——检查棋子，棋手长时间接触棋子，这是下毒的绝佳途径。", "cost": 1 },
+    { "id": "hint_2", "content": "为什么钱五段也捏了有毒的棋子却没有中毒？他做了什么防护？", "cost": 1 },
+    { "id": "hint_3", "content": "毒药是如何从棋子传到刘九段体内的？注意他的饮茶习惯和手部动作。", "cost": 1 }
+  ]
+}

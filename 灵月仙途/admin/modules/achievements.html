@@ -1,0 +1,340 @@
+<script src="../js/api-service.js"></script>
+<div class="section active">
+  <div class="status-message" id="achievementMessage"></div>
+  <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+    <h2 class="section-title">成就管理</h2>
+    <button class="btn btn-primary" onclick="openAddAchievementModal()">新增成就</button>
+  </div>
+  
+  <!-- 筛选条件 -->
+  <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+    <select id="achievementTypeFilter" onchange="handleAchievementSearch()" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; min-width: 150px;">
+      <option value="">全部类型</option>
+      <option value="login">登录相关</option>
+      <option value="combat">战斗相关</option>
+      <option value="cultivation">修炼相关</option>
+      <option value="clan">宗门相关</option>
+      <option value="other">其他</option>
+    </select>
+    <select id="achievementStatusFilter" onchange="handleAchievementSearch()" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; min-width: 150px;">
+      <option value="">全部状态</option>
+      <option value="1">启用</option>
+      <option value="0">禁用</option>
+    </select>
+    <input type="text" id="achievementSearch" placeholder="搜索成就名称..." onkeyup="handleAchievementSearch()" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; min-width: 200px;">
+  </div>
+  
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>成就名称</th>
+        <th>类型</th>
+        <th>达成条件</th>
+        <th>排序权重</th>
+        <th>状态</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody id="achievementTableBody">
+      <!-- JS 生成 -->
+    </tbody>
+  </table>
+  <div id="achievementPagination"></div>
+</div>
+
+<!-- 新增/编辑成就模态框 -->
+<div id="achievementModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="achievementModalTitle">新增成就</h3>
+      <span class="close" onclick="closeModal()">&times;</span>
+    </div>
+    <form id="achievementForm">
+      <input type="hidden" id="achievementId">
+      <div class="form-group">
+        <label>成就名称</label>
+        <input type="text" id="achievementName" required>
+      </div>
+      <div class="form-group">
+        <label>成就类型</label>
+        <select id="achievementType" required>
+          <option value="login">登录相关</option>
+          <option value="combat">战斗相关</option>
+          <option value="cultivation">修炼相关</option>
+          <option value="clan">宗门相关</option>
+          <option value="other">其他</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>成就描述</label>
+        <textarea id="achievementDescription" rows="3" required></textarea>
+      </div>
+      <div class="form-group">
+        <label>达成条件</label>
+        <input type="text" id="achievementCondition" placeholder="如：累计登录30天" required>
+      </div>
+      <div class="form-group">
+        <label>目标值</label>
+        <input type="number" id="achievementTargetValue" min="1" required>
+      </div>
+      <div class="form-group">
+        <label>图标</label>
+        <input type="file" id="achievementIcon" accept="image/*">
+      </div>
+      <div class="form-group">
+        <label>排序权重</label>
+        <input type="number" id="achievementSort" value="0">
+      </div>
+      <div class="form-group">
+        <label>状态</label>
+        <select id="achievementStatus" required>
+          <option value="1">启用</option>
+          <option value="0">禁用</option>
+        </select>
+      </div>
+      
+      <!-- 奖励配置区域 -->
+      <div class="form-group" style="margin-top: 20px;">
+        <label style="font-weight: bold; font-size: 1.1rem;">奖励配置</label>
+        <div style="border: 1px solid #ddd; border-radius: 6px; padding: 15px; margin-top: 10px;">
+          <!-- 资源类奖励 -->
+          <div style="margin-bottom: 15px;">
+            <h4 style="margin-bottom: 10px; color: #555;">资源类奖励</h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+              <div class="form-group">
+                <label>灵石</label>
+                <input type="number" id="rewardSpiritStones" min="0" value="0">
+              </div>
+              <div class="form-group">
+                <label>修为</label>
+                <input type="number" id="rewardCultivation" min="0" value="0">
+              </div>
+              <div class="form-group">
+                <label>宗门贡献</label>
+                <input type="number" id="rewardClanContribution" min="0" value="0">
+              </div>
+              <div class="form-group">
+                <label>其他资源</label>
+                <input type="number" id="rewardOtherResources" min="0" value="0">
+              </div>
+            </div>
+          </div>
+          
+          <!-- 道具类奖励 -->
+          <div style="margin-bottom: 15px;">
+            <h4 style="margin-bottom: 10px; color: #555;">道具类奖励</h4>
+            <div class="form-group">
+              <label>物品ID</label>
+              <input type="text" id="rewardItemId" placeholder="多个物品ID用逗号分隔">
+            </div>
+            <div class="form-group">
+              <label>物品数量</label>
+              <input type="text" id="rewardItemQuantity" placeholder="对应物品的数量，用逗号分隔">
+            </div>
+          </div>
+          
+          <!-- 荣誉类奖励 -->
+          <div>
+            <h4 style="margin-bottom: 10px; color: #555;">荣誉类奖励</h4>
+            <div class="form-group">
+              <label>专属称号</label>
+              <input type="text" id="rewardTitle" placeholder="如：修真大能">
+            </div>
+            <div class="form-group">
+              <label>头像框</label>
+              <input type="text" id="rewardAvatarFrame" placeholder="头像框ID">
+            </div>
+            <div class="form-group">
+              <label>全服广播</label>
+              <input type="checkbox" id="rewardBroadcast">
+              <span style="margin-left: 5px;">达成时全服广播</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div style="text-align: right; margin-top: 20px;">
+        <button type="button" class="btn btn-secondary" onclick="closeModal()">取消</button>
+        <button type="submit" class="btn btn-primary">保存</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  // 初始化成就管理
+  function initAchievements() {
+    loadAchievements();
+    bindAchievementFormEvents();
+  }
+
+  // 加载成就列表
+  async function loadAchievements() {
+    const tableBody = document.getElementById('achievementTableBody');
+    tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#999;">加载中...</td></tr>';
+    
+    try {
+      const achievements = await apiService.get('/achievement');
+      
+      // 处理API返回的数据格式
+      let achievementsData = achievements;
+      if (achievements && achievements.data) {
+        achievementsData = achievements.data;
+      }
+      
+      tableBody.innerHTML = '';
+      if (achievementsData && Array.isArray(achievementsData) && achievementsData.length > 0) {
+        achievementsData.forEach(achievement => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${achievement.id}</td>
+            <td>${achievement.name}</td>
+            <td>${achievement.type}</td>
+            <td>${achievement.condition}</td>
+            <td>${achievement.sort || 0}</td>
+            <td>${achievement.status === 1 ? '启用' : '禁用'}</td>
+            <td>
+              <button class="btn btn-primary" onclick="editAchievement(${achievement.id})">编辑</button>
+              <button class="btn btn-danger" onclick="deleteAchievement(${achievement.id})">删除</button>
+            </td>
+          `;
+          tableBody.appendChild(row);
+        });
+      } else {
+        tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#999;">暂无成就</td></tr>';
+      }
+    } catch (error) {
+      console.error('加载成就列表失败:', error);
+      tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#e74c3c;">加载失败: ' + (error.message || '未知错误') + '</td></tr>';
+    }
+  }
+
+  // 打开新增成就模态框
+  function openAddAchievementModal() {
+    document.getElementById('achievementModalTitle').textContent = '新增成就';
+    document.getElementById('achievementForm').reset();
+    document.getElementById('achievementId').value = '';
+    openModal('achievementModal');
+  }
+
+  // 编辑成就
+  async function editAchievement(id) {
+    try {
+      const achievement = await apiService.get(`/achievement/${id}`);
+      document.getElementById('achievementModalTitle').textContent = '编辑成就';
+      document.getElementById('achievementId').value = achievement.id;
+      document.getElementById('achievementName').value = achievement.name;
+      document.getElementById('achievementType').value = achievement.type;
+      document.getElementById('achievementDescription').value = achievement.description || '';
+      document.getElementById('achievementCondition').value = achievement.condition;
+      document.getElementById('achievementTargetValue').value = achievement.targetValue || 1;
+      document.getElementById('achievementSort').value = achievement.sort || 0;
+      document.getElementById('achievementStatus').value = achievement.status || 1;
+      
+      // 填充奖励信息
+      if (achievement.rewards) {
+        document.getElementById('rewardSpiritStones').value = achievement.rewards.spiritStones || 0;
+        document.getElementById('rewardCultivation').value = achievement.rewards.cultivation || 0;
+        document.getElementById('rewardClanContribution').value = achievement.rewards.clanContribution || 0;
+        document.getElementById('rewardOtherResources').value = achievement.rewards.otherResources || 0;
+        
+        if (achievement.rewards.items) {
+          document.getElementById('rewardItemId').value = achievement.rewards.items.ids || '';
+          document.getElementById('rewardItemQuantity').value = achievement.rewards.items.quantities || '';
+        }
+        
+        if (achievement.rewards.honor) {
+          document.getElementById('rewardTitle').value = achievement.rewards.honor.title || '';
+          document.getElementById('rewardAvatarFrame').value = achievement.rewards.honor.avatarFrame || '';
+          document.getElementById('rewardBroadcast').checked = achievement.rewards.honor.broadcast || false;
+        }
+      }
+      
+      openModal('achievementModal');
+    } catch (error) {
+      console.error('获取成就信息失败:', error);
+      showMessage('achievementMessage', '获取成就信息失败: ' + (error.message || '未知错误'), 'error');
+    }
+  }
+
+  // 删除成就
+  async function deleteAchievement(id) {
+    if (confirm('确定要删除这个成就吗？')) {
+      try {
+        await apiService.delete(`/achievement/${id}`);
+        showMessage('achievementMessage', '删除成功', 'success');
+        loadAchievements();
+      } catch (error) {
+        console.error('删除成就失败:', error);
+        showMessage('achievementMessage', '删除失败: ' + (error.message || '未知错误'), 'error');
+      }
+    }
+  }
+
+  // 绑定成就表单事件
+  function bindAchievementFormEvents() {
+    document.getElementById('achievementForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      saveAchievement();
+    });
+  }
+
+  // 保存成就
+  async function saveAchievement() {
+    const id = document.getElementById('achievementId').value;
+    const achievement = {
+      name: document.getElementById('achievementName').value,
+      type: document.getElementById('achievementType').value,
+      description: document.getElementById('achievementDescription').value,
+      condition: document.getElementById('achievementCondition').value,
+      targetValue: parseInt(document.getElementById('achievementTargetValue').value),
+      sort: parseInt(document.getElementById('achievementSort').value),
+      status: parseInt(document.getElementById('achievementStatus').value),
+      rewards: {
+        spiritStones: parseInt(document.getElementById('rewardSpiritStones').value),
+        cultivation: parseInt(document.getElementById('rewardCultivation').value),
+        clanContribution: parseInt(document.getElementById('rewardClanContribution').value),
+        otherResources: parseInt(document.getElementById('rewardOtherResources').value),
+        items: {
+          ids: document.getElementById('rewardItemId').value,
+          quantities: document.getElementById('rewardItemQuantity').value
+        },
+        honor: {
+          title: document.getElementById('rewardTitle').value,
+          avatarFrame: document.getElementById('rewardAvatarFrame').value,
+          broadcast: document.getElementById('rewardBroadcast').checked
+        }
+      }
+    };
+    
+    try {
+      if (id) {
+        await apiService.put(`/achievement/${id}`, achievement);
+        showMessage('achievementMessage', '更新成功', 'success');
+      } else {
+        await apiService.post('/achievement', achievement);
+        showMessage('achievementMessage', '新增成功', 'success');
+      }
+      closeModal();
+      loadAchievements();
+    } catch (error) {
+      console.error('保存成就失败:', error);
+      showMessage('achievementMessage', '保存失败: ' + (error.message || '未知错误'), 'error');
+    }
+  }
+
+  // 处理成就搜索
+  function handleAchievementSearch() {
+    const typeFilter = document.getElementById('achievementTypeFilter').value;
+    const statusFilter = document.getElementById('achievementStatusFilter').value;
+    const searchTerm = document.getElementById('achievementSearch').value.toLowerCase();
+    console.log('搜索成就:', typeFilter, statusFilter, searchTerm);
+    // 这里可以实现搜索逻辑
+  }
+
+  // 页面加载完成后初始化
+  if (typeof window.initAchievements === 'undefined') {
+    window.initAchievements = initAchievements;
+  }
+</script>

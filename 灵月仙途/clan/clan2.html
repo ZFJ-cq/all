@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="../js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="../css/mobile-adapt.css">
+  <title>灵月仙途 - 宗门地图</title>
+  <style>
+    :root {
+      --gold-primary: #e6c749;
+      --gold-light: #f4d03f;
+      --gold-dark: #b8860b;
+      --text-main: #fdfbf7;
+      --text-dim: #d4c5a9;
+      --bg-overlay: rgba(20, 25, 40, 0.6);
+      --glass-bg: rgba(30, 35, 50, 0.75);
+      --border-glow: 0 0 15px rgba(230, 199, 73, 0.3);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Microsoft YaHei', 'SimSun', serif;
+      background: #1a1f2e;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    /* 地图背景容器 */
+    .map-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      max-width: 420px;
+      max-height: 850px;
+      overflow: hidden;
+      border-radius: 12px;
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.7);
+      background: linear-gradient(to bottom, #2b3242, #1a1f2e);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 0;
+    }
+
+    /* 顶部信息栏 */
+    .top-info-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: var(--glass-bg);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(230, 199, 73, 0.2);
+      padding: 12px 15px;
+      z-index: 100;
+      animation: fadeInDown 0.8s ease-out;
+    }
+
+    .sect-info {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .sect-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sect-level {
+      font-size: 12px;
+      font-weight: bold;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(230, 199, 73, 0.2);
+      color: var(--gold-primary);
+    }
+
+    .sect-name {
+      font-size: 16px;
+      font-weight: bold;
+      color: var(--text-main);
+    }
+
+    .sect-resources {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .resource-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 4px 8px;
+      border-radius: 12px;
+    }
+
+    /* 地图交互层 */
+    .interactive-map {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .map-background {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: brightness(0.7) sepia(0.3);
+    }
+
+    /* 地图标记点 */
+    .map-marker {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background: var(--gold-primary);
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: 10;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 10px var(--gold-primary);
+      animation: pulse 2s infinite;
+    }
+
+    .map-marker:hover {
+      transform: scale(1.5);
+      box-shadow: 0 0 20px var(--gold-primary);
+    }
+
+    .map-marker::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--gold-primary);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      opacity: 0.3;
+    }
+
+    .marker-label {
+      position: absolute;
+      top: -30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.7);
+      color: var(--gold-primary);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+      z-index: 20;
+    }
+
+    .map-marker:hover .marker-label {
+      opacity: 1;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
+
+    /* 地图区域（交互热区） */
+    .map-area {
+      position: absolute;
+      border: 2px solid transparent;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      z-index: 5;
+    }
+
+    .map-area:hover {
+      border-color: var(--gold-primary);
+      background: rgba(230, 199, 73, 0.1);
+      box-shadow: 0 0 20px rgba(230, 199, 73, 0.3);
+    }
+
+    .area-label {
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.8);
+      color: var(--gold-primary);
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+      z-index: 6;
+    }
+
+    .map-area:hover .area-label {
+      opacity: 1;
+    }
+
+    /* 详细信息面板 */
+    .details-panel {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: var(--glass-bg);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(230, 199, 73, 0.2);
+      padding: 15px;
+      transform: translateY(100%);
+      transition: transform 0.4s ease;
+      z-index: 150;
+      box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .details-panel.active {
+      transform: translateY(0);
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(230, 199, 73, 0.2);
+    }
+
+    .panel-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: var(--gold-primary);
+    }
+
+    .close-panel {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      font-size: 20px;
+      cursor: pointer;
+      padding: 0;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .close-panel:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-main);
+    }
+
+    .panel-content {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    /* 功能模块 */
+    .module-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .function-card {
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(230, 199, 73, 0.2);
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .function-card:hover {
+      background: rgba(0, 0, 0, 0.3);
+      border-color: var(--gold-primary);
+      transform: translateY(-2px);
+    }
+
+    .function-icon {
+      font-size: 20px;
+      margin-bottom: 8px;
+      color: var(--gold-primary);
+    }
+
+    .function-title {
+      font-size: 12px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .function-desc {
+      font-size: 10px;
+      color: var(--text-dim);
+    }
+
+    /* 宗门建筑详情 */
+    .building-details {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .building-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .building-icon {
+      width: 40px;
+      height: 40px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: var(--gold-primary);
+    }
+
+    .building-text {
+      flex: 1;
+    }
+
+    .building-name {
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    .building-desc {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    /* 底部导航栏 */
+    .bottom-nav {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: var(--glass-bg);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(230, 199, 73, 0.2);
+      padding: 8px 0;
+      display: flex;
+      justify-content: space-around;
+      z-index: 200;
+      box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 5px;
+      text-decoration: none;
+      color: #aaa;
+      transition: all 0.2s ease;
+      width: 20%;
+    }
+
+    .nav-item.active {
+      color: var(--gold-primary);
+    }
+
+    .nav-icon {
+      font-size: 20px;
+      margin-bottom: 3px;
+    }
+
+    .nav-text {
+      font-size: 10px;
+    }
+
+    /* 按钮样式 */
+    .antique-button {
+      background: linear-gradient(135deg, rgba(230, 199, 73, 0.2), rgba(230, 199, 73, 0.1));
+      border: 1px solid var(--gold-primary);
+      color: var(--gold-primary);
+      padding: 8px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .antique-button:hover {
+      background: linear-gradient(135deg, rgba(230, 199, 73, 0.3), rgba(230, 199, 73, 0.2));
+      transform: translateY(-2px);
+    }
+
+    /* 动画 */
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* 响应式调整 */
+    @media (max-width: 480px) {
+      .top-info-bar {
+        padding: 10px 12px;
+      }
+      
+      .sect-name {
+        font-size: 14px;
+      }
+      
+      .panel-title {
+        font-size: 16px;
+      }
+    }
+  </style>
+
+  </head>
+<body>
+  <!-- 地图容器 -->
+  <div class="map-container">
+    <!-- 顶部信息栏 -->
+    <div class="top-info-bar">
+      <div class="sect-info">
+        <div class="sect-header">
+          <div class="sect-level" id="sectLevel">五流宗门</div>
+          <div class="sect-name">青云门</div>
+        </div>
+        
+        <div class="sect-resources">
+          <div class="resource-item">
+            <span>🗡️ 战力: 12,450</span>
+          </div>
+          <div class="resource-item">
+            <span>⚔️ 声望: 320</span>
+          </div>
+          <div class="resource-item">
+            <span>💰 灵石: 89,700</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 交互式地图 -->
+    <div class="interactive-map" id="interactiveMap">
+      <!-- 背景图片占位 - 实际使用时替换为真实地图 -->
+      <div class="map-background"></div>
+      
+      <!-- 藏宝阁区域 -->
+      <div class="map-area" id="treasureArea" 
+           style="top: 20%; left: 15%; width: 60px; height: 40px;"
+           onclick="showAreaDetails('treasure')">
+        <div class="area-label">藏宝阁</div>
+      </div>
+      
+      <!-- 藏经阁区域 -->
+      <div class="map-area" id="scriptureArea" 
+           style="top: 35%; left: 70%; width: 50px; height: 35px;"
+           onclick="showAreaDetails('scripture')">
+        <div class="area-label">藏经阁</div>
+      </div>
+      
+      <!-- 炼丹房区域 -->
+      <div class="map-area" id="alchemyArea" 
+           style="top: 50%; left: 20%; width: 55px; height: 45px;"
+           onclick="showAreaDetails('alchemy')">
+        <div class="area-label">炼丹房</div>
+      </div>
+      
+      <!-- 演武场区域 -->
+      <div class="map-area" id="trainingArea" 
+           style="top: 60%; left: 60%; width: 65px; height: 50px;"
+           onclick="showAreaDetails('training')">
+        <div class="area-label">演武场</div>
+      </div>
+      
+      <!-- 宗门大殿区域 -->
+      <div class="map-area" id="mainHallArea" 
+           style="top: 30%; left: 40%; width: 80px; height: 60px;"
+           onclick="showAreaDetails('mainHall')">
+        <div class="area-label">宗门大殿</div>
+      </div>
+      
+      <!-- 弟子居所区域 -->
+      <div class="map-area" id="dormitoryArea" 
+           style="top: 70%; left: 35%; width: 70px; height: 40px;"
+           onclick="showAreaDetails('dormitory')">
+        <div class="area-label">弟子居所</div>
+      </div>
+      
+      <!-- 灵药园区域 -->
+      <div class="map-area" id="herbGardenArea" 
+           style="top: 15%; left: 75%; width: 50px; height: 35px;"
+           onclick="showAreaDetails('herbGarden')">
+        <div class="area-label">灵药园</div>
+      </div>
+      
+      <!-- 灵兽园区域 -->
+      <div class="map-area" id="beastGardenArea" 
+           style="top: 75%; left: 10%; width: 60px; height: 40px;"
+           onclick="showAreaDetails('beastGarden')">
+        <div class="area-label">灵兽园</div>
+      </div>
+    </div>
+    
+    <!-- 详细信息面板 -->
+    <div class="details-panel" id="detailsPanel">
+      <div class="panel-header">
+        <h3 class="panel-title" id="panelTitle">区域详情</h3>
+        <button class="close-panel" onclick="closeDetailsPanel()">✕</button>
+      </div>
+      <div class="panel-content" id="panelContent">
+        <!-- 内容将动态加载 -->
+      </div>
+    </div>
+    
+    <!-- 底部导航栏 -->
+    <nav class="bottom-nav" role="navigation" aria-label="主导航">
+            <a href="../index.html" class="nav-item" aria-label="修炼页面">
+                <div class="nav-icon">🧘</div>
+                <div class="nav-text">修炼</div>
+            </a>
+            <a href="../skills/skills.html" class="nav-item" aria-label="功法页面">
+                <div class="nav-icon">📜</div>
+                <div class="nav-text">功法</div>
+            </a>
+            <a href="clan.html" class="nav-item active" aria-label="宗门页面" aria-current="page">
+                <div class="nav-icon">🏯</div>
+                <div class="nav-text">宗门</div>
+            </a>
+            <a href="../word/world.html" class="nav-item" aria-label="仙途页面">
+                <div class="nav-icon">🌌</div>
+                <div class="nav-text">仙途</div>
+            </a>
+            <a href="../map/map.html" class="nav-item" aria-label="云游页面">
+                <div class="nav-icon">🗺️</div>
+                <div class="nav-text">云游</div>
+            </a>
+        </nav>
+        <div class="nav-text">洞府</div>
+      </a>
+      <a href="../inventory.html" class="nav-item">
+        <div class="nav-icon">🎒</div>
+        <div class="nav-text">背包</div>
+      </a>
+      <a href="../character.html" class="nav-item">
+        <div class="nav-icon">👤</div>
+        <div class="nav-text">角色</div>
+      </a>
+      <a href="index.html" class="nav-item active">
+        <div class="nav-icon">🏯</div>
+        <div class="nav-text">宗门</div>
+      </a>
+      <a href="../tasks.html" class="nav-item">
+        <div class="nav-icon">📜</div>
+        <div class="nav-text">任务</div>
+      </a>
+    </div>
+  </div>
+  
+  <script>
+    // 宗门数据
+    const sectData = {
+      level: "五流",
+      reputation: 320,
+      totalContribution: 12450,
+      spiritStone: 89700,
+      currentPosition: "长老"
+    };
+    
+    // 地图区域数据
+    const areaData = {
+      treasure: {
+        name: "藏宝阁",
+        description: "宗门资源宝库，存放灵石、灵材和各种珍贵宝物",
+        level: 3,
+        functions: [
+          { name: "资源兑换", icon: "💰", desc: "用贡献兑换灵石、灵材" },
+          { name: "宝物鉴定", icon: "🔍", desc: "鉴定未知宝物的价值" },
+          { name: "灵石存取", icon: "💎", desc: "存取个人灵石储备" }
+        ],
+        events: ["今日有灵材拍卖会", "可领取月度俸禄"]
+      },
+      scripture: {
+        name: "藏经阁",
+        description: "宗门功法秘籍收藏之地，内有万千修炼法门",
+        level: 4,
+        functions: [
+          { name: "功法研习", icon: "📖", desc: "研习各类修炼功法" },
+          { name: "秘籍借阅", icon: "📚", desc: "借阅前辈修炼心得" },
+          { name: "功法兑换", icon: "⚔️", desc: "用贡献兑换高级功法" }
+        ],
+        events: ["新到《金丹要诀》", "长老正在讲授剑法"]
+      },
+      alchemy: {
+        name: "炼丹房",
+        description: "宗门炼丹之地，丹香四溢，炉火不熄",
+        level: 3,
+        functions: [
+          { name: "丹药炼制", icon: "⚗️", desc: "炼制各类修炼丹药" },
+          { name: "丹方学习", icon: "📜", desc: "学习新的丹药配方" },
+          { name: "丹药购买", icon: "💊", desc: "购买现成修炼丹药" }
+        ],
+        events: ["正在炼制筑基丹", "可领取免费疗伤丹"]
+      },
+      training: {
+        name: "演武场",
+        description: "弟子修炼切磋之地，剑气纵横，道法相争",
+        level: 2,
+        functions: [
+          { name: "修炼打坐", icon: "🧘", desc: "静心打坐提升修为" },
+          { name: "同门切磋", icon: "⚔️", desc: "与同门切磋提高战力" },
+          { name: "功法练习", icon: "✨", desc: "练习新学的功法" }
+        ],
+        events: ["今日有长老指点", "每月比武大会即将开始"]
+      },
+      mainHall: {
+        name: "宗门大殿",
+        description: "宗门核心之地，处理宗门事务，迎接宾客",
+        level: 5,
+        functions: [
+          { name: "接取任务", icon: "📋", desc: "接取宗门各类任务" },
+          { name: "晋升申请", icon: "📈", desc: "申请职位晋升" },
+          { name: "宗门事务", icon: "🏛️", desc: "处理宗门日常事务" }
+        ],
+        events: ["宗主正在议事", "有外来宾客到访"]
+      },
+      dormitory: {
+        name: "弟子居所",
+        description: "宗门弟子休息之地，灵气充沛，适合静修",
+        level: 1,
+        functions: [
+          { name: "休息恢复", icon: "🛌", desc: "休息恢复体力和灵力" },
+          { name: "整理行囊", icon: "🎒", desc: "整理随身携带的物品" },
+          { name: "同门交流", icon: "🗣️", desc: "与同门交流修炼心得" }
+        ],
+        events: ["有弟子在论道", "可领取日常补给"]
+      },
+      herbGarden: {
+        name: "灵药园",
+        description: "宗门药田，种植各类灵草仙药，灵气浓郁",
+        level: 2,
+        functions: [
+          { name: "灵药采集", icon: "🌿", desc: "采集成熟的灵药" },
+          { name: "药田照料", icon: "💧", desc: "照料灵药生长" },
+          { name: "灵药兑换", icon: "🌱", desc: "用贡献兑换灵药" }
+        ],
+        events: ["七星草已成熟", "有灵兽守护千年人参"]
+      },
+      beastGarden: {
+        name: "灵兽园",
+        description: "宗门驯养灵兽之地，各类灵兽栖息其中",
+        level: 2,
+        functions: [
+          { name: "灵兽驯养", icon: "🐲", desc: "驯养和培养灵兽" },
+          { name: "灵兽购买", icon: "🐉", desc: "购买各类灵兽伙伴" },
+          { name: "灵兽战斗", icon: "⚔️", desc: "与灵兽进行战斗训练" }
+        ],
+        events: ["新到一批幼年灵兽", "灵兽比赛即将开始"]
+      }
+    };
+    
+    // 显示区域详情
+    function showAreaDetails(areaId) {
+      const panel = document.getElementById('detailsPanel');
+      const panelTitle = document.getElementById('panelTitle');
+      const panelContent = document.getElementById('panelContent');
+      
+      const area = areaData[areaId];
+      if (!area) return;
+      
+      panelTitle.textContent = area.name;
+      
+      let content = `
+        <div class="building-details">
+          <div class="building-info">
+            <div class="building-icon" style="background: rgba(230, 199, 73, 0.2);">
+              🏯
+            </div>
+            <div class="building-text">
+              <div class="building-name">${area.name}（${'★'.repeat(area.level)}${'☆'.repeat(5-area.level)}）</div>
+              <div class="building-desc">${area.description}</div>
+            </div>
+          </div>
+          
+          <div style="margin: 15px 0 10px;">
+            <div style="font-weight: bold; color: var(--gold-primary); margin-bottom: 8px;">可用功能</div>
+            <div class="module-grid">
+      `;
+      
+      // 添加功能卡片
+      area.functions.forEach(func => {
+        content += `
+          <div class="function-card" onclick="useFunction('${areaId}', '${func.name}')">
+            <div class="function-icon">${func.icon}</div>
+            <div class="function-title">${func.name}</div>
+            <div class="function-desc">${func.desc}</div>
+          </div>
+        `;
+      });
+      
+      content += `
+            </div>
+          </div>
+          
+          <div style="margin: 10px 0;">
+            <div style="font-weight: bold; color: var(--gold-primary); margin-bottom: 8px;">当前事件</div>
+            <div style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;">
+      `;
+      
+      // 添加事件
+      area.events.forEach(event => {
+        content += `
+          <div style="padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+            <div style="font-size: 12px;">✨ ${event}</div>
+          </div>
+        `;
+      });
+      
+      content += `
+            </div>
+          </div>
+          
+          <button class="antique-button" style="width: 100%; margin-top: 10px;" onclick="enterArea('${areaId}')">
+            进入${area.name}
+          </button>
+        </div>
+      `;
+      
+      panelContent.innerHTML = content;
+      panel.classList.add('active');
+    }
+    
+    // 关闭详情面板
+    function closeDetailsPanel() {
+      const panel = document.getElementById('detailsPanel');
+      panel.classList.remove('active');
+    }
+    
+    // 使用功能
+    function useFunction(areaId, functionName) {
+      showToast(`正在使用【${areaData[areaId].name}】的【${functionName}】功能...`);
+      // 这里可以跳转到对应功能页面
+    }
+    
+    // 进入区域
+    function enterArea(areaId) {
+      showToast(`进入【${areaData[areaId].name}】...`);
+      // 这里可以跳转到对应区域页面
+    }
+    
+    // 创建地图标记点
+    function createMapMarkers() {
+      const mapContainer = document.getElementById('interactiveMap');
+      
+      // 示例：创建一些资源点标记
+      const markers = [
+        { id: 'goldMine', label: '金矿脉', x: 25, y: 25 },
+        { id: 'herbField', label: '灵草田', x: 75, y: 20 },
+        { id: 'spiritSpring', label: '灵泉', x: 20, y: 60 },
+        { id: 'trainingGround', label: '修炼场', x: 60, y: 65 },
+        { id: 'market', label: '坊市', x: 80, y: 80 }
+      ];
+      
+      markers.forEach(marker => {
+        const markerElement = document.createElement('div');
+        markerElement.className = 'map-marker';
+        markerElement.style.left = `${marker.x}%`;
+        markerElement.style.top = `${marker.y}%`;
+        markerElement.onclick = () => {
+          showMarkerDetails(marker.id, marker.label);
+        };
+        
+        const label = document.createElement('div');
+        label.className = 'marker-label';
+        label.textContent = marker.label;
+        markerElement.appendChild(label);
+        
+        mapContainer.appendChild(markerElement);
+      });
+    }
+    
+    // 显示标记点详情
+    function showMarkerDetails(markerId, markerLabel) {
+      const panel = document.getElementById('detailsPanel');
+      const panelTitle = document.getElementById('panelTitle');
+      const panelContent = document.getElementById('panelContent');
+      
+      panelTitle.textContent = markerLabel;
+      
+      let content = '';
+      
+      // 根据不同的标记点显示不同的信息
+      switch(markerId) {
+        case 'goldMine':
+          content = `
+            <div class="building-details">
+              <div class="building-info">
+                <div class="building-icon" style="background: rgba(212, 175, 55, 0.2);">
+                  💰
+                </div>
+                <div class="building-text">
+                  <div class="building-name">金矿脉</div>
+                  <div class="building-desc">宗门重要资源点，日产黄金1000两</div>
+                </div>
+              </div>
+              
+              <div style="margin: 15px 0;">
+                <div style="font-weight: bold; color: var(--gold-primary); margin-bottom: 8px;">矿脉信息</div>
+                <div style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;">
+                  <div style="padding: 5px 0;">储量：丰富</div>
+                  <div style="padding: 5px 0;">开采状态：进行中</div>
+                  <div style="padding: 5px 0;">守卫力量：10名内门弟子</div>
+                </div>
+              </div>
+              
+              <button class="antique-button" style="width: 100%; margin-top: 10px;">
+                派遣弟子开采
+              </button>
+            </div>
+          `;
+          break;
+          
+        case 'herbField':
+          content = `
+            <div class="building-details">
+              <div class="building-info">
+                <div class="building-icon" style="background: rgba(76, 175, 80, 0.2);">
+                  🌿
+                </div>
+                <div class="building-text">
+                  <div class="building-name">灵草田</div>
+                  <div class="building-desc">种植各类灵草，供应炼丹房需求</div>
+                </div>
+              </div>
+              
+              <div style="margin: 15px 0;">
+                <div style="font-weight: bold; color: var(--gold-primary); margin-bottom: 8px;">可采集灵草</div>
+                <div class="module-grid">
+                  <div class="function-card">
+                    <div class="function-icon">🌱</div>
+                    <div class="function-title">聚灵草</div>
+                    <div class="function-desc">成熟可采</div>
+                  </div>
+                  <div class="function-card">
+                    <div class="function-icon">🍀</div>
+                    <div class="function-title">七星花</div>
+                    <div class="function-desc">还需3天</div>
+                  </div>
+                </div>
+              </div>
+              
+              <button class="antique-button" style="width: 100%; margin-top: 10px;">
+                采集灵草
+              </button>
+            </div>
+          `;
+          break;
+      }
+      
+      panelContent.innerHTML = content;
+      panel.classList.add('active');
+    }
+    
+    // 页面加载完成后初始化
+    document.addEventListener('DOMContentLoaded', function() {
+      // 创建地图标记
+      createMapMarkers();
+      
+      // 为地图容器添加点击事件，点击空白处关闭面板
+      document.getElementById('interactiveMap').addEventListener('click', function(e) {
+        // 如果点击的是地图背景（不是标记点或区域）
+        if (e.target.classList.contains('interactive-map') || e.target.classList.contains('map-background')) {
+          closeDetailsPanel();
+        }
+      });
+    });
+  </script>
+  <script src="../js/ui-components.js"></script>
+</body>
+</html>

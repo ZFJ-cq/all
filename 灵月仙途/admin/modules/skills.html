@@ -1,0 +1,103 @@
+<script src="../js/api-service.js"></script>
+<div class="section active">
+  <h2 class="section-title">技能管理</h2>
+  
+  <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+    <div></div>
+    <button class="btn btn-primary" onclick="openAddSkillModal()">新增技能</button>
+  </div>
+  
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>技能名称</th>
+        <th>技能类型</th>
+        <th>等级</th>
+        <th>攻击力</th>
+        <th>防御力</th>
+        <th>修为</th>
+        <th>神力</th>
+        <th>速度</th>
+        <th>暴击</th>
+        <th>状态</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody id="skillTableBody">
+      <!-- JS 生成 -->
+    </tbody>
+  </table>
+  <div id="skillPagination"></div>
+</div>
+
+<script>
+  // 初始化技能管理
+  function initSkills() {
+    loadSkills();
+  }
+
+  // 加载技能列表
+  async function loadSkills() {
+    const tableBody = document.getElementById('skillTableBody');
+    tableBody.innerHTML = '<tr><td colspan="12" style="text-align:center; color:#999;">加载中...</td></tr>';
+    
+    try {
+      const result = await apiService.get('/skill');
+      const skills = result.data || result;
+      
+      tableBody.innerHTML = '';
+      if (Array.isArray(skills) && skills.length > 0) {
+        skills.forEach(skill => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${skill.id}</td>
+            <td>${skill.name}</td>
+            <td>${skill.type}</td>
+            <td>${skill.level}</td>
+            <td>${skill.attack}</td>
+            <td>${skill.defense}</td>
+            <td>${skill.cultivation}</td>
+            <td>${skill.power}</td>
+            <td>${skill.speed}</td>
+            <td>${skill.critical}</td>
+            <td>${skill.status === 1 ? '启用' : '禁用'}</td>
+            <td>
+              <button class="btn btn-primary" onclick="editSkill(${skill.id})">编辑</button>
+              <button class="btn btn-danger" onclick="deleteSkill(${skill.id})">删除</button>
+            </td>
+          `;
+          tableBody.appendChild(row);
+        });
+      } else {
+        tableBody.innerHTML = '<tr><td colspan="12" style="text-align:center; color:#999;">暂无数据</td></tr>';
+      }
+    } catch (error) {
+      console.error('加载技能列表失败:', error);
+      tableBody.innerHTML = '<tr><td colspan="12" style="text-align:center; color:#e74c3c;">加载失败</td></tr>';
+    }
+  }
+
+  // 打开新增技能模态框
+  function openAddSkillModal() {
+    console.log('打开新增技能模态框');
+  }
+
+  // 编辑技能
+  function editSkill(id) {
+    console.log('编辑技能:', id);
+  }
+
+  // 删除技能
+  function deleteSkill(id) {
+    if (confirm('确定要删除这个技能吗？')) {
+      console.log('删除技能:', id);
+      loadSkills();
+    }
+  }
+
+  // 页面加载完成后初始化
+  if (typeof window.initSkills === 'undefined') {
+    window.initSkills = initSkills;
+  }
+</script>

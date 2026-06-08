@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>概率抽奖器</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .form-section, .list-section, .draw-section {
+            margin-bottom: 30px;
+        }
+
+        .form-section input {
+            width: calc(50% - 10px);
+            padding: 10px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .form-section button, .list-section button, .draw-section button {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .form-section button:hover {
+            background-color: #218838;
+        }
+
+        .list-section button {
+            background-color: #dc3545; /* 红色 */
+            margin-top: 10px;
+        }
+
+        .list-section button:hover {
+            background-color: #c82333;
+        }
+
+        .draw-section button {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            background-color: #007bff;
+        }
+
+        .draw-section button:hover {
+            background-color: #0069d9;
+        }
+
+        #itemsList {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #itemsList li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .item-info {
+            flex-grow: 1;
+        }
+
+        .delete-btn {
+            background-color: #ffc107;
+            color: black;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .delete-btn:hover {
+            background-color: #e0a800;
+        }
+
+        .result-section {
+            text-align: center;
+            padding: 20px;
+            margin-top: 20px;
+            background-color: #e8f5e9;
+            border-radius: 4px;
+        }
+
+        .result-section h2 {
+            color: #28a745;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .total-prob {
+            margin-top: 5px;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .total-prob.warning {
+            color: #dc3545; /* 红色警告 */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>概率抽奖器</h1>
+
+        <!-- 添加新条目的表单 -->
+        <div class="form-section">
+            <h2>添加选项</h2>
+            <input type="text" id="itemNameInput" placeholder="输入选项名称 (例如: 特等奖)">
+            <input type="number" id="itemProbabilityInput" placeholder="输入概率 (%)" min="0" max="100" step="any">
+            <button id="addItemBtn">添加</button>
+        </div>
+
+        <!-- 显示已添加的条目列表 -->
+        <div class="list-section">
+            <h2>当前选项列表</h2>
+            <ul id="itemsList"></ul>
+            <div id="totalProbDisplay" class="total-prob warning">总概率: 0%</div>
+            <button id="clearAllBtn">清空全部</button>
+        </div>
+
+        <!-- 抽取按钮 -->
+        <div class="draw-section">
+            <button id="drawBtn">开始抽奖！</button>
+        </div>
+
+        <!-- 显示抽取结果 -->
+        <div id="resultSection" class="result-section hidden">
+            <h2>恭喜！抽中了：</h2>
+            <p id="resultText"></p>
+        </div>
+    </div>
+
+    <script>
+        // DOM元素引用
+        const itemNameInput = document.getElementById('itemNameInput');
+        const itemProbabilityInput = document.getElementById('itemProbabilityInput');
+        const addItemBtn = document.getElementById('addItemBtn');
+        const itemsList = document.getElementById('itemsList');
+        const clearAllBtn = document.getElementById('clearAllBtn');
+        const drawBtn = document.getElementById('drawBtn');
+        const resultSection = document.getElementById('resultSection');
+        const resultText = document.getElementById('resultText');
+        const totalProbDisplay = document.getElementById('totalProbDisplay');
+
+        // 从localStorage加载初始数据
+        let items = JSON.parse(localStorage.getItem('raffleItems')) || [];
+
+        /**
+         * 将当前items数组保存到localStorage
+         */
+        function saveToLocalStorage() {
+            localStorage.setItem('raffleItems', JSON.stringify(items));
+        }
+
+        /**
+         * 计算并显示总概率
+         */
+        function updateTotalProbabilityDisplay() {
+            const total = items.reduce((sum, item) => sum + item.probability, 0);
+            totalProbDisplay.textContent = `总概率: ${total.toFixed(2)}%`;
+            // 根据总概率是否为100%来改变颜色
+            if (Math.abs(total - 100) < 0.0001) { // 使用小数点比较避免浮点误差
+                totalProbDisplay.classList.remove('warning');
+            } else {
+                totalProbDisplay.classList.add('warning');
+            }
+        }
+
+        /**
+         * 渲染items列表到页面上
+         */
+        function renderItemsList() {
+            itemsList.innerHTML = '';
+            items.forEach((item, index) => {
+                const li = document.createElement('li');
+                // 将内部存储的小数概率转换为百分比显示
+                const displayProbability = (item.probability * 100).toFixed(2);
+                li.innerHTML = `
+                    <span class="item-info">${item.name} (概率: ${displayProbability}%)</span>
+                    <button class="delete-btn" data-index="${index}">删除</button>
+                `;
+                itemsList.appendChild(li);
+            });
+
+            // 为新生成的删除按钮添加事件监听器
+            document.querySelectorAll('.delete-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    items.splice(index, 1); // 从数组中移除
+                    saveToLocalStorage(); // 保存更新后的数组
+                    renderItemsList(); // 重新渲染列表
+                    updateTotalProbabilityDisplay(); // 更新总概率显示
+                });
+            });
+            updateTotalProbabilityDisplay(); // 渲染后更新总概率
+        }
+
+        /**
+         * 加权随机抽取函数
+         * @param {Array} itemsArray - 包含{name, probability}的对象数组 (probability为小数形式)
+         * @returns {Object|null} - 被抽中的对象，如果数组为空则返回null
+         */
+        function weightedRandomSelect(itemsArray) {
+            if (itemsArray.length === 0) return null;
+
+            // 计算总权重
+            const totalWeight = itemsArray.reduce((sum, item) => sum + item.probability, 0);
+
+            // 如果总权重为0，则等概率抽取
+            if (totalWeight === 0) {
+                const randomIndex = Math.floor(Math.random() * itemsArray.length);
+                return itemsArray[randomIndex];
+            }
+
+            // 生成一个0到总权重之间的随机数
+            let random = Math.random() * totalWeight;
+
+            // 遍历数组，累加权重，直到随机数小于等于当前累计权重
+            for (const item of itemsArray) {
+                random -= item.probability;
+                if (random <= 0) {
+                    return item;
+                }
+            }
+
+            // 理论上不会执行到这里，但作为保险
+            return itemsArray[itemsArray.length - 1];
+        }
+
+        // --- 事件监听器 ---
+
+        // 添加新条目
+        addItemBtn.addEventListener('click', () => {
+            const name = itemNameInput.value.trim();
+            const probStr = itemProbabilityInput.value.trim();
+
+            if (!name) {
+                alert('请输入选项名称！');
+                return;
+            }
+            if (isNaN(probStr) || parseFloat(probStr) < 0 || parseFloat(probStr) > 100) {
+                alert('请输入一个0到100之间的有效概率值！');
+                return;
+            }
+
+            // 将输入的百分比转换为内部使用的小数
+            const newProbability = parseFloat(probStr) / 100;
+            const newItem = {
+                name: name,
+                probability: newProbability
+            };
+
+            items.push(newItem);
+            saveToLocalStorage();
+            renderItemsList(); // 这会自动调用 updateTotalProbabilityDisplay
+
+            // 清空输入框
+            itemNameInput.value = '';
+            itemProbabilityInput.value = '';
+        });
+
+        // 清空全部条目
+        clearAllBtn.addEventListener('click', () => {
+            if (confirm('确定要清空所有选项吗？此操作不可撤销。')) {
+                items = [];
+                saveToLocalStorage();
+                renderItemsList(); // 这会自动调用 updateTotalProbabilityDisplay
+            }
+        });
+
+        // 开始抽奖
+        drawBtn.addEventListener('click', () => {
+            if (items.length === 0) {
+                alert('请先添加至少一个选项！');
+                return;
+            }
+
+            const winner = weightedRandomSelect(items);
+            // 将结果显示为原始名称
+            resultText.textContent = winner.name;
+            resultSection.classList.remove('hidden');
+            
+            // 滚动到底部，方便看到结果
+            resultSection.scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // 页面加载完成后，初始化列表
+        document.addEventListener('DOMContentLoaded', () => {
+            renderItemsList();
+        });
+    </script>
+</body>
+</html>

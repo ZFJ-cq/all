@@ -1,0 +1,142 @@
+/* 统一头像样式 */
+
+:root {
+  --avatar-primary: #e6c749;
+  --avatar-secondary: #8a7c5d;
+  --avatar-background: #fff;
+  --avatar-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* 标准头像 - 60x60 */
+.avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 3px solid var(--avatar-primary);
+  background: var(--avatar-background);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  position: relative;
+  box-shadow: var(--avatar-shadow);
+  transition: all 0.3s ease;
+}
+
+.avatar:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+}
+
+/* 小型头像 - 40x40 */
+.avatar-small {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid var(--avatar-secondary);
+  background: var(--avatar-background);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+}
+
+.avatar-small:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* 大型头像 - 80x80 */
+.avatar-large {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 4px solid var(--avatar-primary);
+  background: var(--avatar-background);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+  transition: all 0.3s ease;
+}
+
+.avatar-large:hover {
+  transform: scale(1.1);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+}
+
+/* 头像状态指示器 */
+.avatar::after {
+  content: '';
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 16px;
+  height: 16px;
+  background: #4CAF50;
+  border-radius: 50%;
+  border: 2px solid var(--avatar-background);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* 头像框效果 */
+.avatar-frame {
+  position: relative;
+  display: inline-block;
+}
+
+.avatar-frame::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  background: linear-gradient(45deg, var(--avatar-primary), var(--avatar-secondary), var(--avatar-primary)) border-box;
+  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: rotate 3s linear infinite;
+}
+
+@keyframes rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 禁用状态 */
+.avatar.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.avatar.disabled:hover {
+  transform: none;
+  box-shadow: var(--avatar-shadow);
+}
+
+/* 响应式调整 */
+@media (max-width: 480px) {
+  .avatar {
+    width: 50px;
+    height: 50px;
+    font-size: 1.5rem;
+  }
+  
+  .avatar-small {
+    width: 32px;
+    height: 32px;
+    font-size: 1rem;
+  }
+  
+  .avatar-large {
+    width: 64px;
+    height: 64px;
+    font-size: 2rem;
+  }
+}

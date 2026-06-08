@@ -1,0 +1,204 @@
+<script src="../js/api-service.js"></script>
+<div class="section active">
+  <h2 class="section-title">排行榜</h2>
+  
+  <!-- 选项卡切换 -->
+  <div style="margin-bottom: 20px;">
+    <button class="btn btn-primary" onclick="showLeaderboardTab('level')" id="tabLevel">等级排行榜</button>
+    <button class="btn btn-secondary" onclick="showLeaderboardTab('realm')" id="tabRealm">境界排行榜</button>
+    <button class="btn btn-secondary" onclick="showLeaderboardTab('combined')" id="tabCombined">综合排行榜</button>
+  </div>
+  
+  <!-- 等级排行榜 -->
+  <div id="levelLeaderboardContent">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th style="width: 60px;">排名</th>
+          <th>角色名称</th>
+          <th>用户名称</th>
+          <th>昵称</th>
+          <th>等级</th>
+          <th>境界</th>
+        </tr>
+      </thead>
+      <tbody id="levelLeaderboardBody">
+        <!-- JS 生成 -->
+      </tbody>
+    </table>
+    <div id="levelLeaderboardPagination"></div>
+  </div>
+  
+  <!-- 境界排行榜 -->
+  <div id="realmLeaderboardContent" style="display: none;">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th style="width: 60px;">排名</th>
+          <th>角色名称</th>
+          <th>用户名称</th>
+          <th>昵称</th>
+          <th>境界</th>
+          <th>等级</th>
+        </tr>
+      </thead>
+      <tbody id="realmLeaderboardBody">
+        <!-- JS 生成 -->
+      </tbody>
+    </table>
+    <div id="realmLeaderboardPagination"></div>
+  </div>
+  
+  <!-- 综合排行榜 -->
+  <div id="combinedLeaderboardContent" style="display: none;">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th style="width: 60px;">排名</th>
+          <th>角色名称</th>
+          <th>用户名称</th>
+          <th>昵称</th>
+          <th>境界</th>
+          <th>等级</th>
+        </tr>
+      </thead>
+      <tbody id="combinedLeaderboardBody">
+        <!-- JS 生成 -->
+      </tbody>
+    </table>
+    <div id="combinedLeaderboardPagination"></div>
+  </div>
+</div>
+
+<script>
+  // 初始化排行榜
+  function initLeaderboard() {
+    loadLevelLeaderboard();
+  }
+
+  // 显示排行榜选项卡
+  function showLeaderboardTab(tab) {
+    // 隐藏所有内容
+    document.getElementById('levelLeaderboardContent').style.display = 'none';
+    document.getElementById('realmLeaderboardContent').style.display = 'none';
+    document.getElementById('combinedLeaderboardContent').style.display = 'none';
+    
+    // 重置按钮样式
+    document.getElementById('tabLevel').className = 'btn btn-secondary';
+    document.getElementById('tabRealm').className = 'btn btn-secondary';
+    document.getElementById('tabCombined').className = 'btn btn-secondary';
+    
+    // 显示选中的内容
+    if (tab === 'level') {
+      document.getElementById('levelLeaderboardContent').style.display = 'block';
+      document.getElementById('tabLevel').className = 'btn btn-primary';
+      loadLevelLeaderboard();
+    } else if (tab === 'realm') {
+      document.getElementById('realmLeaderboardContent').style.display = 'block';
+      document.getElementById('tabRealm').className = 'btn btn-primary';
+      loadRealmLeaderboard();
+    } else if (tab === 'combined') {
+      document.getElementById('combinedLeaderboardContent').style.display = 'block';
+      document.getElementById('tabCombined').className = 'btn btn-primary';
+      loadCombinedLeaderboard();
+    }
+  }
+
+  // 加载等级排行榜
+  async function loadLevelLeaderboard() {
+    const tableBody = document.getElementById('levelLeaderboardBody');
+    tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999;">加载中...</td></tr>';
+    
+    try {
+      const leaderboard = await apiService.get('/leaderboard/level');
+      
+      tableBody.innerHTML = '';
+      if (Array.isArray(leaderboard)) {
+        leaderboard.forEach(item => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${item.rank}</td>
+            <td>${item.roleName}</td>
+            <td>${item.userName}</td>
+            <td>${item.nickname}</td>
+            <td>${item.level}</td>
+            <td>${item.realm}</td>
+          `;
+          tableBody.appendChild(row);
+        });
+      } else {
+        tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999;">暂无数据</td></tr>';
+      }
+    } catch (error) {
+      console.error('加载等级排行榜失败:', error);
+      tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#e74c3c;">加载失败</td></tr>';
+    }
+  }
+
+  // 加载境界排行榜
+  async function loadRealmLeaderboard() {
+    const tableBody = document.getElementById('realmLeaderboardBody');
+    tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999;">加载中...</td></tr>';
+    
+    try {
+      const leaderboard = await apiService.get('/leaderboard/realm');
+      
+      tableBody.innerHTML = '';
+      if (Array.isArray(leaderboard)) {
+        leaderboard.forEach(item => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${item.rank}</td>
+            <td>${item.roleName}</td>
+            <td>${item.userName}</td>
+            <td>${item.nickname}</td>
+            <td>${item.realm}</td>
+            <td>${item.level}</td>
+          `;
+          tableBody.appendChild(row);
+        });
+      } else {
+        tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999;">暂无数据</td></tr>';
+      }
+    } catch (error) {
+      console.error('加载境界排行榜失败:', error);
+      tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#e74c3c;">加载失败</td></tr>';
+    }
+  }
+
+  // 加载综合排行榜
+  async function loadCombinedLeaderboard() {
+    const tableBody = document.getElementById('combinedLeaderboardBody');
+    tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999;">加载中...</td></tr>';
+    
+    try {
+      const leaderboard = await apiService.get('/leaderboard/combined');
+      
+      tableBody.innerHTML = '';
+      if (Array.isArray(leaderboard)) {
+        leaderboard.forEach(item => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${item.rank}</td>
+            <td>${item.roleName}</td>
+            <td>${item.userName}</td>
+            <td>${item.nickname}</td>
+            <td>${item.realm}</td>
+            <td>${item.level}</td>
+          `;
+          tableBody.appendChild(row);
+        });
+      } else {
+        tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999;">暂无数据</td></tr>';
+      }
+    } catch (error) {
+      console.error('加载综合排行榜失败:', error);
+      tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#e74c3c;">加载失败</td></tr>';
+    }
+  }
+
+  // 页面加载完成后初始化
+  if (typeof window.initLeaderboard === 'undefined') {
+    window.initLeaderboard = initLeaderboard;
+  }
+</script>

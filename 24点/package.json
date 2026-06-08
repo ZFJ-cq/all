@@ -1,0 +1,13 @@
+{
+  "name": "24-point-game",
+  "version": "1.0.0",
+  "description": "24点多人在线游戏",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  }
+}

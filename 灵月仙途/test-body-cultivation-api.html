@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="css/mobile-adapt.css">
+  <meta charset="UTF-8" />
+  <title>测试锻体 API</title>
+  <style>
+    body { background: #1a1a2e; color: #fff; padding: 20px; font-family: monospace; }
+    .result { background: rgba(0,0,0,0.5); padding: 15px; margin: 10px 0; border-radius: 5px; }
+    .success { color: #4CAF50; }
+    .error { color: #ff4444; }
+    button { background: #e6c749; border: none; padding: 10px 20px; margin: 5px; cursor: pointer; }
+  </style>
+
+  </head>
+<body>
+  <h1>🔍 测试锻体 API</h1>
+  
+  <div>
+    <button onclick="testAPI()">测试 API</button>
+    <button onclick="clearToken()">清除 Token</button>
+  </div>
+  
+  <div id="result" class="result"></div>
+  
+  <script>
+    function log(message, type = 'info') {
+      const el = document.getElementById('result');
+      const color = type === 'success' ? 'success' : type === 'error' ? 'error' : 'info';
+      el.innerHTML += `<div class="${color}">[${new Date().toLocaleTimeString()}] ${message}</div>`;
+      el.scrollTop = el.scrollHeight;
+    }
+    
+    async function testAPI() {
+      document.getElementById('result').innerHTML = '';
+      
+      const token = localStorage.getItem('token');
+      const roleId = localStorage.getItem('currentRoleId') || localStorage.getItem('roleId');
+      
+      log(`Token: ${token ? '存在' : '不存在'}`, token ? 'success' : 'error');
+      log(`RoleId: ${roleId || '不存在'}`, roleId ? 'success' : 'error');
+      
+      if (!token || !roleId) {
+        log('缺少 Token 或 RoleId，请先登录！', 'error');
+        return;
+      }
+      
+      try {
+        log('开始请求 API...');
+        
+        const response = await fetch(`http://localhost:8088/api/body-cultivation/role/${roleId}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        log(`状态码：${response.status}`, response.ok ? 'success' : 'error');
+        
+        const data = await response.json();
+        log(`响应：${JSON.stringify(data, null, 2)}`, response.ok ? 'success' : 'error');
+        
+        if (response.ok) {
+          log('✅ API 调用成功！', 'success');
+        } else {
+          log(`❌ API 调用失败：${data.message || '未知错误'}`, 'error');
+        }
+        
+      } catch (error) {
+        log(`❌ 请求失败：${error.message}`, 'error');
+      }
+    }
+    
+    function clearToken() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('userId');
+      localStorage.removeItem('roleId');
+      localStorage.removeItem('currentRoleId');
+      log('✅ Token 已清除', 'success');
+    }
+  </script>
+</body>
+</html>

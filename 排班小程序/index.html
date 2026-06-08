@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>命运罗盘 - 智能随机排班系统</title>
+    <!-- 引入 Tailwind CSS 进行快速样式布局 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 SheetJS 用于导出 Excel 功能 -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* 自定义下拉框样式 */
+        select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen p-4 md:p-8">
+
+    <div class="max-w-5xl mx-auto">
+        <!-- 标题区 -->
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-extrabold text-indigo-600 mb-2">🧭 命运罗盘</h1>
+            <p class="text-slate-500">支持手动微调、一人多岗的智能随机排班系统</p>
+        </header>
+
+        <!-- 配置输入区 -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+                <label class="block text-sm font-bold mb-2 text-slate-700">👥 小组成员</label>
+                <textarea id="membersInput" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none h-32" placeholder="请输入姓名，用逗号或换行分隔&#10;例如：张三, 李四, 王五"></textarea>
+            </div>
+            <div>
+                <label class="block text-sm font-bold mb-2 text-slate-700">🛠️ 岗位/任务</label>
+                <textarea id="rolesInput" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none h-32" placeholder="请输入岗位，用逗号或换行分隔&#10;例如：前端, 后端, UI设计"></textarea>
+            </div>
+            <div>
+                <label class="block text-sm font-bold mb-2 text-slate-700">⏰ 时间段</label>
+                <textarea id="timesInput" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none h-32" placeholder="请输入时间段，用逗号或换行分隔&#10;例如：第一周, 第二周, 第三周"></textarea>
+            </div>
+        </div>
+
+        <!-- 按钮操作区 -->
+        <div class="flex flex-col sm:flex-row justify-center gap-4 mb-10">
+            <button onclick="generateSchedule()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-10 rounded-full shadow-lg transform transition hover:-translate-y-1 active:translate-y-0 flex items-center justify-center">
+                <span class="mr-2 text-xl">🎲</span> 启动随机分配
+            </button>
+            <button onclick="exportToExcel()" id="exportBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-10 rounded-full shadow-lg transform transition hover:-translate-y-1 active:translate-y-0 flex items-center justify-center hidden">
+                <span class="mr-2 text-xl">📊</span> 导出为 Excel
+            </button>
+        </div>
+
+        <!-- 结果展示区 -->
+        <div id="resultContainer" class="space-y-8"></div>
+    </div>
+
+    <script>
+        // 全局变量，保存生成的排班结果，方便导出
+        let finalScheduleData = [];
+        let currentMembers = []; // 保存当前的人员列表，用于生成下拉框
+
+        // 随机洗牌算法 (Fisher-Yates Shuffle)
+        function shuffleArray(array) {
+            const newArr = [...array];
+            for (let i = newArr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+            }
+            return newArr;
+        }
+
+        // 解析输入框文本为数组
+        function parseInput(text) {
+            return text.split(/[,，\n]/).map(s => s.trim()).filter(s => s);
+        }
+
+        // 核心排班逻辑
+        function generateSchedule() {
+            currentMembers = parseInput(document.getElementById('membersInput').value);
+            const roles = parseInput(document.getElementById('rolesInput').value);
+            const times = parseInput(document.getElementById('timesInput').value);
+
+            if (currentMembers.length === 0 || roles.length === 0 || times.length === 0) {
+                alert('请确保人员、岗位和时间段都已填写！');
+                return;
+            }
+
+            finalScheduleData = [];
+
+            // 按时间段循环分配
+            times.forEach(time => {
+                // 每个时间段都重新随机打乱岗位和人员顺序，保证绝对随机和公平
+                const currentRoles = shuffleArray(roles);
+                const shuffledMembers = shuffleArray(currentMembers);
+
+                currentRoles.forEach((role, roleIndex) => {
+                    // 负载均衡核心算法：取余法循环分配
+                    const assignedMember = shuffledMembers[roleIndex % shuffledMembers.length];
+                    
+                    // 为每条数据生成一个唯一ID，方便后续修改时定位
+                    const uniqueId = `task-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+                    
+                    finalScheduleData.push({
+                        id: uniqueId,
+                        time,
+                        role,
+                        member: assignedMember
+                    });
+                });
+            });
+
+            renderResults();
+            // 显示导出按钮
+            document.getElementById('exportBtn').classList.remove('hidden');
+        }
+
+        // 渲染页面结果
+        function renderResults() {
+            const container = document.getElementById('resultContainer');
+            container.innerHTML = '';
+            
+            // 按时间分组数据
+            const groupedData = {};
+            finalScheduleData.forEach(item => {
+                if (!groupedData[item.time]) {
+                    groupedData[item.time] = { time: item.time, tasks: [] };
+                }
+                groupedData[item.time].tasks.push(item);
+            });
+
+            // 动态生成 HTML
+            Object.values(groupedData).forEach(group => {
+                // 检查当前时间段是否有人身兼多职
+                const memberCounts = {};
+                group.tasks.forEach(t => { memberCounts[t.member] = (memberCounts[t.member] || 0) + 1; });
+                const hasMultiRole = Object.values(memberCounts).some(count => count > 1);
+
+                const groupHtml = `
+                    <div class="bg-white rounded-2xl shadow-md overflow-hidden border border-slate-100 fade-in">
+                        <div class="bg-indigo-50 px-6 py-3 border-b border-indigo-100 flex items-center justify-between">
+                            <div class="flex items-center">
+                                <span class="bg-indigo-600 text-white text-xs font-bold px-2 py-1 rounded mr-3">TIME</span>
+                                <h3 class="text-lg font-bold text-indigo-900">${group.time}</h3>
+                            </div>
+                            ${hasMultiRole ? '<span class="text-xs text-orange-500 font-medium bg-orange-50 px-2 py-1 rounded border border-orange-100">⚠️ 此时段有人身兼多职</span>' : ''}
+                        </div>
+                        
+                        <div class="p-6">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                ${group.tasks.map(task => `
+                                    <div class="flex items-center justify-between p-4 rounded-xl border border-slate-200 hover:shadow-md transition bg-slate-50">
+                                        <div class="flex flex-col">
+                                            <span class="text-xs text-slate-400 font-semibold uppercase tracking-wider">岗位任务</span>
+                                            <span class="text-slate-700 font-medium">${task.role}</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <!-- 下拉框选择人员 -->
+                                            <select onchange="updateMember('${task.id}', this.value)" 
+                                                class="bg-white border border-indigo-200 text-indigo-700 font-bold py-1.5 px-3 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+                                                ${currentMembers.map(m => `
+                                                    <option value="${m}" ${m === task.member ? 'selected' : ''}>${m}</option>
+                                                `).join('')}
+                                            </select>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += groupHtml;
+            });
+        }
+
+        // 手动修改人员
+        function updateMember(taskId, newMember) {
+            // 在数据源中找到对应的任务并更新人员
+            const task = finalScheduleData.find(t => t.id === taskId);
+            if (task) {
+                task.member = newMember;
+                // 重新渲染页面，以更新“身兼多职”的警告提示
+                renderResults();
+            }
+        }
+
+        // 导出 Excel 功能
+        function exportToExcel() {
+            if (finalScheduleData.length === 0) return;
+
+            // 准备 Excel 数据格式（按时间排序导出）
+            const sortedData = [...finalScheduleData].sort((a, b) => {
+                // 简单按时间字符串排序，如果需要更复杂的排序可在此调整
+                return a.time.localeCompare(b.time);
+            });
+
+            const wsData = sortedData.map(item => ({
+                "时间段": item.time,
+                "岗位/任务": item.role,
+                "指派人员": item.member
+            }));
+
+            // 创建工作簿和工作表
+            const ws = XLSX.utils.json_to_sheet(wsData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "排班结果");
+
+            // 导出文件
+            XLSX.writeFile(wb, "命运罗盘_排班结果.xlsx");
+        }
+    </script>
+</body>
+</html>

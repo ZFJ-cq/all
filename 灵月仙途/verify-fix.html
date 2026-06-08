@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="css/mobile-adapt.css">
+    <title>验证 401 修复 - 灵月仙途</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #d4af37;
+            margin-bottom: 30px;
+            font-size: 2rem;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+        }
+        
+        .card h2 {
+            color: #d4af37;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+        
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .status-item:last-child {
+            border-bottom: none;
+        }
+        
+        .status-label {
+            color: #aaa;
+        }
+        
+        .status-value {
+            font-weight: bold;
+        }
+        
+        .status-value.success {
+            color: #4caf50;
+        }
+        
+        .status-value.error {
+            color: #f44336;
+        }
+        
+        .status-value.warning {
+            color: #ff9800;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #d4af37 0%, #aa8c2c 100%);
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.4);
+        }
+        
+        button.danger {
+            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+            color: #fff;
+        }
+        
+        .log-area {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        
+        .log-entry {
+            margin-bottom: 5px;
+        }
+        
+        .log-entry.info {
+            color: #4caf50;
+        }
+        
+        .log-entry.warn {
+            color: #ff9800;
+        }
+        
+        .log-entry.error {
+            color: #f44336;
+        }
+        
+        .button-group {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .check-result {
+            text-align: center;
+            padding: 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        
+        .check-result.pass {
+            color: #4caf50;
+        }
+        
+        .check-result.fail {
+            color: #f44336;
+        }
+    </style>
+
+  </head>
+<body>
+    <div class="container">
+        <h1>🔍 401 错误修复验证</h1>
+        
+        <div class="card">
+            <h2>📊 当前登录状态</h2>
+            <div id="loginStatus">
+                <div class="status-item">
+                    <span class="status-label">Token:</span>
+                    <span class="status-value" id="tokenStatus">检查中...</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">用户 ID:</span>
+                    <span class="status-value" id="userIdStatus">检查中...</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">角色 ID:</span>
+                    <span class="status-value" id="roleIdStatus">检查中...</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Token 有效期:</span>
+                    <span class="status-value" id="tokenExpireStatus">检查中...</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>✅ 修复验证</h2>
+            <div id="fixCheckResult">
+                <div class="status-item">
+                    <span class="status-label">auth-check.js 不清除数据:</span>
+                    <span class="status-value" id="authCheckFix">检查中...</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">config.js 不清除 localStorage:</span>
+                    <span class="status-value" id="configFix">检查中...</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">login-manager.js 不弹窗:</span>
+                    <span class="status-value" id="loginManagerFix">检查中...</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>🔧 操作工具</h2>
+            <div class="button-group">
+                <button onclick="verifyAll()">🔄 重新验证</button>
+                <button onclick="test401Handling()">🧪 测试 401 处理</button>
+                <button onclick="clearAndRelogin()" class="danger">🔑 清除数据并重新登录</button>
+                <button onclick="location.href='index.html'">🏠 返回修炼页面</button>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>📝 操作日志</h2>
+            <div class="log-area" id="logArea">
+                <div class="log-entry info">等待操作...</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 日志工具
+        function log(message, type = 'info') {
+            const logArea = document.getElementById('logArea');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            const timestamp = new Date().toLocaleTimeString();
+            entry.textContent = `[${timestamp}] ${message}`;
+            logArea.appendChild(entry);
+            logArea.scrollTop = logArea.scrollHeight;
+        }
+        
+        // 检查登录状态
+        function checkLoginStatus() {
+            const token = localStorage.getItem('token');
+            const userId = localStorage.getItem('userId');
+            const roleId = localStorage.getItem('roleId');
+            
+            document.getElementById('tokenStatus').textContent = token ? 
+                `${token.substring(0, 20)}...` : '不存在';
+            document.getElementById('tokenStatus').className = 
+                `status-value ${token ? 'success' : 'error'}`;
+            
+            document.getElementById('userIdStatus').textContent = userId || '不存在';
+            document.getElementById('userIdStatus').className = 
+                `status-value ${userId ? 'success' : 'error'}`;
+            
+            document.getElementById('roleIdStatus').textContent = roleId || '不存在';
+            document.getElementById('roleIdStatus').className = 
+                `status-value ${roleId ? 'success' : 'error'}`;
+            
+            // 检查 Token 有效期
+            if (token) {
+                try {
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    const expireTime = new Date(payload.exp * 1000).toLocaleString();
+                    const now = Date.now() / 1000;
+                    const isExpired = payload.exp && payload.exp < now;
+                    
+                    document.getElementById('tokenExpireStatus').textContent = 
+                        `${expireTime} (${isExpired ? '已过期' : '有效'})`;
+                    document.getElementById('tokenExpireStatus').className = 
+                        `status-value ${isExpired ? 'error' : 'success'}`;
+                } catch (e) {
+                    document.getElementById('tokenExpireStatus').textContent = '无法解析';
+                    document.getElementById('tokenExpireStatus').className = 'status-value error';
+                }
+            } else {
+                document.getElementById('tokenExpireStatus').textContent = '无 Token';
+                document.getElementById('tokenExpireStatus').className = 'status-value warning';
+            }
+            
+            log(`登录状态检查完成 - Token: ${token ? '存在' : '不存在'}, 用户 ID: ${userId || '不存在'}`);
+        }
+        
+        // 验证修复
+        function verifyFixes() {
+            // 检查 auth-check.js
+            fetch('js/auth-check.js')
+                .then(r => r.text())
+                .then(code => {
+                    const hasClearCode = code.includes('localStorage.removeItem(\'token\')') && 
+                                          !code.includes('// localStorage.removeItem(\'token\')');
+                    const hasCommentedCode = code.includes('// localStorage.removeItem(\'token\')');
+                    
+                    const isFixed = !hasClearCode || hasCommentedCode;
+                    document.getElementById('authCheckFix').textContent = isFixed ? '✅ 已修复' : '❌ 未修复';
+                    document.getElementById('authCheckFix').className = 
+                        `status-value ${isFixed ? 'success' : 'error'}`;
+                    log(`auth-check.js: ${isFixed ? '修复成功' : '需要修复'}`, isFixed ? 'info' : 'error');
+                })
+                .catch(e => {
+                    document.getElementById('authCheckFix').textContent = '检查失败';
+                    document.getElementById('authCheckFix').className = 'status-value error';
+                    log(`auth-check.js 检查失败: ${e.message}`, 'error');
+                });
+            
+            // 检查 config.js
+            fetch('js/config.js')
+                .then(r => r.text())
+                .then(code => {
+                    const clearUserInfoMatch = code.match(/clearUserInfo\(\)[\s\S]*?^}/m);
+                    if (clearUserInfoMatch) {
+                        const clearUserInfoCode = clearUserInfoMatch[0];
+                        const hasRoleStoreLogout = clearUserInfoCode.includes('roleStore.logout()') && 
+                                                    !clearUserInfoCode.includes('// 不调用 roleStore.logout()');
+                        const hasCommentedLogout = clearUserInfoCode.includes('// 不调用 roleStore.logout()');
+                        
+                        const isFixed = !hasRoleStoreLogout || hasCommentedLogout;
+                        document.getElementById('configFix').textContent = isFixed ? '✅ 已修复' : '❌ 未修复';
+                        document.getElementById('configFix').className = 
+                            `status-value ${isFixed ? 'success' : 'error'}`;
+                        log(`config.js: ${isFixed ? '修复成功' : '需要修复'}`, isFixed ? 'info' : 'error');
+                    }
+                })
+                .catch(e => {
+                    document.getElementById('configFix').textContent = '检查失败';
+                    document.getElementById('configFix').className = 'status-value error';
+                    log(`config.js 检查失败: ${e.message}`, 'error');
+                });
+            
+            // 检查 login-manager.js
+            fetch('js/login-manager.js')
+                .then(r => r.text())
+                .then(code => {
+                    const handle401Match = code.match(/handle401Error[\s\S]*?^  \}/m);
+                    if (handle401Match) {
+                        const handle401Code = handle401Match[0];
+                        const hasShowDialog = handle401Code.includes('showReloginDialog') && 
+                                               !handle401Code.includes('// 不显示弹窗');
+                        const hasNoDialogComment = handle401Code.includes('不显示弹窗');
+                        
+                        const isFixed = !hasShowDialog || hasNoDialogComment;
+                        document.getElementById('loginManagerFix').textContent = isFixed ? '✅ 已修复' : '❌ 未修复';
+                        document.getElementById('loginManagerFix').className = 
+                            `status-value ${isFixed ? 'success' : 'error'}`;
+                        log(`login-manager.js: ${isFixed ? '修复成功' : '需要修复'}`, isFixed ? 'info' : 'error');
+                    }
+                })
+                .catch(e => {
+                    document.getElementById('loginManagerFix').textContent = '检查失败';
+                    document.getElementById('loginManagerFix').className = 'status-value error';
+                    log(`login-manager.js 检查失败: ${e.message}`, 'error');
+                });
+        }
+        
+        // 测试 401 处理
+        async function test401Handling() {
+            log('开始测试 401 错误处理...', 'info');
+            
+            try {
+                const response = await fetch(`${window.APP_CONFIG?.API_BASE_URL || 'http://localhost:8088/api'}/test/401`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer invalid-token',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                log(`测试请求返回状态码：${response.status}`, response.status === 401 ? 'warn' : 'info');
+                
+                if (response.status === 401) {
+                    log('✅ 401 错误被正确捕获，没有弹窗或跳转', 'info');
+                    log('请检查页面：是否显示了弹窗？是否跳转了登录页？', 'info');
+                } else {
+                    log('测试请求未返回 401，这是正常的', 'info');
+                }
+            } catch (error) {
+                log(`测试请求失败：${error.message}`, 'error');
+                log('这可能是网络错误，不影响修复验证', 'info');
+            }
+        }
+        
+        // 清除数据并重新登录
+        function clearAndRelogin() {
+            if (confirm('确定要清除所有登录数据并跳转到登录页面吗？')) {
+                log('清除所有登录数据...', 'warn');
+                localStorage.removeItem('token');
+                localStorage.removeItem('userId');
+                localStorage.removeItem('roleId');
+                localStorage.removeItem('username');
+                localStorage.removeItem('currentRoleId');
+                localStorage.removeItem('currentUserId');
+                
+                log('数据已清除，跳转到登录页面...', 'info');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 1000);
+            }
+        }
+        
+        // 重新验证
+        function verifyAll() {
+            log('=== 开始验证 ===', 'info');
+            checkLoginStatus();
+            verifyFixes();
+        }
+        
+        // 页面加载时自动验证
+        window.addEventListener('DOMContentLoaded', () => {
+            log('页面加载完成，开始自动验证...', 'info');
+            verifyAll();
+        });
+    </script>
+</body>
+</html>

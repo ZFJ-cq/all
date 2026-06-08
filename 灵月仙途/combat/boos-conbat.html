@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="../js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="../css/mobile-adapt.css">
+  <title>灵月仙途 - 多人围攻BOSS</title>
+  <style>
+    /* 全局样式重置 */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Microsoft YaHei", "SimSun", serif;
+    }
+
+    :root {
+      --primary: #4a6fa5;
+      --secondary: #d9b17a;
+      --danger: #e74c3c;
+      --success: #27ae60;
+      --bg-dark: #1a202c;
+      --text-light: #f8f9fa;
+      --boss-color: #9b59b6;
+      --player1-color: #3498db;
+      --player2-color: #e67e22;
+      --player3-color: #1abc9c;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: var(--text-light);
+      min-height: 100vh;
+      overflow-x: hidden;
+      padding: 20px;
+    }
+
+    .game-container {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    /* 主内容区 */
+    .main-content {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      border-radius: 8px;
+      padding: 15px;
+      border: 1px solid var(--secondary);
+      margin-bottom: 15px;
+    }
+
+    .section-title {
+      color: var(--secondary);
+      font-size: 1.4rem;
+      margin-bottom: 15px;
+      position: relative;
+      padding-bottom: 8px;
+      text-align: center;
+    }
+
+    .section-title::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 2px;
+      background: var(--secondary);
+      border-radius: 2px;
+    }
+
+    /* 团队状态面板 */
+    .team-panel {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .player-card {
+      flex: 1;
+      min-width: 120px;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 6px;
+      padding: 8px;
+      border: 1px solid transparent;
+    }
+
+    .player-card.player1 {
+      border-color: var(--player1-color);
+    }
+
+    .player-card.player2 {
+      border-color: var(--player2-color);
+    }
+
+    .player-card.player3 {
+      border-color: var(--player3-color);
+    }
+
+    .player-name {
+      font-weight: bold;
+      font-size: 0.9rem;
+      margin-bottom: 5px;
+    }
+
+    .player1 .player-name { color: var(--player1-color); }
+    .player2 .player-name { color: var(--player2-color); }
+    .player3 .player-name { color: var(--player3-color); }
+
+    .health-bar-small {
+      height: 8px;
+      background: #333;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 3px;
+    }
+
+    .health-fill-small {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+
+    .mana-bar-small {
+      height: 6px;
+      background: #222;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .mana-fill-small {
+      height: 100%;
+      background: linear-gradient(90deg, #3498db, #2980b9);
+      border-radius: 3px;
+      transition: width 0.3s ease;
+    }
+
+    .status-text {
+      font-size: 0.7rem;
+      opacity: 0.8;
+      margin-top: 3px;
+    }
+
+    /* 自动战斗按钮 */
+    .auto-battle-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 40;
+      width: 70px;
+      height: 30px;
+      border-radius: 15px;
+      border: none;
+      font-size: 0.8rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+
+    .auto-battle-off {
+      background: #7f8c8d;
+      color: white;
+    }
+
+    .auto-battle-on {
+      background: var(--success);
+      color: white;
+      box-shadow: 0 0 10px rgba(39, 174, 96, 0.7);
+    }
+
+    /* 战斗场景 */
+    .battle-arena {
+      position: relative;
+      height: 320px;
+      background: url('https://picsum.photos/id/1074/1000/500') center/cover no-repeat;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      overflow: hidden;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
+    }
+
+    .battle-arena::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+    }
+
+    /* 角色样式 */
+    .character {
+      position: absolute;
+      width: 90px;
+      height: 150px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 10;
+      transition: all 0.2s ease;
+      border-radius: 6px;
+    }
+
+    /* 玩家团队 */
+    .player-char1 {
+      left: 50px;
+      background: url('https://picsum.photos/id/1005/90/150') center/cover no-repeat;
+      border: 2px solid var(--player1-color);
+      box-shadow: 0 0 10px var(--player1-color);
+    }
+
+    .player-char2 {
+      left: 160px;
+      top: 45%;
+      background: url('https://picsum.photos/id/1012/90/150') center/cover no-repeat;
+      border: 2px solid var(--player2-color);
+      box-shadow: 0 0 10px var(--player2-color);
+    }
+
+    .player-char3 {
+      left: 70px;
+      top: 55%;
+      background: url('https://picsum.photos/id/1025/90/150') center/cover no-repeat;
+      border: 2px solid var(--player3-color);
+      box-shadow: 0 0 10px var(--player3-color);
+    }
+
+    /* BOSS角色 */
+    .boss-char {
+      right: 50px;
+      width: 120px;
+      height: 180px;
+      background: url('https://picsum.photos/id/1074/120/180') center/cover no-repeat;
+      border: 3px solid var(--boss-color);
+      box-shadow: 0 0 15px var(--boss-color), 0 0 30px rgba(155, 89, 182, 0.5);
+    }
+
+    /* 角色动画 */
+    .character.hit {
+      animation: hitEffect 0.4s ease-in-out;
+    }
+
+    .character.cast {
+      animation: castEffect 0.6s ease-in-out;
+    }
+
+    @keyframes hitEffect {
+      0% { transform: translateY(-50%) scale(1); }
+      25% { transform: translateY(-50%) scale(0.9) rotate(3deg); }
+      50% { transform: translateY(-50%) scale(1.05); }
+      75% { transform: translateY(-50%) scale(0.95) rotate(-3deg); }
+      100% { transform: translateY(-50%) scale(1); }
+    }
+
+    @keyframes castEffect {
+      0% { transform: translateY(-50%) scale(1); box-shadow: 0 0 10px currentColor; }
+      50% { transform: translateY(-50%) scale(1.05); box-shadow: 0 0 20px currentColor, 0 0 30px currentColor; }
+      100% { transform: translateY(-50%) scale(1); box-shadow: 0 0 10px currentColor; }
+    }
+
+    /* BOSS血条 */
+    .boss-health-bar {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80%;
+      height: 20px;
+      background: #222;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 2px solid var(--boss-color);
+      box-shadow: 0 0 10px var(--boss-color);
+      z-index: 20;
+    }
+
+    .boss-health-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #e74c3c, #c0392b);
+      border-radius: 8px;
+      transition: width 0.5s ease-in-out;
+      position: relative;
+    }
+
+    .boss-health-fill::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 50%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      animation: healthGlow 2s infinite linear;
+    }
+
+    @keyframes healthGlow {
+      0% { left: -100%; }
+      100% { left: 200%; }
+    }
+
+    .boss-health-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 0.9rem;
+      font-weight: bold;
+      color: white;
+      text-shadow: 1px 1px 3px black;
+      z-index: 1;
+    }
+
+    .boss-name {
+      position: absolute;
+      top: 20px;
+      right: 50px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: var(--boss-color);
+      text-shadow: 0 0 10px var(--boss-color), 2px 2px 4px black;
+      animation: bossNameGlow 2s infinite ease-in-out;
+    }
+
+    @keyframes bossNameGlow {
+      0%, 100% { opacity: 0.9; }
+      50% { opacity: 1; text-shadow: 0 0 15px var(--boss-color), 2px 2px 4px black; }
+    }
+
+    /* 技能栏 */
+    .skills-container {
+      background: rgba(0, 0, 0, 0.7);
+      border-radius: 8px;
+      padding: 15px;
+      border: 1px solid var(--secondary);
+      margin-bottom: 15px;
+    }
+
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 10px;
+    }
+
+    .skill-btn {
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid var(--secondary);
+      color: var(--text-light);
+      padding: 10px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+      font-size: 0.8rem;
+    }
+
+    .skill-btn:active {
+      transform: translateY(1px) scale(0.98);
+    }
+
+    .skill-btn:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateY(-2px);
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .skill-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* 战斗日志 */
+    .battle-log {
+      background: rgba(0, 0, 0, 0.7);
+      border-radius: 8px;
+      padding: 10px;
+      border: 1px solid var(--secondary);
+      height: 150px;
+      overflow-y: auto;
+      margin-bottom: 15px;
+      font-size: 0.85rem;
+    }
+
+    .log-entry {
+      margin-bottom: 4px;
+      padding: 2px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      animation: logFadeIn 0.5s ease-out;
+    }
+
+    @keyframes logFadeIn {
+      0% { opacity: 0; transform: translateY(5px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .log-player1 { color: var(--player1-color); }
+    .log-player2 { color: var(--player2-color); }
+    .log-player3 { color: var(--player3-color); }
+    .log-boss { color: var(--boss-color); }
+    .log-damage { color: #e74c3c; font-weight: bold; }
+    .log-heal { color: #2ecc71; font-weight: bold; }
+    .log-system { color: var(--secondary); }
+
+    /* 操作按钮 */
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, var(--secondary), #c89e68);
+      color: #1a202c;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+      flex: 1;
+      min-width: 100px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: rgba(255,255,255,0.3);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: width 0.6s ease, height 0.6s ease;
+    }
+
+    .btn:active::after {
+      width: 300px;
+      height: 300px;
+      opacity: 0;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 3px 10px rgba(217, 177, 122, 0.4);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #e74c3c, #c0392b);
+      color: white;
+    }
+
+    .btn-pk {
+      background: linear-gradient(135deg, #9b59b6, #8e44ad);
+      color: white;
+    }
+
+    /* 技能特效 */
+    .skill-effect {
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      z-index: 20;
+      display: none;
+    }
+
+    .skill-effect.attack {
+      background: radial-gradient(circle, rgba(255, 100, 100, 0.8) 0%, rgba(220, 50, 50, 0.6) 70%, transparent 100%);
+      box-shadow: 0 0 20px rgba(255, 100, 100, 0.8), 0 0 40px rgba(220, 50, 50, 0.6);
+      animation: attackEffect 1.2s ease-out forwards;
+    }
+
+    .skill-effect.heal {
+      background: radial-gradient(circle, rgba(100, 255, 100, 0.8) 0%, rgba(50, 220, 50, 0.6) 70%, transparent 100%);
+      box-shadow: 0 0 20px rgba(100, 255, 100, 0.8), 0 0 40px rgba(50, 220, 50, 0.6);
+      animation: healEffect 1.2s ease-out forwards;
+    }
+
+    .skill-effect.boss-attack {
+      background: radial-gradient(circle, rgba(200, 100, 255, 0.8) 0%, rgba(150, 50, 220, 0.6) 70%, transparent 100%);
+      box-shadow: 0 0 20px rgba(200, 100, 255, 0.8), 0 0 40px rgba(150, 50, 220, 0.6);
+      animation: attackEffect 1.5s ease-out forwards;
+      width: 120px;
+      height: 120px;
+    }
+
+    @keyframes attackEffect {
+      0% { opacity: 1; transform: scale(0); }
+      30% { transform: scale(1.2); }
+      100% { opacity: 0; transform: scale(1.8); }
+    }
+
+    @keyframes healEffect {
+      0% { opacity: 1; transform: scale(0); }
+      30% { transform: scale(1.2); }
+      100% { opacity: 0; transform: scale(1.8); }
+    }
+
+    /* 伤害数字 */
+    .damage-float {
+      position: absolute;
+      font-size: 1.4rem;
+      font-weight: bold;
+      text-shadow: 2px 2px 4px black, 0 0 10px black;
+      z-index: 30;
+      display: none;
+      font-family: 'Arial Black', sans-serif;
+    }
+
+    .damage-float.damage {
+      color: #ff4757;
+      animation: damageFloat 1.2s ease-out forwards;
+    }
+
+    .damage-float.heal {
+      color: #2ecc71;
+      animation: healFloat 1.2s ease-out forwards;
+    }
+
+    .damage-float.boss-damage {
+      color: #ff6b81;
+      font-size: 1.6rem;
+      animation: bossDamageFloat 1.5s ease-out forwards;
+    }
+
+    @keyframes damageFloat {
+      0% { opacity: 1; transform: translateY(0) scale(1); }
+      50% { opacity: 1; transform: translateY(-20px) scale(1.2); }
+      100% { opacity: 0; transform: translateY(-40px) scale(0.8); }
+    }
+
+    @keyframes healFloat {
+      0% { opacity: 1; transform: translateY(0) scale(1); }
+      50% { opacity: 1; transform: translateY(-20px) scale(1.2) rotate(5deg); }
+      100% { opacity: 0; transform: translateY(-40px) scale(0.8) rotate(-5deg); }
+    }
+
+    @keyframes bossDamageFloat {
+      0% { opacity: 1; transform: translateY(0) scale(1); }
+      50% { opacity: 1; transform: translateY(-30px) scale(1.3); }
+      100% { opacity: 0; transform: translateY(-60px) scale(0.9); }
+    }
+
+    /* 通知提示 */
+    .notification {
+      position: fixed;
+      top: 15px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.8);
+      border: 1px solid var(--secondary);
+      border-radius: 6px;
+      padding: 10px 15px;
+      color: var(--text-light);
+      z-index: 1000;
+      display: none;
+      animation: notificationSlide 0.4s ease-out forwards, notificationFade 0.4s ease-out 2.6s forwards;
+      max-width: 90%;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    @keyframes notificationSlide {
+      from { transform: translate(-50%, -20px); opacity: 0; }
+      to { transform: translate(-50%, 0); opacity: 1; }
+    }
+
+    @keyframes notificationFade {
+      to { opacity: 0; transform: translate(-50%, -10px); }
+    }
+
+    /* 战斗结束弹窗 */
+    .battle-over-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      padding: 20px;
+      animation: modalBgFade 0.5s ease-out forwards;
+    }
+
+    .modal-content {
+      background: #1a202c;
+      border: 2px solid var(--secondary);
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      width: 100%;
+      max-width: 400px;
+      animation: modalPopIn 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+      box-shadow: 0 0 30px rgba(217, 177, 122, 0.5);
+    }
+
+    .modal-title {
+      color: var(--secondary);
+      font-size: 1.5rem;
+      margin-bottom: 15px;
+      animation: titleGlow 2s infinite ease-in-out;
+    }
+
+    .modal-text {
+      font-size: 1rem;
+      margin-bottom: 20px;
+    }
+
+    .reward-text {
+      color: #f1c40f;
+      font-weight: bold;
+      margin: 8px 0;
+      font-size: 0.95rem;
+      animation: rewardPulse 1.5s infinite ease-in-out;
+    }
+
+    @keyframes modalBgFade { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes modalPopIn {
+      0% { transform: scale(0.7); opacity: 0; }
+      70% { transform: scale(1.05); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    @keyframes titleGlow {
+      0%, 100% { text-shadow: 0 0 5px var(--secondary); }
+      50% { text-shadow: 0 0 15px var(--secondary), 0 0 25px var(--secondary); }
+    }
+    @keyframes rewardPulse {
+      0%, 100% { opacity: 0.9; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.05); }
+    }
+
+    /* 响应式适配 */
+    @media (max-width: 768px) {
+      .character {
+        width: 70px;
+        height: 120px;
+      }
+      .boss-char {
+        width: 90px;
+        height: 140px;
+      }
+      .player-char1 { left: 20px; }
+      .player-char2 { left: 90px; }
+      .player-char3 { left: 40px; }
+      .boss-char { right: 20px; }
+      .boss-health-bar { width: 90%; }
+    }
+  </style>
+
+  </head>
+<body>
+  <div class="game-container">
+    <!-- 多人围攻BOSS主内容 -->
+    <div class="main-content">
+      <h2 class="section-title">多人围攻 - 九幽魔尊</h2>
+      
+      <!-- 团队状态面板 -->
+      <div class="team-panel">
+        <div class="player-card player1">
+          <div class="player-name">逍遥剑客（你）</div>
+          <div class="health-bar-small">
+            <div class="health-fill-small" id="player1Health" style="width: 100%; background: var(--player1-color);"></div>
+          </div>
+          <div class="mana-bar-small">
+            <div class="mana-fill-small" id="player1Mana" style="width: 100%;"></div>
+          </div>
+          <div class="status-text" id="player1Status">状态良好</div>
+        </div>
+        
+        <div class="player-card player2">
+          <div class="player-name">烈火法师</div>
+          <div class="health-bar-small">
+            <div class="health-fill-small" id="player2Health" style="width: 100%; background: var(--player2-color);"></div>
+          </div>
+          <div class="mana-bar-small">
+            <div class="mana-fill-small" id="player2Mana" style="width: 100%;"></div>
+          </div>
+          <div class="status-text" id="player2Status">状态良好</div>
+        </div>
+        
+        <div class="player-card player3">
+          <div class="player-name">妙手神医</div>
+          <div class="health-bar-small">
+            <div class="health-fill-small" id="player3Health" style="width: 100%; background: var(--player3-color);"></div>
+          </div>
+          <div class="mana-bar-small">
+            <div class="mana-fill-small" id="player3Mana" style="width: 100%;"></div>
+          </div>
+          <div class="status-text" id="player3Status">状态良好</div>
+        </div>
+      </div>
+      
+      <!-- 战斗场景 -->
+      <div class="battle-arena" id="battleArena">
+        <!-- 自动战斗按钮 -->
+        <button class="auto-battle-btn auto-battle-off" id="autoBattleBtn" onclick="toggleAutoBattle()">
+          自动
+        </button>
+        
+        <!-- 玩家团队 -->
+        <div class="character player-char1"></div>
+        <div class="character player-char2"></div>
+        <div class="character player-char3"></div>
+        
+        <!-- BOSS角色 -->
+        <div class="character boss-char"></div>
+        <div class="boss-name">九幽魔尊</div>
+        
+        <!-- BOSS血条 -->
+        <div class="boss-health-bar">
+          <div class="boss-health-fill" id="bossHealthBar" style="width: 100%;"></div>
+          <div class="boss-health-text" id="bossHealthText">10000/10000</div>
+        </div>
+        
+        <!-- 特效容器 -->
+        <div class="skill-effect" id="skillEffect"></div>
+        <div class="damage-float" id="damageFloat"></div>
+      </div>
+      
+      <!-- 技能栏 -->
+      <div class="skills-container">
+        <h3 class="section-title" style="font-size: 1rem; margin-bottom: 8px;">你的技能</h3>
+        <div class="skills-grid">
+          <button class="skill-btn" id="skill1" onclick="useSkill(1)">
+            <div>御剑术</div>
+            <div style="font-size: 0.7rem; opacity: 0.8;">灵力: 10</div>
+          </button>
+          <button class="skill-btn" id="skill2" onclick="useSkill(2)">
+            <div>万剑归宗</div>
+            <div style="font-size: 0.7rem; opacity: 0.8;">灵力: 25</div>
+          </button>
+          <button class="skill-btn" id="skill3" onclick="useSkill(3)">
+            <div>治愈术</div>
+            <div style="font-size: 0.7rem; opacity: 0.8;">灵力: 20</div>
+          </button>
+          <button class="skill-btn" id="skill4" onclick="useSkill(4)">
+            <div>剑神附体</div>
+            <div style="font-size: 0.7rem; opacity: 0.8;">灵力: 40</div>
+          </button>
+        </div>
+      </div>
+      
+      <!-- 战斗日志 -->
+      <div class="battle-log" id="battleLog">
+        <div class="log-entry log-system">团队已集结，准备挑战九幽魔尊！</div>
+        <div class="log-entry log-system">BOSS拥有10000点生命值，小心应对！</div>
+      </div>
+      
+      <!-- 操作按钮 -->
+      <div class="action-buttons">
+        <button class="btn btn-danger" onclick="fleeBattle()">全员撤退</button>
+        <button class="btn" onclick="refreshBattle()">重置挑战</button>
+        <button class="btn" onclick="window.location.href='../index.html'">返回首页</button>
+        <button class="btn btn-pk" onclick="window.location.href='pk-monitor.html'">查看PK列表</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 通知提示 -->
+  <div class="notification" id="notification">提示信息</div>
+  
+  <!-- 战斗结束弹窗 -->
+  <div class="battle-over-modal" id="battleOverModal">
+    <div class="modal-content">
+      <h3 class="modal-title" id="modalTitle">战斗胜利！</h3>
+      <div class="modal-text" id="modalText">你们成功击败了九幽魔尊！</div>
+      <div class="reward-text" id="rewardText">获得：极品灵石 x 1000，绝世修为 x 5000</div>
+      <button class="btn" onclick="closeBattleModal()">继续冒险</button>
+    </div>
+  </div>
+
+  <script>
+    // 游戏数据
+    const gameData = {
+      // 玩家团队
+      players: [
+        {
+          id: 1,
+          name: "逍遥剑客",
+          health: 1000,
+          healthMax: 1000,
+          mana: 200,
+          manaMax: 200,
+          attack: 80,
+          defense: 40,
+          color: "var(--player1-color)"
+        },
+        {
+          id: 2,
+          name: "烈火法师",
+          health: 800,
+          healthMax: 800,
+          mana: 250,
+          manaMax: 250,
+          attack: 100,
+          defense: 30,
+          color: "var(--player2-color)"
+        },
+        {
+          id: 3,
+          name: "妙手神医",
+          health: 900,
+          healthMax: 900,
+          mana: 300,
+          manaMax: 300,
+          attack: 60,
+          defense: 35,
+          color: "var(--player3-color)"
+        }
+      ],
+      
+      // BOSS数据
+      boss: {
+        name: "九幽魔尊",
+        health: 10000,
+        healthMax: 10000,
+        attack: 150,
+        defense: 50,
+        skillChance: 0.3 // 释放技能的概率
+      },
+      
+      // 技能配置
+      skills: [
+        { id: 1, name: "御剑术", cost: 10, damage: [80, 120], type: "attack" },
+        { id: 2, name: "万剑归宗", cost: 25, damage: [150, 200], type: "attack" },
+        { id: 3, name: "治愈术", cost: 20, heal: [100, 150], type: "heal" },
+        { id: 4, name: "剑神附体", cost: 40, damage: [250, 350], type: "attack" }
+      ],
+      
+      // 战斗状态
+      battleActive: true,
+      playerTurn: true,
+      autoBattle: false,
+      autoBattleInterval: null,
+      allPlayersDead: false
+    };
+
+    // 初始化页面
+    function initBattle() {
+      updateAllPlayersStatus();
+      updateBossStatus();
+      updateSkillButtons();
+    }
+
+    // 更新所有玩家状态
+    function updateAllPlayersStatus() {
+      gameData.players.forEach(player => {
+        // 更新血条
+        const healthPercent = (player.health / player.healthMax) * 100;
+        document.getElementById(`player${player.id}Health`).style.width = `${healthPercent}%`;
+        
+        // 更新蓝条
+        const manaPercent = (player.mana / player.manaMax) * 100;
+        document.getElementById(`player${player.id}Mana`).style.width = `${manaPercent}%`;
+        
+        // 更新状态文本
+        let status = "状态良好";
+        if (player.health / player.healthMax < 0.3) status = "血量危急";
+        else if (player.health / player.healthMax < 0.6) status = "血量偏低";
+        if (player.mana / player.manaMax < 0.2) status = `${status} | 灵力不足`;
+        
+        document.getElementById(`player${player.id}Status`).textContent = status;
+        
+        // 检查是否死亡
+        if (player.health <= 0) {
+          document.getElementById(`player${player.id}Status`).textContent = "已阵亡";
+          document.querySelector(`.player-char${player.id}`).style.opacity = 0.5;
+        } else {
+          document.querySelector(`.player-char${player.id}`).style.opacity = 1;
+        }
+      });
+      
+      // 检查是否全部阵亡
+      gameData.allPlayersDead = gameData.players.every(p => p.health <= 0);
+    }
+
+    // 更新BOSS状态
+    function updateBossStatus() {
+      const healthPercent = (gameData.boss.health / gameData.boss.healthMax) * 100;
+      document.getElementById("bossHealthBar").style.width = `${healthPercent}%`;
+      document.getElementById("bossHealthText").textContent = `${gameData.boss.health}/${gameData.boss.healthMax}`;
+      
+      // BOSS血量提示
+      if (gameData.boss.health / gameData.boss.healthMax < 0.5 && gameData.boss.health / gameData.boss.healthMax > 0.2) {
+        addBattleLog(`<span class="log-boss">${gameData.boss.name}</span>：尔等小辈，竟能伤我！`);
+      } else if (gameData.boss.health / gameData.boss.healthMax <= 0.2) {
+        addBattleLog(`<span class="log-boss">${gameData.boss.name}</span>：不可能！我竟会败在你们手中！`);
+      }
+    }
+
+    // 更新技能按钮状态
+    function updateSkillButtons() {
+      const currentPlayer = gameData.players[0]; // 你控制的玩家
+      gameData.skills.forEach(skill => {
+        const btn = document.getElementById(`skill${skill.id}`);
+        btn.disabled = currentPlayer.mana < skill.cost || !gameData.battleActive || currentPlayer.health <= 0;
+      });
+    }
+
+    // 切换自动战斗
+    function toggleAutoBattle() {
+      gameData.autoBattle = !gameData.autoBattle;
+      const btn = document.getElementById("autoBattleBtn");
+      
+      if (gameData.autoBattle) {
+        btn.className = "auto-battle-btn auto-battle-on";
+        btn.textContent = "自动√";
+        showNotification("已开启自动战斗！");
+        startAutoBattle();
+      } else {
+        btn.className = "auto-battle-btn auto-battle-off";
+        btn.textContent = "自动";
+        showNotification("已关闭自动战斗！");
+        stopAutoBattle();
+      }
+    }
+
+    // 启动自动战斗
+    function startAutoBattle() {
+      stopAutoBattle();
+      
+      gameData.autoBattleInterval = setInterval(() => {
+        if (!gameData.battleActive || !gameData.playerTurn || gameData.allPlayersDead) return;
+        
+        // 自动选择技能策略
+        autoSelectSkill();
+        
+        // 其他队友自动行动
+        setTimeout(() => {
+          if (gameData.battleActive && !gameData.allPlayersDead && gameData.boss.health > 0) {
+            teammateAutoAction(2); // 法师行动
+            setTimeout(() => {
+              if (gameData.battleActive && !gameData.allPlayersDead && gameData.boss.health > 0) {
+                teammateAutoAction(3); // 神医行动
+                setTimeout(() => {
+                  if (gameData.battleActive && !gameData.allPlayersDead && gameData.boss.health > 0) {
+                    bossTurn(); // BOSS行动
+                  }
+                }, 800);
+              }
+            }, 800);
+          }
+        }, 1000);
+      }, 4000);
+    }
+
+    // 停止自动战斗
+    function stopAutoBattle() {
+      if (gameData.autoBattleInterval) {
+        clearInterval(gameData.autoBattleInterval);
+        gameData.autoBattleInterval = null;
+      }
+    }
+
+    // 自动选择技能
+    function autoSelectSkill() {
+      const currentPlayer = gameData.players[0];
+      
+      // 优先治疗自己
+      if (currentPlayer.health / currentPlayer.healthMax < 0.4 && currentPlayer.mana >= 20) {
+        useSkill(3);
+        return;
+      }
+      
+      // 优先使用高伤害技能
+      if (currentPlayer.mana >= 40) {
+        useSkill(4);
+      } else if (currentPlayer.mana >= 25) {
+        useSkill(2);
+      } else if (currentPlayer.mana >= 10) {
+        useSkill(1);
+      } else {
+        // 恢复灵力
+        addBattleLog(`<span class="log-player1">${currentPlayer.name}</span>：调息恢复灵力！`);
+        currentPlayer.mana = Math.min(currentPlayer.manaMax, currentPlayer.mana + 20);
+        updateAllPlayersStatus();
+        updateSkillButtons();
+      }
+    }
+
+    // 队友自动行动
+    function teammateAutoAction(playerId) {
+      const player = gameData.players.find(p => p.id === playerId);
+      if (!player || player.health <= 0) return;
+      
+      const charElement = document.querySelector(`.player-char${playerId}`);
+      charElement.classList.add('cast');
+      setTimeout(() => charElement.classList.remove('cast'), 600);
+      
+      if (playerId === 2) { // 法师
+        // 随机使用技能
+        const skills = [
+          { name: "烈火焚天", cost: 30, damage: [180, 250] },
+          { name: "火球术", cost: 15, damage: [80, 120] },
+          { name: "炎爆术", cost: 25, damage: [120, 180] }
+        ];
+        
+        let selectedSkill;
+        if (player.mana >= 30) {
+          selectedSkill = skills[0];
+        } else if (player.mana >= 25) {
+          selectedSkill = skills[2];
+        } else if (player.mana >= 15) {
+          selectedSkill = skills[1];
+        } else {
+          // 恢复灵力
+          addBattleLog(`<span class="log-player2">${player.name}</span>：恢复灵力！`);
+          player.mana = Math.min(player.manaMax, player.mana + 25);
+          updateAllPlayersStatus();
+          return;
+        }
+        
+        player.mana -= selectedSkill.cost;
+        const damage = Math.floor(Math.random() * (selectedSkill.damage[1] - selectedSkill.damage[0] + 1)) + selectedSkill.damage[0];
+        const finalDamage = Math.max(1, damage - gameData.boss.defense);
+        gameData.boss.health = Math.max(0, gameData.boss.health - finalDamage);
+        
+        addBattleLog(`<span class="log-player2">${player.name}</span>释放了${selectedSkill.name}，对<span class="log-boss">${gameData.boss.name}</span>造成了<span class="log-damage">${finalDamage}</span>点伤害！`);
+        
+        // 显示特效
+        showSkillEffect('boss', 'attack');
+        showDamageFloat(finalDamage, 'boss', false);
+        
+        // BOSS受击
+        document.querySelector('.boss-char').classList.add('hit');
+        setTimeout(() => document.querySelector('.boss-char').classList.remove('hit'), 400);
+        
+      } else if (playerId === 3) { // 神医
+        // 检查团队血量
+        const lowHealthPlayers = gameData.players.filter(p => p.health / p.healthMax < 0.5 && p.health > 0);
+        
+        if (lowHealthPlayers.length > 0 && player.mana >= 25) {
+          // 群体治疗
+          player.mana -= 25;
+          const healAmount = Math.floor(Math.random() * (80 - 50 + 1)) + 50;
+          
+          gameData.players.forEach(p => {
+            if (p.health > 0) {
+              p.health = Math.min(p.healthMax, p.health + healAmount);
+            }
+          });
+          
+          addBattleLog(`<span class="log-player3">${player.name}</span>释放了群体治疗，为全队恢复了<span class="log-heal">${healAmount}</span>点气血！`);
+          showSkillEffect('player1', 'heal');
+          showDamageFloat(healAmount, 'player1', true);
+          
+        } else if (player.mana >= 15) {
+          // 单体治疗
+          player.mana -= 15;
+          const targetPlayer = gameData.players.find(p => p.health / p.healthMax < 0.8 && p.health > 0) || gameData.players[0];
+          const healAmount = Math.floor(Math.random() * (120 - 80 + 1)) + 80;
+          
+          targetPlayer.health = Math.min(targetPlayer.healthMax, targetPlayer.health + healAmount);
+          addBattleLog(`<span class="log-player3">${player.name}</span>为<span class="log-player${targetPlayer.id}">${targetPlayer.name}</span>恢复了<span class="log-heal">${healAmount}</span>点气血！`);
+          showSkillEffect(`player${targetPlayer.id}`, 'heal');
+          showDamageFloat(healAmount, `player${targetPlayer.id}`, true);
+          
+        } else {
+          // 恢复灵力
+          addBattleLog(`<span class="log-player3">${player.name}</span>：恢复灵力！`);
+          player.mana = Math.min(player.manaMax, player.mana + 30);
+        }
+      }
+      
+      updateAllPlayersStatus();
+      updateBossStatus();
+      
+      // 检查BOSS是否死亡
+      if (gameData.boss.health <= 0) {
+        battleWin();
+      }
+    }
+
+    // 使用技能（玩家1）
+    function useSkill(skillId) {
+      if (!gameData.battleActive || !gameData.playerTurn || gameData.players[0].health <= 0) return;
+      
+      const skill = gameData.skills.find(s => s.id === skillId);
+      const currentPlayer = gameData.players[0];
+      
+      if (!skill || currentPlayer.mana < skill.cost) {
+        showNotification("灵力不足，无法使用该技能！");
+        return;
+      }
+      
+      // 施法动画
+      document.querySelector('.player-char1').classList.add('cast');
+      setTimeout(() => document.querySelector('.player-char1').classList.remove('cast'), 600);
+      
+      // 消耗灵力
+      currentPlayer.mana -= skill.cost;
+      
+      if (skill.type === "attack") {
+        // 计算伤害
+        const damage = Math.floor(Math.random() * (skill.damage[1] - skill.damage[0] + 1)) + skill.damage[0];
+        const finalDamage = Math.max(1, damage - gameData.boss.defense);
+        gameData.boss.health = Math.max(0, gameData.boss.health - finalDamage);
+        
+        // 日志
+        addBattleLog(`<span class="log-player1">${currentPlayer.name}</span>释放了${skill.name}，对<span class="log-boss">${gameData.boss.name}</span>造成了<span class="log-damage">${finalDamage}</span>点伤害！`);
+        
+        // 特效
+        showSkillEffect('boss', 'attack');
+        showDamageFloat(finalDamage, 'boss', false);
+        
+        // BOSS受击
+        document.querySelector('.boss-char').classList.add('hit');
+        setTimeout(() => document.querySelector('.boss-char').classList.remove('hit'), 400);
+        
+        // 更新状态
+        updateAllPlayersStatus();
+        updateBossStatus();
+        
+        // 检查BOSS是否死亡
+        if (gameData.boss.health <= 0) {
+          battleWin();
+          return;
+        }
+        
+      } else if (skill.type === "heal") {
+        // 治疗
+        const healAmount = Math.floor(Math.random() * (skill.heal[1] - skill.heal[0] + 1)) + skill.heal[0];
+        currentPlayer.health = Math.min(currentPlayer.healthMax, currentPlayer.health + healAmount);
+        
+        addBattleLog(`<span class="log-player1">${currentPlayer.name}</span>使用了${skill.name}，恢复了<span class="log-heal">${healAmount}</span>点气血！`);
+        showSkillEffect('player1', 'heal');
+        showDamageFloat(healAmount, 'player1', true);
+        updateAllPlayersStatus();
+      }
+      
+      // 更新技能按钮
+      updateSkillButtons();
+      
+      // 如果不是自动战斗，等待后进入队友回合
+      if (!gameData.autoBattle) {
+        gameData.playerTurn = false;
+        setTimeout(() => {
+          if (gameData.battleActive && !gameData.allPlayersDead && gameData.boss.health > 0) {
+            teammateAutoAction(2);
+            setTimeout(() => {
+              if (gameData.battleActive && !gameData.allPlayersDead && gameData.boss.health > 0) {
+                teammateAutoAction(3);
+                setTimeout(() => {
+                  if (gameData.battleActive && !gameData.allPlayersDead && gameData.boss.health > 0) {
+                    bossTurn();
+                  }
+                }, 800);
+              }
+            }, 800);
+          }
+        }, 1000);
+      }
+    }
+
+    // BOSS回合
+    function bossTurn() {
+      if (!gameData.battleActive || gameData.boss.health <= 0) return;
+      
+      // BOSS施法动画
+      const bossChar = document.querySelector('.boss-char');
+      bossChar.classList.add('cast');
+      setTimeout(() => bossChar.classList.remove('cast'), 800);
+      
+      // 随机选择攻击目标
+      const alivePlayers = gameData.players.filter(p => p.health > 0);
+      if (alivePlayers.length === 0) {
+        battleLose();
+        return;
+      }
+      
+      const targetPlayer = alivePlayers[Math.floor(Math.random() * alivePlayers.length)];
+      
+      // 随机选择技能
+      let skill, damage;
+      if (Math.random() < gameData.boss.skillChance) {
+        // 释放大招
+        skill = "九幽魔焰";
+        damage = Math.floor(Math.random() * (300 - 200 + 1)) + 200;
+        addBattleLog(`<span class="log-boss">${gameData.boss.name}</span>释放了${skill}！`);
+        showSkillEffect(`player${targetPlayer.id}`, 'boss-attack');
+      } else {
+        // 普通攻击
+        skill = "魔爪攻击";
+        damage = Math.floor(Math.random() * (180 - 120 + 1)) + 120;
+      }
+      
+      // 计算最终伤害
+      const finalDamage = Math.max(1, damage - targetPlayer.defense);
+      targetPlayer.health = Math.max(0, targetPlayer.health - finalDamage);
+      
+      // 日志和特效
+      addBattleLog(`<span class="log-boss">${gameData.boss.name}</span>使用${skill}对<span class="log-player${targetPlayer.id}">${targetPlayer.name}</span>造成了<span class="log-damage">${finalDamage}</span>点伤害！`);
+      showDamageFloat(finalDamage, `player${targetPlayer.id}`, false);
+      
+      // 目标受击动画
+      document.querySelector(`.player-char${targetPlayer.id}`).classList.add('hit');
+      setTimeout(() => document.querySelector(`.player-char${targetPlayer.id}`).classList.remove('hit'), 400);
+      
+      // 更新状态
+      updateAllPlayersStatus();
+      
+      // 检查是否团灭
+      if (gameData.allPlayersDead) {
+        battleLose();
+        return;
+      }
+      
+      // 回合结束
+      gameData.playerTurn = true;
+      updateSkillButtons();
+      
+      if (gameData.autoBattle) {
+        // 自动战斗下延迟后继续
+        setTimeout(() => {
+          if (gameData.battleActive) {
+            autoSelectSkill();
+          }
+        }, 1000);
+      }
+    }
+
+    // 战斗胜利
+    function battleWin() {
+      gameData.battleActive = false;
+      stopAutoBattle();
+      
+      // BOSS死亡动画
+      const bossChar = document.querySelector('.boss-char');
+      bossChar.style.transition = "all 1.5s ease-out";
+      bossChar.style.opacity = 0;
+      bossChar.style.transform = "translateY(-50%) scale(0.8) rotate(20deg)";
+      
+      addBattleLog(`<span class="log-system">恭喜！你们成功击败了${gameData.boss.name}！</span>`);
+      addBattleLog(`<span class="log-system">获得了丰厚的奖励！</span>`);
+      
+      // 显示胜利弹窗
+      document.getElementById("modalTitle").textContent = "战斗胜利！";
+      document.getElementById("modalText").textContent = `你们成功击败了${gameData.boss.name}！`;
+      document.getElementById("rewardText").textContent = "获得：极品灵石 x 1000，绝世修为 x 5000";
+      document.getElementById("battleOverModal").style.display = "flex";
+      
+      // 禁用技能
+      gameData.skills.forEach(skill => {
+        document.getElementById(`skill${skill.id}`).disabled = true;
+      });
+    }
+
+    // 战斗失败
+    function battleLose() {
+      gameData.battleActive = false;
+      stopAutoBattle();
+      
+      addBattleLog(`<span class="log-system">团灭！你们被${gameData.boss.name}击败了！</span>`);
+      addBattleLog(`<span class="log-system">损失了大量修为和灵石...</span>`);
+      
+      // 显示失败弹窗
+      document.getElementById("modalTitle").textContent = "战斗失败！";
+      document.getElementById("modalText").textContent = `你们被${gameData.boss.name}击败，全军覆没！`;
+      document.getElementById("rewardText").textContent = "损失：灵石 x 500，修为 x 2000";
+      document.getElementById("battleOverModal").style.display = "flex";
+      
+      // 禁用技能
+      gameData.skills.forEach(skill => {
+        document.getElementById(`skill${skill.id}`).disabled = true;
+      });
+    }
+
+    // 全员撤退
+    function fleeBattle() {
+      if (!gameData.battleActive) return;
+      
+      // 撤退成功率70%
+      const fleeSuccess = Math.random() > 0.3;
+      
+      if (fleeSuccess) {
+        gameData.battleActive = false;
+        stopAutoBattle();
+        
+        // 撤退动画
+        gameData.players.forEach((player, index) => {
+          const char = document.querySelector(`.player-char${player.id}`);
+          char.style.transition = `all ${0.5 + index * 0.2}s ease-out`;
+          char.style.left = "-100px";
+          char.style.opacity = 0;
+        });
+        
+        addBattleLog(`<span class="log-system">全员成功撤退！逃离了${gameData.boss.name}的领地！</span>`);
+        showNotification("成功撤退！");
+        
+        // 禁用技能
+        gameData.skills.forEach(skill => {
+          document.getElementById(`skill${skill.id}`).disabled = true;
+        });
+        
+      } else {
+        addBattleLog(`<span class="log-system">撤退失败！${gameData.boss.name}拦住了你们的去路！</span>`);
+        showNotification("撤退失败！");
+        
+        // BOSS反击
+        setTimeout(() => {
+          gameData.players.forEach(player => {
+            if (player.health > 0) {
+              const damage = Math.floor(Math.random() * (100 - 50 + 1)) + 50;
+              player.health = Math.max(0, player.health - damage);
+              
+              addBattleLog(`<span class="log-boss">${gameData.boss.name}</span>追击${player.name}，造成了<span class="log-damage">${damage}</span>点伤害！`);
+              showDamageFloat(damage, `player${player.id}`, false);
+            }
+          });
+          
+          updateAllPlayersStatus();
+          
+          // 检查团灭
+          if (gameData.allPlayersDead) {
+            battleLose();
+          }
+        }, 1000);
+      }
+    }
+
+    // 重置挑战
+    function refreshBattle() {
+      // 重置数据
+      gameData.players = [
+        { id: 1, name: "逍遥剑客", health: 1000, healthMax: 1000, mana: 200, manaMax: 200, attack: 80, defense: 40, color: "var(--player1-color)" },
+        { id: 2, name: "烈火法师", health: 800, healthMax: 800, mana: 250, manaMax: 250, attack: 100, defense: 30, color: "var(--player2-color)" },
+        { id: 3, name: "妙手神医", health: 900, healthMax: 900, mana: 300, manaMax: 300, attack: 60, defense: 35, color: "var(--player3-color)" }
+      ];
+      
+      gameData.boss = {
+        name: "九幽魔尊",
+        health: 10000,
+        healthMax: 10000,
+        attack: 150,
+        defense: 50,
+        skillChance: 0.3
+      };
+      
+      gameData.battleActive = true;
+      gameData.playerTurn = true;
+      gameData.allPlayersDead = false;
+      
+      // 停止自动战斗
+      stopAutoBattle();
+      gameData.autoBattle = false;
+      document.getElementById("autoBattleBtn").className = "auto-battle-btn auto-battle-off";
+      document.getElementById("autoBattleBtn").textContent = "自动";
+      
+      // 重置角色样式
+      gameData.players.forEach(player => {
+        const char = document.querySelector(`.player-char${player.id}`);
+        char.style.transition = "all 0.2s ease";
+        char.style.opacity = 1;
+        char.style.left = "";
+        char.style.top = "";
+        char.style.transform = "translateY(-50%)";
+      });
+      
+      const bossChar = document.querySelector('.boss-char');
+      bossChar.style.transition = "all 0.2s ease";
+      bossChar.style.opacity = 1;
+      bossChar.style.transform = "translateY(-50%) scale(1) rotate(0)";
+      
+      // 清空日志
+      document.getElementById("battleLog").innerHTML = `
+        <div class="log-entry log-system">团队已集结，准备挑战九幽魔尊！</div>
+        <div class="log-entry log-system">BOSS拥有10000点生命值，小心应对！</div>
+      `;
+      
+      // 更新UI
+      updateAllPlayersStatus();
+      updateBossStatus();
+      updateSkillButtons();
+      
+      // 关闭弹窗
+      document.getElementById("battleOverModal").style.display = "none";
+      
+      showNotification("挑战已重置！");
+    }
+
+    // 添加战斗日志
+    function addBattleLog(message) {
+      const logContainer = document.getElementById("battleLog");
+      const logEntry = document.createElement("div");
+      logEntry.className = "log-entry";
+      logEntry.innerHTML = message;
+      
+      logContainer.appendChild(logEntry);
+      logContainer.scrollTop = logContainer.scrollHeight;
+    }
+
+    // 显示技能特效
+    function showSkillEffect(target, effectType) {
+      const effect = document.getElementById("skillEffect");
+      let charElement;
+      
+      if (target === 'boss') {
+        charElement = document.querySelector('.boss-char');
+      } else if (target.startsWith('player')) {
+        const playerId = target.replace('player', '');
+        charElement = document.querySelector(`.player-char${playerId}`);
+      }
+      
+      if (!charElement) return;
+      
+      const rect = charElement.getBoundingClientRect();
+      const arenaRect = document.getElementById("battleArena").getBoundingClientRect();
+      
+      effect.style.left = `${rect.left - arenaRect.left + rect.width/2 - (effectType === 'boss-attack' ? 60 : 40)}px`;
+      effect.style.top = `${rect.top - arenaRect.top + rect.height/2 - (effectType === 'boss-attack' ? 60 : 40)}px`;
+      effect.className = `skill-effect ${effectType}`;
+      effect.style.display = "block";
+      
+      setTimeout(() => {
+        effect.style.display = "none";
+      }, effectType === 'boss-attack' ? 1500 : 1200);
+    }
+
+    // 显示伤害/治疗数字
+    function showDamageFloat(value, target, isHeal = false) {
+      const float = document.getElementById("damageFloat");
+      let charElement;
+      
+      if (target === 'boss') {
+        charElement = document.querySelector('.boss-char');
+      } else if (target.startsWith('player')) {
+        const playerId = target.replace('player', '');
+        charElement = document.querySelector(`.player-char${playerId}`);
+      }
+      
+      if (!charElement) return;
+      
+      const rect = charElement.getBoundingClientRect();
+      const arenaRect = document.getElementById("battleArena").getBoundingClientRect();
+      const randomOffset = Math.random() * 20 - 10;
+      
+      float.style.left = `${rect.left - arenaRect.left + rect.width/2 - 20 + randomOffset}px`;
+      float.style.top = `${rect.top - arenaRect.top + 20}px`;
+      
+      if (isHeal) {
+        float.className = "damage-float heal";
+        float.textContent = `+${value}`;
+      } else if (target === 'boss') {
+        float.className = "damage-float damage";
+        float.textContent = `-${value}`;
+      } else {
+        float.className = target === 'boss' ? "damage-float boss-damage" : "damage-float damage";
+        float.textContent = `-${value}`;
+      }
+      
+      float.style.display = "block";
+      
+      setTimeout(() => {
+        float.style.display = "none";
+      }, 1200);
+    }
+
+    // 显示通知
+    function showNotification(message) {
+      const notification = document.getElementById("notification");
+      notification.textContent = message;
+      notification.style.display = "block";
+      
+      // 自动隐藏（通过CSS动画）
+    }
+
+    // 关闭弹窗
+    function closeBattleModal() {
+      document.getElementById("battleOverModal").style.display = "none";
+    }
+
+    // 页面加载初始化
+    window.onload = function() {
+      initBattle();
+    };
+
+    // 页面卸载清理
+    window.onbeforeunload = function() {
+      stopAutoBattle();
+    };
+  </script>
+  <script src="js/ui-components.js"></script>
+</body>
+</html>

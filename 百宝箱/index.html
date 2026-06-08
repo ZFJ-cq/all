@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>前端项目百宝箱</title>
+  <!-- 内联响应式样式（无CDN依赖） -->
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, sans-serif; }
+    body { background: #f8faff; min-height: 100vh; display: flex; flex-direction: column; color: #4b5563; }
+
+    /* 头部样式 - 响应式简化 */
+    header { 
+      background: white; 
+      padding: 12px 16px; 
+      box-shadow: 0 2px 10px rgba(22,93,255,0.05); 
+      position: sticky; 
+      top: 0; 
+      z-index: 10; 
+    }
+    .header-wrap { 
+      max-width: 1200px; 
+      margin: 0 auto; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+    }
+    .logo { display: flex; align-items: center; gap: 8px; }
+    .logo-icon { 
+      width: 32px; 
+      height: 32px; 
+      border-radius: 50%; 
+      background: rgba(22,93,255,0.1); 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      color: #165dff; 
+    }
+    .logo-text { 
+      font-size: clamp(16px, 4vw, 20px); /* 自适应字体 */
+      font-weight: bold; 
+      color: #1f2937; 
+    }
+    .btn { 
+      padding: 9px 16px; 
+      border-radius: 8px; 
+      border: none; 
+      cursor: pointer; 
+      transition: all 0.3s; 
+      font-size: clamp(14px, 3vw, 16px); /* 按钮文字自适应 */
+      min-height: 40px; /* 保证小屏幕按钮触控区域 */
+    }
+    .btn-primary { background: #165dff; color: white; }
+    .btn-primary:hover { background: rgba(22,93,255,0.9); }
+    .btn-primary .btn-text { display: inline-block; }
+    .btn-outline { background: white; border: 1px solid #e5e7eb; color: #6b7280; }
+    .btn-outline:hover { background: #f3f4f6; }
+    .btn-danger { background: #ef4444; color: white; }
+    .btn-danger:hover { background: rgba(239,68,68,0.9); }
+
+    /* 搜索和分类区域 */
+    .search-section {
+      max-width: 1200px;
+      margin: 16px auto;
+      padding: 0 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px; /* 间距 */
+    }
+    @media (min-width: 640px) {
+      .search-section {
+        flex-direction: row;
+        align-items: center;
+      }
+    }
+    .search-input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: clamp(14px, 3vw, 16px);
+      min-height: 40px;
+    }
+    .search-input:focus {
+      border-color: #165dff;
+      box-shadow: 0 0 0 2px rgba(22,93,255,0.1);
+    }
+    .category-filter {
+      padding: 10px 14px;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: clamp(14px, 3vw, 16px);
+      min-height: 40px;
+      background: white;
+    }
+    .category-filter:focus {
+      border-color: #165dff;
+      box-shadow: 0 0 0 2px rgba(22,93,255,0.1);
+    }
+
+    /* 主内容 - 响应式网格 */
+    main { 
+      flex: 1; 
+      max-width: 1200px; 
+      margin: 0 auto; 
+      padding: 0 12px; /* 小屏幕减小内边距 */
+    }
+    .project-grid { 
+      display: grid; 
+      gap: 14px; /* 小屏幕减小间距 */
+      /* 响应式列数：手机1列 → 平板2列 → 电脑3-4列 */
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+    /* 平板以上调整列数和间距 */
+    @media (min-width: 640px) {
+      .project-grid { 
+        gap: 20px; 
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      }
+    }
+    @media (min-width: 1024px) {
+      .project-grid { grid-template-columns: repeat(4, 1fr); }
+    }
+
+    /* 项目卡片 - 新增编辑按钮，与删除按钮对称 */
+    .project-card { 
+      background: white; 
+      padding: 18px; /* 小屏幕保证内容充足 */
+      border-radius: 12px; 
+      border: 1px solid #f3f4f6; 
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+      text-align: center; 
+      transition: all 0.3s; 
+      position: relative; 
+      min-height: 180px; /* 保证小屏幕卡片高度 */
+    }
+    .project-card:hover { transform: translateY(-5px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .card-icon { 
+      width: 44px; 
+      height: 44px; 
+      border-radius: 50%; 
+      background: rgba(22,93,255,0.1); 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      color: #165dff; 
+      font-size: 18px; 
+      margin: 0 auto 12px; 
+    }
+    .card-name { 
+      font-size: clamp(16px, 3vw, 18px); /* 自适应标题 */
+      font-weight: 600; 
+      color: #1f2937; 
+      margin-bottom: 8px; 
+      line-height: 1.4; /* 避免文字溢出 */
+    }
+    .card-desc { 
+      color: #9ca3af; 
+      font-size: clamp(12px, 2vw, 14px); /* 自适应描述 */
+      line-height: 1.5;
+    }
+    /* 编辑按钮 - 左下角，与删除按钮对称，样式统一 */
+    .edit-btn { 
+      position: absolute; 
+      bottom: 12px; 
+      left: 12px; 
+      width: 34px; 
+      height: 34px; /* 放大触控区域 */
+      border-radius: 50%; 
+      background: white; 
+      border: 1px solid #e5e7eb; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      color: #9ca3af; 
+      cursor: pointer; 
+      opacity: 0; 
+      transition: all 0.3s; 
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .edit-btn:hover { color: #165dff; border-color: #165dff; background: #f0f7ff; }
+    /* 删除按钮 - 样式微调，与编辑按钮统一 */
+    .delete-btn { 
+      position: absolute; 
+      bottom: 12px; 
+      right: 12px; 
+      width: 34px; 
+      height: 34px; /* 放大删除按钮触控区域 */
+      border-radius: 50%; 
+      background: white; 
+      border: 1px solid #e5e7eb; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      color: #9ca3af; 
+      cursor: pointer; 
+      opacity: 0; 
+      transition: all 0.3s; 
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .delete-btn:hover { color: #ef4444; border-color: #ef4444; background: #fff5f5; }
+    /* 悬浮卡片时显示编辑/删除按钮 */
+    .project-card:hover .edit-btn,
+    .project-card:hover .delete-btn { opacity: 1; }
+
+    /* 空状态 - 响应式调整+明确提示 */
+    .empty-state { 
+      text-align: center; 
+      padding: 40px 12px; /* 小屏幕留边 */
+    }
+    @media (min-width: 640px) {
+      .empty-state { padding: 60px 0; }
+    }
+    .empty-icon { 
+      font-size: clamp(40px, 10vw, 60px); /* 自适应图标 */
+      color: #e5e7eb; 
+      margin-bottom: 12px; 
+    }
+    .empty-title { 
+      font-size: clamp(16px, 3vw, 18px); 
+      color: #9ca3af; 
+      margin-bottom: 8px; 
+    }
+    .empty-desc { 
+      color: #9ca3af; 
+      font-size: clamp(12px, 2vw, 14px); 
+      margin-bottom: 20px; 
+      line-height: 1.6;
+    }
+    .empty-note {
+      color: #165dff;
+      font-size: clamp(12px, 2vw, 14px);
+      margin-top: 10px;
+      padding: 8px 12px;
+      background: #f0f7ff;
+      border-radius: 6px;
+      display: inline-block;
+    }
+
+    /* 弹窗 - 响应式宽度+触控友好 */
+    .modal-mask { 
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      right: 0; 
+      bottom: 0; 
+      background: rgba(0,0,0,0.4); 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      padding: 12px; /* 小屏幕留边 */
+      z-index: 100; 
+      display: none; 
+    }
+    .modal-content { 
+      background: white; 
+      border-radius: 12px; 
+      padding: 20px; /* 小屏幕减小内边距 */
+      width: 100%; 
+      max-width: 92%; /* 手机占更多宽度 */
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    @media (min-width: 640px) {
+      .modal-content { 
+        padding: 24px; 
+        max-width: 400px; /* 平板以上固定宽度 */
+      }
+    }
+    .modal-header { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      margin-bottom: 16px; /* 小屏幕减小间距 */
+    }
+    @media (min-width: 640px) {
+      .modal-header { margin-bottom: 20px; }
+    }
+    .modal-title { 
+      font-size: clamp(16px, 3vw, 18px); 
+      font-weight: 600; 
+      display: flex; 
+      align-items: center; 
+      gap: 8px; 
+    }
+    .modal-close { 
+      width: 34px; 
+      height: 34px; /* 放大关闭按钮触控区域 */
+      border-radius: 50%; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      cursor: pointer; 
+      transition: all 0.3s; 
+    }
+    .modal-close:hover { background: #f3f4f6; }
+
+    /* 表单 - 响应式调整+输入友好 */
+    .form-group { margin-bottom: 14px; }
+    @media (min-width: 640px) {
+      .form-group { margin-bottom: 16px; }
+    }
+    .form-label { 
+      display: block; 
+      font-size: clamp(12px, 2vw, 14px); 
+      margin-bottom: 6px; 
+      font-weight: 500;
+    }
+    .form-input { 
+      width: 100%; 
+      padding: 11px 14px; /* 放大输入框触控区域 */
+      border: 1px solid #e5e7eb; 
+      border-radius: 8px; 
+      outline: none; 
+      font-size: clamp(14px, 2vw, 16px); /* 输入框文字自适应 */
+      min-height: 44px; /* 保证触控高度 */
+    }
+    .form-input:focus { border-color: #165dff; box-shadow: 0 0 0 2px rgba(22,93,255,0.1); }
+    .icon-group { 
+      display: grid; 
+      grid-template-columns: repeat(6, 1fr); 
+      gap: 6px; /* 小屏幕减小图标间距 */
+      margin-top: 8px; 
+    }
+    @media (min-width: 640px) {
+      .icon-group { gap: 8px; }
+    }
+    .icon-item { 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      padding: 7px; /* 小屏幕减小图标内边距 */
+      border: 1px solid #e5e7eb; 
+      border-radius: 8px; 
+      cursor: pointer; 
+      min-height: 60px; /* 保证图标项触控区域 */
+      justify-content: center;
+    }
+    @media (min-width: 640px) {
+      .icon-item { padding: 8px; }
+    }
+    .icon-item.active { border-color: #165dff; background: rgba(22,93,255,0.05); }
+    .icon-item i { 
+      font-size: 18px; 
+      margin-bottom: 4px; 
+    }
+    .icon-item span { 
+      font-size: clamp(10px, 2vw, 12px); 
+    }
+    .form-buttons { 
+      display: flex; 
+      gap: 10px; /* 小屏幕减小按钮间距 */
+      margin-top: 18px; 
+    }
+    @media (min-width: 640px) {
+      .form-buttons { 
+        gap: 12px; 
+        margin-top: 20px; 
+      }
+    }
+    .form-buttons button { flex: 1; min-height: 44px; }
+
+    /* 底部 - 响应式文字 */
+    footer { 
+      background: white; 
+      padding: 12px 16px; /* 小屏幕减小内边距 */
+      text-align: center; 
+      border-top: 1px solid #f3f4f6; 
+      margin-top: 20px; 
+    }
+    footer p { 
+      font-size: clamp(12px, 2vw, 14px); 
+      color: #9ca3af; 
+    }
+
+    /* 小屏幕隐藏按钮文字 */
+    @media (max-width: 480px) {
+      .btn-primary .btn-text { display: none; }
+      .btn-primary { padding: 10px; /* 小屏幕按钮仅显示图标 */ }
+    }
+  </style>
+  <!-- 本地图标（新增编辑图标icon-edit，与原有样式统一） -->
+  <style>
+    .icon-code::before { content: "✎"; }
+    .icon-globe::before { content: "🌐"; }
+    .icon-store::before { content: "🛒"; }
+    .icon-blog::before { content: "📝"; }
+    .icon-dashboard::before { content: "📊"; }
+    .icon-gamepad::before { content: "🎮"; }
+    .icon-trash::before { content: "🗑️"; }
+    .icon-plus::before { content: "➕"; }
+    .icon-close::before { content: "✕"; }
+    .icon-edit::before { content: "✏️"; } /* 编辑图标-铅笔 */
+    .icon-pen::before { content: "✏️"; } /* 弹窗标题编辑图标 */
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-wrap">
+      <div class="logo">
+        <div class="logo-icon"><span>📦</span></div>
+        <div class="logo-text">前端项目百宝箱</div>
+      </div>
+      <button id="addProjectBtn" class="btn btn-primary">
+        <span class="icon-plus"></span>
+        <span class="btn-text">新增项目</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- 新增搜索和分类区域 -->
+  <div class="search-section">
+    <input type="text" id="searchInput" class="search-input" placeholder="搜索项目名称或描述...">
+    <select id="categoryFilter" class="category-filter">
+      <option value="all">全部分类</option>
+      <option value="icon-code">代码</option>
+      <option value="icon-globe">网站</option>
+      <option value="icon-store">商城</option>
+      <option value="icon-blog">博客</option>
+      <option value="icon-dashboard">后台</option>
+      <option value="icon-gamepad">游戏</option>
+    </select>
+  </div>
+
+  <main>
+    <div id="projectGrid" class="project-grid"></div>
+    <div id="emptyState" class="empty-state">
+      <div class="empty-icon">📂</div>
+      <h3 class="empty-title">暂无前端项目</h3>
+      <p class="empty-desc">点击右上角「新增项目」，开始管理你的前端项目吧<br>本地路径示例：./西游杀/index.html（百宝箱与项目文件夹同级）</p>
+      <p class="empty-note">⚠️ 请使用VS Code Live Server打开本文件（直接双击无法访问本地项目）</p>
+      <button id="emptyAddBtn" class="btn btn-primary">
+        <span class="icon-plus"></span>
+        <span>新增第一个项目</span>
+      </button>
+    </div>
+  </main>
+
+  <footer>
+    <p>前端项目百宝箱 © 2026 | 一站式前端项目管理入口（支持新增/编辑/删除/搜索/分类）</p>
+  </footer>
+
+  <!-- 新增弹窗 -->
+  <div id="addModal" class="modal-mask">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title"><span>➕</span>新增前端项目</h2>
+        <div class="modal-close" onclick="closeModal('addModal')"><span class="icon-close"></span></div>
+      </div>
+      <form id="addProjectForm">
+        <div class="form-group">
+          <label class="form-label">项目名称 *</label>
+          <input type="text" id="projectName" class="form-input" placeholder="如：翻牌游戏、Vue管理系统" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">项目描述</label>
+          <input type="text" id="projectDesc" class="form-input" placeholder="简单描述项目功能（选填）">
+        </div>
+        <div class="form-group">
+          <label class="form-label">访问地址 *</label>
+          <input type="text" id="projectUrl" class="form-input" placeholder="本地路径：./西游杀/index.html（与百宝箱同级）；网络地址：https://xxx.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">选择项目图标 *</label>
+          <div id="addIconContainer" class="icon-group">
+            <label class="icon-item active">
+              <input type="radio" name="addProjectIcon" value="icon-code" checked hidden>
+              <span class="icon-code"></span>
+              <span>代码</span>
+            </label>
+            <label class="icon-item">
+              <input type="radio" name="addProjectIcon" value="icon-globe" hidden>
+              <span class="icon-globe"></span>
+              <span>网站</span>
+            </label>
+            <label class="icon-item">
+              <input type="radio" name="addProjectIcon" value="icon-store" hidden>
+              <span class="icon-store"></span>
+              <span>商城</span>
+            </label>
+            <label class="icon-item">
+              <input type="radio" name="addProjectIcon" value="icon-blog" hidden>
+              <span class="icon-blog"></span>
+              <span>博客</span>
+            </label>
+            <label class="icon-item">
+              <input type="radio" name="addProjectIcon" value="icon-dashboard" hidden>
+              <span class="icon-dashboard"></span>
+              <span>后台</span>
+            </label>
+            <label class="icon-item">
+              <input type="radio" name="addProjectIcon" value="icon-gamepad" hidden>
+              <span class="icon-gamepad"></span>
+              <span>游戏</span>
+            </label>
+          </div>
+        </div>
+        <div class="form-buttons">
+          <button type="button" class="btn btn-outline" onclick="closeModal('addModal')">取消</button>
+          <button type="submit" class="btn btn-primary">确认新增</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 编辑弹窗（新增，与新增弹窗结构一致，自动回显数据） -->
+  <div id="editModal" class="modal-mask">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title"><span class="icon-pen"></span>编辑前端项目</h2>
+        <div class="modal-close" onclick="closeModal('editModal')"><span class="icon-close"></span></div>
+      </div>
+      <form id="editProjectForm">
+        <div class="form-group">
+          <label class="form-label">项目名称 *</label>
+          <input type="text" id="editProjectName" class="form-input" placeholder="如：翻牌游戏、Vue管理系统" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">项目描述</label>
+          <input type="text" id="editProjectDesc" class="form-input" placeholder="简单描述项目功能（选填）">
+        </div>
+        <div class="form-group">
+          <label class="form-label">访问地址 *</label>
+          <input type="text" id="editProjectUrl" class="form-input" placeholder="本地路径：./西游杀/index.html（与百宝箱同级）；网络地址：https://xxx.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">选择项目图标 *</label>
+          <div id="editIconContainer" class="icon-group">
+            <label class="icon-item">
+              <input type="radio" name="editProjectIcon" value="icon-code" hidden>
+              <span class="icon-code"></span>
+              <span>代码</span>
+            </label>
+            <label class="icon-item">
+              <input type="radio" name="editProjectIcon" value="icon-globe" hidden>
+              <span class="icon-globe"></span>
+              <span>网站</span>
+            </label>
+            <label class="icon-item">
+              <input type="radio" name="editProjectIcon" value="icon-store" hidden>
+              <span class="icon-store"></span>
+              <span>商城</span>
+            </label>
+            <label class="icon-item">
+              <input type="radio" name="editProjectIcon" value="icon-blog" hidden>
+              <span class="icon-blog"></span>
+              <span>博客</span>
+            </label>
+            <label class="icon-item">
+              <input type="radio" name="editProjectIcon" value="icon-dashboard" hidden>
+              <span class="icon-dashboard"></span>
+              <span>后台</span>
+            </label>
+            <label class="icon-item">
+              <input type="radio" name="editProjectIcon" value="icon-gamepad" hidden>
+              <span class="icon-gamepad"></span>
+              <span>游戏</span>
+            </label>
+          </div>
+        </div>
+        <div class="form-buttons">
+          <button type="button" class="btn btn-outline" onclick="closeModal('editModal')">取消</button>
+          <button type="submit" class="btn btn-primary">确认修改</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 删除弹窗 -->
+  <div id="deleteModal" class="modal-mask">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title"><span class="icon-trash"></span>确认删除</h2>
+        <div class="modal-close" onclick="closeModal('deleteModal')"><span class="icon-close"></span></div>
+      </div>
+      <div>
+        <p>你确定要删除该项目吗？</p>
+        <p style="color: #ef4444; margin: 8px 0;">删除后无法恢复，请谨慎操作！</p>
+        <p>项目：<span id="deleteProjName" style="font-weight: 600;"></span></p>
+      </div>
+      <div class="form-buttons" style="margin-top: 20px;">
+        <button type="button" class="btn btn-outline" onclick="closeModal('deleteModal')">取消</button>
+        <button type="button" id="confirmDelete" class="btn btn-danger">确认删除</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentDeleteId = null; // 当前删除的项目ID
+    let currentEditId = null;   // 新增：当前编辑的项目ID
+    const STORAGE_KEY = 'front_end_project_box';
+
+    // 新增编辑相关DOM节点，与原有节点统一管理
+    const el = {
+      projectGrid: document.getElementById('projectGrid'),
+      emptyState: document.getElementById('emptyState'),
+      addProjectBtn: document.getElementById('addProjectBtn'),
+      emptyAddBtn: document.getElementById('emptyAddBtn'),
+      // 弹窗
+      addModal: document.getElementById('addModal'),
+      editModal: document.getElementById('editModal'),
+      deleteModal: document.getElementById('deleteModal'),
+      // 新增表单
+      addProjectForm: document.getElementById('addProjectForm'),
+      addIconContainer: document.getElementById('addIconContainer'),
+      projectName: document.getElementById('projectName'),
+      projectDesc: document.getElementById('projectDesc'),
+      projectUrl: document.getElementById('projectUrl'),
+      // 编辑表单（新增）
+      editProjectForm: document.getElementById('editProjectForm'),
+      editIconContainer: document.getElementById('editIconContainer'),
+      editProjectName: document.getElementById('editProjectName'),
+      editProjectDesc: document.getElementById('editProjectDesc'),
+      editProjectUrl: document.getElementById('editProjectUrl'),
+      // 删除相关
+      confirmDelete: document.getElementById('confirmDelete'),
+      deleteProjName: document.getElementById('deleteProjName'),
+      // 搜索和分类
+      searchInput: document.getElementById('searchInput'),
+      categoryFilter: document.getElementById('categoryFilter')
+    };
+
+    // 初始化
+    init();
+    function init() {
+      const projects = getLocalData();
+      renderProjects(projects); // 初始渲染
+      bindEvents();
+      // 初始化关闭所有弹窗
+      closeModal('addModal');
+      closeModal('editModal');
+      closeModal('deleteModal');
+
+      // 绑定搜索和分类事件
+      el.searchInput.addEventListener('input', performSearchAndFilter);
+      el.categoryFilter.addEventListener('change', performSearchAndFilter);
+    }
+
+    // 本地存储（复用原有逻辑，无修改）
+    function getLocalData() {
+      const data = localStorage.getItem(STORAGE_KEY);
+      return data ? JSON.parse(data) : [];
+    }
+    function saveLocalData(data) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    // 辅助函数：根据图标类名获取类别 (用于分类筛选)
+    function getCategoryFromIcon(iconClass) {
+      switch(iconClass) {
+        case 'icon-code': return '代码';
+        case 'icon-globe': return '网站';
+        case 'icon-store': return '商城';
+        case 'icon-blog': return '博客';
+        case 'icon-dashboard': return '后台';
+        case 'icon-gamepad': return '游戏';
+        default: return '未知';
+      }
+    }
+
+    // 渲染项目（新增 filter 参数）
+    function renderProjects(projects, filter = {}) {
+      el.projectGrid.innerHTML = '';
+      if (projects.length === 0) {
+        el.projectGrid.style.display = 'none';
+        el.emptyState.style.display = 'block';
+        return;
+      }
+      el.projectGrid.style.display = 'grid';
+      el.emptyState.style.display = 'none';
+
+      // 应用过滤条件
+      const filteredProjects = projects.filter(proj => {
+        // 搜索关键词过滤
+        const searchTerm = filter.searchTerm?.toLowerCase() || '';
+        const matchesSearch = proj.name.toLowerCase().includes(searchTerm) ||
+                              (proj.desc && proj.desc.toLowerCase().includes(searchTerm));
+
+        // 分类过滤
+        const selectedCategory = filter.category || 'all';
+        const matchesCategory = selectedCategory === 'all' || proj.icon === selectedCategory;
+
+        return matchesSearch && matchesCategory;
+      });
+
+      // 如果过滤后没有项目，显示空状态
+      if (filteredProjects.length === 0) {
+        el.projectGrid.style.display = 'none';
+        el.emptyState.style.display = 'block';
+        el.emptyState.innerHTML = `
+          <div class="empty-icon">🔍</div>
+          <h3 class="empty-title">未找到匹配的项目</h3>
+          <p class="empty-desc">尝试调整搜索关键词或分类筛选</p>
+          <button id="resetFilterBtn" class="btn btn-primary">
+            <span class="icon-plus"></span>
+            <span>清空筛选</span>
+          </button>
+        `;
+        document.getElementById('resetFilterBtn').addEventListener('click', () => {
+          el.searchInput.value = '';
+          el.categoryFilter.value = 'all';
+          performSearchAndFilter(); // 重新应用空筛选
+        });
+        return;
+      }
+
+      // 渲染过滤后的项目
+      filteredProjects.forEach(proj => {
+        const card = document.createElement('div');
+        card.className = 'project-card';
+        // 卡片新增【编辑按钮】，与删除按钮对称，绑定打开编辑弹窗事件
+        card.innerHTML = `
+          <div class="card-icon"><span class="${proj.icon}"></span></div>
+          <h3 class="card-name">${proj.name}</h3>
+          <p class="card-desc">${proj.desc || '无描述'}</p>
+          <div class="edit-btn" onclick="openEditModal(${proj.id})"><span class="icon-edit"></span></div>
+          <div class="delete-btn" onclick="openDeleteModal(${proj.id}, '${proj.name}')"><span class="icon-trash"></span></div>
+        `;
+        // 跳转链接逻辑（复用原有，无修改）
+        const link = document.createElement('a');
+        link.href = proj.url;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.style.textDecoration = 'none';
+        link.style.color = 'inherit';
+        link.appendChild(card);
+        el.projectGrid.appendChild(link);
+      });
+    }
+
+    // 弹窗通用方法（复用原有，支持编辑弹窗）
+    function openModal(modalId) {
+      document.getElementById(modalId).style.display = 'flex';
+    }
+    function closeModal(modalId) {
+      document.getElementById(modalId).style.display = 'none';
+    }
+
+    // 打开删除弹窗（复用原有，无修改）
+    function openDeleteModal(id, name) {
+      currentDeleteId = id;
+      el.deleteProjName.textContent = name;
+      openModal('deleteModal');
+    }
+
+    // 新增：打开编辑弹窗，根据ID回显原项目数据
+    function openEditModal(id) {
+      currentEditId = id;
+      const projects = getLocalData();
+      // 根据ID找到当前编辑的项目
+      const editProj = projects.find(p => p.id === id);
+      if (!editProj) return;
+      // 回显数据到编辑表单
+      el.editProjectName.value = editProj.name;
+      el.editProjectDesc.value = editProj.desc || '';
+      el.editProjectUrl.value = editProj.url;
+      // 回显选中的图标（移除原有active，给当前图标加active）
+      el.editIconContainer.querySelectorAll('.icon-item').forEach(item => {
+        item.classList.remove('active');
+        const input = item.querySelector('input');
+        if (input.value === editProj.icon) {
+          item.classList.add('active');
+          input.checked = true;
+        }
+      });
+      // 打开编辑弹窗
+      openModal('editModal');
+    }
+
+    // 新增：执行搜索和分类过滤
+    function performSearchAndFilter() {
+      const searchTerm = el.searchInput.value.trim();
+      const selectedCategory = el.categoryFilter.value;
+
+      // 创建过滤对象
+      const filter = {};
+      if (searchTerm) filter.searchTerm = searchTerm;
+      if (selectedCategory !== 'all') filter.category = selectedCategory;
+
+      // 获取所有项目并应用过滤
+      const projects = getLocalData();
+      renderProjects(projects, filter);
+    }
+
+    // 绑定所有事件（新增编辑表单事件、编辑图标选择事件）
+    function bindEvents() {
+      // 新增项目按钮（复用原有，无修改）
+      el.addProjectBtn.onclick = () => openModal('addModal');
+      el.emptyAddBtn.onclick = () => openModal('addModal');
+
+      // 新增项目表单提交（复用原有，微调图标选择器，避免与编辑冲突）
+      el.addProjectForm.onsubmit = (e) => {
+        e.preventDefault();
+        const newProj = {
+          id: Date.now(),
+          name: el.projectName.value.trim(),
+          desc: el.projectDesc.value.trim(),
+          url: el.projectUrl.value.trim(),
+          icon: el.addIconContainer.querySelector('input[name="addProjectIcon"]:checked').value
+        };
+        if (!newProj.name || !newProj.url) {
+          alert('请填写项目名称和访问地址！');
+          return;
+        }
+        const projects = getLocalData();
+        projects.unshift(newProj);
+        saveLocalData(projects);
+        renderProjects(projects);
+        closeModal('addModal');
+        el.addProjectForm.reset();
+        // 重置新增图标默认选中
+        el.addIconContainer.querySelectorAll('.icon-item')[0].classList.add('active');
+        el.addIconContainer.querySelector('input[name="addProjectIcon"]').checked = true;
+        alert('项目新增成功！请确保用Live Server打开文件以访问本地项目');
+      };
+
+      // 新增：编辑项目表单提交 - 修改后覆盖原数据
+      el.editProjectForm.onsubmit = (e) => {
+        e.preventDefault();
+        // 获取编辑后的数据
+        const editData = {
+          name: el.editProjectName.value.trim(),
+          desc: el.editProjectDesc.value.trim(),
+          url: el.editProjectUrl.value.trim(),
+          icon: el.editIconContainer.querySelector('input[name="editProjectIcon"]:checked').value
+        };
+        // 表单校验（与新增一致，必填项校验）
+        if (!editData.name || !editData.url) {
+          alert('请填写项目名称和访问地址！');
+          return;
+        }
+        const projects = getLocalData();
+        // 根据currentEditId找到原项目，覆盖数据（ID不变，其余字段更新）
+        const newProjects = projects.map(p => {
+          if (p.id === currentEditId) {
+            return { ...p, ...editData }; // 保留原ID，更新其余字段
+          }
+          return p;
+        });
+        // 保存到本地存储，重新渲染，关闭弹窗
+        saveLocalData(newProjects);
+        renderProjects(newProjects);
+        closeModal('editModal');
+        alert('项目修改成功！');
+      };
+
+      // 新增图标选择（微调选择器，避免与编辑冲突）
+      el.addIconContainer.addEventListener('click', (e) => {
+        const item = e.target.closest('.icon-item');
+        if (!item) return;
+        el.addIconContainer.querySelectorAll('.icon-item').forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+        item.querySelector('input').checked = true;
+      });
+
+      // 新增：编辑图标选择 - 与新增图标选择逻辑一致
+      el.editIconContainer.addEventListener('click', (e) => {
+        const item = e.target.closest('.icon-item');
+        if (!item) return;
+        el.editIconContainer.querySelectorAll('.icon-item').forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+        item.querySelector('input').checked = true;
+      });
+
+      // 删除项目（复用原有，无修改）
+      el.confirmDelete.onclick = () => {
+        const projects = getLocalData();
+        const newProjects = projects.filter(p => p.id !== currentDeleteId);
+        saveLocalData(newProjects);
+        renderProjects(newProjects);
+        closeModal('deleteModal');
+        alert('项目已删除！');
+      };
+    }
+  </script>
+</body>
+</html>
+

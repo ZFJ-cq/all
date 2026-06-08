@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="css/mobile-adapt.css">
+    <title>灵月仙途 - 流程测试</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+
+        :root {
+            --success: #4ade80;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text: #f0f3f5;
+            --sub: #94a3b8;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--info);
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: var(--info);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--sub);
+        }
+
+        .status-indicator.success { background: var(--success); }
+        .status-indicator.error { background: var(--error); }
+        .status-indicator.warning { background: var(--warning); }
+
+        .test-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+
+        .test-result {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .btn:hover { transform: translateY(-2px); }
+        .btn-primary { background: var(--info); color: white; }
+        .btn-success { background: var(--success); color: #000; }
+        .btn-warning { background: var(--warning); color: #000; }
+
+        .log-area {
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 0.85rem;
+        }
+
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+            border-left: 3px solid var(--sub);
+            padding-left: 10px;
+        }
+
+        .log-entry.success { border-color: var(--success); color: var(--success); }
+        .log-entry.error { border-color: var(--error); color: var(--error); }
+        .log-entry.info { border-color: var(--info); color: var(--info); }
+
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .summary-item {
+            text-align: center;
+            padding: 15px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+        }
+
+        .summary-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .summary-label {
+            color: var(--sub);
+            font-size: 0.9rem;
+        }
+    </style>
+
+  </head>
+<body>
+    <div class="container">
+        <h1>🔍 灵月仙途 - 角色流程测试</h1>
+
+        <div class="card">
+            <div class="card-title">
+                测试控制面板
+                <button class="btn btn-primary" onclick="runAllTests()">运行所有测试</button>
+            </div>
+            <div class="summary">
+                <div class="summary-item">
+                    <div class="summary-value" id="totalTests">0</div>
+                    <div class="summary-label">总测试数</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value" id="passedTests" style="color: var(--success);">0</div>
+                    <div class="summary-label">通过</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value" id="failedTests" style="color: var(--error);">0</div>
+                    <div class="summary-label">失败</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value" id="pendingTests" style="color: var(--warning);">0</div>
+                    <div class="summary-label">待测试</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">
+                1. 配置初始化
+                <div class="status-indicator" id="config-status"></div>
+            </div>
+            <div class="test-item">
+                <span>APP_CONFIG 加载</span>
+                <div class="test-result">
+                    <span id="config-result"></span>
+                    <button class="btn btn-primary" onclick="testConfig()">测试</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">
+                2. 后端连接
+                <div class="status-indicator" id="backend-status"></div>
+            </div>
+            <div class="test-item">
+                <span>API 基础连接</span>
+                <div class="test-result">
+                    <span id="api-result"></span>
+                    <button class="btn btn-primary" onclick="testBackend()">测试</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">
+                3. 用户认证
+                <div class="status-indicator" id="auth-status"></div>
+            </div>
+            <div class="test-item">
+                <span>检查登录状态</span>
+                <div class="test-result">
+                    <span id="login-result"></span>
+                    <button class="btn btn-primary" onclick="testLoginStatus()">测试</button>
+                </div>
+            </div>
+            <div class="test-item">
+                <span>获取用户信息</span>
+                <div class="test-result">
+                    <span id="user-result"></span>
+                    <button class="btn btn-primary" onclick="testUserInfo()">测试</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">
+                4. 角色数据
+                <div class="status-indicator" id="role-status"></div>
+            </div>
+            <div class="test-item">
+                <span>获取角色列表</span>
+                <div class="test-result">
+                    <span id="role-list-result"></span>
+                    <button class="btn btn-primary" onclick="testRoleList()">测试</button>
+                </div>
+            </div>
+            <div class="test-item">
+                <span>获取角色详情</span>
+                <div class="test-result">
+                    <span id="role-detail-result"></span>
+                    <button class="btn btn-primary" onclick="testRoleDetail()">测试</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">
+                5. 游戏功能 API
+                <div class="status-indicator" id="game-status"></div>
+            </div>
+            <div class="test-item">
+                <span>修炼状态</span>
+                <div class="test-result">
+                    <span id="cultivation-result"></span>
+                    <button class="btn btn-primary" onclick="testCultivation()">测试</button>
+                </div>
+            </div>
+            <div class="test-item">
+                <span>角色资产</span>
+                <div class="test-result">
+                    <span id="assets-result"></span>
+                    <button class="btn btn-primary" onclick="testAssets()">测试</button>
+                </div>
+            </div>
+            <div class="test-item">
+                <span>背包</span>
+                <div class="test-result">
+                    <span id="inventory-result"></span>
+                    <button class="btn btn-primary" onclick="testInventory()">测试</button>
+                </div>
+            </div>
+            <div class="test-item">
+                <span>任务</span>
+                <div class="test-result">
+                    <span id="tasks-result"></span>
+                    <button class="btn btn-primary" onclick="testTasks()">测试</button>
+                </div>
+            </div>
+            <div class="test-item">
+                <span>宗门列表</span>
+                <div class="test-result">
+                    <span id="clans-result"></span>
+                    <button class="btn btn-primary" onclick="testClans()">测试</button>
+                </div>
+            </div>
+            <div class="test-item">
+                <span>活动/新闻</span>
+                <div class="test-result">
+                    <span id="news-result"></span>
+                    <button class="btn btn-primary" onclick="testNews()">测试</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">
+                6. 页面跳转检查
+                <div class="status-indicator" id="pages-status"></div>
+            </div>
+            <div class="test-item">
+                <span>登录页</span>
+                <a href="login.html" target="_blank" class="btn btn-info">检查</a>
+            </div>
+            <div class="test-item">
+                <span>角色创建</span>
+                <a href="character-create/character-create-step1.html" target="_blank" class="btn btn-info">检查</a>
+            </div>
+            <div class="test-item">
+                <span>主页面</span>
+                <a href="index.html" target="_blank" class="btn btn-info">检查</a>
+            </div>
+            <div class="test-item">
+                <span>世界地图</span>
+                <a href="word/world.html" target="_blank" class="btn btn-info">检查</a>
+            </div>
+            <div class="test-item">
+                <span>资产页面</span>
+                <a href="assets/assets.html" target="_blank" class="btn btn-info">检查</a>
+            </div>
+            <div class="test-item">
+                <span>炼丹室</span>
+                <a href="guild/liandan.html" target="_blank" class="btn btn-info">检查</a>
+            </div>
+            <div class="test-item">
+                <span>锻器室</span>
+                <a href="guild/forge.html" target="_blank" class="btn btn-info">检查</a>
+            </div>
+            <div class="test-item">
+                <span>修仙洞府</span>
+                <a href="guild/cave.html" target="_blank" class="btn btn-info">检查</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">
+                测试日志
+                <button class="btn btn-warning" onclick="clearLogs()">清空</button>
+            </div>
+            <div class="log-area" id="logArea">
+                <div class="log-entry info">等待测试开始...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8088/api';
+        let testResults = {
+            total: 0,
+            passed: 0,
+            failed: 0,
+            pending: 12
+        };
+
+        function log(message, type = 'info') {
+            const logArea = document.getElementById('logArea');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logArea.appendChild(entry);
+            logArea.scrollTop = logArea.scrollHeight;
+        }
+
+        function clearLogs() {
+            document.getElementById('logArea').innerHTML = '<div class="log-entry info">日志已清空</div>';
+        }
+
+        function updateSummary() {
+            document.getElementById('totalTests').textContent = testResults.total;
+            document.getElementById('passedTests').textContent = testResults.passed;
+            document.getElementById('failedTests').textContent = testResults.failed;
+            document.getElementById('pendingTests').textContent = testResults.pending;
+        }
+
+        function setResult(elementId, success, message) {
+            const el = document.getElementById(elementId);
+            if (success) {
+                el.innerHTML = `<span style="color: var(--success);">✅ ${message}</span>`;
+            } else {
+                el.innerHTML = `<span style="color: var(--error);">❌ ${message}</span>`;
+            }
+            testResults.total++;
+            if (success) testResults.passed++;
+            else testResults.failed++;
+            testResults.pending = Math.max(0, testResults.pending - 1);
+            updateSummary();
+        }
+
+        function setStatus(elementId, status) {
+            const el = document.getElementById(elementId);
+            el.className = 'status-indicator ' + status;
+        }
+
+        async function testConfig() {
+            log('开始测试 APP_CONFIG...');
+            try {
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                if (window.APP_CONFIG) {
+                    log('APP_CONFIG 已加载', 'success');
+                    setResult('config-result', true, '配置加载成功');
+                    setStatus('config-status', 'success');
+                } else {
+                    throw new Error('APP_CONFIG 未定义');
+                }
+            } catch (error) {
+                log(`APP_CONFIG 测试失败: ${error.message}`, 'error');
+                setResult('config-result', false, error.message);
+                setStatus('config-status', 'error');
+            }
+        }
+
+        async function testBackend() {
+            log('开始测试后端连接...');
+            try {
+                const response = await fetch(`${API_BASE}/stats`);
+                if (response.ok) {
+                    log('后端连接成功', 'success');
+                    setResult('api-result', true, '连接正常');
+                    setStatus('backend-status', 'success');
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                log(`后端连接失败: ${error.message}`, 'error');
+                setResult('api-result', false, error.message);
+                setStatus('backend-status', 'error');
+            }
+        }
+
+        async function testLoginStatus() {
+            log('检查登录状态...');
+            const userId = localStorage.getItem('userId');
+            if (userId) {
+                log(`已登录，userId: ${userId}`, 'success');
+                setResult('login-result', true, '已登录');
+                setStatus('auth-status', 'success');
+            } else {
+                log('未登录', 'warning');
+                setResult('login-result', false, '未登录，请先登录');
+                setStatus('auth-status', 'warning');
+            }
+        }
+
+        async function testUserInfo() {
+            log('测试用户信息...');
+            const userId = localStorage.getItem('userId');
+            if (!userId) {
+                setResult('user-result', false, '未登录');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/user/${userId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`用户信息获取成功: ${data.username || '未知用户'}`, 'success');
+                    setResult('user-result', true, '获取成功');
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                log(`用户信息获取失败: ${error.message}`, 'error');
+                setResult('user-result', false, error.message);
+            }
+        }
+
+        async function testRoleList() {
+            log('测试角色列表...');
+            const userId = localStorage.getItem('userId');
+            if (!userId) {
+                setResult('role-list-result', false, '未登录');
+                setStatus('role-status', 'warning');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/role/user/${userId}`);
+                if (response.ok) {
+                    const roles = await response.json();
+                    log(`角色列表获取成功，共 ${roles.length} 个角色`, 'success');
+                    setResult('role-list-result', true, `${roles.length} 个角色`);
+                    
+                    if (roles.length > 0 && !localStorage.getItem('roleId')) {
+                        localStorage.setItem('roleId', roles[0].id);
+                        log(`自动设置角色 ID: ${roles[0].id}`, 'info');
+                    }
+                    setStatus('role-status', 'success');
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                log(`角色列表获取失败: ${error.message}`, 'error');
+                setResult('role-list-result', false, error.message);
+                setStatus('role-status', 'error');
+            }
+        }
+
+        async function testRoleDetail() {
+            log('测试角色详情...');
+            const roleId = localStorage.getItem('roleId');
+            if (!roleId) {
+                setResult('role-detail-result', false, '未选择角色');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/role/${roleId}`);
+                if (response.ok) {
+                    const role = await response.json();
+                    log(`角色详情获取成功: ${role.roleName || '未知角色'}`, 'success');
+                    setResult('role-detail-result', true, '获取成功');
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                log(`角色详情获取失败: ${error.message}`, 'error');
+                setResult('role-detail-result', false, error.message);
+            }
+        }
+
+        async function testCultivation() {
+            log('测试修炼状态...');
+            const roleId = localStorage.getItem('roleId');
+            if (!roleId) {
+                setResult('cultivation-result', false, '未选择角色');
+                setStatus('game-status', 'warning');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/cultivation/status/${roleId}`);
+                if (response.ok) {
+                    log('修炼状态获取成功', 'success');
+                    setResult('cultivation-result', true, '获取成功');
+                    setStatus('game-status', 'success');
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                log(`修炼状态获取失败: ${error.message}`, 'error');
+                setResult('cultivation-result', false, error.message);
+            }
+        }
+
+        async function testAssets() {
+            log('测试角色资产...');
+            const roleId = localStorage.getItem('roleId');
+            if (!roleId) {
+                setResult('assets-result', false, '未选择角色');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/role-asset/${roleId}`);
+                if (response.ok) {
+                    const assets = await response.json();
+                    log(`资产获取成功`, 'success');
+                    setResult('assets-result', true, '获取成功');
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                log(`资产获取失败: ${error.message}`, 'error');
+                setResult('assets-result', false, error.message);
+            }
+        }
+
+        async function testInventory() {
+            log('测试背包...');
+            const roleId = localStorage.getItem('roleId');
+            if (!roleId) {
+                setResult('inventory-result', false, '未选择角色');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/inventory/role/${roleId}`);
+                if (response.ok) {
+                    log('背包获取成功', 'success');
+                    setResult('inventory-result', true, '获取成功');
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                log(`背包获取失败: ${error.message}`, 'error');
+                setResult('inventory-result', false, error.message);
+            }
+        }
+
+        async function testTasks() {
+            log('测试任务...');
+            const roleId = localStorage.getItem('roleId');
+            if (!roleId) {
+                setResult('tasks-result', false, '未选择角色');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/enhanced-task/role/${roleId}`);
+                if (response.ok) {
+                    log('任务获取成功', 'success');
+                    setResult('tasks-result', true, '获取成功');
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                log(`任务获取失败: ${error.message}`, 'error');
+                setResult('tasks-result', false, error.message);
+            }
+        }
+
+        async function testClans() {
+            log('测试宗门列表...');
+            try {
+                const response = await fetch(`${API_BASE}/clan`);
+                if (response.ok) {
+                    const clans = await response.json();
+                    log(`宗门列表获取成功，共 ${clans.length} 个宗门`, 'success');
+                    setResult('clans-result', true, `${clans.length} 个宗门`);
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                log(`宗门列表获取失败: ${error.message}`, 'error');
+                setResult('clans-result', false, error.message);
+            }
+        }
+
+        async function testNews() {
+            log('测试活动/新闻...');
+            try {
+                const response = await fetch(`${API_BASE}/activity/status/active`);
+                if (response.ok) {
+                    log('活动/新闻获取成功', 'success');
+                    setResult('news-result', true, '获取成功');
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                log(`活动/新闻获取失败: ${error.message}`, 'error');
+                setResult('news-result', false, error.message);
+            }
+        }
+
+        async function runAllTests() {
+            log('=== 开始运行所有测试 ===', 'info');
+            
+            await testConfig();
+            await new Promise(r => setTimeout(r, 300));
+            
+            await testBackend();
+            await new Promise(r => setTimeout(r, 300));
+            
+            await testLoginStatus();
+            await new Promise(r => setTimeout(r, 300));
+            
+            await testUserInfo();
+            await new Promise(r => setTimeout(r, 300));
+            
+            await testRoleList();
+            await new Promise(r => setTimeout(r, 300));
+            
+            await testRoleDetail();
+            await new Promise(r => setTimeout(r, 300));
+            
+            await testCultivation();
+            await new Promise(r => setTimeout(r, 300));
+            
+            await testAssets();
+            await new Promise(r => setTimeout(r, 300));
+            
+            await testInventory();
+            await new Promise(r => setTimeout(r, 300));
+            
+            await testTasks();
+            await new Promise(r => setTimeout(r, 300));
+            
+            await testClans();
+            await new Promise(r => setTimeout(r, 300));
+            
+            await testNews();
+            
+            log('=== 所有测试完成 ===', 'success');
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            updateSummary();
+            log('测试页面已加载，点击"运行所有测试"开始', 'info');
+        });
+    </script>
+</body>
+</html>

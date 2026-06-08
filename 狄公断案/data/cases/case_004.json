@@ -1,0 +1,227 @@
+{
+  "id": "case_004",
+  "title": "兰亭疑云",
+  "subtitle": "第四案",
+  "difficulty": 2,
+  "description": "收藏家重金购得王羲之兰亭序真迹，却在鉴赏会上发现是赝品。狄仁杰抽丝剥茧，揭开书画造假黑幕……",
+  "background": "唐武则天时期，洛阳收藏家陈员外花重金从古董商处购得一幅号称王羲之真迹的兰亭序，邀请名流鉴赏时却被当场指出是赝品。陈员外怒而报官，狄仁杰介入调查，发现这背后隐藏着一个庞大的书画造假团伙。",
+  "stages": {
+    "report": {
+      "id": "report",
+      "name": "报案",
+      "dialogues": [
+        {
+          "speaker": "系统",
+          "speakerTitle": "旁白",
+          "content": "洛阳城，陈员外府上。一场盛大的书画鉴赏会正在进行，陈员外得意地展示新购的兰亭序真迹。",
+          "emotion": "narrator"
+        },
+        {
+          "speaker": "陈员外",
+          "speakerTitle": "收藏家",
+          "content": "诸位请看，这便是王右军的兰亭序真迹！本员外花了三千两白银才购得此宝！",
+          "emotion": "proud"
+        },
+        {
+          "speaker": "系统",
+          "speakerTitle": "旁白",
+          "content": "在场的一位老书法家仔细端详后，摇头叹息。",
+          "emotion": "narrator"
+        },
+        {
+          "speaker": "老书法家",
+          "speakerTitle": "书法名家",
+          "content": "陈员外，恕老夫直言，此乃赝品。纸张虽旧，墨迹却是新的，且笔法与王右军相去甚远。",
+          "emotion": "serious"
+        },
+        {
+          "speaker": "陈员外",
+          "speakerTitle": "收藏家",
+          "content": "什么？！赝品？来人！去报官！我花了三千两白银，竟买了个假货！",
+          "emotion": "angry"
+        },
+        {
+          "speaker": "狄仁杰",
+          "speakerTitle": "同平章事",
+          "content": "三千两白银买一幅赝品，此事绝非简单的买卖纠纷。本官定要查个水落石出！",
+          "emotion": "serious"
+        }
+      ]
+    },
+    "investigation": {
+      "id": "investigation",
+      "name": "取证",
+      "scenes": [
+        {
+          "id": "antique_shop",
+          "name": "古董铺",
+          "description": "出售兰亭序的古董铺，掌柜姓方，店面不大但藏品颇丰。",
+          "searchHints": ["检查铺中其他书画", "查看进货账本", "寻找作画工具"]
+        },
+        {
+          "id": "warehouse",
+          "name": "城西仓库",
+          "description": "古董铺的仓库，存放着大量未出售的书画和古玩，角落里有一间密室。",
+          "searchHints": ["查看密室中的物品", "检查纸张和墨料", "寻找造假证据"]
+        }
+      ],
+      "evidences": [
+        {
+          "id": "ev_001",
+          "name": "赝品兰亭序的纸张",
+          "icon": "note",
+          "description": "经鉴定，兰亭序赝品所用纸张是用特殊药水做旧的唐代新纸，与真迹的晋代纸张完全不同。",
+          "sceneId": "antique_shop",
+          "isKey": true,
+          "clue": "纸张是用药水做旧的唐代新纸，这是专业造假手段！"
+        },
+        {
+          "id": "ev_002",
+          "name": "古董铺的进货账本",
+          "icon": "book",
+          "description": "账本显示，古董铺近期从城西仓库进了大量'旧纸'和'古墨'，远超正常经营所需。",
+          "sceneId": "antique_shop",
+          "isKey": true,
+          "clue": "大量采购'旧纸'和'古墨'，这分明是造假所需的材料！"
+        },
+        {
+          "id": "ev_003",
+          "name": "仓库密室中的造假工具",
+          "icon": "seal",
+          "description": "密室中发现做旧药水、仿古印章、各种名家的字帖临摹稿，以及数十幅未完成的赝品书画。",
+          "sceneId": "warehouse",
+          "isKey": true,
+          "clue": "密室就是造假工坊！所有造假工具和半成品都在这里！"
+        },
+        {
+          "id": "ev_004",
+          "name": "买家名单",
+          "icon": "book",
+          "description": "密室中还有一本买家名单，记录着已售出赝品的买家姓名和价格，总额高达数万两白银。",
+          "sceneId": "warehouse",
+          "isKey": true,
+          "clue": "买家名单证明这是一个大规模的造假售假团伙，受害者众多！"
+        },
+        {
+          "id": "ev_005",
+          "name": "方掌柜的供词",
+          "icon": "witness",
+          "description": "方掌柜声称自己只是代售，兰亭序是从一个叫'吴先生'的人那里拿的货。",
+          "sceneId": "antique_shop",
+          "isKey": false,
+          "clue": "方掌柜只是销售环节，幕后还有一个'吴先生'在操控。"
+        },
+        {
+          "id": "ev_006",
+          "name": "邻居的证词",
+          "icon": "witness",
+          "description": "仓库邻居称，经常在深夜听到仓库中有磨墨和纸张翻动的声音。",
+          "sceneId": "warehouse",
+          "isKey": false,
+          "clue": "深夜磨墨和翻动纸张，说明有人在夜间秘密制作赝品。"
+        }
+      ]
+    },
+    "interrogation": {
+      "id": "interrogation",
+      "name": "审讯",
+      "suspects": [
+        {
+          "id": "sus_001",
+          "name": "吴先生",
+          "role": "书画造假师",
+          "description": "神秘书画高手，擅长临摹历代名家作品，是造假团伙的核心人物。",
+          "dialogues": [
+            {
+              "speaker": "吴先生",
+              "speakerTitle": "嫌疑人",
+              "content": "大人，小人只是个教书先生，何曾造过什么假画？",
+              "emotion": "fear"
+            },
+            {
+              "speaker": "狄仁杰",
+              "speakerTitle": "同平章事",
+              "content": "城西仓库密室中的造假工具和半成品赝品，你可要本官一一呈上？",
+              "emotion": "serious"
+            },
+            {
+              "speaker": "吴先生",
+              "speakerTitle": "嫌疑人",
+              "content": "那些……那些只是小人练习书法所用！",
+              "emotion": "panic"
+            },
+            {
+              "speaker": "狄仁杰",
+              "speakerTitle": "同平章事",
+              "content": "练习书法需要做旧药水？需要仿古印章？你那买家名单上可记着数万两白银的生意！",
+              "emotion": "angry"
+            },
+            {
+              "speaker": "吴先生",
+              "speakerTitle": "嫌疑人",
+              "content": "大人饶命！小人……小人确实造假，但都是方掌柜让小人做的！他负责找买家！",
+              "emotion": "surrender"
+            }
+          ],
+          "isGuilty": true
+        },
+        {
+          "id": "sus_002",
+          "name": "方掌柜",
+          "role": "古董铺掌柜",
+          "description": "古董铺掌柜，经营古董生意多年，人脉广泛。",
+          "dialogues": [
+            {
+              "speaker": "方掌柜",
+              "speakerTitle": "嫌疑人",
+              "content": "大人！小人只是代售，那兰亭序是吴先生送来的，小人不知是赝品啊！",
+              "emotion": "fear"
+            },
+            {
+              "speaker": "狄仁杰",
+              "speakerTitle": "同平章事",
+              "content": "你做了多年古董生意，会看不出兰亭序是赝品？",
+              "emotion": "serious"
+            },
+            {
+              "speaker": "方掌柜",
+              "speakerTitle": "嫌疑人",
+              "content": "小人……小人确实起了贪念。吴先生造的赝品太逼真了，小人一时糊涂……",
+              "emotion": "nervous"
+            },
+            {
+              "speaker": "狄仁杰",
+              "speakerTitle": "同平章事",
+              "content": "一时糊涂？你那账本上可是长期大量进货'旧纸'和'古墨'！你与吴先生是同谋！",
+              "emotion": "angry"
+            },
+            {
+              "speaker": "方掌柜",
+              "speakerTitle": "嫌疑人",
+              "content": "大人饶命！小人知罪！小人愿退赔所有银两！",
+              "emotion": "surrender"
+            }
+          ],
+          "isGuilty": false,
+          "hint": "方掌柜是同谋，但造假的核心是吴先生"
+        }
+      ]
+    },
+    "judgment": {
+      "id": "judgment",
+      "name": "断案",
+      "correctSuspectId": "sus_001",
+      "requiredEvidenceIds": ["ev_001", "ev_002", "ev_003", "ev_004"],
+      "judgmentText": {
+        "correct": "经查明，书画造假师吴先生利用高超技艺临摹历代名家作品，用药水做旧纸张，在城西仓库密室中批量制作赝品，再由方掌柜以古董铺为掩护高价出售。二人合伙诈骗数万两白银，受害者众多。判吴先生流放三千里，方掌柜杖责四十，退还所有赃款！查抄造假工坊，销毁所有赝品。此案彰显狄公明辨真伪之智！",
+        "wrong": "本案证据尚不充分，大人还需仔细查证，切莫冤枉了好人。",
+        "partial": "大人所断有部分道理，但仍有关键证据未纳入考量，请重新审视所有证据。"
+      }
+    }
+  },
+  "hints": [
+    { "id": "hint_1", "content": "赝品的关键在于纸张——检查纸张的做旧手法。", "cost": 1 },
+    { "id": "hint_2", "content": "古董铺的进货账本透露了大量采购造假材料的秘密。", "cost": 1 },
+    { "id": "hint_3", "content": "城西仓库的密室是造假的核心地点，里面的证据至关重要。", "cost": 1 }
+  ]
+}

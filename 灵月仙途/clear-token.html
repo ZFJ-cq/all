@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="css/mobile-adapt.css">
+    <title>清除 Token - 灵月仙途</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+        .info {
+            background: #f0f4ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        button.secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+
+  </head>
+<body>
+    <div class="container">
+        <h1>🔧 Token 修复工具</h1>
+        
+        <div class="info">
+            <strong>检测到 Token 无效问题</strong><br>
+            由于系统更新，您的登录 Token 已失效。请清除旧 Token 并重新登录。
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <p><strong>当前状态:</strong></p>
+            <ul id="statusList" style="color: #666;">
+                <li>Token: <span id="tokenStatus">检查中...</span></li>
+                <li>用户 ID: <span id="userIdStatus">检查中...</span></li>
+                <li>用户名：<span id="usernameStatus">检查中...</span></li>
+            </ul>
+        </div>
+        
+        <button onclick="clearToken()">🗑️ 清除旧 Token</button>
+        <button class="secondary" onclick="goToLogin()">🔐 去登录</button>
+        
+        <div id="status" class="status"></div>
+    </div>
+    
+    <script>
+        // 检查当前状态
+        function checkStatus() {
+            const token = localStorage.getItem('token');
+            const userId = localStorage.getItem('userId');
+            const username = localStorage.getItem('username');
+            
+            document.getElementById('tokenStatus').textContent = token ? '存在 (可能已过期)' : '不存在';
+            document.getElementById('userIdStatus').textContent = userId || '不存在';
+            document.getElementById('usernameStatus').textContent = username || '不存在';
+            
+            if (token) {
+                document.getElementById('tokenStatus').style.color = '#ff9800';
+            }
+        }
+        
+        // 清除 Token
+        function clearToken() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userId');
+            localStorage.removeItem('username');
+            localStorage.removeItem('currentRoleId');
+            localStorage.removeItem('currentUserId');
+            
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = '✅ 已清除所有登录信息，请重新登录';
+            statusDiv.className = 'status success';
+            statusDiv.style.display = 'block';
+            
+            checkStatus();
+            
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 1500);
+        }
+        
+        // 跳转到登录页面
+        function goToLogin() {
+            window.location.href = 'login.html';
+        }
+        
+        // 页面加载时检查状态
+        checkStatus();
+    </script>
+</body>
+</html>

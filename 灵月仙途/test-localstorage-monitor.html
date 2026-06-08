@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="css/mobile-adapt.css">
+    <meta charset="UTF-8">
+    <title>localStorage 监控</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background: #f0f0f0; }
+        .container { background: white; padding: 20px; border-radius: 8px; max-width: 800px; margin: 0 auto; }
+        .log { background: #1e1e1e; color: #00ff00; padding: 15px; border-radius: 5px; max-height: 400px; overflow-y: auto; font-family: monospace; font-size: 12px; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    </style>
+
+  </head>
+<body>
+    <div class="container">
+        <h1>🔍 localStorage 实时监控</h1>
+        <p>监控 localStorage 的变化，查看是否有代码在清除数据</p>
+        
+        <button onclick="setData()">设置测试数据</button>
+        <button onclick="getData()">读取数据</button>
+        <button onclick="clearData()">清除数据</button>
+        <button onclick="reloadPage()">刷新页面</button>
+        
+        <h3>实时监控日志：</h3>
+        <div class="log" id="logBox"></div>
+    </div>
+    
+    <script>
+        const logBox = document.getElementById('logBox');
+        
+        function log(message, type = 'info') {
+            const time = new Date().toLocaleTimeString();
+            const color = type === 'error' ? '#ff0000' : type === 'warning' ? '#ffa500' : '#00ff00';
+            logBox.innerHTML += `<div style="color: ${color};">[${time}] ${message}</div>`;
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+        
+        // 监控 localStorage 变化
+        const originalSetItem = Storage.prototype.setItem;
+        const originalRemoveItem = Storage.prototype.removeItem;
+        const originalClear = Storage.prototype.clear;
+        
+        Storage.prototype.setItem = function(key, value) {
+            log(`✅ setItem: ${key} = ${value.substring(0, 50)}`, 'info');
+            return originalSetItem.apply(this, arguments);
+        };
+        
+        Storage.prototype.removeItem = function(key) {
+            log(`❌ removeItem: ${key}`, 'warning');
+            return originalRemoveItem.apply(this, arguments);
+        };
+        
+        Storage.prototype.clear = function() {
+            log('🗑️ clear() - 清除所有数据！', 'error');
+            return originalClear.apply(this, arguments);
+        };
+        
+        // 监控 storage 事件（其他标签页的变化）
+        window.addEventListener('storage', (e) => {
+            log(`📡 其他标签页修改：${e.key} = ${e.newValue}`, 'warning');
+        });
+        
+        function setData() {
+            localStorage.setItem('userId', '1');
+            localStorage.setItem('roleId', '45');
+            localStorage.setItem('token', 'test-token-123');
+            log('✅ 已设置测试数据', 'info');
+        }
+        
+        function getData() {
+            const userId = localStorage.getItem('userId');
+            const roleId = localStorage.getItem('roleId');
+            const token = localStorage.getItem('token');
+            
+            if (userId && roleId && token) {
+                log(`✅ 数据完整：userId=${userId}, roleId=${roleId}`, 'info');
+            } else {
+                log(`❌ 数据丢失！userId=${userId}, roleId=${roleId}, token=${token ? '存在' : '不存在'}`, 'error');
+            }
+        }
+        
+        function clearData() {
+            localStorage.clear();
+            log('🗑️ 已手动清除所有数据', 'warning');
+        }
+        
+        function reloadPage() {
+            log('🔄 准备刷新页面...', 'info');
+            setTimeout(() => location.reload(), 500);
+        }
+        
+        // 页面加载时自动检查
+        window.addEventListener('DOMContentLoaded', () => {
+            log('📄 页面加载完成', 'info');
+            getData();
+        });
+        
+        // 页面卸载时记录
+        window.addEventListener('beforeunload', () => {
+            log('🚪 页面即将卸载', 'warning');
+        });
+    </script>
+</body>
+</html>

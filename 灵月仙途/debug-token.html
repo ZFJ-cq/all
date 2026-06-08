@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="css/mobile-adapt.css">
+  <title>Token 诊断工具</title>
+  <style>
+    body {
+      font-family: 'Microsoft YaHei', sans-serif;
+      background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      padding: 20px;
+    }
+    .container {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      padding: 30px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      max-width: 600px;
+      width: 100%;
+    }
+    h1 {
+      color: #f4d03f;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .section {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-left: 3px solid #f4d03f;
+    }
+    .section-title {
+      color: #f4d03f;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .info-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+    }
+    .info-label {
+      color: #ddd;
+    }
+    .info-value {
+      color: #f4d03f;
+      font-family: monospace;
+      word-break: break-all;
+      max-width: 300px;
+    }
+    .btn {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(90deg, #f4d03f, #f1c40f);
+      border: none;
+      border-radius: 8px;
+      color: #333;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 10px;
+    }
+    .btn:hover {
+      background: linear-gradient(90deg, #f1c40f, #f4d03f);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(244, 208, 63, 0.4);
+    }
+    .btn-danger {
+      background: linear-gradient(90deg, #ff6b6b, #ee5a5a);
+    }
+    .btn-danger:hover {
+      background: linear-gradient(90deg, #ee5a5a, #ff6b6b);
+    }
+    .btn-success {
+      background: linear-gradient(90deg, #4CAF50, #45a049);
+    }
+    .btn-success:hover {
+      background: linear-gradient(90deg, #45a049, #4CAF50);
+    }
+    .grid-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .log-container {
+      background: #000;
+      border-radius: 8px;
+      padding: 15px;
+      max-height: 300px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 0.8rem;
+      color: #0f0;
+      margin-top: 20px;
+    }
+    .log-entry {
+      margin-bottom: 5px;
+    }
+    .log-error { color: #f44; }
+    .log-warn { color: #ff0; }
+    .log-info { color: #0f0; }
+  </style>
+
+  </head>
+<body>
+  <div class="container">
+    <h1>🔍 Token 诊断工具</h1>
+    
+    <div class="section">
+      <div class="section-title">📦 LocalStorage 状态</div>
+      <div class="info-item">
+        <span class="info-label">Token:</span>
+        <span class="info-value" id="tokenValue">检查中...</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">User ID:</span>
+        <span class="info-value" id="userIdValue">检查中...</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Role ID:</span>
+        <span class="info-value" id="roleIdValue">检查中...</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Username:</span>
+        <span class="info-value" id="usernameValue">检查中...</span>
+      </div>
+    </div>
+    
+    <div class="section">
+      <div class="section-title">🔑 Token 详情</div>
+      <div class="info-item">
+        <span class="info-label">Token 长度:</span>
+        <span class="info-value" id="tokenLength">0</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Token 格式:</span>
+        <span class="info-value" id="tokenFormat">未知</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Token 过期时间:</span>
+        <span class="info-value" id="tokenExp">未知</span>
+      </div>
+    </div>
+    
+    <div class="section">
+      <div class="section-title">⚠️ 诊断结果</div>
+      <div id="diagnosisResult" style="color: #fff; margin-top: 10px;"></div>
+    </div>
+    
+    <div class="grid-buttons">
+      <button class="btn btn-success" onclick="testApi()">测试 API 连接</button>
+      <button class="btn" onclick="goToLogin()">去登录</button>
+      <button class="btn btn-danger" onclick="clearAll()">清除所有数据</button>
+      <button class="btn" onclick="refreshPage()">刷新页面</button>
+    </div>
+    
+    <div class="log-container" id="logContainer">
+      <div class="log-entry log-info">诊断工具已启动...</div>
+    </div>
+  </div>
+  
+  <script>
+    const logContainer = document.getElementById('logContainer');
+    
+    function log(message, type = 'info') {
+      const entry = document.createElement('div');
+      entry.className = 'log-entry log-' + type;
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      logContainer.appendChild(entry);
+      logContainer.scrollTop = logContainer.scrollHeight;
+    }
+    
+    function checkTokenStatus() {
+      const token = localStorage.getItem('token');
+      const userId = localStorage.getItem('userId');
+      const roleId = localStorage.getItem('roleId');
+      const username = localStorage.getItem('username');
+      
+      document.getElementById('tokenValue').textContent = token ? token.substring(0, 50) + '...' : '不存在';
+      document.getElementById('userIdValue').textContent = userId || '不存在';
+      document.getElementById('roleIdValue').textContent = roleId || '不存在';
+      document.getElementById('usernameValue').textContent = username || '不存在';
+      
+      // Token 详情
+      if (token) {
+        document.getElementById('tokenLength').textContent = token.length;
+        
+        // 检查 Token 格式（JWT 应该是三段式）
+        const parts = token.split('.');
+        if (parts.length === 3) {
+          document.getElementById('tokenFormat').textContent = 'JWT (有效格式)';
+          
+          // 解析 Token 过期时间
+          try {
+            const payload = JSON.parse(atob(parts[1]));
+            if (payload.exp) {
+              const expDate = new Date(payload.exp * 1000);
+              const now = new Date();
+              const isExpired = expDate < now;
+              document.getElementById('tokenExp').textContent = 
+                `${expDate.toLocaleString()} (${isExpired ? '已过期' : '有效'})`;
+              log(`Token 过期时间：${expDate.toLocaleString()}, ${isExpired ? '已过期' : '有效'}`, isExpired ? 'warn' : 'info');
+            } else {
+              document.getElementById('tokenExp').textContent = '无过期时间';
+              log('Token 没有过期时间字段', 'warn');
+            }
+          } catch (e) {
+            document.getElementById('tokenExp').textContent = '无法解析';
+            log('Token 解析失败：' + e.message, 'error');
+          }
+        } else {
+          document.getElementById('tokenFormat').textContent = '非 JWT 格式';
+          log('Token 格式不正确，不是 JWT 格式', 'error');
+        }
+      } else {
+        document.getElementById('tokenLength').textContent = '0';
+        document.getElementById('tokenFormat').textContent = '无 Token';
+        document.getElementById('tokenExp').textContent = '无 Token';
+        log('LocalStorage 中没有 Token', 'error');
+      }
+      
+      // 诊断结果
+      const diagnosisDiv = document.getElementById('diagnosisResult');
+      if (!token) {
+        diagnosisDiv.innerHTML = `
+          <div style="color: #ff6b6b; margin-bottom: 10px;">❌ 问题：没有 Token</div>
+          <div>您需要先登录系统。请点击"去登录"按钮进行登录。</div>
+        `;
+        log('诊断结果：没有 Token，需要登录', 'error');
+      } else if (userId && roleId) {
+        diagnosisDiv.innerHTML = `
+          <div style="color: #4CAF50; margin-bottom: 10px;">✅ 认证信息完整</div>
+          <div>Token、User ID 和 Role ID 都存在。如果仍然出现 401 错误，可能是 Token 已过期或后端服务有问题。</div>
+        `;
+        log('诊断结果：认证信息完整', 'info');
+      } else {
+        diagnosisDiv.innerHTML = `
+          <div style="color: #ff0; margin-bottom: 10px;">⚠️ 认证信息不完整</div>
+          <div>有 Token 但缺少 User ID 或 Role ID。建议清除数据后重新登录。</div>
+        `;
+        log('诊断结果：认证信息不完整', 'warn');
+      }
+    }
+    
+    async function testApi() {
+      log('开始测试 API 连接...', 'info');
+      const token = localStorage.getItem('token');
+      const roleId = localStorage.getItem('roleId');
+      
+      if (!token) {
+        log('没有 Token，无法测试 API', 'error');
+        alert('请先登录！');
+        return;
+      }
+      
+      try {
+        const response = await fetch(`http://localhost:8088/api/role/${roleId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          log(`API 测试成功！状态码：${response.status}`, 'info');
+          log('返回数据：' + JSON.stringify(data).substring(0, 100), 'info');
+          alert('API 连接成功！');
+        } else {
+          const errorData = await response.json().catch(() => ({}));
+          log(`API 测试失败！状态码：${response.status}, 错误：${errorData.message || '未知'}`, 'error');
+          alert(`API 连接失败：${response.status} - ${errorData.message || '未知错误'}`);
+        }
+      } catch (error) {
+        log(`API 测试异常：${error.message}`, 'error');
+        alert(`API 连接异常：${error.message}`);
+      }
+    }
+    
+    function goToLogin() {
+      log('跳转到登录页面...', 'info');
+      window.location.href = 'login.html';
+    }
+    
+    function clearAll() {
+      if (confirm('确定要清除所有本地数据吗？此操作不可恢复！')) {
+        localStorage.clear();
+        log('已清除所有本地数据', 'info');
+        alert('已清除所有本地数据，请重新登录。');
+        checkTokenStatus();
+      }
+    }
+    
+    function refreshPage() {
+      log('刷新页面...', 'info');
+      window.location.reload();
+    }
+    
+    // 页面加载时执行诊断
+    window.addEventListener('DOMContentLoaded', () => {
+      log('=== Token 诊断工具 ===', 'info');
+      log('检查 LocalStorage 状态...', 'info');
+      checkTokenStatus();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="../js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="../css/mobile-adapt.css">
+    <title>宗门成员 - 灵月仙途</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-body: #f0f2f5;
+            --bg-card: #2c3e50;
+            --bg-card-light: #34495e;
+            --text-gold: #d4af37;
+            --text-gold-dim: #aa8c2c;
+            --text-white: #ecf0f1;
+            --text-grey: #95a5a6;
+            --border-radius: 8px;
+            --nav-height: 60px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-white);
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            background: rgba(44, 62, 80, 0.05);
+            min-height: 100vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            padding-bottom: calc(var(--nav-height) + 20px);
+        }
+
+        /* 头部 */
+        .header {
+            background: var(--bg-card);
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--text-gold-dim);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .header-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--text-gold);
+        }
+
+        .header-btn {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--text-gold-dim);
+            color: var(--text-gold);
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        /* 统计信息 */
+        .stats-bar {
+            background: var(--bg-card);
+            margin: 10px 15px;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--text-gold);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-grey);
+            margin-top: 5px;
+        }
+
+        /* 筛选栏 */
+        .filter-bar {
+            margin: 15px;
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+
+        .filter-btn {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            color: var(--text-grey);
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .filter-btn.active {
+            background: rgba(212, 175, 55, 0.2);
+            border-color: var(--text-gold);
+            color: var(--text-gold);
+        }
+
+        /* 成员列表 */
+        .members-list {
+            padding: 0 15px;
+        }
+
+        .member-card {
+            background: var(--bg-card);
+            border-radius: var(--border-radius);
+            padding: 15px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(212, 175, 55, 0.1);
+            transition: all 0.2s;
+        }
+
+        .member-card:hover {
+            border-color: var(--text-gold);
+            transform: translateY(-2px);
+        }
+
+        .member-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .member-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--text-gold), var(--text-gold-dim));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            border: 2px solid var(--text-gold);
+        }
+
+        .member-info {
+            flex: 1;
+        }
+
+        .member-name {
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--text-white);
+            margin-bottom: 4px;
+        }
+
+        .member-position {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .position-zongzhu {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            color: #000;
+        }
+
+        .position-fuzongzhu {
+            background: linear-gradient(135deg, #c0c0c0, #808080);
+            color: #000;
+        }
+
+        .position-zhanglao {
+            background: linear-gradient(135deg, #cd7f32, #8b4513);
+            color: #fff;
+        }
+
+        .position-jingying {
+            background: rgba(212, 175, 55, 0.3);
+            color: var(--text-gold);
+        }
+
+        .position-dizi {
+            background: rgba(149, 165, 166, 0.3);
+            color: var(--text-grey);
+        }
+
+        .member-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .member-stat {
+            text-align: center;
+        }
+
+        .member-stat-value {
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--text-gold);
+        }
+
+        .member-stat-label {
+            font-size: 11px;
+            color: var(--text-grey);
+            margin-top: 3px;
+        }
+
+        .member-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            justify-content: flex-end;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .btn-promote {
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid #4CAF50;
+            color: #4CAF50;
+        }
+
+        .btn-demote {
+            background: rgba(255, 152, 0, 0.2);
+            border: 1px solid #FF9800;
+            color: #FF9800;
+        }
+
+        .btn-kick {
+            background: rgba(244, 67, 54, 0.2);
+            border: 1px solid #F44336;
+            color: #F44336;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        /* 底部导航 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #1a252f;
+            border-top: 1px solid var(--text-gold-dim);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+            max-width: 480px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: var(--text-grey);
+            text-decoration: none;
+            font-size: 10px;
+            width: 20%;
+        }
+
+        .nav-item.active {
+            color: var(--text-gold);
+        }
+
+        .nav-icon {
+            font-size: 18px;
+        }
+
+        /* 弹窗 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-container {
+            background: var(--bg-card);
+            border: 1px solid var(--text-gold);
+            border-radius: 12px;
+            width: 85%;
+            max-width: 400px;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transform: scale(0.9);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            overflow: hidden;
+        }
+
+        .modal-overlay.active .modal-container {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0,0,0,0.2);
+        }
+
+        .modal-title {
+            color: var(--text-gold);
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-grey);
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            color: var(--text-white);
+        }
+
+        .modal-footer {
+            padding: 15px 20px;
+            border-top: 1px solid rgba(212, 175, 55, 0.3);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            background: rgba(0,0,0,0.2);
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 4px;
+            border: none;
+            font-size: 14px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background: var(--text-gold);
+            color: #1a252f;
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: var(--text-grey);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        /* 通知 */
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(20, 30, 60, 0.95);
+            color: #aaccff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: 1px solid rgba(100, 150, 255, 0.4);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+            z-index: 3000;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .notification.show {
+            opacity: 1;
+        }
+    </style>
+
+  </head>
+<body>
+    <div class="app-container">
+        <!-- 头部 -->
+        <header class="header">
+            <button class="header-btn" onclick="history.back()">← 返回</button>
+            <div class="header-title">宗门成员</div>
+            <button class="header-btn" onclick="showContributionHelp()">❓</button>
+        </header>
+
+        <!-- 统计信息 -->
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-value" id="totalMembers">0</div>
+                <div class="stat-label">总人数</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="onlineMembers">0</div>
+                <div class="stat-label">在线</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="totalContribution">0</div>
+                <div class="stat-label">总贡献</div>
+            </div>
+        </div>
+
+        <!-- 筛选栏 -->
+        <div class="filter-bar">
+            <button class="filter-btn active" onclick="filterByPosition('all')">全部</button>
+            <button class="filter-btn" onclick="filterByPosition('4')">宗主</button>
+            <button class="filter-btn" onclick="filterByPosition('3')">副宗主</button>
+            <button class="filter-btn" onclick="filterByPosition('2')">长老</button>
+            <button class="filter-btn" onclick="filterByPosition('1')">精英弟子</button>
+            <button class="filter-btn" onclick="filterByPosition('0')">普通弟子</button>
+        </div>
+
+        <!-- 成员列表 -->
+        <div class="members-list" id="membersList">
+            <!-- 成员卡片将通过 JS 动态加载 -->
+        </div>
+
+        <!-- 底部导航 -->
+        <nav class="bottom-nav" role="navigation" aria-label="主导航">
+            <a href="../index.html" class="nav-item" aria-label="修炼页面">
+                <div class="nav-icon">🧘</div>
+                <div class="nav-text">修炼</div>
+            </a>
+            <a href="../skills/skills.html" class="nav-item" aria-label="功法页面">
+                <div class="nav-icon">📜</div>
+                <div class="nav-text">功法</div>
+            </a>
+            <a href="clan.html" class="nav-item active" aria-label="宗门页面" aria-current="page">
+                <div class="nav-icon">🏯</div>
+                <div class="nav-text">宗门</div>
+            </a>
+            <a href="../word/world.html" class="nav-item" aria-label="仙途页面">
+                <div class="nav-icon">🌌</div>
+                <div class="nav-text">仙途</div>
+            </a>
+            <a href="../map/map.html" class="nav-item" aria-label="云游页面">
+                <div class="nav-icon">🗺️</div>
+                <div class="nav-text">云游</div>
+            </a>
+        </nav>
+    </div>
+
+    <!-- 职位调整弹窗 -->
+    <div id="positionModal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 class="modal-title">调整职位</h3>
+                <button class="modal-close" onclick="closePositionModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 15px;">正在调整成员 <strong id="targetMemberName" style="color: var(--text-gold);"></strong> 的职位</p>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <button class="btn" style="background: rgba(76, 175, 80, 0.2); border: 1px solid #4CAF50; color: #4CAF50;" onclick="executePromote()">
+                        ⬆️ 提升职位
+                    </button>
+                    <button class="btn" style="background: rgba(255, 152, 0, 0.2); border: 1px solid #FF9800; color: #FF9800;" onclick="executeDemote()">
+                        ⬇️ 降低职位
+                    </button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closePositionModal()">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 踢出成员弹窗 -->
+    <div id="kickModal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 class="modal-title" style="color: #ff4444;">⚠️ 踢出成员</h3>
+                <button class="modal-close" onclick="closeKickModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <p>确定要将 <strong id="kickMemberName" style="color: var(--text-gold);"></strong> 踢出宗门吗？</p>
+                <p style="margin-top: 10px; color: var(--text-grey); font-size: 13px;">此操作不可恢复，该成员的所有贡献将被清空。</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeKickModal()">取消</button>
+                <button class="btn" style="background: #ff4444; color: white;" onclick="executeKick()">确认踢出</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = window.APP_CONFIG?.API_BASE_URL || 'http://localhost:8088/api';
+        const roleId = window.AuthService ? window.AuthService.getCurrentRoleId() : localStorage.getItem('currentRoleId');
+        let currentClanId = null;
+        let myPosition = 0; // 当前用户的职位
+        let membersData = [];
+        let currentFilter = 'all';
+        let selectedMember = null;
+
+        // 职位映射
+        const positionMap = {
+            0: { name: '普通弟子', class: 'position-dizi' },
+            1: { name: '精英弟子', class: 'position-jingying' },
+            2: { name: '长老', class: 'position-zhanglao' },
+            3: { name: '副宗主', class: 'position-fuzongzhu' },
+            4: { name: '宗主', class: 'position-zongzhu' }
+        };
+
+        // 页面加载
+        window.addEventListener('DOMContentLoaded', () => {
+            loadMyClanInfo();
+        });
+
+        // 加载我的宗门信息
+        async function loadMyClanInfo() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/clan/member/role/${roleId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data && data.clanId) {
+                        currentClanId = data.clanId;
+                        myPosition = data.position || 0;
+                        loadMembers();
+                    } else {
+                        showNotification('您还未加入任何宗门');
+                        setTimeout(() => {
+                            window.location.href = 'clan-list.html';
+                        }, 1500);
+                    }
+                }
+            } catch (error) {
+                console.error('加载宗门信息失败:', error);
+            }
+        }
+
+        // 加载成员列表
+        async function loadMembers() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/clan/${currentClanId}/members`);
+                if (response.ok) {
+                    membersData = await response.json();
+                    updateStats();
+                    renderMembers();
+                }
+            } catch (error) {
+                console.error('加载成员列表失败:', error);
+                // 使用模拟数据
+                loadMockData();
+            }
+        }
+
+        // 加载模拟数据
+        function loadMockData() {
+            membersData = [
+                { id: 1, roleId: 1, roleName: '张三', position: 4, contribution: 100000, totalContribution: 500000, status: 1, lastLoginTime: new Date() },
+                { id: 2, roleId: 2, roleName: '李四', position: 3, contribution: 50000, totalContribution: 200000, status: 1, lastLoginTime: new Date() },
+                { id: 3, roleId: 3, roleName: '王五', position: 2, contribution: 30000, totalContribution: 150000, status: 0, lastLoginTime: new Date(Date.now() - 86400000) },
+                { id: 4, roleId: 4, roleName: '赵六', position: 1, contribution: 15000, totalContribution: 80000, status: 1, lastLoginTime: new Date() },
+                { id: 5, roleId: 5, roleName: '钱七', position: 0, contribution: 5000, totalContribution: 20000, status: 1, lastLoginTime: new Date() },
+                { id: 6, roleId: 6, roleName: '孙八', position: 0, contribution: 2000, totalContribution: 10000, status: 0, lastLoginTime: new Date(Date.now() - 172800000) }
+            ];
+            updateStats();
+            renderMembers();
+        }
+
+        // 更新统计信息
+        function updateStats() {
+            const total = membersData.length;
+            const online = membersData.filter(m => m.status === 1).length;
+            const totalContrib = membersData.reduce((sum, m) => sum + (m.totalContribution || 0), 0);
+
+            document.getElementById('totalMembers').textContent = total;
+            document.getElementById('onlineMembers').textContent = online;
+            document.getElementById('totalContribution').textContent = totalContrib.toLocaleString();
+        }
+
+        // 渲染成员列表
+        function renderMembers() {
+            const list = document.getElementById('membersList');
+            let filtered = membersData;
+
+            if (currentFilter !== 'all') {
+                filtered = membersData.filter(m => m.position === parseInt(currentFilter));
+            }
+
+            // 按职位和贡献排序
+            filtered.sort((a, b) => {
+                if (b.position !== a.position) return b.position - a.position;
+                return (b.totalContribution || 0) - (a.totalContribution || 0);
+            });
+
+            list.innerHTML = filtered.map(member => {
+                const posInfo = positionMap[member.position] || positionMap[0];
+                const canManage = canManageMember(member);
+
+                return `
+                    <div class="member-card">
+                        <div class="member-header">
+                            <div class="member-avatar">👤</div>
+                            <div class="member-info">
+                                <div class="member-name">${member.roleName || '未知'}</div>
+                                <span class="member-position ${posInfo.class}">${posInfo.name}</span>
+                            </div>
+                            <div style="color: ${member.status === 1 ? '#4CAF50' : '#999'}; font-size: 12px;">
+                                ${member.status === 1 ? '● 在线' : '○ 离线'}
+                            </div>
+                        </div>
+                        <div class="member-stats">
+                            <div class="member-stat">
+                                <div class="member-stat-value">${(member.contribution || 0).toLocaleString()}</div>
+                                <div class="member-stat-label">个人贡献</div>
+                            </div>
+                            <div class="member-stat">
+                                <div class="member-stat-value">${(member.totalContribution || 0).toLocaleString()}</div>
+                                <div class="member-stat-label">累计贡献</div>
+                            </div>
+                            <div class="member-stat">
+                                <div class="member-stat-value">${formatLastLogin(member.lastLoginTime)}</div>
+                                <div class="member-stat-label">最后登录</div>
+                            </div>
+                        </div>
+                        ${canManage ? `
+                            <div class="member-actions">
+                                ${member.position < 4 ? `<button class="action-btn btn-promote" onclick="showPositionModal(${member.id}, '${member.roleName}')">调整</button>` : ''}
+                                ${member.position < myPosition ? `<button class="action-btn btn-kick" onclick="showKickModal(${member.id}, '${member.roleName}')">踢出</button>` : ''}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 判断是否可以管理该成员
+        function canManageMember(member) {
+            if (myPosition === 4) return true; // 宗主可以管理所有人
+            if (myPosition === 3 && member.position <= 2) return true; // 副宗主可以管理长老及以下
+            if (myPosition === 2 && member.position <= 1) return true; // 长老可以管理精英弟子及以下
+            return false;
+        }
+
+        // 筛选职位
+        function filterByPosition(position) {
+            currentFilter = position;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            renderMembers();
+        }
+
+        // 显示职位调整弹窗
+        function showPositionModal(memberId, memberName) {
+            selectedMember = membersData.find(m => m.id === memberId);
+            document.getElementById('targetMemberName').textContent = memberName;
+            document.getElementById('positionModal').classList.add('active');
+        }
+
+        // 关闭职位调整弹窗
+        function closePositionModal() {
+            document.getElementById('positionModal').classList.remove('active');
+            selectedMember = null;
+        }
+
+        // 执行提升职位
+        async function executePromote() {
+            if (!selectedMember) return;
+
+            try {
+                const newPosition = selectedMember.position + 1;
+                const response = await fetch(`${API_BASE_URL}/clan/member/${selectedMember.id}/position`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ position: newPosition })
+                });
+
+                if (response.ok) {
+                    selectedMember.position = newPosition;
+                    showNotification(`已提升 ${selectedMember.roleName} 的职位`);
+                    closePositionModal();
+                    renderMembers();
+                    updateStats();
+                }
+            } catch (error) {
+                console.error('提升职位失败:', error);
+                showNotification('操作失败，请稍后重试');
+            }
+        }
+
+        // 执行降低职位
+        async function executeDemote() {
+            if (!selectedMember) return;
+
+            try {
+                const newPosition = Math.max(0, selectedMember.position - 1);
+                const response = await fetch(`${API_BASE_URL}/clan/member/${selectedMember.id}/position`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ position: newPosition })
+                });
+
+                if (response.ok) {
+                    selectedMember.position = newPosition;
+                    showNotification(`已降低 ${selectedMember.roleName} 的职位`);
+                    closePositionModal();
+                    renderMembers();
+                    updateStats();
+                }
+            } catch (error) {
+                console.error('降低职位失败:', error);
+                showNotification('操作失败，请稍后重试');
+            }
+        }
+
+        // 显示踢出弹窗
+        function showKickModal(memberId, memberName) {
+            selectedMember = membersData.find(m => m.id === memberId);
+            document.getElementById('kickMemberName').textContent = memberName;
+            document.getElementById('kickModal').classList.add('active');
+        }
+
+        // 关闭踢出弹窗
+        function closeKickModal() {
+            document.getElementById('kickModal').classList.remove('active');
+            selectedMember = null;
+        }
+
+        // 执行踢出
+        async function executeKick() {
+            if (!selectedMember) return;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/clan/member/${selectedMember.id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    showNotification(`已将 ${selectedMember.roleName} 踢出宗门`);
+                    closeKickModal();
+                    membersData = membersData.filter(m => m.id !== selectedMember.id);
+                    renderMembers();
+                    updateStats();
+                }
+            } catch (error) {
+                console.error('踢出成员失败:', error);
+                showNotification('操作失败，请稍后重试');
+            }
+        }
+
+        // 显示贡献帮助
+        function showContributionHelp() {
+            showToast('贡献值说明：完成任务、参与活动、捐赠资源、参与战争');
+            
+            // 可以在这里添加更详细的帮助模态框
+            // 暂时使用简单提示，后续可扩展为完整帮助系统
+        }
+
+        // 格式化最后登录时间
+        function formatLastLogin(date) {
+            if (!date) return '未知';
+            const now = new Date();
+            const diff = now - new Date(date);
+            const days = Math.floor(diff / 86400000);
+            
+            if (days === 0) return '今天';
+            if (days === 1) return '昨天';
+            if (days < 7) return `${days}天前`;
+            return `${Math.floor(days / 7)}周前`;
+        }
+
+        // 显示通知
+        function showNotification(message, duration = 3000) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => notification.classList.add('show'), 10);
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 300);
+            }, duration);
+        }
+    </script>
+  <script src="../js/ui-components.js"></script>
+  <script src="../js/auth-service.js"></script>
+</body>
+</html>

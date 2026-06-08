@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="js/viewport-adapt.js"></script>
+  <script src="js/config.js"></script>
+  <link rel="stylesheet" href="css/mobile-adapt.css">
+  <title>灵月仙途 - 任务中心</title>
+  <style>
+    :root {
+      --gold-primary: #e6c749;
+      --gold-light: #f4d03f;
+      --gold-dark: #b8860b;
+      --text-main: #fdfbf7;
+      --text-secondary: #c9b896;
+      --text-dim: #8a7f6a;
+      --bg-dark: #0f1219;
+      --bg-card: rgba(30, 35, 50, 0.8);
+      --bg-glass: rgba(20, 25, 40, 0.85);
+      --success-color: #4caf50;
+      --danger-color: #e74c3c;
+      --warning-color: #f39c12;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      font-family: 'Microsoft YaHei', 'SimSun', serif;
+      background: linear-gradient(to bottom, #0f1219, #1a1f2e);
+      color: var(--text-main);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* 背景特效 */
+    .bg-effects {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .particles {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background-image: radial-gradient(var(--gold-primary) 1px, transparent 1px);
+      background-size: 50px 50px;
+      animation: float 20s linear infinite;
+      opacity: 0.1;
+    }
+
+    @keyframes float {
+      from { background-position: 0 100%; }
+      to { background-position: 0 0; }
+    }
+
+    /* 主容器 */
+    .main-container {
+      position: relative;
+      z-index: 10;
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    /* 头部 */
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .page-title {
+      font-size: 2rem;
+      font-weight: bold;
+      color: var(--gold-primary);
+      text-shadow: 0 0 20px rgba(230, 199, 73, 0.5);
+      margin-bottom: 15px;
+    }
+
+    /* 活跃度卡片 */
+    .activity-card {
+      background: linear-gradient(135deg, rgba(230, 199, 73, 0.15), rgba(30, 35, 50, 0.8));
+      border: 2px solid rgba(230, 199, 73, 0.3);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .activity-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(230, 199, 73, 0.1) 0%, transparent 70%);
+      animation: rotate 30s linear infinite;
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .activity-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .activity-title {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: var(--gold-primary);
+    }
+
+    .activity-points {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--gold-light);
+    }
+
+    .activity-points span {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+    }
+
+    /* 进度条 */
+    .progress-bar {
+      width: 100%;
+      height: 24px;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+      z-index: 1;
+      border: 1px solid rgba(230, 199, 73, 0.2);
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold-dark), var(--gold-primary), var(--gold-light));
+      transition: width 0.5s ease;
+      border-radius: 12px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .progress-fill::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.3) 50%,
+        transparent 100%
+      );
+      animation: shimmer 2s infinite;
+    }
+
+    @keyframes shimmer {
+      from { transform: translateX(-100%); }
+      to { transform: translateX(100%); }
+    }
+
+    /* 宝箱按钮 */
+    .chest-btn {
+      width: 100%;
+      margin-top: 15px;
+      padding: 12px;
+      background: linear-gradient(135deg, var(--gold-primary), var(--gold-dark));
+      border: none;
+      border-radius: 12px;
+      color: #000;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      position: relative;
+      z-index: 1;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .chest-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .chest-btn:not(:disabled):hover {
+      transform: scale(1.02);
+      box-shadow: 0 0 20px rgba(230, 199, 73, 0.5);
+    }
+
+    .chest-icon {
+      font-size: 1.5rem;
+    }
+
+    /* 任务标签页 */
+    .task-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 5px;
+      border-radius: 12px;
+      border: 1px solid rgba(230, 199, 73, 0.2);
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 12px;
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 0.3s;
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, var(--gold-primary), var(--gold-dark));
+      color: #000;
+    }
+
+    /* 任务列表 */
+    .task-list {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .task-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(230, 199, 73, 0.2);
+      border-radius: 12px;
+      padding: 15px;
+      transition: all 0.3s;
+    }
+
+    .task-card.completed {
+      border-color: var(--success-color);
+      background: rgba(76, 175, 80, 0.1);
+    }
+
+    .task-card.claimed {
+      opacity: 0.6;
+      border-color: var(--text-dim);
+    }
+
+    .task-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .task-name {
+      font-size: 1rem;
+      font-weight: bold;
+      color: var(--gold-primary);
+    }
+
+    .task-status {
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: 12px;
+      background: rgba(230, 199, 73, 0.2);
+      color: var(--gold-light);
+    }
+
+    .task-status.completed {
+      background: rgba(76, 175, 80, 0.3);
+      color: var(--success-color);
+    }
+
+    .task-description {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+
+    .task-progress {
+      margin-bottom: 12px;
+    }
+
+    .progress-text {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      margin-bottom: 5px;
+    }
+
+    .task-mini-bar {
+      width: 100%;
+      height: 8px;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .task-mini-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold-dark), var(--gold-primary));
+      transition: width 0.3s;
+    }
+
+    .task-rewards {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .reward-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 10px;
+      background: rgba(230, 199, 73, 0.1);
+      border: 1px solid rgba(230, 199, 73, 0.3);
+      border-radius: 8px;
+      font-size: 0.8rem;
+      color: var(--gold-primary);
+    }
+
+    .reward-icon {
+      font-size: 1rem;
+    }
+
+    .task-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .action-btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .claim-btn {
+      background: linear-gradient(135deg, var(--success-color), #45a049);
+      color: #fff;
+    }
+
+    .claim-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .claim-btn:not(:disabled):hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(76, 175, 80, 0.5);
+    }
+
+    /* 空状态 */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-dim);
+    }
+
+    .empty-icon {
+      font-size: 4rem;
+      margin-bottom: 20px;
+      opacity: 0.5;
+    }
+
+    .empty-text {
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+
+    /* 弹窗 */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: linear-gradient(135deg, rgba(30, 35, 50, 0.95), rgba(15, 18, 25, 0.95));
+      border: 2px solid var(--gold-primary);
+      border-radius: 20px;
+      padding: 30px;
+      max-width: 90%;
+      text-align: center;
+      position: relative;
+      animation: modalPop 0.3s ease;
+    }
+
+    @keyframes modalPop {
+      from {
+        transform: scale(0.8);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .modal-icon {
+      font-size: 4rem;
+      margin-bottom: 20px;
+      animation: bounce 1s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .modal-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--gold-primary);
+      margin-bottom: 10px;
+    }
+
+    .modal-text {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    .modal-btn {
+      padding: 12px 40px;
+      background: linear-gradient(135deg, var(--gold-primary), var(--gold-dark));
+      border: none;
+      border-radius: 12px;
+      color: #000;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    /* 加载动画 */
+    .loading {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--gold-primary);
+    }
+
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid rgba(230, 199, 73, 0.2);
+      border-top-color: var(--gold-primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+
+  </head>
+<body>
+  <!-- 背景特效 -->
+  <div class="bg-effects">
+    <div class="particles"></div>
+  </div>
+
+  <!-- 主容器 -->
+  <div class="main-container">
+    <!-- 头部 -->
+    <div class="header">
+      <div class="page-title">📜 任务中心</div>
+    </div>
+
+    <!-- 活跃度卡片 -->
+    <div class="activity-card">
+      <div class="activity-header">
+        <div class="activity-title">💎 活跃度</div>
+        <div class="activity-points">
+          <span id="activityPointsValue">0</span>
+          <span>/ 100</span>
+        </div>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="activityProgressBar" style="width: 0%"></div>
+      </div>
+      <button class="chest-btn" id="chestBtn" onclick="claimActivityChest()" disabled>
+        <span class="chest-icon">🎁</span>
+        <span id="chestBtnText">活跃度满 100 可开启宝箱</span>
+      </button>
+    </div>
+
+    <!-- 任务标签页 -->
+    <div class="task-tabs">
+      <button class="tab-btn active" onclick="switchTab('daily')">每日任务</button>
+      <button class="tab-btn" onclick="switchTab('main')">主线任务</button>
+      <button class="tab-btn" onclick="switchTab('achievement')">成就任务</button>
+    </div>
+
+    <!-- 任务列表 -->
+    <div class="task-list" id="taskList">
+      <div class="loading">
+        <div class="loading-spinner"></div>
+        <div>加载中...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 奖励弹窗 -->
+  <div class="modal-overlay" id="rewardModal">
+    <div class="modal-content">
+      <div class="modal-icon">🎁</div>
+      <div class="modal-title">任务完成</div>
+      <div class="modal-text" id="rewardModalText">获得奖励</div>
+      <button class="modal-btn" onclick="closeRewardModal()">领取</button>
+    </div>
+  </div>
+
+  <script>
+    let currentTab = 'daily';
+    let allTasks = { daily: [], main: [], achievement: [] };
+    let activityPoints = 0;
+    let chestClaimed = false;
+
+    // 页面加载
+    window.addEventListener('DOMContentLoaded', async function() {
+      await loadTasks();
+    });
+
+    // 切换标签
+    function switchTab(tab) {
+      currentTab = tab;
+      
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      event.target.classList.add('active');
+      
+      renderTasks();
+    }
+
+    // 加载任务
+    async function loadTasks() {
+      try {
+        const roleId = localStorage.getItem('roleId') || localStorage.getItem('currentRoleId');
+        if (!roleId) {
+          showToast('请先选择角色', 'error');
+          return;
+        }
+
+        const response = await fetch(`${window.getApiBaseUrl()}/task/list/${roleId}`);
+        const result = await response.json();
+
+        if (result.code === 200 && result.data) {
+          const data = result.data;
+          allTasks = data.tasks || { daily: [], main: [], achievement: [] };
+          activityPoints = data.activityPoints || 0;
+          chestClaimed = data.chestClaimed || false;
+
+          updateActivityUI();
+          renderTasks();
+        }
+      } catch (error) {
+        console.error('加载任务失败:', error);
+        document.getElementById('taskList').innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">📭</div>
+            <div class="empty-text">加载失败，请稍后重试</div>
+          </div>
+        `;
+      }
+    }
+
+    // 更新活跃度 UI
+    function updateActivityUI() {
+      const pointsEl = document.getElementById('activityPointsValue');
+      const barEl = document.getElementById('activityProgressBar');
+      const btnEl = document.getElementById('chestBtn');
+      const btnTextEl = document.getElementById('chestBtnText');
+
+      pointsEl.textContent = activityPoints;
+      const percentage = Math.min((activityPoints / 100) * 100, 100);
+      barEl.style.width = percentage + '%';
+
+      if (chestClaimed) {
+        btnEl.disabled = true;
+        btnTextEl.textContent = '宝箱已领取';
+        btnEl.style.background = 'linear-gradient(135deg, #8a7f6a, #5a5a5a)';
+      } else if (activityPoints >= 100) {
+        btnEl.disabled = false;
+        btnTextEl.textContent = '开启宝箱';
+        btnEl.style.background = 'linear-gradient(135deg, #4caf50, #45a049)';
+      } else {
+        btnEl.disabled = true;
+        btnTextEl.textContent = `还需${100 - activityPoints}点活跃度`;
+        btnEl.style.background = 'linear-gradient(135deg, var(--gold-primary), var(--gold-dark))';
+      }
+    }
+
+    // 渲染任务列表
+    function renderTasks() {
+      const taskListEl = document.getElementById('taskList');
+      const tasks = allTasks[currentTab] || [];
+
+      if (tasks.length === 0) {
+        taskListEl.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">📭</div>
+            <div class="empty-text">暂无任务</div>
+          </div>
+        `;
+        return;
+      }
+
+      let html = '';
+      tasks.forEach(task => {
+        const progressPercent = task.target > 0 ? (task.progress / task.target * 100) : 0;
+        const isCompleted = task.status === 'completed';
+        const isClaimed = task.status === 'claimed';
+
+        html += `
+          <div class="task-card ${isCompleted ? 'completed' : ''} ${isClaimed ? 'claimed' : ''}">
+            <div class="task-header">
+              <div class="task-name">${task.name}</div>
+              <div class="task-status ${isCompleted ? 'completed' : ''}">
+                ${isClaimed ? '已领取' : isCompleted ? '已完成' : '进行中'}
+              </div>
+            </div>
+            <div class="task-description">${task.description}</div>
+            <div class="task-progress">
+              <div class="progress-text">
+                <span>进度</span>
+                <span>${task.progress}/${task.target}</span>
+              </div>
+              <div class="task-mini-bar">
+                <div class="task-mini-fill" style="width: ${progressPercent}%"></div>
+              </div>
+            </div>
+            ${!isClaimed ? `
+              <div class="task-actions">
+                <button class="action-btn claim-btn" 
+                        ${!isCompleted ? 'disabled' : ''} 
+                        onclick="claimReward(${task.id})">
+                  ${isCompleted ? '领取奖励' : '未完成'}
+                </button>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      });
+
+      taskListEl.innerHTML = html;
+    }
+
+    // 领取奖励
+    async function claimReward(taskId) {
+      try {
+        const roleId = localStorage.getItem('roleId') || localStorage.getItem('currentRoleId');
+        if (!roleId) {
+          showToast('请先选择角色', 'error');
+          return;
+        }
+
+        const response = await fetch(`${window.getApiBaseUrl()}/task/${taskId}/claim`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ roleId })
+        });
+
+        const result = await response.json();
+
+        if (result.code === 200) {
+          // 显示奖励
+          showReward(result.data);
+          // 重新加载任务
+          await loadTasks();
+        } else {
+          showToast(result.message || '领取失败', 'error');
+        }
+      } catch (error) {
+        console.error('领取奖励失败:', error);
+        showToast('网络错误，请稍后重试', 'error');
+      }
+    }
+
+    // 领取活跃度宝箱
+    async function claimActivityChest() {
+      try {
+        const roleId = localStorage.getItem('roleId') || localStorage.getItem('currentRoleId');
+        if (!roleId) {
+          showToast('请先选择角色', 'error');
+          return;
+        }
+
+        const response = await fetch(`${window.getApiBaseUrl()}/task/activity/chest`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ roleId })
+        });
+
+        const result = await response.json();
+
+        if (result.code === 200) {
+          showReward(result.data);
+          await loadTasks();
+        } else {
+          showToast(result.message || '领取失败', 'error');
+        }
+      } catch (error) {
+        console.error('领取宝箱失败:', error);
+        showToast('网络错误，请稍后重试', 'error');
+      }
+    }
+
+    // 显示奖励
+    function showReward(data) {
+      const modal = document.getElementById('rewardModal');
+      const textEl = document.getElementById('rewardModalText');
+      
+      let rewardText = '恭喜获得：<br>';
+      if (data.rewards && data.rewards.data) {
+        const rewards = data.rewards.data;
+        if (rewards.resourceRewards) {
+          if (rewards.resourceRewards.lingshi) {
+            rewardText += `💰 灵石 x${rewards.resourceRewards.lingshi}<br>`;
+          }
+          if (rewards.resourceRewards.xiuwei) {
+            rewardText += `✨ 修为 x${rewards.resourceRewards.xiuwei}<br>`;
+          }
+        }
+      }
+      
+      if (data.activityPoints) {
+        rewardText += `💎 活跃度 +${data.activityPoints}`;
+      }
+
+      textEl.innerHTML = rewardText;
+      modal.classList.add('active');
+    }
+
+    // 关闭奖励弹窗
+    function closeRewardModal() {
+      document.getElementById('rewardModal').classList.remove('active');
+    }
+
+    // 提示消息
+    function showToast(message, type = 'info') {
+      const colors = {
+        success: '#4caf50',
+        error: '#e74c3c',
+        info: '#e6c749'
+      };
+
+      const toast = document.createElement('div');
+      toast.style.cssText = `
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: ${colors[type]};
+        color: #fff;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: bold;
+        z-index: 2000;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        animation: slideDown 0.3s ease;
+      `;
+      toast.textContent = message;
+      document.body.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.animation = 'slideUp 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+      }, 2000);
+    }
+
+    // 添加动画
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes slideDown {
+        from { transform: translate(-50%, -100%); opacity: 0; }
+        to { transform: translate(-50%, 0); opacity: 1; }
+      }
+      @keyframes slideUp {
+        from { transform: translate(-50%, 0); opacity: 1; }
+        to { transform: translate(-50%, -100%); opacity: 0; }
+      }
+    `;
+    document.head.appendChild(style);
+  </script>
+</body>
+</html>

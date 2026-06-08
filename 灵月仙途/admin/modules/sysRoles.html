@@ -1,0 +1,203 @@
+<div class="section active">
+  <div class="status-message" id="sysRoleMessage"></div>
+  <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+    <h2 class="section-title">系统角色</h2>
+    <button class="btn btn-primary" onclick="openAddSysRoleModal()">新增角色</button>
+  </div>
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>角色名称</th>
+        <th>角色编码</th>
+        <th>排序</th>
+        <th>状态</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody id="sysRoleTableBody">
+      <!-- JS 生成 -->
+    </tbody>
+  </table>
+</div>
+
+<!-- 新增/编辑系统角色模态框 -->
+<div id="sysRoleModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="sysRoleModalTitle">新增系统角色</h3>
+      <span class="close" onclick="closeModal()">&times;</span>
+    </div>
+    <form id="sysRoleForm">
+      <input type="hidden" id="sysRoleId">
+      <div class="form-group">
+        <label>角色名称</label>
+        <input type="text" id="sysRoleName" required>
+      </div>
+      <div class="form-group">
+        <label>角色编码</label>
+        <input type="text" id="sysRoleCode" required>
+      </div>
+      <div class="form-group">
+        <label>排序</label>
+        <input type="number" id="sysRoleSort" value="0" required>
+      </div>
+      <div class="form-group">
+        <label>状态</label>
+        <select id="sysRoleStatus" required>
+          <option value="1">启用</option>
+          <option value="0">禁用</option>
+        </select>
+      </div>
+      <div style="text-align: right; margin-top: 20px;">
+        <button type="button" class="btn btn-secondary" onclick="closeModal()">取消</button>
+        <button type="submit" class="btn btn-primary">保存</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  (function() {
+    function initSysRoles() {
+      loadSysRoles();
+      bindSysRoleFormEvents();
+    }
+
+    async function loadSysRoles() {
+      const tableBody = document.getElementById('sysRoleTableBody');
+      tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999;">加载中...</td></tr>';
+      
+      try {
+        const sysRoles = await apiService.get('/sys/role');
+        
+        // 处理API返回的数据格式
+        let rolesData = sysRoles;
+        if (sysRoles && sysRoles.data) {
+          rolesData = sysRoles.data;
+        }
+        
+        tableBody.innerHTML = '';
+        if (rolesData && rolesData.length > 0) {
+          rolesData.forEach(role => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${role.id}</td>
+              <td>${role.roleName || role.name}</td>
+              <td>${role.roleCode || role.code}</td>
+              <td>${role.sort || 0}</td>
+              <td>${role.status === 1 ? '启用' : '禁用'}</td>
+              <td>
+                <button class="btn btn-primary" onclick="window.editSysRole(${role.id})">编辑</button>
+                <button class="btn btn-danger" onclick="window.deleteSysRole(${role.id})">删除</button>
+              </td>
+            `;
+            tableBody.appendChild(row);
+          });
+        } else {
+          tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999;">暂无数据</td></tr>';
+        }
+      } catch (error) {
+        console.error('加载系统角色列表失败:', error);
+        tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#e74c3c;">加载失败: ' + (error.message || '未知错误') + '</td></tr>';
+      }
+    }
+
+    function openAddSysRoleModal() {
+      document.getElementById('sysRoleModalTitle').textContent = '新增系统角色';
+      document.getElementById('sysRoleForm').reset();
+      document.getElementById('sysRoleId').value = '';
+      openModal('sysRoleModal');
+    }
+
+    async function editSysRole(id) {
+      try {
+        const roleResponse = await apiService.get(`/sys/role/${id}`);
+        
+        // 处理API返回的数据格式
+        let role = roleResponse;
+        if (roleResponse && roleResponse.data) {
+          role = roleResponse.data;
+        }
+        
+        document.getElementById('sysRoleModalTitle').textContent = '编辑系统角色';
+        document.getElementById('sysRoleId').value = role.id;
+        document.getElementById('sysRoleName').value = role.roleName || role.name;
+        document.getElementById('sysRoleCode').value = role.roleCode || role.code;
+        document.getElementById('sysRoleSort').value = role.sort || 0;
+        document.getElementById('sysRoleStatus').value = role.status;
+        openModal('sysRoleModal');
+      } catch (error) {
+        console.error('获取角色信息失败:', error);
+        showMessage('sysRoleMessage', '获取角色信息失败: ' + (error.message || '未知错误'), 'error');
+      }
+    }
+
+    async function deleteSysRole(id) {
+      if (confirm('确定要删除这个系统角色吗？')) {
+        try {
+          await apiService.delete(`/sys/role/${id}`);
+          showMessage('sysRoleMessage', '删除成功', 'success');
+          loadSysRoles();
+        } catch (error) {
+          console.error('删除系统角色失败:', error);
+          showMessage('sysRoleMessage', '删除失败: ' + error.message, 'error');
+        }
+      }
+    }
+
+    function bindSysRoleFormEvents() {
+      const form = document.getElementById('sysRoleForm');
+      if (form) {
+        form.addEventListener('submit', async function(e) {
+          e.preventDefault();
+          await saveSysRole();
+        });
+      }
+    }
+
+    async function saveSysRole() {
+      const id = document.getElementById('sysRoleId').value;
+      const role = {
+        name: document.getElementById('sysRoleName').value,
+        code: document.getElementById('sysRoleCode').value,
+        sort: parseInt(document.getElementById('sysRoleSort').value),
+        status: parseInt(document.getElementById('sysRoleStatus').value)
+      };
+      
+      try {
+        if (id) {
+          await apiService.put(`/sys/role/${id}`, role);
+          showMessage('sysRoleMessage', '更新成功', 'success');
+        } else {
+          await apiService.post('/sys/role', role);
+          showMessage('sysRoleMessage', '新增成功', 'success');
+        }
+        closeModal();
+        loadSysRoles();
+      } catch (error) {
+        console.error('保存系统角色失败:', error);
+        showMessage('sysRoleMessage', '保存失败: ' + error.message, 'error');
+      }
+    }
+
+    function showMessage(elementId, message, type) {
+      const statusEl = document.getElementById(elementId);
+      if (statusEl) {
+        statusEl.textContent = message;
+        statusEl.className = `status-message ${type}`;
+        statusEl.style.display = 'block';
+        
+        setTimeout(() => {
+          statusEl.style.display = 'none';
+        }, 3000);
+      }
+    }
+
+    window.initSysRoles = initSysRoles;
+    window.loadSysRoles = loadSysRoles;
+    window.openAddSysRoleModal = openAddSysRoleModal;
+    window.editSysRole = editSysRole;
+    window.deleteSysRole = deleteSysRole;
+  })();
+</script>

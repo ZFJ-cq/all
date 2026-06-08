@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="../js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="../css/mobile-adapt.css">
+  <title>修复验证 - 宗门跳转</title>
+  <style>
+    body {
+      font-family: 'Microsoft YaHei', sans-serif;
+      background: #0f1420;
+      color: #fff;
+      padding: 40px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: rgba(20, 25, 45, 0.8);
+      border: 1px solid rgba(230, 199, 73, 0.3);
+      border-radius: 10px;
+      padding: 30px;
+    }
+    h1 {
+      color: #e6c749;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .test-item {
+      background: rgba(0,0,0,0.3);
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      border-left: 4px solid #e6c749;
+    }
+    .test-item h3 {
+      color: #e6c749;
+      margin-bottom: 10px;
+    }
+    .test-item p {
+      color: #d4c5a9;
+      line-height: 1.6;
+    }
+    .success {
+      border-left-color: #4CAF50;
+    }
+    .success h3 {
+      color: #4CAF50;
+    }
+    .button {
+      display: inline-block;
+      padding: 10px 20px;
+      background: linear-gradient(90deg, transparent, rgba(230,199,73,0.2), transparent);
+      border: 1px solid #e6c749;
+      color: #e6c749;
+      text-decoration: none;
+      border-radius: 6px;
+      margin-top: 10px;
+      transition: all 0.3s;
+    }
+    .button:hover {
+      background: rgba(230,199,73,0.3);
+      box-shadow: 0 0 15px rgba(230,199,73,0.4);
+    }
+  </style>
+
+  </head>
+<body>
+  <div class="container">
+    <h1>🔧 修复验证报告</h1>
+    
+    <div class="test-item">
+      <h3>✅ 问题定位</h3>
+      <p><strong>问题:</strong> 加入宗门时跳转失败</p>
+      <p><strong>原因:</strong> 角色 ID 获取方式不正确，使用了硬编码的默认值 1</p>
+    </div>
+    
+    <div class="test-item success">
+      <h3>✅ 修复方案</h3>
+      <p>1. 添加异步获取角色 ID 的函数 <code>getRoleId()</code></p>
+      <p>2. 优先从 localStorage 获取角色 ID</p>
+      <p>3. 如果没有，则通过 API 从服务器获取</p>
+      <p>4. 在 <code>executeJoinClan()</code> 函数中使用异步获取的角色 ID</p>
+    </div>
+    
+    <div class="test-item success">
+      <h3>✅ 修复文件</h3>
+      <p><strong>文件:</strong> <code>clan/clan-list.html</code></p>
+      <p><strong>修改内容:</strong></p>
+      <ul>
+        <li>添加 <code>getRoleId()</code> 异步函数</li>
+        <li>修改 <code>executeJoinClan()</code> 函数，使用 <code>await getRoleId()</code></li>
+        <li>添加角色 ID 为空时的错误处理和跳转</li>
+        <li>调整脚本加载顺序，确保依赖正确</li>
+      </ul>
+    </div>
+    
+    <div class="test-item">
+      <h3>📋 测试步骤</h3>
+      <p>1. 打开 <a href="clan-list.html" style="color: #e6c749;">宗门列表页面</a></p>
+      <p>2. 点击任意宗门的"申请加入"按钮</p>
+      <p>3. 在确认弹窗中点击"确认加入"</p>
+      <p>4. 观察是否正确跳转到宗门页面</p>
+    </div>
+    
+    <div class="test-item">
+      <h3>🔗 快速链接</h3>
+      <a href="clan-list.html" class="button">前往宗门列表</a>
+      <a href="clan.html" class="button">前往宗门页面</a>
+      <a href="../index.html" class="button">返回首页</a>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="css/mobile-adapt.css">
+    <title>网络诊断工具</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-item {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        pre {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 3px;
+            overflow-x: auto;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+
+  </head>
+<body>
+    <h1>🔍 灵月仙途 - 网络诊断工具</h1>
+    
+    <div class="test-item">
+        <h3>1. 基本信息</h3>
+        <div id="basic-info"></div>
+    </div>
+    
+    <div class="test-item">
+        <h3>2. 后端 API 连通性测试</h3>
+        <button onclick="testHealth()">测试健康检查</button>
+        <button onclick="testRoleAPI()">测试角色 API</button>
+        <button onclick="testSkillAPI()">测试技能 API</button>
+        <div id="api-test" style="margin-top: 10px;"></div>
+    </div>
+    
+    <div class="test-item">
+        <h3>3. CORS 跨域测试</h3>
+        <button onclick="testCORS()">测试 CORS</button>
+        <div id="cors-test" style="margin-top: 10px;"></div>
+    </div>
+    
+    <div class="test-item">
+        <h3>4. 诊断报告</h3>
+        <button onclick="runFullDiagnosis()" style="background: #28a745;">运行完整诊断</button>
+        <div id="diagnosis" style="margin-top: 10px;"></div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script>
+        const API_BASE = window.APP_CONFIG.API_BASE_URL;
+        
+        // 显示基本信息
+        document.getElementById('basic-info').innerHTML = `
+            <p><strong>当前 URL:</strong> ${window.location.href}</p>
+            <p><strong>Hostname:</strong> ${window.location.hostname}</p>
+            <p><strong>Port:</strong> ${window.location.port}</p>
+            <p><strong>Protocol:</strong> ${window.location.protocol}</p>
+            <p><strong>API_BASE_URL:</strong> ${API_BASE}</p>
+            <p><strong>环境:</strong> ${window.APP_CONFIG.ENVIRONMENT}</p>
+        `;
+        
+        async function testHealth() {
+            const result = document.getElementById('api-test');
+            result.innerHTML = '<p class="info">测试中...</p>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/health`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                result.innerHTML = `
+                    <p class="success">✅ 健康检查成功！</p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                result.innerHTML = `
+                    <p class="error">❌ 测试失败：${error.message}</p>
+                    <p class="info">可能原因：</p>
+                    <ul>
+                        <li>后端服务未启动</li>
+                        <li>防火墙阻止了连接</li>
+                        <li>网络不通</li>
+                    </ul>
+                `;
+            }
+        }
+        
+        async function testRoleAPI() {
+            const result = document.getElementById('api-test');
+            result.innerHTML = '<p class="info">测试中...</p>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/role/user/1`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                result.innerHTML = `
+                    <p class="success">✅ 角色 API 测试成功！</p>
+                    <p>找到 ${data.length} 个角色</p>
+                    <pre>${JSON.stringify(data.slice(0, 2), null, 2)}</pre>
+                `;
+            } catch (error) {
+                result.innerHTML = `
+                    <p class="error">❌ 测试失败：${error.message}</p>
+                `;
+            }
+        }
+        
+        async function testSkillAPI() {
+            const result = document.getElementById('api-test');
+            result.innerHTML = '<p class="info">测试中...</p>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/skill`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                result.innerHTML = `
+                    <p class="success">✅ 技能 API 测试成功！</p>
+                    <p>找到 ${data.length} 个技能</p>
+                    <pre>${JSON.stringify(data.slice(0, 2), null, 2)}</pre>
+                `;
+            } catch (error) {
+                result.innerHTML = `
+                    <p class="error">❌ 测试失败：${error.message}</p>
+                `;
+            }
+        }
+        
+        async function testCORS() {
+            const result = document.getElementById('cors-test');
+            result.innerHTML = '<p class="info">测试中...</p>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/health`, {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Access-Control-Request-Method': 'GET',
+                        'Access-Control-Request-Headers': 'Content-Type,Authorization',
+                        'Origin': window.location.origin
+                    }
+                });
+                
+                console.log('CORS Response:', response);
+                console.log('Headers:', response.headers);
+                
+                const allowOrigin = response.headers.get('Access-Control-Allow-Origin');
+                const allowCredentials = response.headers.get('Access-Control-Allow-Credentials');
+                
+                result.innerHTML = `
+                    <p class="success">✅ CORS 预检请求成功！</p>
+                    <p><strong>Access-Control-Allow-Origin:</strong> ${allowOrigin || '未设置'}</p>
+                    <p><strong>Access-Control-Allow-Credentials:</strong> ${allowCredentials || '未设置'}</p>
+                    <p><strong>Status:</strong> ${response.status} ${response.statusText}</p>
+                `;
+            } catch (error) {
+                result.innerHTML = `
+                    <p class="error">❌ CORS 测试失败：${error.message}</p>
+                    <p class="info">这可能是跨域配置问题</p>
+                `;
+            }
+        }
+        
+        async function runFullDiagnosis() {
+            const result = document.getElementById('diagnosis');
+            result.innerHTML = '<p class="info">运行完整诊断中...</p>';
+            
+            const report = [];
+            
+            // 1. 检查 API_BASE_URL
+            report.push(`<h4>1. API 配置检查</h4>`);
+            if (API_BASE.includes('localhost') || API_BASE.includes('127.0.0.1')) {
+                report.push(`<p class="error">❌ API_BASE_URL 是 localhost，在手机上无法访问</p>`);
+                report.push(`<p class="info">建议：确保从局域网 IP 访问前端页面</p>`);
+            } else {
+                report.push(`<p class="success">✅ API_BASE_URL 配置正确</p>`);
+            }
+            
+            // 2. 测试健康检查
+            report.push(`<h4>2. 后端服务连通性</h4>`);
+            try {
+                const healthResp = await fetch(`${API_BASE}/health`);
+                if (healthResp.ok) {
+                    report.push(`<p class="success">✅ 后端服务可访问</p>`);
+                } else {
+                    report.push(`<p class="error">❌ 后端服务返回错误：${healthResp.status}</p>`);
+                }
+            } catch (e) {
+                report.push(`<p class="error">❌ 无法连接到后端服务：${e.message}</p>`);
+            }
+            
+            // 3. 测试 CORS
+            report.push(`<h4>3. CORS 跨域配置</h4>`);
+            try {
+                const corsResp = await fetch(`${API_BASE}/health`, {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Access-Control-Request-Method': 'GET'
+                    }
+                });
+                if (corsResp.ok) {
+                    report.push(`<p class="success">✅ CORS 配置正确</p>`);
+                } else {
+                    report.push(`<p class="error">❌ CORS 预检失败：${corsResp.status}</p>`);
+                }
+            } catch (e) {
+                report.push(`<p class="error">❌ CORS 测试失败：${e.message}</p>`);
+            }
+            
+            // 4. 网络延迟测试
+            report.push(`<h4>4. 网络延迟测试</h4>`);
+            const startTime = Date.now();
+            try {
+                await fetch(`${API_BASE}/health`);
+                const latency = Date.now() - startTime;
+                if (latency < 100) {
+                    report.push(`<p class="success">✅ 网络延迟良好：${latency}ms</p>`);
+                } else if (latency < 500) {
+                    report.push(`<p class="info">⚠️ 网络延迟较高：${latency}ms</p>`);
+                } else {
+                    report.push(`<p class="error">⚠️ 网络延迟很高：${latency}ms</p>`);
+                }
+            } catch (e) {
+                report.push(`<p class="error">❌ 无法测试延迟：${e.message}</p>`);
+            }
+            
+            result.innerHTML = report.join('');
+        }
+        
+        // 自动运行一次完整诊断
+        window.addEventListener('load', runFullDiagnosis);
+    </script>
+</body>
+</html>

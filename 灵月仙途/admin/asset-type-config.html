@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>灵月仙途 - 资产类型配置</title>
+  <style>
+    :root {
+      --primary-dark: #2c3e50;
+      --primary-gold: #e6c749;
+      --primary-gold-hover: #f4d03f;
+      --bg-color: #f5f5f5;
+      --text-color: #333;
+      --danger-color: #e74c3c;
+      --success-color: #27ae60;
+      --warning-color: #f39c12;
+      --info-color: #3498db;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Microsoft YaHei', 'SimSun', serif;
+      background: var(--bg-color);
+      color: var(--text-color);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    /* 顶部 Header */
+    .admin-header {
+      background: var(--primary-dark);
+      color: white;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      position: relative;
+      z-index: 100;
+    }
+    
+    .admin-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+      letter-spacing: 2px;
+      color: var(--primary-gold);
+    }
+
+    /* 返回按钮 */
+    .back-btn {
+      position: absolute;
+      left: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      padding: 8px 16px;
+      background: rgba(230, 199, 73, 0.2);
+      border: 1px solid var(--primary-gold);
+      color: var(--primary-gold);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+
+    .back-btn:hover {
+      background: rgba(230, 199, 73, 0.4);
+    }
+    
+    /* 主体容器 */
+    .container {
+      flex: 1;
+      padding: 30px;
+      overflow-y: auto;
+    }
+
+    /* 状态消息 */
+    .status-message {
+      padding: 12px 20px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+      display: none;
+      animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .status-message.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .status-message.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .status-message.warning {
+      background: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeaa7;
+    }
+
+    .status-message.info {
+      background: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+    }
+    
+    /* 卡片样式 */
+    .card {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 25px;
+      margin-bottom: 25px;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid var(--primary-gold);
+    }
+
+    .card-title {
+      font-size: 1.3rem;
+      color: var(--primary-dark);
+      font-weight: bold;
+    }
+
+    /* 按钮样式 */
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: all 0.3s;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-primary {
+      background: var(--primary-gold);
+      color: var(--primary-dark);
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-gold-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(230, 199, 73, 0.4);
+    }
+
+    .btn-success {
+      background: var(--success-color);
+      color: white;
+    }
+
+    .btn-success:hover {
+      background: #229954;
+    }
+
+    .btn-danger {
+      background: var(--danger-color);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #c0392b;
+    }
+
+    .btn-warning {
+      background: var(--warning-color);
+      color: white;
+    }
+
+    .btn-warning:hover {
+      background: #e67e22;
+    }
+
+    .btn-secondary {
+      background: #95a5a6;
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background: #7f8c8d;
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 0.85rem;
+    }
+
+    /* 表格样式 */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .data-table thead {
+      background: var(--primary-dark);
+      color: white;
+    }
+
+    .data-table th,
+    .data-table td {
+      padding: 14px;
+      text-align: left;
+      border-bottom: 1px solid #ecf0f1;
+    }
+
+    .data-table th {
+      font-weight: bold;
+      font-size: 0.95rem;
+    }
+
+    .data-table tbody tr {
+      transition: background 0.3s;
+    }
+
+    .data-table tbody tr:hover {
+      background: #f8f9fa;
+    }
+
+    .data-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* 标签样式 */
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+
+    .badge-success {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .badge-danger {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .badge-warning {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .badge-info {
+      background: #d1ecf1;
+      color: #0c5460;
+    }
+
+    .badge-primary {
+      background: #cce5ff;
+      color: #004085;
+    }
+
+    /* 模态框样式 */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(4px);
+      animation: fadeIn 0.3s;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal-content {
+      background: white;
+      margin: 3% auto;
+      padding: 30px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 800px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+      animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid var(--primary-gold);
+    }
+
+    .modal-title {
+      font-size: 1.4rem;
+      color: var(--primary-dark);
+      font-weight: bold;
+    }
+
+    .close {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #95a5a6;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+
+    .close:hover {
+      color: var(--danger-color);
+    }
+
+    /* 表单样式 */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+      color: var(--primary-dark);
+    }
+
+    .form-group label .required {
+      color: var(--danger-color);
+      margin-left: 3px;
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="number"],
+    .form-group input[type="url"],
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 10px 14px;
+      border: 2px solid #dce4ec;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      transition: border-color 0.3s;
+      font-family: inherit;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--primary-gold);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .form-group .help-text {
+      font-size: 0.85rem;
+      color: #7f8c8d;
+      margin-top: 6px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 25px;
+      padding-top: 20px;
+      border-top: 1px solid #ecf0f1;
+    }
+
+    /* 分页样式 */
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      margin-top: 20px;
+    }
+
+    .pagination button {
+      padding: 8px 14px;
+      border: 1px solid #dce4ec;
+      background: white;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .pagination button:hover:not(:disabled) {
+      background: var(--primary-gold);
+      border-color: var(--primary-gold);
+    }
+
+    .pagination button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .pagination button.active {
+      background: var(--primary-gold);
+      border-color: var(--primary-gold);
+      color: var(--primary-dark);
+    }
+
+    .pagination-info {
+      color: #7f8c8d;
+      font-size: 0.9rem;
+    }
+
+    /* 日志表格特殊样式 */
+    .log-timestamp {
+      font-family: 'Courier New', monospace;
+      color: #7f8c8d;
+      font-size: 0.85rem;
+    }
+
+    .log-operator {
+      color: var(--primary-dark);
+      font-weight: bold;
+    }
+
+    .log-action {
+      font-weight: bold;
+    }
+
+    .log-action.create { color: var(--success-color); }
+    .log-action.update { color: var(--info-color); }
+    .log-action.delete { color: var(--danger-color); }
+
+    /* 响应式 */
+    @media (max-width: 768px) {
+      .container {
+        padding: 15px;
+      }
+
+      .card {
+        padding: 15px;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .data-table {
+        font-size: 0.85rem;
+      }
+
+      .data-table th,
+      .data-table td {
+        padding: 10px 8px;
+      }
+
+      .modal-content {
+        width: 95%;
+        margin: 5% auto;
+        padding: 20px;
+      }
+    }
+
+    /* 图标样式 */
+    .icon-preview {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      background: #f8f9fa;
+      border: 1px solid #dce4ec;
+      border-radius: 6px;
+      font-size: 1.5rem;
+    }
+
+    /* Tab 切换 */
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #dce4ec;
+      padding-bottom: 10px;
+    }
+
+    .tab-btn {
+      padding: 10px 20px;
+      background: transparent;
+      border: none;
+      border-bottom: 3px solid transparent;
+      cursor: pointer;
+      font-size: 1rem;
+      color: #7f8c8d;
+      transition: all 0.3s;
+    }
+
+    .tab-btn.active {
+      color: var(--primary-dark);
+      border-bottom-color: var(--primary-gold);
+      font-weight: bold;
+    }
+
+    .tab-btn:hover:not(.active) {
+      color: var(--primary-gold);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <!-- 顶部 Header -->
+  <header class="admin-header">
+    <a href="index.html" class="back-btn">← 返回管理后台</a>
+    <h1 class="admin-title">灵月仙途 - 资产类型配置</h1>
+  </header>
+
+  <!-- 主体容器 -->
+  <div class="container">
+    <!-- 状态消息 -->
+    <div id="statusMessage" class="status-message"></div>
+
+    <!-- Tab 切换 -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('config')">类型配置</button>
+      <button class="tab-btn" onclick="switchTab('logs')">操作日志</button>
+    </div>
+
+    <!-- 类型配置 Tab -->
+    <div id="configTab" class="tab-content active">
+      <!-- 资产类型列表卡片 -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">资产类型列表</h2>
+          <button class="btn btn-primary" onclick="openAddModal()">+ 新增资产类型</button>
+        </div>
+
+        <!-- 筛选条件 -->
+        <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+          <input type="text" id="searchName" placeholder="类型名称筛选" onkeyup="loadAssetTypes()" 
+                 style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; min-width: 150px;">
+          <select id="filterCategory" onchange="loadAssetTypes()" 
+                  style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; min-width: 150px;">
+            <option value="">全部大类</option>
+            <option value="currency">货币</option>
+            <option value="material">材料</option>
+            <option value="task">任务</option>
+            <option value="equipment">装备</option>
+            <option value="consumable">消耗品</option>
+          </select>
+          <select id="filterStatus" onchange="loadAssetTypes()" 
+                  style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; min-width: 120px;">
+            <option value="">全部状态</option>
+            <option value="enabled">启用</option>
+            <option value="disabled">禁用</option>
+          </select>
+        </div>
+
+        <!-- 数据表格 -->
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>图标</th>
+              <th>类型名称</th>
+              <th>唯一编码</th>
+              <th>所属大类</th>
+              <th>可交易</th>
+              <th>可丢弃</th>
+              <th>堆叠上限</th>
+              <th>状态</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="assetTypeTableBody">
+            <!-- JS 动态生成 -->
+          </tbody>
+        </table>
+
+        <!-- 分页 -->
+        <div id="pagination" class="pagination"></div>
+      </div>
+    </div>
+
+    <!-- 操作日志 Tab -->
+    <div id="logsTab" class="tab-content">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">操作日志</h2>
+          <div style="display: flex; gap: 10px;">
+            <input type="date" id="logStartDate" onchange="loadLogs()" 
+                   style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+            <input type="date" id="logEndDate" onchange="loadLogs()" 
+                   style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+            <button class="btn btn-secondary" onclick="loadLogs()">刷新</button>
+          </div>
+        </div>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>时间</th>
+              <th>操作人</th>
+              <th>操作类型</th>
+              <th>资产类型</th>
+              <th>详情</th>
+            </tr>
+          </thead>
+          <tbody id="logTableBody">
+            <!-- JS 动态生成 -->
+          </tbody>
+        </table>
+
+        <div id="logPagination" class="pagination"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 新增/编辑模态框 -->
+  <div id="assetTypeModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalTitle">新增资产类型</h3>
+        <span class="close" onclick="closeModal()">&times;</span>
+      </div>
+      <form id="assetTypeForm">
+        <input type="hidden" id="assetTypeId">
+        
+        <!-- 基础信息 -->
+        <div class="form-group">
+          <label>基础信息<span class="required">*</span></label>
+          <div class="form-row">
+            <div>
+              <label>类型名称<span class="required">*</span></label>
+              <input type="text" id="assetTypeName" required placeholder="如：灵石、法宝">
+            </div>
+            <div>
+              <label>唯一编码<span class="required">*</span></label>
+              <input type="text" id="assetTypeCode" required placeholder="如：lingshi、fabao" 
+                     pattern="[a-z_]+" title="只能使用小写字母和下划线">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>图标路径/Emoji</label>
+            <input type="text" id="assetTypeIcon" placeholder="如：💎 或 /images/icons/coin.png" 
+                   oninput="updateIconPreview()">
+            <div class="help-text">支持 Emoji 表情或图片 URL</div>
+          </div>
+          <div class="form-group">
+            <label>图标预览</label>
+            <div id="iconPreview" class="icon-preview">💎</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>描述说明</label>
+          <textarea id="assetTypeDescription" rows="3" placeholder="描述该资产的用途和特性"></textarea>
+        </div>
+
+        <!-- 属性配置 -->
+        <div class="form-group">
+          <label>属性配置<span class="required">*</span></label>
+          <div class="form-row">
+            <div>
+              <label>所属大类<span class="required">*</span></label>
+              <select id="assetTypeCategory" required onchange="updateModuleOptions()">
+                <option value="">请选择</option>
+                <option value="currency">货币</option>
+                <option value="material">材料</option>
+                <option value="task">任务物品</option>
+                <option value="equipment">装备</option>
+                <option value="consumable">消耗品</option>
+                <option value="special">特殊</option>
+              </select>
+            </div>
+            <div>
+              <label>最大堆叠上限<span class="required">*</span></label>
+              <input type="number" id="assetTypeMaxStack" required min="1" value="999" 
+                     placeholder="单个堆叠最大数量">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>
+              <input type="checkbox" id="assetTypeTradable" checked> 可交易
+            </label>
+            <div class="help-text">允许玩家之间交易</div>
+          </div>
+          <div class="form-group">
+            <label>
+              <input type="checkbox" id="assetTypeDroppable" checked> 可丢弃
+            </label>
+            <div class="help-text">允许玩家丢弃</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>销毁策略</label>
+          <select id="assetTypeDestroyPolicy">
+            <option value="none">不销毁</option>
+            <option value="auto">自动销毁（数量归零时）</option>
+            <option value="manual">手动销毁</option>
+            <option value="time">定时销毁（需配置时间）</option>
+          </select>
+        </div>
+
+        <!-- 关联规则 -->
+        <div class="form-group">
+          <label>关联系统模块</label>
+          <div id="moduleCheckboxes" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px;">
+            <label><input type="checkbox" name="modules" value="cultivation"> 修炼</label>
+            <label><input type="checkbox" name="modules" value="body"> 锻体</label>
+            <label><input type="checkbox" name="modules" value="skill"> 技能</label>
+            <label><input type="checkbox" name="modules" value="auction"> 拍卖行</label>
+            <label><input type="checkbox" name="modules" value="shop"> 商店</label>
+            <label><input type="checkbox" name="modules" value="task"> 任务</label>
+            <label><input type="checkbox" name="modules" value="dungeon"> 副本</label>
+            <label><input type="checkbox" name="modules" value="pvp"> PVP</label>
+            <label><input type="checkbox" name="modules" value="all"> 全系统通用</label>
+          </div>
+          <div class="help-text">配置该资产类型适用的系统模块，实现权限隔离</div>
+        </div>
+
+        <!-- 状态设置 -->
+        <div class="form-group">
+          <label>状态</label>
+          <select id="assetTypeStatus">
+            <option value="enabled">启用</option>
+            <option value="disabled">禁用</option>
+          </select>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeModal()">取消</button>
+          <button type="submit" class="btn btn-primary">保存</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // API 基础 URL
+    const API_BASE_URL = 'http://localhost:8088/api';
+    
+    // 当前页码
+    let currentPage = 1;
+    let totalPages = 1;
+    let currentLogPage = 1;
+    let logTotalPages = 1;
+
+    // 初始加载
+    window.addEventListener('DOMContentLoaded', () => {
+      loadAssetTypes();
+      initEventListeners();
+    });
+
+    // 初始化事件监听
+    function initEventListeners() {
+      // 表单提交
+      document.getElementById('assetTypeForm').addEventListener('submit', handleSubmit);
+      
+      // 模态框点击外部关闭
+      window.addEventListener('click', (e) => {
+        const modal = document.getElementById('assetTypeModal');
+        if (e.target === modal) {
+          closeModal();
+        }
+      });
+    }
+
+    // Tab 切换
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+      
+      event.target.classList.add('active');
+      document.getElementById(tabName + 'Tab').classList.add('active');
+      
+      if (tabName === 'logs') {
+        loadLogs();
+      }
+    }
+
+    // 加载资产类型列表
+    async function loadAssetTypes() {
+      const tbody = document.getElementById('assetTypeTableBody');
+      tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; color:#999;">加载中...</td></tr>';
+      
+      try {
+        const name = document.getElementById('searchName').value;
+        const category = document.getElementById('filterCategory').value;
+        const status = document.getElementById('filterStatus').value;
+        
+        let url = `${API_BASE_URL}/asset-type/list?page=${currentPage}&size=10`;
+        if (name) url += `&name=${encodeURIComponent(name)}`;
+        if (category) url += `&category=${category}`;
+        if (status) url += `&status=${status}`;
+        
+        const response = await fetch(url);
+        const data = await handleResponse(response);
+        
+        tbody.innerHTML = '';
+        if (data && data.list && data.list.length > 0) {
+          data.list.forEach(item => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${item.id}</td>
+              <td><span style="font-size: 1.5rem;">${item.icon || '📦'}</span></td>
+              <td>${item.name}</td>
+              <td><code>${item.code}</code></td>
+              <td>${getCategoryText(item.category)}</td>
+              <td>${item.tradable ? '✓' : '✗'}</td>
+              <td>${item.droppable ? '✓' : '✗'}</td>
+              <td>${item.maxStack}</td>
+              <td>
+                <span class="badge ${item.status === 'enabled' ? 'badge-success' : 'badge-danger'}">
+                  ${item.status === 'enabled' ? '启用' : '禁用'}
+                </span>
+              </td>
+              <td>
+                <button class="btn btn-primary btn-sm" onclick="editAssetType('${item.id}')">编辑</button>
+                <button class="btn btn-${item.status === 'enabled' ? 'warning' : 'success'} btn-sm" 
+                        onclick="toggleStatus('${item.id}', '${item.status}')">
+                  ${item.status === 'enabled' ? '禁用' : '启用'}
+                </button>
+                <button class="btn btn-danger btn-sm" onclick="deleteAssetType('${item.id}')">删除</button>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          });
+          
+          // 更新分页
+          totalPages = data.totalPages || 1;
+          updatePagination(data.total || 0, data.size || 10);
+        } else {
+          tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; color:#999;">暂无数据</td></tr>';
+        }
+      } catch (error) {
+        console.error('加载资产类型失败:', error);
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; color:#e74c3c;">加载失败，请刷新重试</td></tr>';
+        showStatus('加载失败：' + error.message, 'error');
+      }
+    }
+
+    // 加载操作日志
+    async function loadLogs() {
+      const tbody = document.getElementById('logTableBody');
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999;">加载中...</td></tr>';
+      
+      try {
+        const startDate = document.getElementById('logStartDate').value;
+        const endDate = document.getElementById('logEndDate').value;
+        
+        let url = `${API_BASE_URL}/asset-type/logs?page=${currentLogPage}&size=20`;
+        if (startDate) url += `&startDate=${startDate}`;
+        if (endDate) url += `&endDate=${endDate}`;
+        
+        const response = await fetch(url);
+        const data = await handleResponse(response);
+        
+        tbody.innerHTML = '';
+        if (data && data.list && data.list.length > 0) {
+          data.list.forEach(item => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td class="log-timestamp">${formatDateTime(item.operateTime)}</td>
+              <td class="log-operator">${item.operator || '系统'}</td>
+              <td class="log-action ${item.actionType}">${getActionText(item.actionType)}</td>
+              <td>${item.assetTypeName || '-'}</td>
+              <td>${item.details || '-'}</td>
+            `;
+            tbody.appendChild(tr);
+          });
+          
+          logTotalPages = data.totalPages || 1;
+          updateLogPagination(data.total || 0, data.size || 20);
+        } else {
+          tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999;">暂无日志</td></tr>';
+        }
+      } catch (error) {
+        console.error('加载日志失败:', error);
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#e74c3c;">加载失败</td></tr>';
+      }
+    }
+
+    // 打开新增模态框
+    function openAddModal() {
+      document.getElementById('modalTitle').textContent = '新增资产类型';
+      document.getElementById('assetTypeForm').reset();
+      document.getElementById('assetTypeId').value = '';
+      document.getElementById('iconPreview').textContent = '💎';
+      document.getElementById('assetTypeModal').style.display = 'flex';
+    }
+
+    // 编辑资产类型
+    async function editAssetType(id) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/asset-type/${id}`);
+        const data = await handleResponse(response);
+        
+        document.getElementById('modalTitle').textContent = '编辑资产类型';
+        document.getElementById('assetTypeId').value = data.id;
+        document.getElementById('assetTypeName').value = data.name;
+        document.getElementById('assetTypeCode').value = data.code;
+        document.getElementById('assetTypeIcon').value = data.icon || '';
+        document.getElementById('assetTypeDescription').value = data.description || '';
+        document.getElementById('assetTypeCategory').value = data.category || '';
+        document.getElementById('assetTypeMaxStack').value = data.maxStack || 999;
+        document.getElementById('assetTypeTradable').checked = data.tradable || false;
+        document.getElementById('assetTypeDroppable').checked = data.droppable || false;
+        document.getElementById('assetTypeDestroyPolicy').value = data.destroyPolicy || 'none';
+        document.getElementById('assetTypeStatus').value = data.status || 'enabled';
+        
+        // 设置模块复选框
+        if (data.modules) {
+          const modules = data.modules.split(',');
+          document.querySelectorAll('input[name="modules"]').forEach(cb => {
+            cb.checked = modules.includes(cb.value) || modules.includes('all');
+          });
+        }
+        
+        updateIconPreview();
+        document.getElementById('assetTypeModal').style.display = 'flex';
+      } catch (error) {
+        console.error('获取资产类型详情失败:', error);
+        showStatus('获取详情失败：' + error.message, 'error');
+      }
+    }
+
+    // 表单提交处理
+    async function handleSubmit(e) {
+      e.preventDefault();
+      
+      const formData = {
+        name: document.getElementById('assetTypeName').value,
+        code: document.getElementById('assetTypeCode').value,
+        icon: document.getElementById('assetTypeIcon').value,
+        description: document.getElementById('assetTypeDescription').value,
+        category: document.getElementById('assetTypeCategory').value,
+        maxStack: parseInt(document.getElementById('assetTypeMaxStack').value),
+        tradable: document.getElementById('assetTypeTradable').checked,
+        droppable: document.getElementById('assetTypeDroppable').checked,
+        destroyPolicy: document.getElementById('assetTypeDestroyPolicy').value,
+        status: document.getElementById('assetTypeStatus').value,
+        modules: Array.from(document.querySelectorAll('input[name="modules"]:checked'))
+                        .map(cb => cb.value).join(',')
+      };
+      
+      const id = document.getElementById('assetTypeId').value;
+      const url = id ? `${API_BASE_URL}/asset-type/${id}` : `${API_BASE_URL}/asset-type`;
+      const method = id ? 'PUT' : 'POST';
+      
+      try {
+        const response = await fetch(url, {
+          method: method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        });
+        
+        await handleResponse(response);
+        
+        showStatus(id ? '更新成功！' : '创建成功！', 'success');
+        closeModal();
+        loadAssetTypes();
+      } catch (error) {
+        console.error('保存失败:', error);
+        showStatus('保存失败：' + error.message, 'error');
+      }
+    }
+
+    // 切换状态
+    async function toggleStatus(id, currentStatus) {
+      const newStatus = currentStatus === 'enabled' ? 'disabled' : 'enabled';
+      
+      try {
+        const response = await fetch(`${API_BASE_URL}/asset-type/${id}/status`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatus })
+        });
+        
+        await handleResponse(response);
+        showStatus('状态更新成功！', 'success');
+        loadAssetTypes();
+      } catch (error) {
+        console.error('更新状态失败:', error);
+        showStatus('更新失败：' + error.message, 'error');
+      }
+    }
+
+    // 删除资产类型
+    async function deleteAssetType(id) {
+      if (!confirm('确定删除该资产类型吗？此操作不可恢复！')) {
+        return;
+      }
+      
+      try {
+        const response = await fetch(`${API_BASE_URL}/asset-type/${id}`, {
+          method: 'DELETE'
+        });
+        
+        await handleResponse(response);
+        showStatus('删除成功！', 'success');
+        loadAssetTypes();
+      } catch (error) {
+        console.error('删除失败:', error);
+        showStatus('删除失败：' + error.message, 'error');
+      }
+    }
+
+    // 关闭模态框
+    function closeModal() {
+      document.getElementById('assetTypeModal').style.display = 'none';
+      document.getElementById('assetTypeForm').reset();
+    }
+
+    // 更新图标预览
+    function updateIconPreview() {
+      const iconValue = document.getElementById('assetTypeIcon').value;
+      const preview = document.getElementById('iconPreview');
+      
+      if (iconValue) {
+        if (iconValue.startsWith('/') || iconValue.startsWith('http')) {
+          preview.innerHTML = `<img src="${iconValue}" style="width: 100%; height: 100%; object-fit: contain;" alt="图标">`;
+        } else {
+          preview.textContent = iconValue;
+        }
+      } else {
+        preview.textContent = '💎';
+      }
+    }
+
+    // 更新模块选项（根据大类）
+    function updateModuleOptions() {
+      const category = document.getElementById('assetTypeCategory').value;
+      const checkboxes = document.querySelectorAll('input[name="modules"]');
+      
+      // 默认全选
+      if (category === 'currency') {
+        checkboxes.forEach(cb => cb.checked = true);
+      } else {
+        checkboxes.forEach(cb => cb.checked = false);
+      }
+    }
+
+    // 显示状态消息
+    function showStatus(message, type) {
+      const statusEl = document.getElementById('statusMessage');
+      statusEl.textContent = message;
+      statusEl.className = `status-message ${type}`;
+      statusEl.style.display = 'block';
+      
+      setTimeout(() => {
+        statusEl.style.display = 'none';
+      }, 3000);
+    }
+
+    // 更新分页
+    function updatePagination(total, size) {
+      const pagination = document.getElementById('pagination');
+      pagination.innerHTML = '';
+      
+      const prevDisabled = currentPage === 1 ? 'disabled' : '';
+      const nextDisabled = currentPage === totalPages ? 'disabled' : '';
+      
+      pagination.innerHTML = `
+        <button ${prevDisabled} onclick="changePage(${currentPage - 1})">上一页</button>
+        <span class="pagination-info">第 ${currentPage} / ${totalPages} 页，共 ${total} 条</span>
+        <button ${nextDisabled} onclick="changePage(${currentPage + 1})">下一页</button>
+      `;
+    }
+
+    // 更新日志分页
+    function updateLogPagination(total, size) {
+      const pagination = document.getElementById('logPagination');
+      pagination.innerHTML = '';
+      
+      const prevDisabled = currentLogPage === 1 ? 'disabled' : '';
+      const nextDisabled = currentLogPage === logTotalPages ? 'disabled' : '';
+      
+      pagination.innerHTML = `
+        <button ${prevDisabled} onclick="changeLogPage(${currentLogPage - 1})">上一页</button>
+        <span class="pagination-info">第 ${currentLogPage} / ${logTotalPages} 页，共 ${total} 条</span>
+        <button ${nextDisabled} onclick="changeLogPage(${currentLogPage + 1})">下一页</button>
+      `;
+    }
+
+    // 切换页码
+    function changePage(page) {
+      if (page < 1 || page > totalPages) return;
+      currentPage = page;
+      loadAssetTypes();
+    }
+
+    // 切换日志页码
+    function changeLogPage(page) {
+      if (page < 1 || page > logTotalPages) return;
+      currentLogPage = page;
+      loadLogs();
+    }
+
+    // 辅助函数
+    function getCategoryText(category) {
+      const map = {
+        'currency': '货币',
+        'material': '材料',
+        'task': '任务',
+        'equipment': '装备',
+        'consumable': '消耗品',
+        'special': '特殊'
+      };
+      return map[category] || category;
+    }
+
+    function getActionText(action) {
+      const map = {
+        'create': '新增',
+        'update': '修改',
+        'delete': '删除',
+        'toggle': '切换状态'
+      };
+      return map[action] || action;
+    }
+
+    function formatDateTime(dateStr) {
+      if (!dateStr) return '-';
+      const date = new Date(dateStr);
+      return date.toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+    }
+
+    // 统一响应处理
+    async function handleResponse(response) {
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ message: '请求失败' }));
+        throw new Error(error.message || `HTTP ${response.status}`);
+      }
+      return response.json();
+    }
+  </script>
+</body>
+</html>

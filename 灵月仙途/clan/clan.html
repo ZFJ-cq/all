@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="../js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="../css/mobile-adapt.css">
+    <title>蓬莱岛 - 宗门</title>
+
+    <style>
+        :root {
+            --bg-body: #f0f2f5;
+            --bg-card: #2c3e50;
+            --bg-card-light: #34495e;
+            --bg-modal-overlay: rgba(0, 0, 0, 0.85);
+            --text-gold: #d4af37;
+            --text-gold-dim: #aa8c2c;
+            --text-white: #ecf0f1;
+            --text-grey: #95a5a6;
+            --border-radius: 8px;
+            --nav-height: 60px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-body); color: var(--text-white); display: flex; justify-content: center; min-height: 100vh; }
+        .app-container { width: 100%; max-width: 480px; background: rgba(44, 62, 80, 0.05); min-height: 100vh; position: relative; display: flex; flex-direction: column; padding-bottom: calc(var(--nav-height) + 20px); }
+        
+        /* 头部与状态 */
+        .header { background: var(--bg-card); padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--text-gold-dim); position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+        .header-btn { background: rgba(0,0,0,0.3); border: 1px solid var(--text-gold-dim); color: var(--text-gold); padding: 5px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+        .header-btn:active { background: var(--text-gold-dim); color: #fff; }
+        .header-title { font-size: 20px; font-weight: bold; color: var(--text-gold); letter-spacing: 2px; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
+        .status-bar { background: var(--bg-card); margin: 10px 15px; padding: 10px 15px; border-radius: var(--border-radius); display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(212, 175, 55, 0.2); }
+        .status-left { display: flex; align-items: center; gap: 8px; color: var(--text-gold); font-size: 14px; font-weight: bold; }
+        .status-right { background: rgba(0,0,0,0.2); padding: 4px 10px; border-radius: 4px; color: var(--text-gold); font-size: 13px; border: 1px solid rgba(212, 175, 55, 0.3); display: flex; align-items: center; gap: 5px; }
+
+        /* 长老卡片 */
+        .elder-card { background: var(--bg-card); margin: 0 15px 15px; padding: 15px; border-radius: var(--border-radius); display: flex; align-items: center; gap: 15px; border: 1px solid rgba(212, 175, 55, 0.1); }
+        .elder-avatar { width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--text-gold); background: #000; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 0 10px rgba(212, 175, 55, 0.3); }
+        .elder-info h3 { color: var(--text-gold); font-size: 16px; margin-bottom: 2px; }
+        .elder-info p { color: var(--text-grey); font-size: 12px; }
+        .elder-icon { margin-left: auto; color: var(--text-grey); font-size: 18px; }
+
+        /* 网格 */
+        .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 15px; }
+        .card { background: var(--bg-card); border-radius: var(--border-radius); overflow: hidden; display: flex; flex-direction: column; border: 1px solid rgba(255,255,255,0.05); transition: transform 0.2s; cursor: pointer; aspect-ratio: 4/3; }
+        .card:active { transform: scale(0.98); background: var(--bg-card-light); }
+        .card-img-area { flex: 1; background: rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; position: relative; padding: 10px; }
+        .icon-shape { opacity: 0.8; transition: all 0.3s; }
+        .card:active .icon-shape { opacity: 1; filter: drop-shadow(0 0 5px var(--text-gold)); }
+        
+        .shape-building { width: 60%; height: 70%; background: var(--text-gold-dim); clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%); }
+        .shape-book { width: 40%; height: 60%; background: var(--text-gold); border-radius: 2px; }
+        .shape-sword { width: 60%; height: 4px; background: var(--text-gold); position: relative; transform: rotate(-45deg); }
+        .shape-sword::after { content:''; position: absolute; right: -5px; top: -8px; width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-bottom: 16px solid var(--text-gold); }
+        .shape-chest { width: 70%; height: 50%; background: var(--text-gold-dim); border: 2px solid var(--text-gold); }
+        .shape-gate { width: 80%; height: 80%; border: 4px solid var(--text-gold-dim); border-bottom: none; position: relative; }
+        .shape-gate::before { content:''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 60%; height: 40%; background: var(--bg-card); }
+        .shape-forbidden { width: 100%; height: 100%; background: radial-gradient(circle, #c0392b 20%, transparent 21%), radial-gradient(circle, #c0392b 20%, transparent 21%); background-size: 20px 20px; background-position: 0 0, 10px 10px; opacity: 0.3; }
+
+        .card-text { padding: 8px; text-align: center; background: rgba(0,0,0,0.1); }
+        .card-title { color: var(--text-gold); font-size: 14px; font-weight: bold; margin-bottom: 2px; }
+        .card-desc { color: var(--text-grey); font-size: 10px; }
+
+        /* 底部导航 */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: var(--nav-height); background: #1a252f; border-top: 1px solid var(--text-gold-dim); display: flex; justify-content: space-around; align-items: center; z-index: 1000; max-width: 480px; left: 50%; transform: translateX(-50%); }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-grey); text-decoration: none; font-size: 10px; width: 20%; }
+        .nav-item i { font-size: 18px; margin-bottom: 2px; transition: color 0.3s; }
+        .nav-item.active { color: var(--text-gold); }
+        .nav-item.active i { text-shadow: 0 0 8px rgba(212, 175, 55, 0.6); }
+
+        /* 弹窗 */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-modal-overlay); z-index: 2000; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s ease; backdrop-filter: blur(2px); }
+        .modal-overlay.active { display: flex; opacity: 1; }
+        .modal-container { background: var(--bg-card); border: 1px solid var(--text-gold); border-radius: 12px; width: 85%; max-width: 400px; max-height: 80vh; display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.5); transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); overflow: hidden; }
+        .modal-overlay.active .modal-container { transform: scale(1); }
+        .modal-header { padding: 15px 20px; border-bottom: 1px solid rgba(212, 175, 55, 0.3); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); }
+        .modal-title { color: var(--text-gold); font-size: 18px; font-weight: bold; letter-spacing: 1px; }
+        .modal-close { background: none; border: none; color: var(--text-grey); font-size: 20px; cursor: pointer; }
+        .modal-close:hover { color: var(--text-white); }
+        .modal-body { padding: 20px; overflow-y: auto; color: var(--text-white); font-size: 14px; line-height: 1.6; }
+        .action-btn-group { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; }
+        .btn { padding: 8px 16px; border-radius: 4px; border: none; font-size: 14px; cursor: pointer; transition: all 0.2s; font-weight: bold; }
+        .btn-primary { background: var(--text-gold); color: #1a252f; }
+        .btn-primary:active { background: var(--text-gold-dim); }
+        .btn-secondary { background: rgba(255,255,255,0.1); color: var(--text-grey); border: 1px solid rgba(255,255,255,0.2); }
+        .feature-list { list-style: none; }
+        .feature-list li { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; }
+        .feature-list li:last-child { border-bottom: none; }
+        .feature-list li i { color: var(--text-gold-dim); margin-right: 8px; }
+        .tag { background: rgba(212, 175, 55, 0.2); color: var(--text-gold); padding: 2px 6px; border-radius: 4px; font-size: 10px; }
+        
+        /* 叛出宗门特殊弹窗样式 */
+        .leave-modal .modal-container {
+            border-color: #ff4444;
+            box-shadow: 0 0 30px rgba(255, 68, 68, 0.4);
+        }
+        .leave-modal .modal-header {
+            background: rgba(255, 68, 68, 0.1);
+            border-bottom-color: rgba(255, 68, 68, 0.3);
+        }
+        .leave-modal .modal-title {
+            color: #ff4444;
+        }
+        .leave-modal .warning-icon {
+            font-size: 48px;
+            text-align: center;
+            margin: 20px 0;
+            color: #ff4444;
+            animation: pulse 2s infinite;
+        }
+        .leave-modal .warning-text {
+            background: rgba(255, 68, 68, 0.1);
+            border-left: 3px solid #ff4444;
+            padding: 12px 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #ffcccc;
+        }
+        .leave-modal .consequences {
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 6px;
+        }
+        .leave-modal .consequences-title {
+            color: #ff4444;
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        .leave-modal .consequences-list {
+            list-style: none;
+            padding-left: 10px;
+        }
+        .leave-modal .consequences-list li {
+            padding: 5px 0;
+            color: var(--text-grey);
+            font-size: 13px;
+            display: flex;
+            align-items: flex-start;
+        }
+        .leave-modal .consequences-list li::before {
+            content: '⚠️';
+            margin-right: 8px;
+        }
+        .leave-modal .btn-danger {
+            background: linear-gradient(135deg, #ff4444, #cc0000);
+            color: white;
+            border: none;
+        }
+        .leave-modal .btn-danger:hover {
+            background: linear-gradient(135deg, #ff6666, #ff0000);
+            box-shadow: 0 0 15px rgba(255, 68, 68, 0.5);
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+    </style>
+
+  </head>
+<body>
+    <div class="app-container">
+        <header class="header">
+            <button class="header-btn" onclick="confirmLeave()">🚪 叛出</button>
+            <div class="header-title">蓬莱岛</div>
+            <button class="header-btn">📜 精义</button>
+        </header>
+        <div class="status-bar">
+            <div class="status-left">🏷️ 长老</div>
+            <div class="status-right">💰 9,239,672</div>
+        </div>
+        <div class="elder-card">
+            <div class="elder-avatar">👴</div>
+            <div class="elder-info"><h3>玄机子</h3><p>当值长老</p></div>
+            <div class="elder-icon">💬</div>
+        </div>
+        <div class="grid-container">
+            <div class="card" onclick="openModal('assembly')"><div class="card-img-area"><div class="icon-shape shape-building"></div></div><div class="card-text"><div class="card-title">议事殿</div><div class="card-desc">高层决策</div></div></div>
+            <div class="card" onclick="openModal('tasks')"><div class="card-img-area"><div class="icon-shape shape-building" style="clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); background: var(--text-grey);"></div></div><div class="card-text"><div class="card-title">杂务堂</div><div class="card-desc">日常任务</div></div></div>
+            <div class="card" onclick="openModal('library')"><div class="card-img-area"><div class="icon-shape shape-book"></div></div><div class="card-text"><div class="card-title">藏经阁</div><div class="card-desc">功法秘籍</div></div></div>
+            <div class="card" onclick="openModal('arena')"><div class="card-img-area"><div class="icon-shape shape-sword"></div></div><div class="card-text"><div class="card-title">演武场</div><div class="card-desc">切磋武艺</div></div></div>
+            <div class="card" onclick="openModal('treasure')"><div class="card-img-area"><div class="icon-shape shape-chest"></div></div><div class="card-text"><div class="card-title">藏宝阁</div><div class="card-desc">兑换资源</div></div></div>
+            <div class="card" onclick="openModal('recruit')"><div class="card-img-area"><div class="icon-shape shape-gate"></div></div><div class="card-text"><div class="card-title">入门殿</div><div class="card-desc">招收弟子</div></div></div>
+            <div class="card" onclick="openModal('tournament')"><div class="card-img-area"><div class="icon-shape" style="width: 60px; height: 60px; border: 2px solid var(--text-gold); border-radius: 50%; display:flex; align-items:center; justify-content:center;"><div style="width: 40px; height: 4px; background: var(--text-gold);"></div></div></div><div class="card-text"><div class="card-title">比武台</div><div class="card-desc">宗门大比</div></div></div>
+            <div class="card" onclick="openModal('forbidden')"><div class="card-img-area"><div class="icon-shape shape-forbidden"></div></div><div class="card-text"><div class="card-title" style="color: #e74c3c;">禁地</div><div class="card-desc">危险重重</div></div></div>
+        </div>
+        <nav class="bottom-nav" role="navigation" aria-label="主导航">
+            <a href="../index.html" class="nav-item" aria-label="修炼页面">
+                <div class="nav-icon">🧘</div>
+                <div class="nav-text">修炼</div>
+            </a>
+            <a href="../skills/skills.html" class="nav-item" aria-label="功法页面">
+                <div class="nav-icon">📜</div>
+                <div class="nav-text">功法</div>
+            </a>
+            <a href="javascript:void(0)" onclick="window.pageUtils.navigateToGuildPage()" class="nav-item active" aria-label="宗门页面" aria-current="page">
+                <div class="nav-icon">🏯</div>
+                <div class="nav-text">宗门</div>
+            </a>
+            <a href="../word/world.html" class="nav-item" aria-label="仙途页面">
+                <div class="nav-icon">🌌</div>
+                <div class="nav-text">仙途</div>
+            </a>
+            <a href="../map/map.html" class="nav-item" aria-label="云游页面">
+                <div class="nav-icon">🗺️</div>
+                <div class="nav-text">云游</div>
+            </a>
+        </nav>
+    </div>
+
+    <!-- 通用弹窗 -->
+    <div id="actionModal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 id="modalTitle" class="modal-title">标题</h3>
+                <button class="modal-close" onclick="closeModal()">✕</button>
+            </div>
+            <div id="modalContent" class="modal-body"></div>
+            <div class="modal-header" style="border-top: 1px solid rgba(212, 175, 55, 0.3); border-bottom: none; background: transparent; padding: 10px 20px;">
+                <div class="action-btn-group" style="margin-top: 0; width: 100%; justify-content: flex-end;">
+                    <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+                    <button id="modalConfirmBtn" class="btn btn-primary">确认</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 叛出宗门专用弹窗 -->
+    <div id="leaveModal" class="modal-overlay leave-modal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 class="modal-title">⚠️ 叛出宗门</h3>
+                <button class="modal-close" onclick="closeLeaveModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="warning-icon">🚪</div>
+                <div class="warning-text">
+                    <strong>慎重决定！</strong><br/>
+                    一旦叛出宗门，将与当前宗门恩断义绝，所有贡献化为乌有。
+                </div>
+                <div class="consequences">
+                    <div class="consequences-title">叛出后果：</div>
+                    <ul class="consequences-list">
+                        <li>清空在当前宗门的所有贡献值</li>
+                        <li>失去宗门弟子身份和职位</li>
+                        <li>无法再使用宗门资源和设施</li>
+                        <li>需要重新选择宗门加入</li>
+                    </ul>
+                </div>
+                <div style="text-align: center; margin-top: 20px; font-size: 13px; color: var(--text-grey);">
+                    江湖路远，何去何从，请三思而后行
+                </div>
+            </div>
+            <div class="modal-header" style="border-top: 1px solid rgba(255, 68, 68, 0.3); border-bottom: none; background: transparent; padding: 15px 20px;">
+                <div class="action-btn-group" style="margin-top: 0; width: 100%; justify-content: space-between;">
+                    <button class="btn btn-secondary" onclick="closeLeaveModal()">我再想想</button>
+                    <button class="btn btn-danger" onclick="executeLeave()">去意已决</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = window.APP_CONFIG?.API_BASE_URL || 'http://localhost:8088/api';
+        const roleId = window.AuthService ? window.AuthService.getCurrentRoleId() : (localStorage.getItem('currentRoleId') || localStorage.getItem('roleId'));
+        let clanData = null;
+        let roleClanMemberData = null;
+
+        // 初始化
+        window.addEventListener('DOMContentLoaded', () => {
+            loadClanData();
+            setupEventListeners();
+        });
+
+        // 加载宗门数据
+        async function loadClanData() {
+            try {
+                // 首先获取角色的宗门成员信息
+                const memberResponse = await fetch(`${API_BASE_URL}/clan/member/role/${roleId}`);
+                if (memberResponse.ok) {
+                    const memberData = await memberResponse.json();
+                    if (memberData && memberData.code === 200 && memberData.data && memberData.data.clanId) {
+                        roleClanMemberData = memberData.data;
+                        // 根据 clanId 获取宗门详细信息
+                        const clanResponse = await fetch(`${API_BASE_URL}/clan/${memberData.data.clanId}`);
+                        if (clanResponse.ok) {
+                            const clanInfo = await clanResponse.json();
+                            if (clanInfo && clanInfo.code === 200 && clanInfo.data && clanInfo.data.id) {
+                                clanData = clanInfo.data;
+                                updateClanDisplay();
+                                updateRoleClanDisplay();
+                            } else {
+                                // 无法获取宗门信息，跳转到宗门列表
+                                window.location.href = 'clan-list.html';
+                            }
+                        } else {
+                            // 无法获取宗门信息，跳转到宗门列表
+                            window.location.href = 'clan-list.html';
+                        }
+                    } else {
+                        // 未加入宗门，跳转到宗门列表
+                        window.location.href = 'clan-list.html';
+                    }
+                } else {
+                    // API返回错误，跳转到宗门列表
+                    window.location.href = 'clan-list.html';
+                }
+            } catch (error) {
+                console.error('加载宗门数据失败:', error);
+                // 错误处理，跳转到宗门列表
+                window.location.href = 'clan-list.html';
+            }
+        }
+
+        // 加载角色宗门数据
+        async function loadRoleClanData() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/clan/member/role/${roleId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data && data.code === 200 && data.data && data.data.clanId) {
+                        roleClanMemberData = data.data;
+                        updateRoleClanDisplay();
+                    } else {
+                        // 未加入宗门，跳转到宗门列表
+                        window.location.href = 'clan-list.html';
+                    }
+                } else {
+                    // API返回错误，跳转到宗门列表
+                    window.location.href = 'clan-list.html';
+                }
+            } catch (error) {
+                console.error('加载角色宗门数据失败:', error);
+                // 错误处理，跳转到宗门列表
+                window.location.href = 'clan-list.html';
+            }
+        }
+        
+
+
+        // 更新宗门显示
+        function updateClanDisplay() {
+            if (clanData) {
+                const headerTitle = document.querySelector('.header-title');
+                const statusRight = document.querySelector('.status-right');
+                if (headerTitle) {
+                    headerTitle.textContent = clanData.name;
+                }
+                if (statusRight) {
+                    statusRight.innerHTML = '<i class="fas fa-coins"></i> ' + clanData.contribution.toLocaleString();
+                }
+            }
+        }
+
+        // 更新角色宗门显示
+        function updateRoleClanDisplay() {
+            if (roleClanMemberData) {
+                const positionMap = {
+                    0: '普通弟子',
+                    1: '精英弟子',
+                    2: '长老',
+                    3: '副宗主',
+                    4: '宗主'
+                };
+                const statusLeft = document.querySelector('.status-left');
+                if (statusLeft) {
+                    const position = positionMap[roleClanMemberData.position] || '普通弟子';
+                    statusLeft.innerHTML = '<i class="fas fa-user-tag"></i> ' + position;
+                }
+            }
+        }
+
+        const moduleData = {
+            'assembly': { title: '议事殿', content: '<ul class="feature-list"><li><span>📜 下月俸禄</span> <span class="tag">进行中</span></li></ul>', confirmText: '提交决议', onConfirm: () => { showToast('决议已提交！'); closeModal(); } },
+            'tasks': { title: '杂务堂', content: '<p>今日任务：<br>1. 采集灵草 (500 贡献)</p>', confirmText: '接取任务', onConfirm: () => { showToast('任务已接取！'); closeModal(); } },
+            'library': { title: '藏经阁', content: '<p>权限不足，需长老批准。</p>', confirmText: '申请权限', onConfirm: () => { showToast('申请已发送。'); closeModal(); } },
+            'default': { title: '提示', content: '<p>功能开发中...</p>', confirmText: '知道了', onConfirm: () => closeModal() }
+        };
+
+        const modalOverlay = document.getElementById('actionModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalContent = document.getElementById('modalContent');
+        const modalConfirmBtn = document.getElementById('modalConfirmBtn');
+        let currentConfirmCallback = null;
+
+        function openModal(moduleKey) {
+            const data = moduleData[moduleKey] || moduleData['default'];
+            modalTitle.innerText = data.title;
+            modalContent.innerHTML = data.content;
+            modalConfirmBtn.innerText = data.confirmText;
+            currentConfirmCallback = data.onConfirm;
+        }
+
+        function handleConfirmClick() {
+            if (currentConfirmCallback) {
+                currentConfirmCallback();
+            }
+        }
+
+        modalConfirmBtn.addEventListener('click', handleConfirmClick);
+
+        function closeModal() {
+            modalOverlay.classList.remove('active');
+        }
+
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) closeModal();
+        });
+
+        // 显示叛出宗门弹窗
+        function confirmLeave() {
+            const leaveModal = document.getElementById('leaveModal');
+            leaveModal.classList.add('active');
+        }
+        
+        // 关闭叛出宗门弹窗
+        function closeLeaveModal() {
+            const leaveModal = document.getElementById('leaveModal');
+            leaveModal.classList.remove('active');
+        }
+        
+        // 执行叛出宗门操作
+        async function executeLeave() {
+            try {
+                // 关闭弹窗
+                closeLeaveModal();
+                
+                // 显示加载提示
+                const loadingTip = document.createElement('div');
+                loadingTip.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: rgba(0, 0, 0, 0.9);
+                    color: #ff4444;
+                    padding: 20px 40px;
+                    border-radius: 10px;
+                    border: 1px solid #ff4444;
+                    font-size: 16px;
+                    z-index: 2000;
+                    text-align: center;
+                `;
+                loadingTip.innerHTML = '⚔️<br><div style="margin-top: 10px;">正在办理叛出手续...</div>';
+                document.body.appendChild(loadingTip);
+                
+                // 调用后端 API 清理角色宗门信息
+                const response = await fetch(`${API_BASE_URL}/role/clans/${roleId}/leave`, {
+                    method: 'POST'
+                });
+                
+                setTimeout(() => {
+                    loadingTip.remove();
+                    
+                    if (response.ok) {
+                        // 显示成功提示
+                        const successTip = document.createElement('div');
+                        successTip.style.cssText = `
+                            position: fixed;
+                            top: 50%;
+                            left: 50%;
+                            transform: translate(-50%, -50%);
+                            background: rgba(255, 68, 68, 0.95);
+                            color: white;
+                            padding: 30px 50px;
+                            border-radius: 12px;
+                            border: 2px solid #ff4444;
+                            font-size: 18px;
+                            z-index: 2000;
+                            text-align: center;
+                            animation: modalPop 0.3s ease;
+                        `;
+                        successTip.innerHTML = `
+                            <div style="font-size: 48px; margin-bottom: 10px;">🚪</div>
+                            <div style="font-weight: bold; margin-bottom: 5px;">已叛出师门</div>
+                            <div style="font-size: 14px;">江湖路远，好自为之</div>
+                        `;
+                        document.body.appendChild(successTip);
+                        
+                        // 跳转到宗门列表页面
+                        setTimeout(() => {
+                            window.location.href = 'clan-list.html';
+                        }, 2000);
+                    } else {
+                        throw new Error('离开宗门失败');
+                    }
+                }, 1500);
+            } catch (error) {
+                console.error('Error leaving clan:', error);
+                // 即使后端失败，也允许前端跳转
+                const errorTip = document.createElement('div');
+                errorTip.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: rgba(255, 68, 68, 0.95);
+                    color: white;
+                    padding: 30px 50px;
+                    border-radius: 12px;
+                    border: 2px solid #ff4444;
+                    font-size: 18px;
+                    z-index: 2000;
+                    text-align: center;
+                `;
+                errorTip.innerHTML = `
+                    <div style="font-size: 48px; margin-bottom: 10px;">🚪</div>
+                    <div style="font-weight: bold; margin-bottom: 5px;">已叛出师门</div>
+                    <div style="font-size: 14px;">江湖路远，好自为之</div>
+                `;
+                document.body.appendChild(errorTip);
+                
+                setTimeout(() => {
+                    window.location.href = 'clan-list.html';
+                }, 2000);
+            }
+        }
+        
+        // 显示通知消息
+        function showNotification(message, duration = 3000) {
+            // 创建通知元素
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(20, 30, 60, 0.95);
+                color: #aaccff;
+                padding: 15px 30px;
+                border-radius: 8px;
+                border: 1px solid rgba(100, 150, 255, 0.4);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+                z-index: 3000;
+                font-size: 14px;
+                transition: opacity 0.3s ease;
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                setTimeout(() => {
+                    notification.remove();
+                }, 300);
+            }, duration);
+        }
+
+        function setupEventListeners() {
+            // 可以在这里添加其他事件监听器
+        }
+    </script>
+  <script src="../js/common.js"></script>
+  <script src="../js/auth-service.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/ui-components.js"></script>
+</body>
+</html>

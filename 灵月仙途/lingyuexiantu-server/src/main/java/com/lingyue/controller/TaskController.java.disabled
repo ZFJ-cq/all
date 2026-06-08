@@ -1,0 +1,264 @@
+package com.lingyue.controller;
+
+import com.lingyue.entity.Task;
+import com.lingyue.entity.RoleTask;
+import com.lingyue.entity.Role;
+import com.lingyue.entity.RoleItem;
+import com.lingyue.entity.Item;
+import com.lingyue.entity.Mail;
+import com.lingyue.repository.TaskRepository;
+import com.lingyue.repository.RoleTaskRepository;
+import com.lingyue.repository.RoleRepository;
+import com.lingyue.repository.RoleItemRepository;
+import com.lingyue.repository.ItemRepository;
+import com.lingyue.repository.MailRepository;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+import java.util.Date;
+import java.time.LocalDateTime;
+
+@RestController
+@RequestMapping("/task")
+public class TaskController {
+    
+    private final TaskRepository taskRepository;
+    private final RoleTaskRepository roleTaskRepository;
+    private final RoleRepository roleRepository;
+    private final RoleItemRepository roleItemRepository;
+    private final ItemRepository itemRepository;
+    private final MailRepository mailRepository;
+    
+    public TaskController(TaskRepository taskRepository, 
+                         RoleTaskRepository roleTaskRepository,
+                         RoleRepository roleRepository,
+                         RoleItemRepository roleItemRepository,
+                         ItemRepository itemRepository,
+                         MailRepository mailRepository) {
+        this.taskRepository = taskRepository;
+        this.roleTaskRepository = roleTaskRepository;
+        this.roleRepository = roleRepository;
+        this.roleItemRepository = roleItemRepository;
+        this.itemRepository = itemRepository;
+        this.mailRepository = mailRepository;
+    }
+    
+    // 获取所有任务（后台管理用）
+    @GetMapping
+    public List<Task> getAllTasks() {
+        return taskRepository.findAll();
+    }
+    
+    // 根据 ID 获取任务
+    @GetMapping("/{id}")
+    public Task getTaskById(@PathVariable Long id) {
+        return taskRepository.findById(id).orElse(null);
+    }
+    
+    // 创建任务（后台管理用）
+    @PostMapping
+    public Task createTask(@RequestBody Task task) {
+        task.setStatus(1); // 1-可用
+        return taskRepository.save(task);
+    }
+    
+    // 更新任务（后台管理用）
+    @PutMapping("/{id}")
+    public Task updateTask(@PathVariable Long id, @RequestBody Task task) {
+        Task existingTask = taskRepository.findById(id).orElse(null);
+        if (existingTask != null) {
+            existingTask.setName(task.getName());
+            existingTask.setDescription(task.getDescription());
+            existingTask.setType(task.getType());
+            existingTask.setLevelRequirement(task.getLevelRequirement());
+            existingTask.setRewardExp(task.getRewardExp());
+            existingTask.setRewardGold(task.getRewardGold());
+            existingTask.setRewardItems(task.getRewardItems());
+            existingTask.setStatus(task.getStatus());
+            return taskRepository.save(existingTask);
+        }
+        return null;
+    }
+    
+    // 删除任务（后台管理用）
+    @DeleteMapping("/{id}")
+    public void deleteTask(@PathVariable Long id) {
+        taskRepository.deleteById(id);
+    }
+    
+    // 根据角色 ID 获取任务
+    @GetMapping("/role/{roleId}")
+    public List<RoleTask> getRoleTasks(@PathVariable Long roleId) {
+        return roleTaskRepository.findByRoleId(roleId);
+    }
+    
+    // 接受任务
+    @PostMapping("/role/{roleId}/accept/{taskId}")
+    public RoleTask acceptTask(@PathVariable Long roleId, @PathVariable Long taskId) {
+        // 检查是否已经接受过该任务
+        RoleTask existingTask = roleTaskRepository.findByRoleIdAndTaskId(roleId, taskId);
+        if (existingTask != null) {
+            return existingTask; // 已经接受过
+        }
+        
+        // 创建新的角色任务记录
+        RoleTask roleTask = new RoleTask();
+        roleTask.setRoleId(roleId);
+        roleTask.setTaskId(taskId);
+        roleTask.setStatus(1); // 1-未完成
+        roleTask.setProgress(0);
+        roleTask.setAcceptTime(new Date());
+        return roleTaskRepository.save(roleTask);
+    }
+    
+    // 更新任务进度
+    @PutMapping("/role/{roleId}/{taskId}/progress")
+    public RoleTask updateTaskProgress(@PathVariable Long roleId, @PathVariable Long taskId, 
+                                       @RequestParam Integer progress) {
+        RoleTask roleTask = roleTaskRepository.findByRoleIdAndTaskId(roleId, taskId);
+        if (roleTask != null && roleTask.getStatus() == 1) {
+            roleTask.setProgress(progress);
+            return roleTaskRepository.save(roleTask);
+        }
+        return null;
+    }
+    
+    // 完成任务
+    @PutMapping("/role/{roleId}/{taskId}/complete")
+    public RoleTask completeTask(@PathVariable Long roleId, @PathVariable Long taskId) {
+        RoleTask roleTask = roleTaskRepository.findByRoleIdAndTaskId(roleId, taskId);
+        if (roleTask != null && roleTask.getStatus() == 1) {
+            roleTask.setStatus(2); // 2-已完成
+            return roleTaskRepository.save(roleTask);
+        }
+        return null;
+    }
+    
+    // 领取任务奖励
+    @PutMapping("/role/{roleId}/{taskId}/claim")
+    public RoleTask claimTaskReward(@PathVariable Long roleId, @PathVariable Long taskId) {
+        RoleTask roleTask = roleTaskRepository.findByRoleIdAndTaskId(roleId, taskId);
+        if (roleTask != null && roleTask.getStatus() == 2) {
+            // 获取任务信息
+            Task task = taskRepository.findById(taskId).orElse(null);
+            if (task == null) {
+                return null;
+            }
+            
+            // 获取角色信息
+            Role role = roleRepository.findById(roleId).orElse(null);
+            if (role == null) {
+                return null;
+            }
+            
+            // 发放奖励
+            boolean success = distributeRewards(role, task);
+            
+            if (success) {
+                roleTask.setStatus(3); // 3-已领取
+                return roleTaskRepository.save(roleTask);
+            } else {
+                // 奖励发放失败（背包已满），通过邮件发送
+                sendRewardMail(role, task);
+                roleTask.setStatus(3); // 3-已领取
+                return roleTaskRepository.save(roleTask);
+            }
+        }
+        return null;
+    }
+    
+    // 发放奖励
+    private boolean distributeRewards(Role role, Task task) {
+        // 1. 增加修为
+        if (task.getRewardExp() != null && task.getRewardExp() > 0) {
+            role.setExp(role.getExp() + task.getRewardExp());
+        }
+        
+        // 2. 增加灵石（金币）
+        if (task.getRewardGold() != null && task.getRewardGold() > 0) {
+            // TODO: 需要实现资源系统，这里暂时简化处理
+        }
+        
+        roleRepository.save(role);
+        
+        // 3. 发放物品奖励
+        if (task.getRewardItems() != null && !task.getRewardItems().isEmpty()) {
+            return addItemToInventory(role.getId(), task.getRewardItems());
+        }
+        
+        return true;
+    }
+    
+    // 添加物品到背包
+    private boolean addItemToInventory(Long roleId, String rewardItemsJson) {
+        // 解析 JSON 格式的奖励物品
+        // 格式示例：[{"itemId":1,"quantity":10},{"itemId":2,"quantity":5}]
+        try {
+            // TODO: 使用 JSON 解析库解析奖励物品
+            // 这里简化处理，假设奖励物品格式为 "itemId:quantity"
+            String[] items = rewardItemsJson.split(",");
+            int背包容量 = 20; // 假设背包容量为 20
+            
+            // 检查当前背包物品数量
+            List<RoleItem> existingItems = roleItemRepository.findByRoleId(roleId);
+            int currentSize = existingItems.size();
+            
+            if (currentSize + items.length > 背包容量) {
+                return false; // 背包已满
+            }
+            
+            // 添加物品
+            for (String itemStr : items) {
+                String[] parts = itemStr.split(":");
+                Long itemId = Long.parseLong(parts[0].trim());
+                Integer quantity = Integer.parseInt(parts[1].trim());
+                
+                // 检查是否已有该物品（可叠加）
+                RoleItem existingItem = existingItems.stream()
+                    .filter(ri -> ri.getItemId().equals(itemId))
+                    .findFirst()
+                    .orElse(null);
+                
+                if (existingItem != null && existingItem.getQuantity() != null) {
+                    // 物品可叠加，增加数量
+                    existingItem.setQuantity(existingItem.getQuantity() + quantity);
+                    roleItemRepository.save(existingItem);
+                } else {
+                    // 新物品
+                    RoleItem roleItem = new RoleItem();
+                    roleItem.setRoleId(roleId);
+                    roleItem.setItemId(itemId);
+                    roleItem.setQuantity(quantity);
+                    roleItem.setPosition(0);
+                    roleItemRepository.save(roleItem);
+                }
+            }
+            
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    // 通过邮件发送奖励
+    private void sendRewardMail(Role role, Task task) {
+        Mail mail = new Mail();
+        mail.setUserId(role.getUserId());
+        mail.setTitle("任务奖励");
+        mail.setContent(String.format("恭喜您完成任务【%s】！由于您的背包已满，奖励已通过邮件发送。\n\n奖励内容：\n修为：%d\n灵石：%d\n物品：%s",
+                                     task.getName(),
+                                     task.getRewardExp() != null ? task.getRewardExp() : 0,
+                                     task.getRewardGold() != null ? task.getRewardGold() : 0,
+                                     task.getRewardItems() != null ? task.getRewardItems() : "无"));
+        mail.setSender("任务系统");
+        mail.setStatus(0); // 0-未读
+        mail.setCreateTime(LocalDateTime.now());
+        mailRepository.save(mail);
+    }
+    
+    // 放弃任务
+    @DeleteMapping("/role/{roleId}/{taskId}")
+    public void abandonTask(@PathVariable Long roleId, @PathVariable Long taskId) {
+        roleTaskRepository.deleteByRoleIdAndTaskId(roleId, taskId);
+    }
+}

@@ -1,0 +1,1473 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="css/mobile-adapt.css">
+  <title>灵月仙途 - 锻体修炼</title>
+  <style>
+    :root {
+      --gold-primary: #e6c749;
+      --gold-light: #f4d03f;
+      --gold-dim: #8a7525;
+      --text-main: #fdfbf7;
+      --text-dim: #d4c5a9;
+      --bg-dark: rgba(15, 20, 35, 0.95);
+      --bg-panel: rgba(20, 25, 45, 0.85);
+      --border-glow: 0 0 10px rgba(230, 199, 73, 0.3);
+      --success: #4CAF50;
+      --danger: #ff4444;
+      --body-common: #a0a0a0;
+      --body-rare: #3498db;
+      --body-epic: #9b59b6;
+      --body-legendary: #f39c12;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      font-family: 'Microsoft YaHei', 'SimSun', serif;
+      background: linear-gradient(to bottom, #0f1420, #1a202c), 
+                  url('https://images.unsplash.com/photo-1518063319789-7217e6706b04?q=80&w=2070&auto=format&fit=crop');
+      background-size: cover;
+      background-position: center;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .particles {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      background-image: radial-gradient(var(--gold-primary) 1px, transparent 1px);
+      background-size: 60px 60px;
+      animation: particleFloat 30s linear infinite;
+      opacity: 0.15;
+    }
+
+    @keyframes particleFloat {
+      from { background-position: 0 0; }
+      to { background-position: 0 1000px; }
+    }
+
+    .main-container {
+      position: relative;
+      z-index: 10;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+      gap: 10px;
+      overflow-y: auto;
+      padding-bottom: 80px;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--bg-panel);
+      border: 1px solid rgba(230, 199, 73, 0.3);
+      border-radius: 8px;
+      padding: 8px 12px;
+      backdrop-filter: blur(10px);
+    }
+
+    .player-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .player-avatar-small {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      border: 2px solid var(--gold-primary);
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+
+    .player-name-small {
+      font-size: 0.85rem;
+      color: var(--gold-primary);
+      font-weight: bold;
+    }
+
+    .resources-mini {
+      display: flex;
+      gap: 10px;
+      font-size: 0.75rem;
+    }
+
+    .resource-mini {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      background: rgba(0,0,0,0.3);
+      padding: 3px 6px;
+      border-radius: 4px;
+    }
+
+    .character-display {
+      position: relative;
+      height: 200px;
+      background: linear-gradient(135deg, rgba(20,30,50,0.8), rgba(30,40,60,0.8));
+      border: 2px solid rgba(230, 199, 73, 0.3);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .character-model {
+      font-size: 6rem;
+      position: relative;
+      z-index: 2;
+      animation: characterGlow 3s ease-in-out infinite;
+    }
+
+    @keyframes characterGlow {
+      0%, 100% { filter: drop-shadow(0 0 10px rgba(230, 199, 73, 0.5)); }
+      50% { filter: drop-shadow(0 0 25px rgba(230, 199, 73, 0.8)); }
+    }
+
+    .body-aura {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(230, 199, 73, 0.3), transparent);
+      animation: auraPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes auraPulse {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+      50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.8; }
+    }
+
+    .realm-display {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 3;
+    }
+
+    .realm-name {
+      font-size: 0.9rem;
+      color: var(--gold-primary);
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .realm-progress {
+      width: 150px;
+      height: 8px;
+      background: rgba(0,0,0,0.5);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .realm-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold-dim), var(--gold-primary), var(--gold-light));
+      transition: width 0.5s ease;
+    }
+
+    .realm-text {
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      margin-top: 3px;
+    }
+
+    .stats-display {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      z-index: 3;
+      text-align: right;
+    }
+
+    .stat-item {
+      font-size: 0.75rem;
+      margin: 2px 0;
+    }
+
+    .stat-label {
+      color: var(--text-dim);
+    }
+
+    .stat-value {
+      color: var(--gold-light);
+      font-weight: bold;
+    }
+
+    .action-tabs {
+      display: flex;
+      gap: 8px;
+      background: var(--bg-panel);
+      border: 1px solid rgba(230, 199, 73, 0.3);
+      border-radius: 8px;
+      padding: 8px;
+      backdrop-filter: blur(10px);
+    }
+
+    .action-tab {
+      flex: 1;
+      padding: 10px;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(230, 199, 73, 0.2);
+      color: var(--text-dim);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+      font-size: 0.85rem;
+      font-weight: bold;
+    }
+
+    .action-tab:hover {
+      border-color: var(--gold-primary);
+      color: var(--gold-primary);
+      background: rgba(230,199,73,0.1);
+    }
+
+    .action-tab.active {
+      background: rgba(230,199,73,0.2);
+      border-color: var(--gold-primary);
+      color: var(--gold-primary);
+      box-shadow: 0 0 15px rgba(230,199,73,0.3);
+    }
+
+    .content-panel {
+      flex: 1;
+      background: var(--bg-panel);
+      border: 1px solid rgba(230, 199, 73, 0.3);
+      border-radius: 8px;
+      padding: 15px;
+      backdrop-filter: blur(10px);
+      overflow-y: auto;
+    }
+
+    .panel-section {
+      display: none;
+    }
+
+    .panel-section.active {
+      display: block;
+    }
+
+    .section-title {
+      font-size: 1rem;
+      color: var(--gold-primary);
+      font-weight: bold;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .training-rooms {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .room-card {
+      background: rgba(0,0,0,0.4);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 6px;
+      padding: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .room-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    .room-card.selected {
+      border-color: var(--gold-primary);
+      box-shadow: 0 0 15px rgba(230,199,73,0.4);
+    }
+
+    .room-card.locked {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .room-card.locked::after {
+      content: '🔒';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 2rem;
+    }
+
+    .room-name {
+      font-size: 0.9rem;
+      font-weight: bold;
+      color: var(--gold-primary);
+      margin-bottom: 5px;
+    }
+
+    .room-efficiency {
+      font-size: 0.75rem;
+      color: var(--success);
+      margin-bottom: 5px;
+    }
+
+    .room-require {
+      font-size: 0.7rem;
+      color: var(--text-dim);
+    }
+
+    .training-options {
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid rgba(230, 199, 73, 0.2);
+    }
+
+    .option-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 10px 0;
+    }
+
+    .option-label {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+    }
+
+    .option-value {
+      font-size: 0.85rem;
+      color: var(--gold-light);
+      font-weight: bold;
+    }
+
+    .training-btn {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(90deg, transparent, rgba(230,199,73,0.2), transparent);
+      border: 1px solid var(--gold-primary);
+      color: var(--gold-primary);
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 0.95rem;
+      margin-top: 15px;
+    }
+
+    .training-btn:hover {
+      background: rgba(230,199,73,0.3);
+      box-shadow: 0 0 15px rgba(230,199,73,0.4);
+    }
+
+    .training-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .realm-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .realm-card {
+      background: rgba(0,0,0,0.4);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 6px;
+      padding: 12px;
+      transition: all 0.3s;
+    }
+
+    .realm-card.completed {
+      border-color: var(--success);
+      background: rgba(76, 175, 80, 0.1);
+    }
+
+    .realm-card.current {
+      border-color: var(--gold-primary);
+      box-shadow: 0 0 15px rgba(230,199,73,0.3);
+    }
+
+    .realm-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .realm-card-name {
+      font-size: 0.95rem;
+      font-weight: bold;
+      color: var(--gold-primary);
+    }
+
+    .realm-card-status {
+      font-size: 0.75rem;
+      padding: 3px 8px;
+      border-radius: 10px;
+      font-weight: bold;
+    }
+
+    .status-completed {
+      background: var(--success);
+      color: #fff;
+    }
+
+    .status-current {
+      background: var(--gold-primary);
+      color: #000;
+    }
+
+    .status-locked {
+      background: var(--text-dim);
+      color: #000;
+    }
+
+    .realm-card-progress {
+      height: 6px;
+      background: rgba(0,0,0,0.5);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .realm-card-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold-dim), var(--gold-primary));
+      transition: width 0.5s ease;
+    }
+
+    .realm-card-stats {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+
+    .breakthrough-materials {
+      margin: 15px 0;
+    }
+
+    .material-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 4px;
+      margin: 5px 0;
+    }
+
+    .material-name {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+    }
+
+    .material-quantity {
+      font-size: 0.85rem;
+      font-weight: bold;
+    }
+
+    .material-sufficient {
+      color: var(--success);
+    }
+
+    .material-insufficient {
+      color: var(--danger);
+    }
+
+    .breakthrough-info {
+      background: rgba(0,0,0,0.3);
+      border-radius: 6px;
+      padding: 12px;
+      margin: 15px 0;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 8px 0;
+      font-size: 0.85rem;
+    }
+
+    .info-label {
+      color: var(--text-dim);
+    }
+
+    .info-value {
+      color: var(--gold-light);
+      font-weight: bold;
+    }
+
+    .skill-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .skill-card {
+      background: rgba(0,0,0,0.4);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-left: 4px solid var(--body-common);
+      border-radius: 6px;
+      padding: 12px;
+      transition: all 0.3s;
+    }
+
+    .skill-card:hover {
+      transform: translateX(5px);
+      border-left-color: var(--gold-primary);
+    }
+
+    .skill-card.locked {
+      opacity: 0.5;
+      filter: grayscale(1);
+    }
+
+    .skill-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .skill-name {
+      font-size: 1rem;
+      font-weight: bold;
+      color: var(--gold-primary);
+    }
+
+    .skill-level {
+      font-size: 0.75rem;
+      background: rgba(0,0,0,0.3);
+      padding: 3px 8px;
+      border-radius: 10px;
+      color: var(--gold-light);
+    }
+
+    .skill-progress {
+      height: 6px;
+      background: rgba(0,0,0,0.5);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .skill-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold-dim), var(--gold-primary));
+      transition: width 0.5s ease;
+    }
+
+    .skill-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      margin: 5px 0;
+    }
+
+    .skill-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .skill-btn {
+      flex: 1;
+      padding: 8px;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(230, 199, 73, 0.3);
+      color: var(--text-dim);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 0.75rem;
+    }
+
+    .skill-btn:hover {
+      border-color: var(--gold-primary);
+      color: var(--gold-primary);
+      background: rgba(230,199,73,0.1);
+    }
+
+    .skill-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 70px;
+      background: linear-gradient(to top, rgba(15, 20, 35, 0.98), rgba(15, 20, 35, 0.8));
+      border-top: 2px solid var(--gold-primary);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 100;
+      box-shadow: 0 -5px 30px rgba(230, 199, 73, 0.4);
+      backdrop-filter: blur(15px);
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      color: var(--text-dim);
+      text-decoration: none;
+      padding: 8px 20px;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      position: relative;
+      min-width: 70px;
+    }
+
+    .nav-item:hover {
+      color: var(--gold-primary);
+      background: rgba(230, 199, 73, 0.2);
+      transform: translateY(-3px);
+    }
+
+    .nav-item.active {
+      color: var(--gold-primary);
+      background: rgba(230, 199, 73, 0.3);
+      box-shadow: 0 0 15px rgba(230, 199, 73, 0.5);
+    }
+
+    .nav-item.active::after {
+      content: '';
+      position: absolute;
+      top: -8px;
+      width: 25px;
+      height: 4px;
+      background: var(--gold-primary);
+      border-radius: 0 0 4px 4px;
+      box-shadow: 0 0 15px var(--gold-primary);
+    }
+
+    .nav-icon { 
+      font-size: 1.6rem;
+      text-shadow: 0 0 10px rgba(230, 199, 73, 0.3);
+    }
+    .nav-text { 
+      font-size: 0.8rem; 
+      font-weight: 600;
+      text-shadow: 0 0 5px rgba(230, 199, 73, 0.3);
+    }
+
+    .popup-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      z-index: 2000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+
+    .popup-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .popup-content {
+      background: var(--bg-panel);
+      border: 2px solid var(--gold-primary);
+      border-radius: 12px;
+      padding: 20px;
+      width: 85%;
+      max-width: 400px;
+      box-shadow: 0 0 30px rgba(230, 199, 73, 0.4);
+      transform: scale(0.9);
+      transition: transform 0.3s;
+    }
+
+    .popup-overlay.active .popup-content {
+      transform: scale(1);
+    }
+
+    .popup-title {
+      font-size: 1.2rem;
+      color: var(--gold-primary);
+      text-align: center;
+      margin-bottom: 15px;
+      font-weight: bold;
+    }
+
+    .popup-body {
+      color: var(--text-dim);
+      font-size: 0.9rem;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .popup-btn {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(90deg, transparent, rgba(230,199,73,0.2), transparent);
+      border: 1px solid var(--gold-primary);
+      color: var(--gold-primary);
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .popup-btn:hover {
+      background: rgba(230,199,73,0.3);
+      box-shadow: 0 0 15px rgba(230,199,73,0.4);
+    }
+
+    .training-timer {
+      text-align: center;
+      padding: 20px;
+    }
+
+    .timer-display {
+      font-size: 2.5rem;
+      color: var(--gold-primary);
+      font-weight: bold;
+      margin: 15px 0;
+      font-family: 'Courier New', monospace;
+    }
+
+    .training-effect {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      margin: 10px 0;
+    }
+
+    @media (max-height: 700px) {
+      .character-display {
+        height: 150px;
+      }
+      .character-model {
+        font-size: 4rem;
+      }
+      .content-panel {
+        flex: 1;
+      }
+    }
+  </style>
+
+  </head>
+<body>
+  <div class="particles"></div>
+
+  <div class="main-container">
+    
+    <div class="top-bar">
+      <div class="player-info">
+        <div class="player-avatar-small" id="charAvatar">👤</div>
+        <div class="player-name-small" id="charName">加载中...</div>
+      </div>
+      <div class="resources-mini">
+        <div class="resource-mini">
+          <span>💎</span>
+          <span id="xianshiValue">0</span>
+        </div>
+        <div class="resource-mini">
+          <span>💰</span>
+          <span id="lingshiValue">0</span>
+        </div>
+        <div class="resource-mini">
+          <span>📜</span>
+          <span id="dailyCount">20</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="character-display">
+      <div class="body-aura" id="bodyAura"></div>
+      <div class="character-model" id="characterModel">🧘</div>
+      
+      <div class="realm-display">
+        <div class="realm-name" id="currentRealm">淬体境</div>
+        <div class="realm-progress">
+          <div class="realm-progress-fill" id="realmProgressFill" style="width: 35%"></div>
+        </div>
+        <div class="realm-text" id="realmProgressText">35/100</div>
+      </div>
+
+      <div class="stats-display">
+        <div class="stat-item">
+          <span class="stat-label">生命加成：</span>
+          <span class="stat-value" id="healthBonus">+5%</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">攻击加成：</span>
+          <span class="stat-value" id="attackBonus">+3%</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="action-tabs">
+      <div class="action-tab active" data-tab="training">修炼</div>
+      <div class="action-tab" data-tab="breakthrough">突破</div>
+      <div class="action-tab" data-tab="skills">技能</div>
+      <div class="action-tab" data-tab="record">记录</div>
+    </div>
+
+    <div class="content-panel">
+      
+      <div class="panel-section active" id="trainingSection">
+        <h3 class="section-title">⛰️ 修炼场所</h3>
+        <div class="training-rooms">
+          <div class="room-card selected" data-room="normal" data-efficiency="100">
+            <div class="room-name">普通练功房</div>
+            <div class="room-efficiency">效率：100%</div>
+            <div class="room-require">消耗：灵石</div>
+          </div>
+          <div class="room-card locked" data-room="juling" data-efficiency="150" data-require="20">
+            <div class="room-name">聚灵阵</div>
+            <div class="room-efficiency">效率：150%</div>
+            <div class="room-require">需要：20 级</div>
+          </div>
+          <div class="room-card locked" data-room="dimai" data-efficiency="200" data-require="40">
+            <div class="room-name">地脉灵眼</div>
+            <div class="room-efficiency">效率：200%</div>
+            <div class="room-require">需要：40 级</div>
+          </div>
+          <div class="room-card locked" data-room="tianduan" data-efficiency="300" data-require="60">
+            <div class="room-name">天锻神池</div>
+            <div class="room-efficiency">效率：300%</div>
+            <div class="room-require">需要：60 级</div>
+          </div>
+        </div>
+
+        <div class="training-options">
+          <div class="option-row">
+            <span class="option-label">修炼时长</span>
+            <select id="trainingDuration" style="background: rgba(0,0,0,0.5); color: var(--gold-light); border: 1px solid rgba(230,199,73,0.3); padding: 5px; border-radius: 4px;">
+              <option value="1">1 分钟</option>
+              <option value="5">5 分钟</option>
+              <option value="10">10 分钟</option>
+              <option value="30">30 分钟</option>
+              <option value="60">1 小时</option>
+              <option value="480">8 小时 (自动)</option>
+            </select>
+          </div>
+          <div class="option-row">
+            <span class="option-label">预计修为</span>
+            <span class="option-value" id="expectedXiuwei">+100</span>
+          </div>
+          <div class="option-row">
+            <span class="option-label">灵石消耗</span>
+            <span class="option-value" id="lingshiCost">100</span>
+          </div>
+          <button class="training-btn" id="startTrainingBtn">开始修炼</button>
+        </div>
+      </div>
+
+      <div class="panel-section" id="breakthroughSection">
+        <h3 class="section-title">⚡ 境界突破</h3>
+        <div class="realm-list" id="realmList">
+        </div>
+
+        <div class="breakthrough-info">
+          <div class="info-row">
+            <span class="info-label">当前境界</span>
+            <span class="info-value" id="breakthroughCurrentRealm">淬体境</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">下一境界</span>
+            <span class="info-value" id="nextRealm">炼骨境</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">突破成功率</span>
+            <span class="info-value" id="successRate">90%</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">保底次数</span>
+            <span class="info-value" id="pityCount">3 次必成</span>
+          </div>
+        </div>
+
+        <h4 style="color: var(--gold-primary); font-size: 0.9rem; margin: 15px 0 10px;">突破材料</h4>
+        <div class="breakthrough-materials" id="breakthroughMaterials">
+        </div>
+
+        <button class="training-btn" id="startBreakthroughBtn">开始突破</button>
+      </div>
+
+      <div class="panel-section" id="skillsSection">
+        <h3 class="section-title">👊 体修技能</h3>
+        <div class="skill-list" id="skillList">
+        </div>
+      </div>
+
+      <div class="panel-section" id="recordSection">
+        <h3 class="section-title">📖 修炼记录</h3>
+        <div style="text-align: center; color: var(--text-dim); padding: 40px;">
+          修炼记录功能开发中...
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="bottom-nav">
+    <a href="../cultivation.html" class="nav-item">
+      <div class="nav-icon">🧘</div>
+      <div class="nav-text">修炼</div>
+    </a>
+    <a href="../skills/skills.html" class="nav-item">
+      <div class="nav-icon">📜</div>
+      <div class="nav-text">功法</div>
+    </a>
+    <a href="../inventory/inventory.html" class="nav-item">
+      <div class="nav-icon">🎒</div>
+      <div class="nav-text">背包</div>
+    </a>
+    <a href="body-training.html" class="nav-item active">
+      <div class="nav-icon">💪</div>
+      <div class="nav-text">锻体</div>
+    </a>
+    <a href="../map/map.html" class="nav-item">
+      <div class="nav-icon">🗺️</div>
+      <div class="nav-text">云游</div>
+    </a>
+  </div>
+
+  <div class="popup-overlay" id="popupOverlay" onclick="closePopup(event)">
+    <div class="popup-content" onclick="event.stopPropagation()">
+      <div class="popup-title" id="popupTitle">标题</div>
+      <div class="popup-body" id="popupBody">内容</div>
+      <button class="popup-btn" onclick="closePopup()">确定</button>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="../js/auth-service.js"></script>
+  <script>
+    let currentRoleId = null;
+    let currentUserId = null;
+    let resourceMap = {};
+    let currentRealmIndex = 0;
+    let selectedRoom = 'normal';
+    let playerLevel = 1;
+
+    const realms = [
+      { name: '淬体境', maxProgress: 100, healthBonus: 5, attackBonus: 3, unlockLevel: 1, model: '🧘' },
+      { name: '炼骨境', maxProgress: 200, healthBonus: 10, attackBonus: 6, unlockLevel: 10, model: '🧘‍♂️' },
+      { name: '易筋境', maxProgress: 300, healthBonus: 15, attackBonus: 9, unlockLevel: 20, model: '🥋' },
+      { name: '洗髓境', maxProgress: 400, healthBonus: 20, attackBonus: 12, unlockLevel: 30, model: '🧙' },
+      { name: '换血境', maxProgress: 500, healthBonus: 25, attackBonus: 15, unlockLevel: 40, model: '🧛' },
+      { name: '金身境', maxProgress: 600, healthBonus: 30, attackBonus: 18, unlockLevel: 50, model: '🗿' },
+      { name: '不灭境', maxProgress: 800, healthBonus: 40, attackBonus: 25, unlockLevel: 60, model: '👼' },
+      { name: '圣体境', maxProgress: 1000, healthBonus: 50, attackBonus: 30, unlockLevel: 70, model: '🌟' }
+    ];
+
+    const skills = [
+      { name: '铁拳', level: 1, maxLevel: 10, type: '主动', cooldown: '5 秒', effect: '造成 150% 物理伤害', requireRealm: 0 },
+      { name: '骨刺', level: 0, maxLevel: 10, type: '主动', cooldown: '8 秒', effect: '穿透防御，造成 180% 伤害', requireRealm: 1 },
+      { name: '筋缠', level: 0, maxLevel: 10, type: '控制', cooldown: '12 秒', effect: '束缚敌人 3 秒', requireRealm: 2 },
+      { name: '髓爆', level: 0, maxLevel: 10, type: '爆发', cooldown: '30 秒', effect: '攻击提升 100%，持续 10 秒', requireRealm: 3 },
+      { name: '血怒', level: 0, maxLevel: 10, type: '被动', cooldown: '被动', effect: '生命越低攻击越高', requireRealm: 4 },
+      { name: '金钟罩', level: 0, maxLevel: 10, type: '防御', cooldown: '20 秒', effect: '减免 50% 伤害，持续 5 秒', requireRealm: 5 },
+      { name: '不灭体', level: 0, maxLevel: 10, type: '被动', cooldown: '被动', effect: '濒死时自动恢复 30% 生命', requireRealm: 6 },
+      { name: '圣体降临', level: 0, maxLevel: 10, type: '终极', cooldown: '120 秒', effect: '全属性提升 200%，持续 15 秒', requireRealm: 7 }
+    ];
+
+    const breakthroughData = [
+      { from: '淬体境', to: '炼骨境', rate: 90, pity: 3, materials: [{name: '炼骨草', count: 50}, {name: '灵石', count: 1000}] },
+      { from: '炼骨境', to: '易筋境', rate: 80, pity: 5, materials: [{name: '易筋花', count: 80}, {name: '灵石', count: 2000}] },
+      { from: '易筋境', to: '洗髓境', rate: 70, pity: 8, materials: [{name: '洗髓果', count: 100}, {name: '灵石', count: 5000}, {name: '洗髓灵液', count: 1}] },
+      { from: '洗髓境', to: '换血境', rate: 60, pity: 10, materials: [{name: '换血参', count: 120}, {name: '灵石', count: 10000}, {name: '换血精', count: 1}] },
+      { from: '换血境', to: '金身境', rate: 50, pity: 15, materials: [{name: '金身矿', count: 150}, {name: '灵石', count: 20000}, {name: '金身诀', count: 1}] },
+      { from: '金身境', to: '不灭境', rate: 40, pity: 20, materials: [{name: '不灭叶', count: 200}, {name: '灵石', count: 50000}, {name: '不灭印', count: 1}] },
+      { from: '不灭境', to: '圣体境', rate: 30, pity: 30, materials: [{name: '圣体晶', count: 300}, {name: '灵石', count: 100000}, {name: '圣体令', count: 1}] }
+    ];
+    
+    // 显示默认内容（未登录状态）
+    function showDefaultContent() {
+      const container = document.querySelector('.cultivation-container');
+      if (container) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 50px; color: #aaa;">
+            <div style="font-size: 60px; margin-bottom: 20px;">🔐</div>
+            <div style="font-size: 18px; margin-bottom: 10px;">请先登录</div>
+            <div style="font-size: 14px;">登录后可以修炼肉身</div>
+          </div>
+        `;
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      currentUserId = localStorage.getItem('userId');
+      if (!currentUserId) {
+        console.log('未登录，显示默认内容');
+        // 不强制跳转，显示默认内容
+        showDefaultContent();
+        return;
+      }
+      
+      currentRoleId = localStorage.getItem('currentRoleId');
+      
+      if (currentRoleId) {
+        loadCharacterInfo(currentUserId);
+        loadRoleResources(currentRoleId);
+        loadBodyCultivationInfo(currentRoleId);
+      } else {
+        console.log('未选择角色，显示默认内容');
+        // 不强制跳转，显示默认内容
+        showDefaultContent();
+      }
+      
+      bindEvents();
+    });
+
+    function loadBodyCultivationInfo(roleId) {
+      apiService.getBodyCultivationInfo(roleId)
+        .then(data => {
+          if (data) {
+            currentRealmIndex = data.realmOrder - 1;
+            updateRealmDisplay(data);
+            updateRealmList();
+            updateSkillList();
+            updateBreakthroughMaterials();
+          }
+        })
+        .catch(error => {
+          console.error('获取锻体信息失败:', error);
+          showPopup('错误', '获取锻体信息失败，请稍后重试');
+        });
+    }
+
+    function bindEvents() {
+      document.querySelectorAll('.action-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+          document.querySelectorAll('.action-tab').forEach(t => t.classList.remove('active'));
+          document.querySelectorAll('.panel-section').forEach(s => s.classList.remove('active'));
+          
+          this.classList.add('active');
+          const sectionId = this.dataset.tab + 'Section';
+          document.getElementById(sectionId).classList.add('active');
+        });
+      });
+
+      document.querySelectorAll('.room-card').forEach(card => {
+        card.addEventListener('click', function() {
+          if (this.classList.contains('locked')) {
+            const require = this.dataset.require;
+            showPopup('场所锁定', `需要玩家等级达到${require}级才能解锁！`);
+            return;
+          }
+
+          document.querySelectorAll('.room-card').forEach(c => c.classList.remove('selected'));
+          this.classList.add('selected');
+          selectedRoom = this.dataset.room;
+          updateTrainingCost();
+        });
+      });
+
+      document.getElementById('trainingDuration').addEventListener('change', updateTrainingCost);
+      document.getElementById('startTrainingBtn').addEventListener('click', startTraining);
+      document.getElementById('startBreakthroughBtn').addEventListener('click', startBreakthrough);
+    }
+
+    function loadCharacterInfo(userId) {
+      apiService.getRole(userId)
+        .then(data => {
+          if (data && data.length > 0) {
+            let charData;
+            if (currentRoleId) {
+              charData = data.find(role => role.id == currentRoleId);
+            }
+            if (!charData) {
+              charData = data[0];
+              currentRoleId = charData.id;
+              localStorage.setItem('currentRoleId', charData.id);
+            }
+            
+            document.getElementById('charName').textContent = charData.roleName;
+            playerLevel = charData.level || 1;
+            setAvatarBySpiritRoot(charData.spiritRoot);
+            unlockRoomsByLevel(playerLevel);
+          }
+        })
+        .catch(error => {
+          console.error('获取角色信息失败:', error);
+          showPopup('错误', '获取角色信息失败，请稍后重试');
+        });
+    }
+
+    function loadRoleResources(roleId) {
+      apiService.getAssetTypes()
+        .then(resourceTypes => {
+          const typeMap = {};
+          resourceTypes.forEach(type => {
+            typeMap[type.id] = type.code;
+          });
+          return apiService.getAssets(roleId)
+            .then(data => {
+              resourceMap = {};
+              data.forEach(resource => {
+                const resourceCode = typeMap[resource.id];
+                if (resourceCode) {
+                  resourceMap[resourceCode] = resource.quantity;
+                }
+              });
+              updateResourceDisplay();
+            });
+        })
+        .catch(error => {
+          console.error('获取角色资源失败:', error);
+          showPopup('错误', '获取角色资源失败，请稍后重试');
+        });
+    }
+
+    function updateResourceDisplay() {
+      function formatQuantity(quantity) {
+        if (quantity >= 100000000) {
+          return (quantity / 100000000).toFixed(2) + ' 亿';
+        } else if (quantity >= 10000) {
+          return (quantity / 10000).toFixed(2) + 'w';
+        } else {
+          return quantity.toString();
+        }
+      }
+
+      document.getElementById('xianshiValue').textContent = resourceMap['xianshi'] ? formatQuantity(resourceMap['xianshi']) : '0';
+      document.getElementById('lingshiValue').textContent = resourceMap['lingshi'] ? formatQuantity(resourceMap['lingshi']) : '0';
+    }
+
+    function setAvatarBySpiritRoot(spiritRoot) {
+      const avatarElement = document.getElementById('charAvatar');
+      switch(spiritRoot) {
+        case '金灵根': avatarElement.textContent = '⚡'; break;
+        case '木灵根': avatarElement.textContent = '🌿'; break;
+        case '水灵根': avatarElement.textContent = '💧'; break;
+        case '火灵根': avatarElement.textContent = '🔥'; break;
+        case '土灵根': avatarElement.textContent = '⛰️'; break;
+        case '雷灵根': avatarElement.textContent = '⚡'; break;
+        default: avatarElement.textContent = '👤';
+      }
+    }
+
+    function unlockRoomsByLevel(level) {
+      document.querySelectorAll('.room-card').forEach(card => {
+        const require = card.dataset.require;
+        if (require && level < parseInt(require)) {
+          card.classList.add('locked');
+        } else {
+          card.classList.remove('locked');
+        }
+      });
+    }
+
+    function updateTrainingCost() {
+      const duration = parseInt(document.getElementById('trainingDuration').value);
+      const efficiency = document.querySelector('.room-card.selected').dataset.efficiency;
+      const baseCost = 100;
+      const cost = Math.floor(baseCost * (duration / 1) * (efficiency / 100));
+      const xiuwei = Math.floor(100 * (duration / 1) * (efficiency / 100));
+      
+      document.getElementById('expectedXiuwei').textContent = '+' + xiuwei;
+      document.getElementById('lingshiCost').textContent = cost;
+    }
+
+    function updateRealmDisplay(data) {
+      if (!data) return;
+      
+      document.getElementById('currentRealm').textContent = data.realmName;
+      document.getElementById('characterModel').textContent = getRealmModel(data.realmOrder);
+      
+      // 计算属性加成（这里简化处理，实际应该从后端获取）
+      const healthBonus = Math.floor(data.realmOrder * 5);
+      const attackBonus = Math.floor(data.realmOrder * 3);
+      document.getElementById('healthBonus').textContent = '+' + healthBonus + '%';
+      document.getElementById('attackBonus').textContent = '+' + attackBonus + '%';
+      
+      const progress = Math.min(Math.floor((data.bodyExp / data.requiredExp) * 100), 100);
+      document.getElementById('realmProgressFill').style.width = progress + '%';
+      document.getElementById('realmProgressText').textContent = `${data.bodyExp}/${data.requiredExp}`;
+    }
+
+    function getRealmModel(realmOrder) {
+      const models = ['🧘', '🧘‍♂️', '🥋', '🧙', '🧛', '🗿', '👼', '🌟'];
+      return models[Math.min(realmOrder - 1, models.length - 1)] || '🧘';
+    }
+
+    function updateRealmList() {
+      const container = document.getElementById('realmList');
+      container.innerHTML = '';
+
+      realms.forEach((realm, index) => {
+        const card = document.createElement('div');
+        card.className = 'realm-card';
+        
+        if (index < currentRealmIndex) {
+          card.classList.add('completed');
+        } else if (index === currentRealmIndex) {
+          card.classList.add('current');
+        } else {
+          card.classList.add('locked');
+        }
+
+        let status = 'locked';
+        let statusText = '未解锁';
+        if (index < currentRealmIndex) {
+          status = 'completed';
+          statusText = '已完成';
+        } else if (index === currentRealmIndex) {
+          status = 'current';
+          statusText = '进行中';
+        }
+
+        card.innerHTML = `
+          <div class="realm-card-header">
+            <span class="realm-card-name">${realm.name}</span>
+            <span class="realm-card-status status-${status}">${statusText}</span>
+          </div>
+          <div class="realm-card-progress">
+            <div class="realm-card-progress-fill" style="width: ${index === currentRealmIndex ? 35 : (index < currentRealmIndex ? 100 : 0)}%"></div>
+          </div>
+          <div class="realm-card-stats">
+            <span>生命 +${realm.healthBonus}%</span>
+            <span>攻击 +${realm.attackBonus}%</span>
+          </div>
+        `;
+        
+        container.appendChild(card);
+      });
+    }
+
+    function updateBreakthroughMaterials() {
+      if (currentRealmIndex >= realms.length - 1) {
+        document.getElementById('breakthroughMaterials').innerHTML = '<div style="text-align: center; color: var(--gold-primary); padding: 20px;">已达到最高境界</div>';
+        document.getElementById('startBreakthroughBtn').disabled = true;
+        return;
+      }
+
+      const data = breakthroughData[currentRealmIndex];
+      const container = document.getElementById('breakthroughMaterials');
+      container.innerHTML = '';
+
+      data.materials.forEach(mat => {
+        const owned = resourceMap[mat.name.toLowerCase()] || 0;
+        const sufficient = owned >= mat.count;
+        
+        const item = document.createElement('div');
+        item.className = 'material-item';
+        item.innerHTML = `
+          <span class="material-name">${mat.name}</span>
+          <span class="material-quantity ${sufficient ? 'material-sufficient' : 'material-insufficient'}">
+            ${owned}/${mat.count}
+          </span>
+        `;
+        container.appendChild(item);
+      });
+
+      document.getElementById('breakthroughCurrentRealm').textContent = data.from;
+      document.getElementById('nextRealm').textContent = data.to;
+      document.getElementById('successRate').textContent = data.rate + '%';
+      document.getElementById('pityCount').textContent = data.pity + '次必成';
+    }
+
+    function updateSkillList() {
+      const container = document.getElementById('skillList');
+      container.innerHTML = '';
+
+      skills.forEach((skill, index) => {
+        const unlocked = currentRealmIndex >= skill.requireRealm;
+        const card = document.createElement('div');
+        card.className = 'skill-card';
+        
+        if (!unlocked) {
+          card.classList.add('locked');
+        }
+
+        const progress = (skill.level / skill.maxLevel) * 100;
+        
+        card.innerHTML = `
+          <div class="skill-header">
+            <span class="skill-name">${skill.name}</span>
+            <span class="skill-level">Lv.${skill.level}/${skill.maxLevel}</span>
+          </div>
+          <div class="skill-progress">
+            <div class="skill-progress-fill" style="width: ${progress}%"></div>
+          </div>
+          <div class="skill-info">
+            <span>类型：${skill.type}</span>
+            <span>冷却：${skill.cooldown}</span>
+          </div>
+          <div class="skill-info">
+            <span>效果：${skill.effect}</span>
+          </div>
+          <div class="skill-actions">
+            <button class="skill-btn" ${!unlocked || skill.level >= skill.maxLevel ? 'disabled' : ''} onclick="upgradeSkill(${index})">升级</button>
+            <button class="skill-btn" ${!unlocked ? 'disabled' : ''} onclick="equipSkill(${index})">装备</button>
+            <button class="skill-btn" onclick="showSkillDetail(${index})">详情</button>
+          </div>
+        `;
+        
+        container.appendChild(card);
+      });
+    }
+
+    function startTraining() {
+      const duration = parseInt(document.getElementById('trainingDuration').value);
+      const lingshiCost = parseInt(document.getElementById('lingshiCost').textContent);
+      
+      if (resourceMap['lingshi'] < lingshiCost) {
+        showPopup('灵石不足', '修炼需要消耗灵石！');
+        return;
+      }
+
+      // 模拟QTE得分（实际应该由用户操作生成）
+      const qteScore = Math.floor(Math.random() * 100) + 1;
+      
+      // 调用后端锻体API
+      apiService.cultivate(currentRoleId, 1, qteScore)
+        .then(result => {
+          if (result.success) {
+            document.getElementById('popupTitle').textContent = '修炼中...';
+            document.getElementById('popupBody').innerHTML = `
+              <div class="training-timer">
+                <div>正在 ${document.querySelector('.room-card.selected').querySelector('.room-name').textContent} 修炼</div>
+                <div class="timer-display" id="trainingTimer">${formatTime(duration * 60)}</div>
+                <div class="training-effect">预计获得修为：${result.expGained}</div>
+              </div>
+            `;
+            document.querySelector('.popup-btn').textContent = '取消修炼';
+            document.querySelector('.popup-btn').onclick = cancelTraining;
+            
+            document.getElementById('popupOverlay').classList.add('active');
+
+            let remainingTime = duration * 60;
+            const timer = setInterval(() => {
+              remainingTime--;
+              document.getElementById('trainingTimer').textContent = formatTime(remainingTime);
+              
+              if (remainingTime <= 0) {
+                clearInterval(timer);
+                completeTraining(result);
+              }
+            }, 1000);
+          } else {
+            showPopup('修炼失败', result.message || '修炼失败，请稍后重试');
+          }
+        })
+        .catch(error => {
+          console.error('修炼失败:', error);
+          showPopup('修炼失败', '网络错误，请稍后重试');
+        });
+    }
+
+    function formatTime(seconds) {
+      const h = Math.floor(seconds / 3600);
+      const m = Math.floor((seconds % 3600) / 60);
+      const s = seconds % 60;
+      return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }
+
+    function cancelTraining() {
+      closePopup();
+      showPopup('提示', '修炼已取消');
+    }
+
+    function completeTraining(result) {
+      closePopup();
+      showPopup('修炼完成', result.message || `恭喜！你获得了 ${result.expGained} 点修为！`);
+      // 重新加载锻体信息
+      loadBodyCultivationInfo(currentRoleId);
+      // 重新加载资源信息
+      loadRoleResources(currentRoleId);
+    }
+
+    function startBreakthrough() {
+      if (currentRealmIndex >= realms.length - 1) {
+        showPopup('提示', '已达到最高境界！');
+        return;
+      }
+
+      // 调用后端突破API
+      apiService.breakthrough(currentRoleId, false)
+        .then(result => {
+          if (result.success) {
+            // 重新加载锻体信息
+            loadBodyCultivationInfo(currentRoleId);
+            showPopup('突破成功', result.message || '突破成功！');
+          } else {
+            showPopup('突破失败', result.message || '突破失败！');
+          }
+        })
+        .catch(error => {
+          console.error('突破失败:', error);
+          showPopup('突破失败', '网络错误，请稍后重试');
+        });
+    }
+
+    function upgradeSkill(index) {
+      const skill = skills[index];
+      if (skill.level >= skill.maxLevel) {
+        showPopup('提示', '技能已达到满级！');
+        return;
+      }
+
+      skill.level++;
+      updateSkillList();
+      showPopup('升级成功', `${skill.name} 升级到 Lv.${skill.level}！`);
+    }
+
+    function equipSkill(index) {
+      showPopup('提示', `${skills[index].name} 已装备！`);
+    }
+
+    function showSkillDetail(index) {
+      const skill = skills[index];
+      showPopup(skill.name, `类型：${skill.type}<br>冷却：${skill.cooldown}<br>效果：${skill.effect}<br>等级：${skill.level}/${skill.maxLevel}`);
+    }
+
+    function showPopup(title, content) {
+      document.getElementById('popupTitle').textContent = title;
+      document.getElementById('popupBody').innerHTML = content.replace(/\n/g, '<br>');
+      document.getElementById('popupOverlay').classList.add('active');
+    }
+
+    function closePopup(e) {
+      if (!e || e.target === document.getElementById('popupOverlay')) {
+        document.getElementById('popupOverlay').classList.remove('active');
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="../js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="../css/mobile-adapt.css">
+    <title>宗门任务 - 灵月仙途</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-body: #f0f2f5;
+            --bg-card: #2c3e50;
+            --bg-card-light: #34495e;
+            --text-gold: #d4af37;
+            --text-gold-dim: #aa8c2c;
+            --text-white: #ecf0f1;
+            --text-grey: #95a5a6;
+            --border-radius: 8px;
+            --nav-height: 60px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-white);
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            background: rgba(44, 62, 80, 0.05);
+            min-height: 100vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            padding-bottom: calc(var(--nav-height) + 20px);
+        }
+
+        /* 头部 */
+        .header {
+            background: var(--bg-card);
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--text-gold-dim);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .header-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--text-gold);
+        }
+
+        .header-btn {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--text-gold-dim);
+            color: var(--text-gold);
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        /* 统计信息 */
+        .stats-bar {
+            background: var(--bg-card);
+            margin: 15px;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--text-gold);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-grey);
+            margin-top: 5px;
+        }
+
+        /* 分类标签 */
+        .category-tabs {
+            margin: 0 15px 15px;
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+
+        .tab-btn {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            color: var(--text-grey);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: rgba(212, 175, 55, 0.2);
+            border-color: var(--text-gold);
+            color: var(--text-gold);
+        }
+
+        /* 任务列表 */
+        .task-list {
+            padding: 0 15px;
+        }
+
+        .task-card {
+            background: var(--bg-card);
+            border-radius: var(--border-radius);
+            padding: 15px;
+            margin-bottom: 12px;
+            border: 1px solid rgba(212, 175, 55, 0.1);
+            transition: all 0.2s;
+        }
+
+        .task-card:hover {
+            border-color: var(--text-gold);
+            transform: translateY(-2px);
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .task-title-section {
+            flex: 1;
+        }
+
+        .task-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--text-white);
+            margin-bottom: 5px;
+        }
+
+        .task-type {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .type-daily {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4CAF50;
+        }
+
+        .type-weekly {
+            background: rgba(33, 150, 243, 0.2);
+            color: #2196F3;
+        }
+
+        .type-special {
+            background: rgba(156, 39, 176, 0.2);
+            color: #9C27B0;
+        }
+
+        .type-emergency {
+            background: rgba(244, 67, 54, 0.2);
+            color: #F44336;
+        }
+
+        .task-reward {
+            text-align: right;
+            margin-left: 10px;
+        }
+
+        .reward-item {
+            font-size: 12px;
+            color: var(--text-gold);
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+
+        .task-desc {
+            font-size: 13px;
+            color: var(--text-grey);
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+
+        .task-requirement {
+            background: rgba(0,0,0,0.2);
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+        }
+
+        .requirement-text {
+            font-size: 12px;
+            color: var(--text-grey);
+        }
+
+        .task-progress-section {
+            margin-bottom: 12px;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--text-grey);
+            margin-bottom: 5px;
+        }
+
+        .progress-bar {
+            background: rgba(0,0,0,0.3);
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--text-gold), #f1c40f);
+            transition: width 0.3s;
+        }
+
+        .task-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .task-status {
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 4px;
+        }
+
+        .status-available {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4CAF50;
+        }
+
+        .status-progress {
+            background: rgba(255, 152, 0, 0.2);
+            color: #FF9800;
+        }
+
+        .status-completed {
+            background: rgba(33, 150, 243, 0.2);
+            color: #2196F3;
+        }
+
+        .status-expired {
+            background: rgba(158, 158, 158, 0.2);
+            color: #9E9E9E;
+        }
+
+        .action-btn {
+            padding: 6px 16px;
+            border-radius: 4px;
+            border: none;
+            font-size: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--text-gold), var(--text-gold-dim));
+            color: #1a252f;
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: var(--text-grey);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        /* 底部导航 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #1a252f;
+            border-top: 1px solid var(--text-gold-dim);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+            max-width: 480px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: var(--text-grey);
+            text-decoration: none;
+            font-size: 10px;
+            width: 20%;
+        }
+
+        .nav-item.active {
+            color: var(--text-gold);
+        }
+
+        .nav-icon {
+            font-size: 18px;
+        }
+
+        /* 通知 */
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(20, 30, 60, 0.95);
+            color: #aaccff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: 1px solid rgba(100, 150, 255, 0.4);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+            z-index: 3000;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .notification.show {
+            opacity: 1;
+        }
+    </style>
+
+  </head>
+<body>
+    <div class="app-container">
+        <!-- 头部 -->
+        <header class="header">
+            <button class="header-btn" onclick="history.back()">← 返回</button>
+            <div class="header-title">宗门任务</div>
+            <button class="header-btn" onclick="showHelp()">❓</button>
+        </header>
+
+        <!-- 统计信息 -->
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-value" id="availableCount">0</div>
+                <div class="stat-label">可接取</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="progressCount">0</div>
+                <div class="stat-label">进行中</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="completedCount">0</div>
+                <div class="stat-label">可领取</div>
+            </div>
+        </div>
+
+        <!-- 分类标签 -->
+        <div class="category-tabs">
+            <button class="tab-btn active" onclick="filterTask('all')">全部</button>
+            <button class="tab-btn" onclick="filterTask('daily')">日常任务</button>
+            <button class="tab-btn" onclick="filterTask('weekly')">周常任务</button>
+            <button class="tab-btn" onclick="filterTask('special')">特殊任务</button>
+        </div>
+
+        <!-- 任务列表 -->
+        <div class="task-list" id="taskList">
+            <!-- 任务卡片将通过 JS 动态加载 -->
+        </div>
+
+        <!-- 底部导航 -->
+        <nav class="bottom-nav" role="navigation" aria-label="主导航">
+            <a href="../index.html" class="nav-item" aria-label="修炼页面">
+                <div class="nav-icon">🧘</div>
+                <div class="nav-text">修炼</div>
+            </a>
+            <a href="../skills/skills.html" class="nav-item" aria-label="功法页面">
+                <div class="nav-icon">📜</div>
+                <div class="nav-text">功法</div>
+            </a>
+            <a href="clan.html" class="nav-item active" aria-label="宗门页面" aria-current="page">
+                <div class="nav-icon">🏯</div>
+                <div class="nav-text">宗门</div>
+            </a>
+            <a href="../word/world.html" class="nav-item" aria-label="仙途页面">
+                <div class="nav-icon">🌌</div>
+                <div class="nav-text">仙途</div>
+            </a>
+            <a href="../map/map.html" class="nav-item" aria-label="云游页面">
+                <div class="nav-icon">🗺️</div>
+                <div class="nav-text">云游</div>
+            </a>
+        </nav>
+    </div>
+
+    <script>
+        const API_BASE_URL = window.APP_CONFIG?.API_BASE_URL || 'http://localhost:8088/api';
+        const roleId = window.AuthService ? window.AuthService.getCurrentRoleId() : localStorage.getItem('currentRoleId');
+        let currentClanId = null;
+        let tasksData = [];
+        let currentFilter = 'all';
+
+        // 模拟任务数据
+        const mockTasks = [
+            {
+                id: 1,
+                title: '采集灵草',
+                type: 'daily',
+                typeName: '日常任务',
+                description: '后山灵田需要补充灵草，请采集 10 株百年灵草交给任务堂。',
+                requirement: '采集 10 株百年灵草',
+                rewardContribution: 100,
+                rewardSpiritStone: 500,
+                rewardExp: 1000,
+                progress: 7,
+                target: 10,
+                status: 'progress',
+                deadline: new Date(Date.now() + 86400000)
+            },
+            {
+                id: 2,
+                title: '猎杀妖兽',
+                type: 'daily',
+                typeName: '日常任务',
+                description: '宗门附近出现了一些妖兽，请清除 5 头筑基期妖兽。',
+                requirement: '猎杀 5 头筑基期妖兽',
+                rewardContribution: 200,
+                rewardSpiritStone: 1000,
+                rewardExp: 2000,
+                progress: 5,
+                target: 5,
+                status: 'completed',
+                deadline: new Date(Date.now() + 86400000)
+            },
+            {
+                id: 3,
+                title: '炼制丹药',
+                type: 'weekly',
+                typeName: '周常任务',
+                description: '宗门丹药库存不足，请炼制 3 炉聚气丹上交。',
+                requirement: '炼制 3 炉聚气丹',
+                rewardContribution: 500,
+                rewardSpiritStone: 3000,
+                rewardExp: 5000,
+                progress: 1,
+                target: 3,
+                status: 'progress',
+                deadline: new Date(Date.now() + 604800000)
+            },
+            {
+                id: 4,
+                title: '守护宗门',
+                type: 'special',
+                typeName: '特殊任务',
+                description: '有魔道修士企图入侵宗门，请前往山门协助防守。',
+                requirement: '击退 10 名入侵者',
+                rewardContribution: 1000,
+                rewardSpiritStone: 5000,
+                rewardExp: 10000,
+                progress: 0,
+                target: 10,
+                status: 'available',
+                deadline: new Date(Date.now() + 172800000)
+            },
+            {
+                id: 5,
+                title: '探索秘境',
+                type: 'special',
+                typeName: '特殊任务',
+                description: '东海秘境开启，请前往探索并带回秘境宝物。',
+                requirement: '探索秘境并带回宝物',
+                rewardContribution: 2000,
+                rewardSpiritStone: 10000,
+                rewardExp: 20000,
+                progress: 0,
+                target: 1,
+                status: 'available',
+                deadline: new Date(Date.now() + 259200000)
+            }
+        ];
+
+        // 页面加载
+        window.addEventListener('DOMContentLoaded', () => {
+            loadMyClanInfo();
+        });
+
+        // 加载我的宗门信息
+        async function loadMyClanInfo() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/clan/member/role/${roleId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data && data.clanId) {
+                        currentClanId = data.clanId;
+                        loadTasks();
+                    } else {
+                        showNotification('您还未加入任何宗门');
+                        setTimeout(() => {
+                            window.location.href = 'clan-list.html';
+                        }, 1500);
+                    }
+                }
+            } catch (error) {
+                console.error('加载宗门信息失败:', error);
+                // 使用模拟数据
+                tasksData = mockTasks;
+                renderTasks();
+            }
+        }
+
+        // 加载任务列表
+        async function loadTasks() {
+            try {
+                if (!currentClanId) return;
+                const response = await fetch(`${API_BASE_URL}/clan/${currentClanId}/tasks`);
+                if (response.ok) {
+                    tasksData = await response.json();
+                    renderTasks();
+                }
+            } catch (error) {
+                console.error('加载任务失败:', error);
+                tasksData = mockTasks;
+                renderTasks();
+            }
+        }
+
+        // 筛选任务
+        function filterTask(type) {
+            currentFilter = type;
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            renderTasks();
+        }
+
+        // 渲染任务列表
+        function renderTasks() {
+            const list = document.getElementById('taskList');
+            let filtered = tasksData;
+
+            if (currentFilter !== 'all') {
+                filtered = tasksData.filter(t => t.type === currentFilter);
+            }
+
+            // 统计
+            updateStats();
+
+            list.innerHTML = filtered.map(task => {
+                const statusMap = {
+                    'available': { text: '可接取', class: 'status-available', btn: '接取任务', disabled: false },
+                    'progress': { text: '进行中', class: 'status-progress', btn: '查看进度', disabled: true },
+                    'completed': { text: '已完成', class: 'status-completed', btn: '领取奖励', disabled: false },
+                    'expired': { text: '已过期', class: 'status-expired', btn: '已过期', disabled: true }
+                };
+
+                const status = statusMap[task.status] || statusMap['available'];
+                const progress = Math.floor((task.progress / task.target) * 100);
+
+                return `
+                    <div class="task-card">
+                        <div class="task-header">
+                            <div class="task-title-section">
+                                <div class="task-title">${task.title}</div>
+                                <span class="task-type type-${task.type}">${task.typeName || '任务'}</span>
+                            </div>
+                            <div class="task-reward">
+                                <div class="reward-item">+${task.rewardContribution} 贡献</div>
+                                <div class="reward-item">+${task.rewardExp} 经验</div>
+                            </div>
+                        </div>
+                        <div class="task-desc">${task.description}</div>
+                        <div class="task-requirement">
+                            <div class="requirement-text">📋 ${task.requirement}</div>
+                        </div>
+                        <div class="task-progress-section">
+                            <div class="progress-info">
+                                <span>进度：${task.progress}/${task.target}</span>
+                                <span>${progress}%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${progress}%"></div>
+                            </div>
+                        </div>
+                        <div class="task-footer">
+                            <span class="task-status ${status.class}">${status.text}</span>
+                            <button class="action-btn btn-primary" 
+                                    onclick="handleTask(${task.id}, '${task.status}')"
+                                    ${status.disabled ? 'disabled' : ''}>
+                                ${status.btn}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 更新统计
+        function updateStats() {
+            const available = tasksData.filter(t => t.status === 'available').length;
+            const progress = tasksData.filter(t => t.status === 'progress').length;
+            const completed = tasksData.filter(t => t.status === 'completed').length;
+
+            document.getElementById('availableCount').textContent = available;
+            document.getElementById('progressCount').textContent = progress;
+            document.getElementById('completedCount').textContent = completed;
+        }
+
+        // 处理任务
+        async function handleTask(taskId, status) {
+            if (status === 'available') {
+                await acceptTask(taskId);
+            } else if (status === 'completed') {
+                await claimTask(taskId);
+            }
+        }
+
+        // 接取任务
+        async function acceptTask(taskId) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/clan/task/${taskId}/accept`, {
+                    method: 'PUT'
+                });
+                if (response.ok) {
+                    const task = tasksData.find(t => t.id === taskId);
+                    if (task) {
+                        task.status = 'progress';
+                        task.progress = 0;
+                    }
+                    renderTasks();
+                    showNotification('任务接取成功');
+                }
+            } catch (error) {
+                console.error('接取任务失败:', error);
+                showNotification('接取任务失败，请重试');
+            }
+        }
+
+        // 完成任务
+        async function submitTask(taskId) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/clan/task/${taskId}/submit`, {
+                    method: 'PUT'
+                });
+                if (response.ok) {
+                    const task = tasksData.find(t => t.id === taskId);
+                    if (task) {
+                        task.status = 'completed';
+                        task.progress = task.target;
+                    }
+                    renderTasks();
+                    showNotification('任务已完成，请领取奖励');
+                }
+            } catch (error) {
+                console.error('提交任务失败:', error);
+            }
+        }
+
+        // 领取奖励
+        async function claimTask(taskId) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/clan/task/${taskId}/complete`, {
+                    method: 'PUT'
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    showNotification(`任务完成！获得 ${data.rewardContribution || 0} 贡献，${data.rewardExp || 0} 经验`);
+                    
+                    // 从列表中移除
+                    tasksData = tasksData.filter(t => t.id !== taskId);
+                    renderTasks();
+                }
+            } catch (error) {
+                console.error('领取奖励失败:', error);
+                // 前端模拟
+                const task = tasksData.find(t => t.id === taskId);
+                if (task) {
+                    showNotification(`任务完成！获得 ${task.rewardContribution} 贡献，${task.rewardExp} 经验`);
+                    tasksData = tasksData.filter(t => t.id !== taskId);
+                    renderTasks();
+                }
+            }
+        }
+
+        // 显示帮助
+        function showHelp() {
+            showToast('宗门任务说明：日常任务、周常任务、特殊任务');
+            
+            // 可以在这里添加更详细的帮助模态框
+            // 暂时使用简单提示，后续可扩展为完整帮助系统
+        }
+
+        // 显示通知
+        function showNotification(message, duration = 3000) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => notification.classList.add('show'), 10);
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 300);
+            }, duration);
+        }
+    </script>
+  <script src="../js/ui-components.js"></script>
+  <script src="../js/auth-service.js"></script>
+</body>
+</html>

@@ -1,0 +1,4489 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="css/mobile-adapt.css">
+  <title>灵月仙途 - 洞府</title>
+  <link rel="stylesheet" href="css/avatar.css">
+  <style>
+    :root {
+      --gold-primary: #e6c749;
+      --gold-light: #f4d03f;
+      --gold-dim: #8a7525;
+      --text-main: #000000;
+      --text-dim: #333333;
+      --bg-dark: rgba(15, 20, 35, 0.95);
+      --bg-panel: rgba(20, 25, 45, 0.85);
+      --border-glow: 0 0 10px rgba(230, 199, 73, 0.3);
+      --success: #4CAF50;
+      --danger: #ff4444;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+  font-family: 'PingFang SC', 'Microsoft YaHei', 'Hiragino Sans GB', 'SimHei', 'SimSun', sans-serif;
+  height: 100vh;
+  width: 100vw;
+  overflow-x: hidden;
+  overflow-y: auto;
+  color: var(--text-main);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: 
+    linear-gradient(rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0.35)),
+    url('images/image.png') center -80px/cover no-repeat;
+  z-index: -1;
+  filter: saturate(60%); /* 降低饱和度到60% */
+}
+    
+    .particles {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      background-image: radial-gradient(var(--gold-primary) 1px, transparent 1px);
+      background-size: 60px 60px;
+      animation: particleFloat 60s linear infinite;
+      opacity: 0.1;
+      transform: translateZ(0);
+      will-change: background-position;
+    }
+
+    @keyframes particleFloat {
+      from { background-position: 0 0; }
+      to { background-position: 0 2000px; }
+    }
+
+    .main-container {
+      position: relative;
+      z-index: 10;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+      gap: 15px;
+      overflow-y: auto;
+      padding-bottom: 80px;
+    }
+
+    .top-status {
+      display: flex;
+      gap: 12px;
+      padding: 12px 0;
+      position: relative;
+      background: transparent;
+      border-radius: 0;
+      border: none;
+      margin-bottom: 5px;
+    }
+
+    .player-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-right: 0;
+      border-right: none;
+      flex-shrink: 0;
+    }
+
+
+
+    .player-details {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .player-name {
+      font-size: 1rem;
+      color: var(--gold-primary);
+      font-weight: bold;
+      text-shadow: 0 0 8px rgba(230, 199, 73, 0.6);
+    }
+
+    .player-cultivation {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+
+    .resources-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        padding: 0;
+    }
+    
+    .resources-row {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+    }
+    
+    .resources-row:first-child {
+        justify-content: space-between;
+    }
+    
+    .resources-row:last-child {
+        justify-content: flex-start;
+    }
+    
+    .resource-item {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+    }
+    
+    .resource-item:hover {
+        transform: scale(1.05);
+    }
+
+    .res-icon { font-size: 0.9rem; }
+    .res-add {
+        font-size: 1.2rem;
+        cursor: pointer;
+        color: var(--gold-primary);
+        background: rgba(230, 199, 73, 0.1);
+        border: 1px solid rgba(230, 199, 73, 0.3);
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: auto;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .res-add:hover {
+        background: rgba(230, 199, 73, 0.3);
+        border-color: var(--gold-primary);
+        transform: scale(1.2);
+        box-shadow: 0 0 10px rgba(230, 199, 73, 0.6);
+    }
+    .res-label { font-size: 0.7rem; color: var(--text-dim); }
+    .res-value { color: var(--gold-light); font-weight: bold; font-size: 0.8rem; }
+
+    .quick-actions {
+      display: grid;
+      grid-template-rows: repeat(2, 1fr);
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px 5px;
+      background: transparent;
+      border: none;
+      border-radius: 0;
+      padding: 5px 0;
+      backdrop-filter: none;
+    }
+
+    .action-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 3px;
+      background: transparent;
+      border: none;
+      border-radius: 0;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      width: 100%;
+      height: 60px;
+      margin: 0 auto;
+      justify-content: center;
+      overflow: visible;
+      backdrop-filter: none;
+    }
+
+    .action-btn:hover {
+      transform: translateY(-4px) scale(1.1);
+    }
+
+    .action-btn:active {
+      transform: translateY(0) scale(0.95);
+    }
+
+    .action-icon { 
+      font-size: 1.5rem; 
+      position: relative; 
+      transition: all 0.3s ease;
+    }
+
+    .action-btn:hover .action-icon {
+      filter: drop-shadow(0 0 10px rgba(230, 199, 73, 0.8));
+      transform: scale(1.1);
+    }
+
+    .badge {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      background: linear-gradient(135deg, var(--danger), #ff6b6b);
+      color: white;
+      font-size: 0.55rem;
+      padding: 2px 6px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      animation: breatheBadge 2s ease-in-out infinite;
+      z-index: 10;
+      box-shadow: 0 0 10px rgba(255, 68, 68, 0.6);
+    }
+
+    .new-tag {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      background: linear-gradient(135deg, var(--gold-primary), var(--gold-light));
+      color: #000;
+      font-size: 0.5rem;
+      font-weight: bold;
+      padding: 2px 5px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      animation: pulse 2s infinite;
+      z-index: 10;
+      box-shadow: 0 0 8px rgba(230, 199, 73, 0.6);
+    }
+
+    @keyframes breatheBadge {
+      0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 10px rgba(255, 68, 68, 0.6);
+      }
+      50% {
+        transform: scale(1.15);
+        box-shadow: 0 0 20px rgba(255, 68, 68, 0.8);
+      }
+    }
+
+    .action-label { font-size: 0.6rem; color: var(--text-dim); text-align: center; width: 100%; white-space: nowrap; }
+
+    .cultivation-core {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      min-height: 260px;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .dual-cultivation {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 40px;
+      width: 100%;
+      position: relative;
+    }
+
+    .cultivation-card {
+      flex: 1;
+      background: transparent;
+      border: none;
+      border-radius: 0;
+      padding: 10px;
+      text-align: center;
+      position: relative;
+      overflow: visible;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      max-width: 160px;
+    }
+
+    .cultivation-card::before {
+      content: '';
+      position: absolute;
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: conic-gradient(from 0deg, transparent, var(--gold-primary), transparent, var(--gold-primary), transparent);
+      opacity: 0.3;
+      animation: magicCircleRotate 8s linear infinite;
+      pointer-events: none;
+    }
+
+    .cultivation-card::after {
+      content: '';
+      position: absolute;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 2px dashed var(--gold-dim);
+      animation: magicCircleRotateReverse 12s linear infinite;
+      pointer-events: none;
+    }
+
+    /* 渡仙法阵特效 */
+    #cardImmortal::before {
+      background: conic-gradient(from 0deg, transparent, #4facfe, transparent, #00f2fe, transparent);
+      box-shadow: 0 0 20px rgba(79, 172, 254, 0.4);
+    }
+
+    #cardImmortal::after {
+      border-color: #4facfe;
+    }
+
+    /* 炼体法阵特效 */
+    #cardBody::before {
+      background: conic-gradient(from 0deg, transparent, #ff6b6b, transparent, #ff9f43, transparent);
+      box-shadow: 0 0 20px rgba(255, 107, 107, 0.4);
+    }
+
+    #cardBody::after {
+      border-color: #ff6b6b;
+    }
+
+    /* 动态粒子效果 */
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      animation: floatParticle 6s ease-in-out infinite;
+    }
+
+    /* 渡仙粒子 */
+    .immortal-particle {
+      background: rgba(79, 172, 254, 0.6);
+      box-shadow: 0 0 10px rgba(79, 172, 254, 0.8);
+    }
+
+    /* 炼体粒子 */
+    .body-particle {
+      background: rgba(255, 107, 107, 0.6);
+      box-shadow: 0 0 10px rgba(255, 107, 107, 0.8);
+    }
+
+    @keyframes floatParticle {
+      0%, 100% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0;
+      }
+      50% {
+        transform: translateY(-20px) rotate(180deg);
+        opacity: 1;
+      }
+    }
+
+    @keyframes magicCircleRotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes magicCircleRotateReverse {
+      from { transform: rotate(360deg); }
+      to { transform: rotate(0deg); }
+    }
+
+    .cultivation-card:hover {
+      transform: scale(1.1);
+    }
+
+    .cultivation-card:hover::before {
+      opacity: 0.6;
+      box-shadow: 0 0 40px rgba(230, 199, 73, 0.6);
+    }
+
+    /* 进度条样式 */
+    .progress-ring {
+      position: absolute;
+      bottom: -15px;
+      width: 100px;
+      height: 20px;
+      z-index: 1;
+    }
+
+    .progress-ring-circle {
+      fill: none;
+      stroke: rgba(230, 199, 73, 0.3);
+      stroke-width: 3;
+    }
+
+    .progress-ring-progress {
+      fill: none;
+      stroke: var(--gold-primary);
+      stroke-width: 3;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.5s ease;
+      transform: rotate(-90deg);
+      transform-origin: 50% 50%;
+    }
+
+    .card-avatar { 
+      font-size: 3.5rem; 
+      filter: drop-shadow(0 0 15px rgba(230,199,73,0.8)); 
+      z-index: 1; 
+      animation: floatAvatar 3s ease-in-out infinite;
+      position: relative;
+    }
+    
+    @keyframes floatAvatar { 
+      0%, 100% { transform: translateY(0); } 
+      50% { transform: translateY(-8px); } 
+    }
+
+    .card-title { 
+      font-size: 1.2rem; 
+      color: var(--gold-primary); 
+      font-weight: bold; 
+      z-index: 1; 
+      text-shadow: 0 0 10px rgba(230,199,73,0.8);
+      letter-spacing: 4px;
+    }
+    
+    .card-level { 
+      font-size: 0.75rem; 
+      color: var(--text-dim); 
+      z-index: 1; 
+    }
+    
+    .card-cost { 
+      font-size: 0.7rem; 
+      color: var(--gold-dim); 
+      z-index: 1; 
+    }
+
+    .bottom-info {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 200px;
+      margin-top: -20px;
+      
+    }
+
+    .info-panel {
+      background: rgba(20, 25, 45, 0.6);
+      border: 1px solid rgba(230, 199, 73, 0.2);
+      border-radius: 12px;
+      padding: 15px;
+      backdrop-filter: blur(8px);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      margin: 0 10px;
+    }
+
+    .scroll-content {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding-right: 4px;
+      min-height: 120px;
+    }
+
+    .list-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 6px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-left: 2px solid transparent;
+      white-space: normal;
+      line-height: 1.4;
+    }
+
+    .item-text {
+      flex: 1;
+      color: var(--text-dim);
+      white-space: normal;
+      overflow: visible;
+      text-overflow: clip;
+      line-height: 1.4;
+    }
+    
+    /* 仙途快讯标题背景条 */
+    .info-panel::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 50px;
+      background: linear-gradient(180deg, rgba(230, 199, 73, 0.08), transparent);
+      border-radius: 12px 12px 0 0;
+      pointer-events: none;
+    }
+
+    .panel-header {
+      font-size: 0.95rem;
+      color: var(--gold-primary);
+      font-weight: bold;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(230, 199, 73, 0.2);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .news-title-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .news-icon {
+      font-size: 1.2rem;
+      filter: drop-shadow(0 2px 4px rgba(230, 199, 73, 0.4));
+    }
+    
+    .news-title-text {
+      font-size: 1rem;
+      font-weight: bold;
+      background: linear-gradient(135deg, var(--gold-primary), var(--gold-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 2px 8px rgba(230, 199, 73, 0.3);
+      letter-spacing: 1px;
+    }
+    
+    /* 查看更多按钮 */
+    .view-more-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      background: rgba(230, 199, 73, 0.15);
+      border: 1px solid rgba(230, 199, 73, 0.3);
+      border-radius: 8px;
+      color: var(--gold-primary);
+      font-size: 0.8rem;
+      font-weight: bold;
+      text-decoration: none;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    
+    .view-more-btn:hover {
+      background: rgba(230, 199, 73, 0.25);
+      border-color: var(--gold-primary);
+      color: var(--gold-light);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(230, 199, 73, 0.2);
+    }
+    
+    .view-more-btn:active {
+      transform: translateY(0);
+    }
+    
+    .arrow-icon {
+      width: 14px;
+      height: 14px;
+      transition: transform 0.3s;
+    }
+    
+    .view-more-btn:hover .arrow-icon {
+      transform: translateX(3px);
+    }
+
+    .scroll-content {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding-right: 4px;
+      max-height: 180px;
+    }
+
+    .scroll-content::-webkit-scrollbar { width: 4px; }
+    .scroll-content::-webkit-scrollbar-track { background: transparent; }
+    .scroll-content::-webkit-scrollbar-thumb { background: rgba(230, 199, 73, 0.3); border-radius: 2px; }
+
+    .list-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 6px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-left: 2px solid transparent;
+    }
+
+    .list-item:hover {
+      background: rgba(230, 199, 73, 0.1);
+      border-left-color: var(--gold-primary);
+      transform: translateX(2px);
+    }
+
+    .item-icon { font-size: 1rem; }
+    .item-text { flex: 1; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .item-status { font-size: 0.65rem; padding: 2px 6px; border-radius: 8px; }
+    .status-green { color: var(--success); background: rgba(76, 175, 80, 0.2); }
+    .status-red { color: var(--danger); background: rgba(255, 68, 68, 0.2); }
+
+    .log-item {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      line-height: 1.5;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .log-tag { color: var(--gold-dim); margin-right: 6px; font-weight: bold; }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 70px;
+      background: linear-gradient(to top, rgba(15, 20, 35, 0.98), rgba(15, 20, 35, 0.8));
+      border-top: 2px solid var(--gold-primary);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 100;
+      box-shadow: 0 -5px 30px rgba(230, 199, 73, 0.4);
+      backdrop-filter: blur(15px);
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      color: var(--text-dim);
+      text-decoration: none;
+      padding: 8px 20px;
+      border-radius: 12px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      min-width: 70px;
+    }
+
+    .nav-item:hover {
+      color: var(--gold-primary);
+      background: rgba(230, 199, 73, 0.2);
+      transform: translateY(-5px) scale(1.05);
+    }
+
+    .nav-item.active {
+      color: var(--gold-primary);
+      background: rgba(230, 199, 73, 0.3);
+      box-shadow: 0 0 20px rgba(230, 199, 73, 0.6);
+      transform: translateY(-3px);
+    }
+
+    .nav-item.active::after {
+      content: '';
+      position: absolute;
+      top: -8px;
+      width: 25px;
+      height: 4px;
+      background: var(--gold-primary);
+      border-radius: 0 0 4px 4px;
+      box-shadow: 0 0 15px var(--gold-primary);
+    }
+
+    .nav-icon { font-size: 1.6rem; text-shadow: 0 0 10px rgba(230, 199, 73, 0.3); }
+    .nav-text { font-size: 0.8rem; font-weight: 600; text-shadow: 0 0 5px rgba(230, 199, 73, 0.3); }
+    .nav-item.active .nav-icon { animation: pulse 2s infinite; }
+
+    @keyframes pulse {
+      0% { text-shadow: 0 0 10px rgba(230, 199, 73, 0.3); }
+      50% { text-shadow: 0 0 20px rgba(230, 199, 73, 0.8); }
+      100% { text-shadow: 0 0 10px rgba(230, 199, 73, 0.3); }
+    }
+    
+    @keyframes glow {
+      0% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.5), 0 0 30px rgba(255, 215, 0, 0.3); }
+      50% { box-shadow: 0 0 25px rgba(255, 215, 0, 0.8), 0 0 50px rgba(255, 215, 0, 0.5); }
+      100% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.5), 0 0 30px rgba(255, 215, 0, 0.3); }
+    }
+
+    .popup-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      z-index: 2000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      backdrop-filter: blur(0px);
+    }
+
+    .popup-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+      backdrop-filter: blur(5px);
+    }
+
+    .popup-content {
+        background: var(--bg-panel);
+        border: 2px solid var(--gold-primary);
+        border-radius: 12px;
+        padding: 15px;
+        width: 80%;
+        max-width: 360px;
+        max-height: 85vh;
+        overflow-y: auto;
+        box-shadow: 0 0 30px rgba(230, 199, 73, 0.4);
+        transform: scale(0.9) translateY(-20px);
+        opacity: 0;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .popup-content::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(230, 199, 73, 0.1), transparent);
+      transform: rotate(45deg);
+      animation: shine 3s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes shine {
+      0% { transform: translateX(-100%) rotate(45deg); }
+      100% { transform: translateX(100%) rotate(45deg); }
+    }
+
+    .popup-overlay.active .popup-content {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+      box-shadow: 0 0 40px rgba(230, 199, 73, 0.6);
+    }
+
+    .popup-btn {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(90deg, transparent, rgba(230,199,73,0.2), transparent);
+      border: 1px solid var(--gold-primary);
+      color: var(--gold-primary);
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .popup-btn:hover {
+      background: rgba(230,199,73,0.3);
+      box-shadow: 0 0 15px rgba(230,199,73,0.6);
+      transform: translateY(-2px);
+    }
+
+    .popup-btn:active {
+      transform: translateY(0);
+      box-shadow: 0 0 5px rgba(230,199,73,0.4);
+    }
+
+    .popup-title { font-size: 1.2rem; color: var(--gold-primary); text-align: center; margin-bottom: 15px; font-weight: bold; }
+    .popup-body { color: var(--text-dim); font-size: 0.9rem; line-height: 1.6; margin-bottom: 20px; }
+
+    @media (max-width: 768px) {
+      .main-container {
+        padding: 8px;
+        gap: 8px;
+      }
+
+      .top-status {
+        flex-direction: row;
+        padding: 6px 0;
+        gap: 8px;
+      }
+
+      .player-info {
+        gap: 6px;
+        flex-shrink: 0;
+      }
+
+      .player-name {
+        font-size: 0.85rem;
+      }
+
+      .player-cultivation {
+        font-size: 0.65rem;
+      }
+
+      .resources-container {
+        gap: 4px;
+      }
+
+      .res-icon { font-size: 0.75rem; }
+      .res-label { font-size: 0.6rem; }
+      .res-value { font-size: 0.7rem; }
+      .res-add { width: 18px; height: 18px; font-size: 1rem; }
+
+      .quick-actions {
+        gap: 4px 3px;
+        grid-template-columns: repeat(5, 1fr);
+      }
+
+      .action-btn {
+        height: 50px;
+        padding: 4px 2px;
+      }
+
+      .action-icon {
+        font-size: 1rem;
+      }
+
+      .action-label {
+        font-size: 0.5rem;
+      }
+
+      .dual-cultivation {
+        gap: 8px;
+      }
+
+      .cultivation-card {
+        max-width: 140px;
+        padding: 15px 10px;
+      }
+
+      .cultivation-card::before {
+        width: 100px;
+        height: 100px;
+      }
+
+      .cultivation-card::after {
+        width: 80px;
+        height: 80px;
+      }
+
+      .card-avatar {
+        font-size: 2.5rem;
+      }
+
+      .card-title {
+        font-size: 0.9rem;
+        letter-spacing: 2px;
+      }
+
+      .bottom-info {
+        min-height: 140px;
+      }
+
+      .nav-item {
+        min-width: 50px;
+        padding: 5px 10px;
+      }
+
+      .nav-icon {
+        font-size: 1.2rem;
+      }
+
+      .nav-text {
+        font-size: 0.6rem;
+      }
+
+      .popup-content {
+        width: 92%;
+        max-width: 360px;
+        padding: 12px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .main-container {
+        padding: 6px;
+        gap: 6px;
+      }
+
+      .top-status {
+        flex-wrap: wrap;
+        padding: 4px 0;
+      }
+
+      .resources-container {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 2px 8px;
+      }
+
+      .resource-item {
+        flex: 0 0 auto;
+        gap: 3px;
+      }
+
+      .cultivation-card::before {
+        width: 80px;
+        height: 80px;
+      }
+
+      .cultivation-card::after {
+        width: 65px;
+        height: 65px;
+      }
+
+      .card-avatar {
+        font-size: 2rem;
+      }
+
+      .card-title {
+        font-size: 0.8rem;
+      }
+
+      .quick-actions {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 3px 2px;
+      }
+
+      .action-btn {
+        height: 46px;
+        padding: 3px 1px;
+      }
+
+      .action-icon {
+        font-size: 0.9rem;
+      }
+
+      .action-label {
+        font-size: 0.45rem;
+      }
+
+      .nav-item {
+        min-width: 40px;
+        padding: 4px 6px;
+      }
+
+      .nav-icon {
+        font-size: 1rem;
+      }
+
+      .nav-text {
+        font-size: 0.55rem;
+      }
+
+      .bottom-info {
+        min-height: 120px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    /* 弹窗样式 */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      z-index: 2000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease-out;
+      backdrop-filter: blur(8px);
+    }
+    
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+      animation: overlayFadeIn 0.3s ease-out;
+    }
+    
+    .modal-content {
+      background: var(--bg-panel);
+      border: 2px solid var(--gold-primary);
+      border-radius: 12px;
+      padding: 20px;
+      width: 85%;
+      max-width: 400px;
+      box-shadow: 0 0 30px rgba(230, 199, 73, 0.4);
+      transform: scale(0.9) translateY(-20px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      background: linear-gradient(135deg, var(--bg-panel) 0%, rgba(40, 50, 70, 0.95) 100%);
+    }
+    
+    .modal-overlay.active .modal-content {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+      box-shadow: 0 0 50px rgba(230, 199, 73, 0.6), 0 0 20px rgba(230, 199, 73, 0.3);
+      animation: modalSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    @keyframes overlayFadeIn {
+      from {
+        opacity: 0;
+        backdrop-filter: blur(0px);
+      }
+      to {
+        opacity: 1;
+        backdrop-filter: blur(8px);
+      }
+    }
+    
+    @keyframes modalSlideIn {
+      from {
+        transform: scale(0.9) translateY(-20px);
+        opacity: 0;
+        box-shadow: 0 0 0 rgba(230, 199, 73, 0);
+      }
+      to {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+        box-shadow: 0 0 50px rgba(230, 199, 73, 0.6), 0 0 20px rgba(230, 199, 73, 0.3);
+      }
+    }
+    
+    .modal-body {
+      flex: 1;
+      overflow-y: auto;
+      max-height: calc(90vh - 120px);
+    }
+    
+    .modal-header {
+      position: sticky;
+      top: 0;
+      background: var(--bg-panel);
+      z-index: 10;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(230, 199, 73, 0.2);
+    }
+    
+    .modal-footer {
+      position: sticky;
+      bottom: 0;
+      background: var(--bg-panel);
+      z-index: 10;
+      padding-top: 10px;
+      border-top: 1px solid rgba(230, 199, 73, 0.2);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.2rem;
+      color: var(--gold-primary);
+      font-weight: bold;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(230, 199, 73, 0.2);
+      position: sticky;
+      top: 0;
+      background: var(--bg-panel);
+      z-index: 10;
+    }
+
+    .modal-header.danger {
+      color: var(--danger);
+      border-bottom-color: rgba(255, 68, 68, 0.3);
+    }
+
+    .modal-icon {
+      font-size: 1.5rem;
+    }
+
+    .modal-body {
+      margin-bottom: 20px;
+      flex: 1;
+      overflow-y: auto;
+      max-height: calc(90vh - 120px);
+    }
+
+    .modal-message {
+      text-align: center;
+    }
+
+    .modal-message p {
+      margin-bottom: 10px;
+      color: var(--text-main);
+    }
+
+    .modal-hint {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      margin-top: 10px;
+    }
+
+    .modal-footer {
+      display: flex;
+      gap: 10px;
+      position: sticky;
+      bottom: 0;
+      background: var(--bg-panel);
+      z-index: 10;
+      padding-top: 10px;
+      border-top: 1px solid rgba(230, 199, 73, 0.2);
+    }
+
+    .modal-btn {
+      flex: 1;
+      padding: 12px;
+      border: 1px solid var(--gold-primary);
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .modal-btn.cancel {
+      background: transparent;
+      color: var(--text-dim);
+      border-color: rgba(230, 199, 73, 0.3);
+    }
+
+    .modal-btn.confirm {
+      background: var(--gold-primary);
+      color: #000;
+    }
+
+    .modal-btn.danger {
+      background: var(--danger);
+      color: white;
+      border-color: var(--danger);
+    }
+
+    .modal-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(230, 199, 73, 0.2);
+    }
+
+    .modal-btn:active {
+      transform: translateY(0);
+    }
+
+    /* Toast样式 */
+    .toast-content {
+      width: auto;
+      max-width: 300px;
+      padding: 15px 20px;
+      text-align: center;
+    }
+
+    .toast-message {
+      color: var(--gold-primary);
+      font-weight: bold;
+    }
+  </style>
+
+  </head>
+<body>
+
+  <div class="particles"></div>
+
+  <div class="main-container page-transition">
+    
+    <div class="top-status">
+      <div class="player-info">
+        <div class="avatar" id="charAvatar">👤</div>
+        <div class="player-details">
+          <div class="player-name" id="charName">加载中...</div>
+          <div class="player-cultivation" id="charLevel">加载中...</div>
+          <div class="player-account" id="currentAccount" style="font-size: 0.7rem; color: var(--text-dim);">未登录</div>
+        </div>
+      </div>
+      <div class="resources-container" id="resourcesGrid">
+        <div class="resource-item"><span class="res-icon">💰</span><span class="res-label">灵石</span><span class="res-value">---</span></div>
+        <div class="resource-item"><span class="res-icon">💎</span><span class="res-label">仙石</span><span class="res-value">---</span></div>
+        <div class="resource-item"><span class="res-icon">⏰</span><span class="res-label">寿命</span><span class="res-value">---</span></div>
+      </div>
+    </div>
+
+    <div class="quick-actions">
+      <div class="action-btn" onclick="openActivityModal()">
+        <div class="action-icon">🎉<span class="badge" id="activityBadge" style="display:none;">NEW</span></div>
+        <div class="action-label">活动</div>
+      </div>
+      <div class="action-btn" onclick="hideLeaderboardBadgeAndOpenPopup()">
+        <div class="action-icon">🏆<span class="badge" id="leaderboardBadge" style="background: #ff4444; font-size: 10px;">NEW</span></div>
+        <div class="action-label">榜单</div>
+      </div>
+      <div class="action-btn" onclick="openCheckinPopup()">
+        <div class="action-icon">📅<span class="badge" id="checkinBadge" style="display: none;">1</span></div>
+        <div class="action-label">签到</div>
+      </div>
+      <div class="action-btn" onclick="openTaskPopup()">
+        <div class="action-icon">📋<span class="badge" id="taskBadge" style="display: none;">3</span></div>
+        <div class="action-label">任务</div>
+      </div>
+      <div class="action-btn" onclick="openAchievementPopup()">
+        <div class="action-icon">🏅<span class="badge" id="achievementBadge" style="display: none;">2</span></div>
+        <div class="action-label">成就</div>
+      </div>
+      <div class="action-btn" onclick="openSocialPopup()">
+        <div class="action-icon">👥</div>
+        <div class="action-label">道友</div>
+      </div>
+
+      <div class="action-btn" onclick="openMallPopup()">
+        <div class="action-icon">🛒</div>
+        <div class="action-label">商城</div>
+      </div>
+      <div class="action-btn" onclick="showMailPopup()">
+        <div class="action-icon">📧<span class="badge" id="mailBadge" style="display: none;">0</span></div>
+        <div class="action-label">邮件</div>
+      </div>
+      <div class="action-btn" onclick="openSettingsPopup()">
+        <div class="action-icon">⚙️</div>
+        <div class="action-label">设置</div>
+      </div>
+    </div>
+
+    <div class="cultivation-core">
+      <div class="dual-cultivation">
+        <div class="cultivation-card" id="cardImmortal" onclick="handleCardClick('immortal')">
+          <div class="card-avatar">🧚‍️</div>
+          <div class="card-title">渡仙</div>
+          <div class="card-level" id="immortalLevel">加载中...</div>
+        </div>
+        <div class="cultivation-card" id="cardBody" onclick="handleCardClick('body')">
+          <div class="card-avatar">🥋</div>
+          <div class="card-title">炼体</div>
+          <div class="card-level" id="bodyLevel">加载中...</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-info">
+      <div class="info-panel">
+        <div class="panel-header">
+          <div class="news-title-wrapper">
+            <span class="news-icon">📢</span>
+            <span class="news-title-text">仙途快讯</span>
+          </div>
+          <a href="news/news-list.html" class="view-more-btn">
+            <span>查看更多</span>
+            <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 18l6-6-6-6"/>
+            </svg>
+          </a>
+        </div>
+        <div class="scroll-content" id="xiantuNews">
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <nav class="bottom-nav" role="navigation" aria-label="主导航">
+    <a href="index.html" class="nav-item active" aria-label="修炼页面">
+      <div class="nav-icon">🧘</div>
+      <div class="nav-text">修炼</div>
+    </a>
+    <a href="skills/skills.html" class="nav-item" aria-label="功法页面">
+      <div class="nav-icon">📜</div>
+      <div class="nav-text">功法</div>
+    </a>
+    <a href="javascript:void(0)" onclick="window.pageUtils.navigateToGuildPage()" class="nav-item" aria-label="宗门页面">
+      <div class="nav-icon">🏯</div>
+      <div class="nav-text">宗门</div>
+    </a>
+    <a href="word/world.html" class="nav-item" aria-label="仙途页面">
+      <div class="nav-icon">🌌</div>
+      <div class="nav-text">仙途</div>
+    </a>
+    <a href="map/map.html" class="nav-item" aria-label="云游页面">
+      <div class="nav-icon">🗺️</div>
+      <div class="nav-text">云游</div>
+    </a>
+  </nav>
+
+  <script src="js/config.js"></script>
+  <script src="js/role-validator.js"></script>
+  <script src="js/login-manager.js"></script>
+  <script src="js/auth-check.js"></script>
+  <script src="js/token-manager.js"></script>
+  <script src="js/role-sync.js"></script>
+  <script src="js/character-store.js"></script>
+  <script src="js/character-service.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/api-service.js"></script>
+  <script src="js/localStorage-monitor.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/game-features.js"></script>
+  <script src="js/game-utils.js"></script>
+  <script>
+    // 测试 apiService.getMallProducts() 方法
+    window.addEventListener('DOMContentLoaded', async () => {
+      console.log('DOMContentLoaded 事件触发');
+      console.log('测试 apiService 是否存在:', typeof apiService);
+      console.log('测试 apiService.getMallProducts 是否存在:', typeof apiService.getMallProducts);
+      try {
+        console.log('调用 apiService.getMallProducts()...');
+        const productsData = await apiService.getMallProducts();
+        console.log('获取商城商品数据成功:', productsData);
+      } catch (error) {
+        console.error('获取商城商品失败:', error);
+      }
+    });
+  </script>
+  <script>
+    // 测试 openMallPopup 函数
+    console.log('测试 openMallPopup 函数是否存在:', typeof openMallPopup);
+  </script>
+  <script>
+    // 错误处理工具
+    const ErrorHandler = {
+      showToast(message, type = 'info', duration = 3000) {
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+          position: fixed;
+          top: 20px;
+          left: 50%;
+          transform: translateX(-50%);
+          background: ${type === 'error' ? '#f44336' : type === 'success' ? '#4CAF50' : '#2196F3'};
+          color: white;
+          padding: 12px 24px;
+          border-radius: 8px;
+          font-size: 14px;
+          font-weight: bold;
+          z-index: 10000;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        `;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), duration);
+      },
+      showSuccess(message) { this.showToast(message, 'success'); },
+      showInfo(message) { this.showToast(message, 'info'); },
+      handleApiError(error, action) {
+        console.error(`${action}失败:`, error);
+        
+        // 解析错误信息，显示更加友好的提示
+        let errorMessage = `${action}失败，请稍后重试`;
+        
+        if (error.message) {
+          if (error.message.includes('今日已签到')) {
+            errorMessage = '今日已签到，明日再来领取奖励';
+          } else if (error.message.includes('补签次数不足')) {
+            errorMessage = '补签次数不足，每月最多补签3次';
+          } else if (error.message.includes('仙石不足')) {
+            errorMessage = '仙石不足，无法补签';
+          } else if (error.message.includes('token 无效')) {
+            errorMessage = '登录已过期，请重新登录';
+          } else if (error.message.includes('资源不存在')) {
+            errorMessage = '资源不存在，请稍后重试';
+          } else if (error.message.includes('业务错误')) {
+            // 尝试提取业务错误信息
+            const match = error.message.match(/业务错误：(.*)/);
+            if (match && match[1]) {
+              errorMessage = match[1];
+            }
+          }
+        }
+        
+        this.showToast(errorMessage, 'error');
+      }
+    };
+
+    // 先定义handleCardClick函数，确保在HTML中引用时已经定义
+    function handleCardClick(type) {
+      if (type === 'immortal') {
+        window.location.href = `cultivation.html?type=immortal`;
+      } else if (type === 'body') {
+        window.location.href = `body-cultivation/index.html`;
+      }
+    }
+
+    let selectedRechargeAmount = 6;
+    let selectedPaymentMethod = 'wechat';
+    let firstRechargeDone = false;
+    let currentLeaderboardTab = 'level';
+    let currentServerId = 1;
+    let isChinese = true;
+    let bgmEnabled = true;
+
+    const servers = [
+      { id: 1, name: '万夫之勇', status: '推荐' },
+      { id: 2, name: '纵横天下', status: '人多' },
+      { id: 3, name: '傲视群雄', status: '新区' },
+      { id: 4, name: '独步武林', status: '火爆' },
+      { id: 5, name: '剑气长城', status: '稳定' }
+    ];
+
+    async function openMallPopup() {
+      try {
+        console.log('开始加载商城商品...');
+        showLoading('正在加载商城商品...');
+        
+        // 从API获取商城商品
+        console.log('调用 apiService.getMallProducts()...');
+        const productsData = await apiService.getMallProducts();
+        console.log('获取商城商品数据成功:', productsData);
+        
+        // 处理后端返回的数据格式
+        const products = productsData.products || productsData.data?.products || [];
+        console.log('处理后的商品数据:', products);
+        
+        const rechargeContent = document.getElementById('rechargeContent');
+        console.log('获取 rechargeContent 元素:', rechargeContent);
+        
+        if (Array.isArray(products) && products.length > 0) {
+          let html = `
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+          `;
+          
+          products.forEach(product => {
+            html += `
+              <div style="
+                background: rgba(30, 35, 50, 0.6);
+                border: 1px solid rgba(230, 199, 73, 0.3);
+                border-radius: 8px;
+                padding: 15px;
+                display: flex;
+                align-items: center;
+                gap: 15px;
+              " onclick="buyProduct(${product.id})">
+                <div style="font-size: 2rem;">${product.icon || getProductIcon(product.type)}</div>
+                <div style="flex: 1;">
+                  <div style="font-weight: bold; color: var(--gold-primary);">${product.name || '商品'}</div>
+                  <div style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 5px;">${product.description || '商品描述'}</div>
+                  <div style="font-size: 0.9rem; color: var(--gold-primary); font-weight: bold;">价格: ${product.price || 0} 灵石</div>
+                </div>
+                <button class="popup-btn" style="width: auto; padding: 5px 15px;">购买</button>
+              </div>
+            `;
+          });
+          
+          html += `</div>`;
+          rechargeContent.innerHTML = html;
+        } else {
+          rechargeContent.innerHTML = `
+            <div style="text-align: center; padding: 30px; color: var(--text-dim);">
+              <div style="font-size: 2rem; margin-bottom: 10px;">🛒</div>
+              <div>商城暂无商品</div>
+              <div style="font-size: 0.8rem; margin-top: 10px;">请稍后再来查看</div>
+            </div>
+          `;
+        }
+        
+        document.getElementById('mallPopup').classList.add('active');
+      } catch (error) {
+        console.error('加载商城商品失败:', error);
+        const rechargeContent = document.getElementById('rechargeContent');
+        rechargeContent.innerHTML = `
+          <div style="text-align: center; padding: 30px; color: var(--text-dim);">
+            <div style="font-size: 2rem; margin-bottom: 10px;">❌</div>
+            <div>加载失败</div>
+            <div style="font-size: 0.8rem; margin-top: 10px;">请检查网络连接后重试</div>
+          </div>
+        `;
+        document.getElementById('mallPopup').classList.add('active');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    function closeMallPopup(e) {
+      if (!e || e.target === document.getElementById('mallPopup')) {
+        document.getElementById('mallPopup').classList.remove('active');
+      }
+    }
+
+    function switchMallTab(tab, element) {
+      document.querySelectorAll('.mall-tab').forEach(t => t.classList.remove('active'));
+      element.classList.add('active');
+      
+      document.getElementById('rechargeContent').style.display = 'none';
+      document.getElementById('shopContent').style.display = 'none';
+      document.getElementById('ordersContent').style.display = 'none';
+      
+      if (tab === 'recharge') {
+        document.getElementById('rechargeContent').style.display = 'block';
+      } else if (tab === 'shop') {
+        document.getElementById('shopContent').style.display = 'block';
+      } else if (tab === 'orders') {
+        document.getElementById('ordersContent').style.display = 'block';
+      }
+    }
+
+    function selectRechargeAmount(amount) {
+      selectedRechargeAmount = amount;
+    }
+
+    function selectPayment(method) {
+      selectedPaymentMethod = method;
+    }
+
+    async function confirmPayment() {
+      try {
+        showLoading();
+        const roleId = window.AuthService ? window.AuthService.getCurrentRoleId() : (localStorage.getItem('currentRoleId') || localStorage.getItem('roleId'));
+        // 调用充值API
+        const result = await apiService.buyItem(selectedRechargeAmount, selectedPaymentMethod);
+        ErrorHandler.showSuccess('充值成功！');
+        // 重新加载用户数据
+        await renderUI();
+      } catch (error) {
+        ErrorHandler.handleApiError(error, '充值');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    function showPopup(title, content) {
+      document.getElementById('popupTitle').textContent = title;
+      document.getElementById('popupBody').innerHTML = content.replace(/\n/g, '<br>');
+      document.getElementById('popupOverlay').classList.add('active');
+    }
+
+    function closePopup(e) {
+      if (!e || e.target === document.getElementById('popupOverlay')) {
+        document.getElementById('popupOverlay').classList.remove('active');
+        const popupContent = document.getElementById('popupOverlay').querySelector('.popup-content');
+        if (popupContent) {
+          popupContent.style.maxWidth = '';
+          popupContent.style.maxHeight = '';
+          popupContent.style.overflowY = '';
+        }
+      }
+    }
+
+    async function showMailPopup() {
+      const mailList = document.getElementById('mailList');
+      
+      // 显示加载状态
+      mailList.innerHTML = `
+        <div style="
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 40px 20px;
+          text-align: center;
+          background: rgba(30, 35, 55, 0.6);
+          border: 1px solid rgba(230, 199, 73, 0.3);
+          border-radius: 8px;
+          margin: 10px;
+        ">
+          <div style="font-size: 2.5rem; margin-bottom: 15px; animation: pulse 1.5s infinite; color: var(--gold-primary);">📧</div>
+          <div style="color: var(--gold-primary); font-size: 1rem; font-weight: bold; margin-bottom: 8px;">邮件加载中...</div>
+          <div style="color: var(--text-dim); font-size: 0.8rem;">正在查询您的邮件</div>
+        </div>
+      `;
+      
+      document.getElementById('mailPopupOverlay').classList.add('active');
+      
+      try {
+        // 获取角色ID
+        const roleId = window.AuthService ? window.AuthService.getCurrentRoleId() : (localStorage.getItem('currentRoleId') || localStorage.getItem('roleId'));
+        // 从API获取邮件数据
+        // 注意：这里需要根据实际的API endpoint进行调整
+        const mails = await apiService.getMails(parseInt(roleId)).catch(() => []);
+        
+        if (mails && Array.isArray(mails) && mails.length > 0) {
+          // 渲染邮件列表
+          mailList.innerHTML = mails.map(mail => `
+            <div style="
+              background: ${mail.hasRead ? 'rgba(30, 35, 55, 0.6)' : 'rgba(230, 199, 73, 0.2)'};
+              border: 1px solid ${mail.hasRead ? 'rgba(230, 199, 73, 0.3)' : 'var(--gold-primary)'};
+              border-radius: 8px;
+              padding: 12px;
+              margin-bottom: 8px;
+              cursor: pointer;
+              transition: all 0.3s;
+            " onclick="readMail(${mail.id})"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <div style="font-weight: bold; color: ${mail.hasRead ? 'var(--text-dim)' : 'var(--gold-primary)'};">${mail.subject || '邮件'}</div>
+                <div style="font-size: 0.7rem; color: var(--text-dim);">${mail.time || new Date().toLocaleString()}</div>
+              </div>
+              <div style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 8px;">${mail.content || '邮件内容'}</div>
+              ${mail.hasReward ? '<div style="font-size: 0.7rem; color: var(--success);">💎 含奖励</div>' : ''}
+            </div>
+          `).join('');
+        } else {
+          // 显示空邮件状态
+          const mailList = document.getElementById('mailList');
+          mailList.innerHTML = `
+            <div style="
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              padding: 40px 20px;
+              text-align: center;
+              background: rgba(30, 35, 55, 0.6);
+              border: 1px solid rgba(230, 199, 73, 0.3);
+              border-radius: 8px;
+              margin: 10px;
+            ">
+              <div style="font-size: 2.5rem; margin-bottom: 15px; color: var(--text-dim);">📧</div>
+              <div style="color: var(--text-dim); font-size: 1rem; font-weight: bold; margin-bottom: 8px;">暂无邮件</div>
+              <div style="color: var(--gold-dim); font-size: 0.8rem; line-height: 1.4;">您的邮箱是空的</div>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('获取邮件数据失败:', error);
+        // 显示错误状态
+        renderMailError();
+      }
+    }
+    
+    // 渲染邮件错误状态
+    function renderMailError() {
+      const mailList = document.getElementById('mailList');
+      mailList.innerHTML = `
+        <div style="
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 40px 20px;
+          text-align: center;
+          background: rgba(30, 35, 55, 0.6);
+          border: 1px solid rgba(230, 199, 73, 0.3);
+          border-radius: 8px;
+          margin: 10px;
+        ">
+          <div style="font-size: 2.5rem; margin-bottom: 15px; color: var(--text-dim);">📧</div>
+          <div style="color: var(--text-dim); font-size: 1rem; font-weight: bold; margin-bottom: 8px;">邮件获取失败</div>
+          <div style="color: var(--gold-dim); font-size: 0.8rem; line-height: 1.4;">请检查网络连接后重试</div>
+        </div>
+      `;
+    }
+
+    async function readMail(mailId) {
+      try {
+        showLoading();
+        const roleId = window.AuthService ? window.AuthService.getCurrentRoleId() : (localStorage.getItem('currentRoleId') || localStorage.getItem('roleId'));
+        // 调用读取邮件API
+        // 注意：这里需要根据实际的API endpoint进行调整
+        const result = await apiService.readMail(mailId, parseInt(roleId));
+        ErrorHandler.showInfo('邮件已阅读');
+        // 重新打开邮件弹窗，显示更新后的状态
+        await showMailPopup();
+      } catch (error) {
+        ErrorHandler.handleApiError(error, '读取邮件');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    function closeMailPopup(e) {
+      if (!e || e.target === document.getElementById('mailPopupOverlay')) {
+        document.getElementById('mailPopupOverlay').classList.remove('active');
+      }
+    }
+
+    function hideGiftBadgeAndGoToCheckin() {
+      const giftBadge = document.getElementById('giftBadge');
+      if (giftBadge) {
+        giftBadge.style.display = 'none';
+      }
+      window.location.href = 'checkin.html';
+    }
+
+    function hideLeaderboardBadgeAndOpenPopup() {
+      const leaderboardBadge = document.getElementById('leaderboardBadge');
+      if (leaderboardBadge) {
+        leaderboardBadge.style.display = 'none';
+      }
+      openLeaderboardPopup();
+    }
+
+    function openLeaderboardPopup() {
+      document.getElementById('leaderboardPopup').classList.add('active');
+      // 加载默认标签页数据
+      switchLeaderboardTab('realm');
+    }
+
+    function closeLeaderboardPopup(e) {
+      if (!e || e.target === document.getElementById('leaderboardPopup')) {
+        document.getElementById('leaderboardPopup').classList.remove('active');
+      }
+    }
+
+    async function switchLeaderboardTab(tab) {
+      currentLeaderboardTab = tab;
+      
+      const leaderboardList = document.getElementById('leaderboardList');
+      
+      // 显示加载状态
+      leaderboardList.innerHTML = `
+        <div style="
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 40px 20px;
+          text-align: center;
+          background: rgba(30, 35, 55, 0.6);
+          border: 1px solid rgba(230, 199, 73, 0.3);
+          border-radius: 8px;
+          margin: 10px;
+        ">
+          <div style="font-size: 2.5rem; margin-bottom: 15px; animation: pulse 1.5s infinite; color: var(--gold-primary);">🔮</div>
+          <div style="color: var(--gold-primary); font-size: 1rem; font-weight: bold; margin-bottom: 8px;">仙榜数据推演中...</div>
+          <div style="color: var(--text-dim); font-size: 0.8rem;">天地灵气汇聚，榜单即将显现</div>
+        </div>
+      `;
+      
+      try {
+        const result = await apiService.getLeaderboard(tab).catch(() => null);
+        let listData = [];
+        
+        if (Array.isArray(result)) {
+          listData = result;
+        } else if (result && Array.isArray(result.data)) {
+          listData = result.data;
+        }
+        
+        if (!listData || listData.length === 0) {
+          // 空态处理
+          leaderboardList.innerHTML = `
+            <div style="
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              padding: 40px 20px;
+              text-align: center;
+              background: rgba(30, 35, 55, 0.6);
+              border: 1px solid rgba(230, 199, 73, 0.3);
+              border-radius: 8px;
+              margin: 10px;
+            ">
+              <div style="font-size: 2.5rem; margin-bottom: 15px; color: var(--text-dim);">📜</div>
+              <div style="color: var(--text-dim); font-size: 1rem; font-weight: bold; margin-bottom: 8px;">暂无仙榜数据</div>
+              <div style="color: var(--gold-dim); font-size: 0.8rem; line-height: 1.4;">仙途初开，豪杰未现<br>待道友们修行有成<br>自当名震三界</div>
+            </div>
+          `;
+        } else {
+          // 正常数据渲染 - 前 10 名特殊头像框
+          leaderboardList.innerHTML = `
+            <div style="padding: 10px;">
+              ${listData.map((item) => {
+                const rank = item.rank || 0;
+                const isTop10 = rank <= 10;
+                const isTop3 = rank <= 3;
+                
+                // 排名颜色
+                let rankColor;
+                let borderColor;
+                let bgGradient;
+                
+                if (rank === 1) {
+                  rankColor = '#FFD700'; // 金色
+                  borderColor = '#FFD700';
+                  bgGradient = 'linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(30, 35, 55, 0.6) 100%)';
+                } else if (rank === 2) {
+                  rankColor = '#C0C0C0'; // 银色
+                  borderColor = '#C0C0C0';
+                  bgGradient = 'linear-gradient(135deg, rgba(192, 192, 192, 0.15) 0%, rgba(30, 35, 55, 0.6) 100%)';
+                } else if (rank === 3) {
+                  rankColor = '#CD7F32'; // 铜色
+                  borderColor = '#CD7F32';
+                  bgGradient = 'linear-gradient(135deg, rgba(205, 127, 50, 0.15) 0%, rgba(30, 35, 55, 0.6) 100%)';
+                } else if (isTop10) {
+                  rankColor = '#E7C649'; // 淡金色
+                  borderColor = 'rgba(230, 199, 73, 0.5)';
+                  bgGradient = 'linear-gradient(135deg, rgba(230, 199, 73, 0.08) 0%, rgba(30, 35, 55, 0.6) 100%)';
+                } else {
+                  rankColor = 'var(--text-dim)';
+                  borderColor = 'rgba(230, 199, 73, 0.3)';
+                  bgGradient = 'rgba(30, 35, 55, 0.6)';
+                }
+                
+                // 头像框特效
+                const avatarFrame = isTop10 ? `
+                  <div style="
+                    position: absolute;
+                    left: 10px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    width: 50px;
+                    height: 50px;
+                    border-radius: 50%;
+                    border: ${isTop3 ? '3px' : '2px'} solid ${rankColor};
+                    box-shadow: ${isTop3 ? `0 0 15px ${rankColor}, 0 0 30px ${rankColor}` : `0 0 10px ${rankColor}`};
+                    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0.3) 100%);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 1.5rem;
+                    animation: ${isTop3 ? 'glow 2s infinite' : 'none'};
+                  ">
+                    ${rank <= 3 ? '👑' : '⭐'}
+                  </div>
+                ` : `
+                  <div style="
+                    position: absolute;
+                    left: 10px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 50%;
+                    background: rgba(0,0,0,0.3);
+                    border: 2px solid rgba(230, 199, 73, 0.3);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 1.2rem;
+                    color: ${rankColor};
+                    font-weight: bold;
+                  ">
+                    ${rank}
+                  </div>
+                `;
+                
+                const paddingLeft = isTop10 ? '70px' : '60px';
+                
+                return `
+                  <div style="
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: ${isTop10 ? '18px' : '15px'} ${isTop10 ? '18px' : '15px'};
+                    padding-left: ${paddingLeft};
+                    margin-bottom: 10px;
+                    background: ${bgGradient};
+                    border: ${isTop10 ? '2px' : '1px'} solid ${borderColor};
+                    border-radius: 8px;
+                    transition: all 0.3s;
+                    position: relative;
+                    overflow: hidden;
+                    ${isTop10 ? 'box-shadow: 0 4px 15px rgba(230, 199, 73, 0.2);' : ''}
+                  " onmouseenter="this.style.transform='translateY(-2px)'; this.style.boxShadow='${isTop10 ? '0 6px 20px rgba(230, 199, 73, 0.3)' : '0 4px 15px rgba(230, 199, 73, 0.15)'}'" onmouseleave="this.style.transform='translateY(0)'; this.style.boxShadow='${isTop10 ? '0 4px 15px rgba(230, 199, 73, 0.2)' : 'none'}'">
+                    ${avatarFrame}
+                    <div style="flex: 1; margin-left: 10px;">
+                      <div style="font-weight: bold; color: ${isTop10 ? 'var(--gold-primary)' : 'var(--text-secondary)'}; font-size: ${isTop10 ? '1.05rem' : '1rem'};">
+                        ${item.roleName || item.name || '未知'}
+                        ${rank === 1 ? '<span style="font-size: 0.8rem; color: #000000; margin-left: 8px;">👑 仙尊</span>' : ''}
+                      </div>
+                      <div style="font-size: 0.85rem; color: var(--text-dim); margin-top: 3px;">
+                        ${item.realm || '凡人'} · Lv.${item.level || 1}
+                      </div>
+                    </div>
+                    ${isTop10 ? `
+                      <div style="
+                        padding: 5px 12px;
+                        background: linear-gradient(135deg, rgba(230, 199, 73, 0.2), rgba(230, 199, 73, 0.05));
+                        border: 1px solid rgba(230, 199, 73, 0.4);
+                        border-radius: 20px;
+                        color: var(--gold-primary);
+                        font-size: 0.85rem;
+                        font-weight: bold;
+                      ">
+                        ${tab === 'realm' ? `${item.realm || '凡人'}` : `💰 ${(item.wealth || 0).toLocaleString()}`}
+                      </div>
+                    ` : ''}
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          `;
+        }
+        
+        // 更新刷新时间
+        updateLeaderboardTime();
+      } catch (error) {
+        console.error('获取排行榜数据失败:', error);
+        // 显示错误状态
+        const leaderboardList = document.getElementById('leaderboardList');
+        leaderboardList.innerHTML = `
+          <div style="
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            text-align: center;
+            background: rgba(30, 35, 55, 0.6);
+            border: 1px solid rgba(230, 199, 73, 0.3);
+            border-radius: 8px;
+            margin: 10px;
+          ">
+            <div style="font-size: 2.5rem; margin-bottom: 15px; color: var(--text-dim);">🔮</div>
+            <div style="color: var(--text-dim); font-size: 1rem; font-weight: bold; margin-bottom: 8px;">仙榜推演受阻</div>
+            <div style="color: var(--gold-dim); font-size: 0.8rem; line-height: 1.4;">天机遮蔽，请稍后再试</div>
+          </div>
+        `;
+      } finally {
+        // 更新标签样式
+        document.querySelectorAll('#lbLevelTab, #lbRealmTab, #lbCombinedTab').forEach(tabEl => {
+          tabEl.classList.remove('active');
+        });
+        document.getElementById(`lb${tab.charAt(0).toUpperCase() + tab.slice(1)}Tab`).classList.add('active');
+      }
+    }
+    
+    // 刷新榜单
+    async function refreshLeaderboard() {
+      // 获取刷新按钮（使用更具体的选择器）
+      const refreshBtn = document.querySelector('#leaderboardPopup button[onclick="refreshLeaderboard()"]');
+      if (!refreshBtn) {
+        console.warn('刷新按钮未找到');
+        return;
+      }
+      
+      const originalText = refreshBtn.innerHTML;
+      refreshBtn.innerHTML = '🔄 刷新中...';
+      refreshBtn.disabled = true;
+      refreshBtn.style.opacity = '0.6';
+      
+      try {
+        await switchLeaderboardTab(currentLeaderboardTab);
+        setTimeout(() => {
+          refreshBtn.innerHTML = originalText;
+          refreshBtn.disabled = false;
+          refreshBtn.style.opacity = '1';
+        }, 500);
+      } catch (error) {
+        console.error('刷新榜单失败:', error);
+        refreshBtn.innerHTML = originalText;
+        refreshBtn.disabled = false;
+        refreshBtn.style.opacity = '1';
+      }
+    }
+    
+    // 更新榜单时间
+    function updateLeaderboardTime() {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('zh-CN', { hour12: false });
+      document.getElementById('leaderboardUpdateTime').innerHTML = `更新于：${timeStr}`;
+    }
+    
+    // 定时刷新榜单（每 30 秒）
+    let leaderboardRefreshInterval;
+    
+    function startLeaderboardAutoRefresh() {
+      if (leaderboardRefreshInterval) {
+        clearInterval(leaderboardRefreshInterval);
+      }
+      leaderboardRefreshInterval = setInterval(() => {
+        if (document.getElementById('leaderboardPopup').classList.contains('active')) {
+          refreshLeaderboard();
+        }
+      }, 30000); // 30 秒
+    }
+    
+    // 页面加载时启动自动刷新
+    document.addEventListener('DOMContentLoaded', startLeaderboardAutoRefresh);
+    
+
+
+    async function openCheckinPopup() {
+      try {
+        showLoading();
+        const roleId = window.AuthService ? window.AuthService.getCurrentRoleId() : (localStorage.getItem('currentRoleId') || localStorage.getItem('roleId'));
+        // 从API获取签到信息
+        const checkinInfo = await apiService.getCheckinInfo(roleId);
+        // 从API获取签到奖励配置
+        const checkinRewards = await apiService.getCheckinRewards() || {};
+        
+        const popup = document.getElementById('checkinPopup');
+        const content = document.getElementById('checkinContent');
+        
+        // 获取当月天数
+        const now = new Date();
+        const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+        const currentDay = now.getDate();
+        
+        let html = `
+          <div style="text-align: center; margin-bottom: 20px;">
+            <div style="font-size: 1.1rem; margin-bottom: 10px;">当前连续签到: <span style="color: var(--gold-primary); font-weight: bold;">${checkinInfo.streak || 0}</span> 天</div>
+            <div style="font-size: 0.9rem; color: var(--text-dim);">累计签到: ${checkinInfo.total || 0} 天</div>
+            <div style="font-size: 0.8rem; color: var(--gold-dim); margin-top: 5px;">补签次数: ${checkinInfo.supplementCount || 0}/3</div>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin-bottom: 20px; max-height: 400px; overflow-y: auto; padding: 10px;">
+        `;
+        
+        // 生成签到日历
+        for (let i = 1; i <= daysInMonth; i++) {
+          const isChecked = checkinInfo.checkinDays && checkinInfo.checkinDays.includes(i);
+          const isToday = i === currentDay;
+          const isPast = i < currentDay;
+          const isSupplement = checkinInfo.checkinDays && checkinInfo.checkinDays.includes(-i);
+          
+          // 获取当日奖励
+          let rewardText = '';
+          let rewardColor = 'var(--text-dim)';
+          
+          // 从后台配置获取奖励，优先使用后台配置，否则使用默认值
+          const dayReward = checkinRewards[i] || {};
+          if (dayReward.lingshi || dayReward.xiuwei || dayReward.hunshi || dayReward.equipment || dayReward.pill) {
+            let rewards = [];
+            if (dayReward.lingshi) rewards.push(`${dayReward.lingshi}灵石`);
+            if (dayReward.xiuwei) rewards.push(`${dayReward.xiuwei}修为`);
+            if (dayReward.hunshi) rewards.push(`${dayReward.hunshi}魂石`);
+            if (dayReward.equipment) rewards.push(`${dayReward.equipment}`);
+            if (dayReward.pill) rewards.push(`${dayReward.pill}`);
+            rewardText = rewards.join('+');
+            rewardColor = dayReward.isBigReward ? '#ff9800' : 'var(--gold-primary)';
+          } else {
+            // 默认奖励
+            if (i === 1) {
+              rewardText = '100灵石+500修为';
+              rewardColor = 'var(--gold-primary)';
+            } else if (i === 7) {
+              rewardText = '500灵石+2000修为+50魂石';
+              rewardColor = '#ff6b35';
+            } else if (i === 15) {
+              rewardText = '1000灵石+5000修为+100魂石';
+              rewardColor = '#9c27b0';
+            } else if (i === 30) {
+              rewardText = '2000灵石+10000修为+200魂石';
+              rewardColor = '#ff9800';
+            } else {
+              rewardText = '50灵石+200修为';
+            }
+          }
+          
+          html += `
+            <div style="
+              background: ${isChecked ? 'rgba(76, 175, 80, 0.2)' : isSupplement ? 'rgba(255, 193, 7, 0.2)' : isToday ? 'rgba(230, 199, 73, 0.2)' : isPast ? 'rgba(30, 35, 55, 0.6)' : 'rgba(20, 25, 45, 0.4)'};
+              border: 1px solid ${isChecked ? 'var(--success)' : isSupplement ? '#ff9800' : isToday ? 'var(--gold-primary)' : isPast ? 'rgba(230, 199, 73, 0.3)' : 'rgba(230, 199, 73, 0.1)'};
+              border-radius: 8px;
+              padding: 12px 8px;
+              text-align: center;
+              position: relative;
+              cursor: ${isPast && !isChecked && !isSupplement ? 'pointer' : 'default'};
+              transition: all 0.3s;
+              min-height: 100px;
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+            " ${isPast && !isChecked && !isSupplement ? `onclick="showSupplementCheckin(${i})" onmouseenter="this.style.transform='scale(1.05)'; this.style.boxShadow='0 2px 8px rgba(230, 199, 73, 0.3)';" onmouseleave="this.style.transform='scale(1)'; this.style.boxShadow='none';"` : ''}>
+              <div style="font-size: 0.8rem; font-weight: bold; color: ${isChecked ? 'var(--success)' : isSupplement ? '#ff9800' : isToday ? 'var(--gold-primary)' : isPast ? 'var(--text-dim)' : 'var(--text-secondary)'};">第${i}天</div>
+              <div style="font-size: 0.65rem; color: ${rewardColor}; margin: 8px 0; line-height: 1.2; word-wrap: break-word;">${rewardText}</div>
+              ${isChecked ? '<div style="position: absolute; top: 5px; right: 5px; font-size: 0.8rem; color: var(--success);">✓</div>' : ''}
+              ${isSupplement ? '<div style="position: absolute; top: 5px; right: 5px; font-size: 0.8rem; color: #ff9800;">补</div>' : ''}
+            </div>
+          `;
+        }
+        
+        html += `</div>`;
+        
+        if (!checkinInfo.todayChecked) {
+          html += `
+            <button class="popup-btn" onclick="doCheckin()" style="margin-top: 20px; padding: 12px 40px; font-size: 1rem;">
+              今日签到
+            </button>
+          `;
+        } else {
+          html += `
+            <div style="text-align: center; padding: 20px; background: rgba(76, 175, 80, 0.2); border: 1px solid var(--success); border-radius: 10px; margin-top: 20px;">
+              <div style="color: var(--success); font-weight: bold; font-size: 1.1rem;">今日已签到</div>
+              <div style="font-size: 0.9rem; color: var(--text-dim); margin-top: 5px;">明日再来领取奖励</div>
+            </div>
+          `;
+        }
+        
+        content.innerHTML = html;
+        popup.classList.add('active');
+      } catch (error) {
+        ErrorHandler.handleApiError(error, '获取签到信息');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    function closeCheckinPopup(e) {
+      if (!e || e.target === document.getElementById('checkinPopup')) {
+        document.getElementById('checkinPopup').classList.remove('active');
+      }
+    }
+
+    async function doCheckin() {
+      try {
+        showLoading();
+        const roleId = window.AuthService ? window.AuthService.getCurrentRoleId() : (localStorage.getItem('currentRoleId') || localStorage.getItem('roleId'));
+        // 调用签到API
+        const result = await apiService.doCheckin(roleId);
+        
+        // 显示签到成功动画
+        showCheckinSuccessAnimation(result.rewards || {});
+        
+        // 重新打开签到弹窗，显示更新后的状态
+        await openCheckinPopup();
+        // 重新加载用户数据
+        await renderUI();
+      } catch (error) {
+        // 特殊处理今日已签到的错误
+        if (error.message && error.message.includes('今日已签到')) {
+          showToast('今日已签到，明日再来领取奖励', 'info');
+        } else {
+          ErrorHandler.handleApiError(error, '签到');
+        }
+      } finally {
+        hideLoading();
+      }
+    }
+    
+    // 显示签到成功动画
+    function showCheckinSuccessAnimation(rewards) {
+      // 创建动画弹窗
+      const animationPopup = document.createElement('div');
+      animationPopup.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        animation: fadeIn 0.3s ease-in;
+      `;
+      
+      // 动画内容
+      let rewardsHtml = '';
+      if (rewards) {
+        if (rewards.lingshi) {
+          rewardsHtml += `<div style="display: flex; align-items: center; margin-bottom: 10px;"><span style="font-size: 1.2rem; margin-right: 10px;">💰</span><span>灵石: ${rewards.lingshi}</span></div>`;
+        }
+        if (rewards.xiuwei) {
+          rewardsHtml += `<div style="display: flex; align-items: center; margin-bottom: 10px;"><span style="font-size: 1.2rem; margin-right: 10px;">🌟</span><span>修为: ${rewards.xiuwei}</span></div>`;
+        }
+        if (rewards.hunshi) {
+          rewardsHtml += `<div style="display: flex; align-items: center; margin-bottom: 10px;"><span style="font-size: 1.2rem; margin-right: 10px;">💎</span><span>魂石: ${rewards.hunshi}</span></div>`;
+        }
+      }
+      
+      animationPopup.innerHTML = `
+        <div style="
+          background: linear-gradient(135deg, rgba(230, 199, 73, 0.9), rgba(255, 165, 0, 0.9));
+          border: 2px solid #ffd700;
+          border-radius: 15px;
+          padding: 40px;
+          text-align: center;
+          box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+          animation: scaleIn 0.5s ease-out;
+        ">
+          <div style="font-size: 3rem; margin-bottom: 20px; animation: pulse 1.5s infinite;">🎉</div>
+          <div style="font-size: 1.5rem; font-weight: bold; margin-bottom: 20px; color: #000;">签到成功！</div>
+          <div style="margin-bottom: 20px; color: #000;">
+            ${rewardsHtml || '获得奖励：1000 灵石'}
+          </div>
+          <button onclick="this.parentElement.parentElement.remove();" style="
+            background: #000;
+            color: #ffd700;
+            border: none;
+            padding: 10px 30px;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+          " onmouseenter="this.style.transform='scale(1.05)';" onmouseleave="this.style.transform='scale(1)';">
+            领取
+          </button>
+        </div>
+      `;
+      
+      // 添加到文档
+      document.body.appendChild(animationPopup);
+      
+      // 3秒后自动关闭
+      setTimeout(() => {
+        animationPopup.style.animation = 'fadeOut 0.3s ease-out';
+        setTimeout(() => {
+          animationPopup.remove();
+        }, 300);
+      }, 3000);
+    }
+    
+    // 显示补签确认弹窗
+    function showSupplementCheckin(day) {
+      const roleId = window.AuthService ? window.AuthService.getCurrentRoleId() : (localStorage.getItem('currentRoleId') || localStorage.getItem('roleId'));
+      
+      // 创建补签弹窗
+      const supplementPopup = document.createElement('div');
+      supplementPopup.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        animation: fadeIn 0.3s ease-in;
+      `;
+      
+      supplementPopup.innerHTML = `
+        <div style="
+          background: linear-gradient(135deg, rgba(139, 69, 19, 0.9), rgba(160, 82, 45, 0.9));
+          border: 2px solid #d2691e;
+          border-radius: 15px;
+          padding: 30px;
+          text-align: center;
+          box-shadow: 0 0 30px rgba(218, 165, 32, 0.3);
+          max-width: 400px;
+        ">
+          <div style="font-size: 2rem; margin-bottom: 20px;">🔄</div>
+          <div style="font-size: 1.2rem; font-weight: bold; margin-bottom: 20px; color: #ffd700;">补签确认</div>
+          <div style="margin-bottom: 20px; color: #f5deb3;">
+            是否花费 50 仙石补签第 ${day} 天？
+          </div>
+          <div style="display: flex; gap: 15px; justify-content: center;">
+            <button onclick="this.parentElement.parentElement.parentElement.remove();" style="
+              background: rgba(0, 0, 0, 0.5);
+              color: #f5deb3;
+              border: 1px solid #d2691e;
+              padding: 10px 20px;
+              border-radius: 8px;
+              cursor: pointer;
+              transition: all 0.3s;
+            " onmouseenter="this.style.background='rgba(0, 0, 0, 0.7)';" onmouseleave="this.style.background='rgba(0, 0, 0, 0.5)';">
+              取消
+            </button>
+            <button onclick="confirmSupplementCheckin(${day}); this.parentElement.parentElement.parentElement.remove();" style="
+              background: linear-gradient(135deg, #d2691e, #cd853f);
+              color: #fff;
+              border: 1px solid #ffd700;
+              padding: 10px 20px;
+              border-radius: 8px;
+              cursor: pointer;
+              transition: all 0.3s;
+            " onmouseenter="this.style.transform='scale(1.05)';" onmouseleave="this.style.transform='scale(1)';">
+              确认补签
+            </button>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(supplementPopup);
+    }
+    
+    // 确认补签
+    async function confirmSupplementCheckin(day) {
+      try {
+        showLoading();
+        const roleId = window.AuthService ? window.AuthService.getCurrentRoleId() : (localStorage.getItem('currentRoleId') || localStorage.getItem('roleId'));
+        // 调用补签API
+        const result = await apiService.supplementCheckin(roleId, day);
+        ErrorHandler.showSuccess('补签成功！');
+        // 重新打开签到弹窗，显示更新后的状态
+        await openCheckinPopup();
+        // 重新加载用户数据
+        await renderUI();
+      } catch (error) {
+        ErrorHandler.handleApiError(error, '补签');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    async function openTaskPopup() {
+      try {
+        showLoading();
+        const roleId = window.AuthService ? window.AuthService.getCurrentRoleId() : (localStorage.getItem('currentRoleId') || localStorage.getItem('roleId'));
+        // 从API获取任务列表
+        const tasks = await apiService.getTaskList(roleId);
+        
+        const popup = document.getElementById('taskPopup');
+        const content = document.getElementById('taskContent');
+        
+        let html = `
+          <div style="display: flex; flex-direction: column; gap: 15px;">
+        `;
+        
+        // 检查tasks是否是数组
+        if (Array.isArray(tasks)) {
+          tasks.forEach(task => {
+            html += `
+              <div style="
+                background: rgba(30, 35, 55, 0.6);
+                border: 1px solid ${task.status === 'completed' ? 'var(--success)' : task.status === 'in_progress' ? 'var(--gold-primary)' : 'rgba(230, 199, 73, 0.3)'};
+                border-radius: 8px;
+                padding: 15px;
+              ">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                  <div style="font-weight: bold; color: ${task.status === 'completed' ? 'var(--success)' : 'var(--gold-primary)'};">${task.title || '任务'}</div>
+                  <div style="font-size: 0.8rem; padding: 2px 8px; border-radius: 10px; background: ${task.status === 'completed' ? 'rgba(76, 175, 80, 0.2)' : task.status === 'in_progress' ? 'rgba(230, 199, 73, 0.2)' : 'rgba(255, 255, 255, 0.1)'};">
+                    ${task.status === 'completed' ? '已完成' : task.status === 'in_progress' ? '进行中' : '未开始'}
+                  </div>
+                </div>
+                <div style="font-size: 0.9rem; color: var(--text-dim); margin-bottom: 10px;">${task.description || '任务描述'}</div>
+                <div style="margin-bottom: 10px;">
+                  <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 5px;">
+                    <span>进度</span>
+                    <span>${task.progress || 0}%</span>
+                  </div>
+                  <div style="height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+                    <div style="
+                      height: 100%;
+                      background: ${task.status === 'completed' ? 'var(--success)' : 'var(--gold-primary)'};
+                      width: ${task.progress || 0}%;
+                      border-radius: 3px;
+                      transition: width 0.3s ease;
+                    "></div>
+                  </div>
+                </div>
+                <div style="font-size: 0.8rem; color: var(--gold-dim);">奖励: ${task.reward || '无'}</div>
+                ${task.status === 'completed' ? 
+                  '<button class="popup-btn" onclick="completeTask(' + task.id + ')" style="margin-top: 10px;">领取奖励</button>' : 
+                  task.status === 'in_progress' ? 
+                  '<button class="popup-btn" onclick="continueTask(' + task.id + ')" style="margin-top: 10px;">继续任务</button>' : 
+                  '<button class="popup-btn" onclick="acceptTask(' + task.id + ')" style="margin-top: 10px;">开始任务</button>'
+                }
+              </div>
+            `;
+          });
+        } else {
+          // 如果tasks不是数组，显示提示信息
+          html += `
+            <div style="text-align: center; padding: 30px; color: var(--text-dim);">
+              暂无任务数据
+            </div>
+          `;
+        }
+        
+        html += `</div>`;
+        content.innerHTML = html;
+        popup.classList.add('active');
+      } catch (error) {
+        ErrorHandler.handleApiError(error, '获取任务列表');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    function closeTaskPopup(e) {
+      if (!e || e.target === document.getElementById('taskPopup')) {
+        document.getElementById('taskPopup').classList.remove('active');
+      }
+    }
+
+    async function acceptTask(taskId) {
+      try {
+        showLoading();
+        // 调用接取任务API
+        const result = await apiService.acceptTask(taskId);
+        ErrorHandler.showSuccess('任务接取成功');
+        // 重新打开任务弹窗，显示更新后的状态
+        await openTaskPopup();
+      } catch (error) {
+        ErrorHandler.handleApiError(error, '接取任务');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    async function continueTask(taskId) {
+      try {
+        showLoading();
+        // 调用继续任务API
+        const result = await apiService.continueTask(taskId);
+        ErrorHandler.showSuccess('任务进度更新');
+        // 重新打开任务弹窗，显示更新后的状态
+        await openTaskPopup();
+      } catch (error) {
+        ErrorHandler.handleApiError(error, '继续任务');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    async function completeTask(taskId) {
+      try {
+        showLoading();
+        // 调用完成任务 API
+        const result = await apiService.completeTask(taskId);
+        ErrorHandler.showSuccess('任务完成！获得奖励：' + (result.reward || '无'));
+        // 重新打开任务弹窗，显示更新后的状态
+        await openTaskPopup();
+        // 重新加载用户数据
+        await renderUI();
+      } catch (error) {
+        ErrorHandler.handleApiError(error, '完成任务');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // 加载仙途快讯
+    async function loadXiantuNews() {
+      try {
+        // 从 API 获取系统公告和活动
+        const [announcements, activities] = await Promise.all([
+          apiService.getAnnouncements().catch(() => []),
+          apiService.getActivities().catch(() => [])
+        ]);
+        
+        const newsContainer = document.getElementById('xiantuNews');
+        const news = [];
+        
+        // 添加活动（优先显示）
+        if (activities && activities.length > 0) {
+          activities.forEach(act => {
+            const statusText = act.status === 1 ? '进行中' : (act.status === 2 ? '已结束' : '未开始');
+            news.push({
+              type: '活动',
+              content: `${act.icon || '🎊'} ${act.name || act.title || '活动'}`,
+              isActivity: true,
+              status: statusText,
+              icon: act.icon || '🎊'
+            });
+          });
+        }
+        
+        // 添加系统公告
+        if (announcements && announcements.length > 0) {
+          announcements.forEach(ann => {
+            news.push({
+              type: '系统',
+              content: ann.content || ann.title
+            });
+          });
+        }
+        
+        // 如果没有数据，显示默认诗句
+        if (news.length === 0) {
+          news.push({
+            type: '系统',
+            content: '晴朗初春日，高心望素云。彩光浮玉辇，紫气隐元君。'
+          });
+        }
+        
+        // 渲染快讯
+        newsContainer.innerHTML = news.map(item => {
+          if (item.isActivity) {
+            return `
+              <div class="list-item">
+                <span class="item-icon">${item.icon}</span>
+                <span class="item-text">${item.content}</span>
+                <span class="item-status status-green">${item.status}</span>
+              </div>
+            `;
+          } else {
+            return `
+              <div class="log-item">
+                <span class="log-tag">[${item.type}]</span>${item.content}
+              </div>
+            `;
+          }
+        }).join('');
+      } catch (error) {
+        console.error('加载仙途快讯失败:', error);
+        // 显示默认数据
+        const newsContainer = document.getElementById('xiantuNews');
+        newsContainer.innerHTML = `
+          <div class="log-item">
+            <span class="log-tag">[系统]</span>晴朗初春日，高心望素云。彩光浮玉辇，紫气隐元君。
+          </div>
+        `;
+      }
+    }
+
+    // 加载通知数量
+    async function loadNotificationCounts() {
+      try {
+        // 获取邮件数量
+        const mailCount = await apiService.getMailUnreadCount().catch(() => 0);
+        const mailBadge = document.getElementById('mailBadge');
+        if (mailBadge) {
+          if (mailCount > 0) {
+            mailBadge.textContent = mailCount > 99 ? '99+' : mailCount;
+            mailBadge.style.display = 'block';
+          } else {
+            mailBadge.style.display = 'none';
+          }
+        }
+        
+        // 获取礼物数量
+        const giftCount = await apiService.getGiftCount().catch(() => 0);
+        const giftBadge = document.getElementById('giftBadge');
+        if (giftBadge) {
+          if (giftCount > 0) {
+            giftBadge.textContent = giftCount > 99 ? '99+' : giftCount;
+            giftBadge.style.display = 'block';
+          } else {
+            giftBadge.style.display = 'none';
+          }
+        }
+      } catch (error) {
+        console.error('加载通知数量失败:', error);
+      }
+    }
+
+    async function openAchievementPopup() {
+      const achievementContent = document.getElementById('achievementContent');
+      
+      // 显示加载状态
+      achievementContent.innerHTML = `
+        <div style="
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 40px 20px;
+          text-align: center;
+          background: rgba(30, 35, 55, 0.6);
+          border: 1px solid rgba(230, 199, 73, 0.3);
+          border-radius: 8px;
+          margin: 10px;
+        ">
+          <div style="font-size: 2.5rem; margin-bottom: 15px; animation: pulse 1.5s infinite; color: var(--gold-primary);">🔮</div>
+          <div style="color: var(--gold-primary); font-size: 1rem; font-weight: bold; margin-bottom: 8px;">成就数据加载中...</div>
+          <div style="color: var(--text-dim); font-size: 0.8rem;">正在查询您的修仙成就</div>
+        </div>
+      `;
+      
+      document.getElementById('achievementPopup').classList.add('active');
+      
+      try {
+        // 获取角色ID
+        const roleId = window.AuthService ? window.AuthService.getCurrentRoleId() : localStorage.getItem('currentRoleId');
+        // 从API获取成就数据
+        // 注意：这里需要根据实际的API endpoint进行调整
+        const achievements = await apiService.getAchievements(parseInt(roleId)).catch(() => []);
+        
+        if (achievements && Array.isArray(achievements) && achievements.length > 0) {
+          // 渲染成就列表
+          achievementContent.innerHTML = achievements.map(achievement => `
+            <div style="
+              background: ${achievement.completed ? 'rgba(76, 175, 80, 0.2)' : 'rgba(30, 35, 55, 0.6)'};
+              border: 1px solid ${achievement.completed ? 'var(--success)' : 'rgba(230, 199, 73, 0.3)'};
+              border-radius: 8px;
+              padding: 15px;
+              margin-bottom: 10px;
+            ">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <div style="font-weight: bold; color: ${achievement.completed ? 'var(--success)' : 'var(--gold-primary)'};">${achievement.title || '成就'}</div>
+                ${achievement.completed ? '<div style="font-size: 0.8rem; color: var(--success);">已完成</div>' : ''}
+              </div>
+              <div style="font-size: 0.9rem; color: var(--text-dim); margin-bottom: 10px;">${achievement.description || '成就描述'}</div>
+              <div style="margin-bottom: 10px;">
+                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 5px;">
+                  <span>进度</span>
+                  <span>${achievement.progress || 0}%</span>
+                </div>
+                <div style="height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+                  <div style="
+                    height: 100%;
+                    background: ${achievement.completed ? 'var(--success)' : 'var(--gold-primary)'};
+                    width: ${achievement.progress || 0}%;
+                    border-radius: 3px;
+                    transition: width 0.3s ease;
+                  "></div>
+                </div>
+              </div>
+              <div style="font-size: 0.8rem; color: var(--gold-dim);">奖励: ${achievement.reward || '无'}</div>
+              ${achievement.completed ? '<button class="popup-btn" onclick="claimAchievementReward(' + achievement.id + ')" style="margin-top: 10px; background: var(--success); color: white;">领取奖励</button>' : ''}
+            </div>
+          `).join('');
+        } else {
+          // 显示空成就状态
+          achievementContent.innerHTML = `
+            <div style="
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              padding: 40px 20px;
+              text-align: center;
+              background: rgba(30, 35, 55, 0.6);
+              border: 1px solid rgba(230, 199, 73, 0.3);
+              border-radius: 8px;
+              margin: 10px;
+            ">
+              <div style="font-size: 2.5rem; margin-bottom: 15px; color: var(--text-dim);">🏅</div>
+              <div style="color: var(--text-dim); font-size: 1rem; font-weight: bold; margin-bottom: 8px;">暂无成就</div>
+              <div style="color: var(--gold-dim); font-size: 0.8rem; line-height: 1.4;">继续修行，解锁更多成就</div>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('获取成就数据失败:', error);
+        // 显示错误状态
+        achievementContent.innerHTML = `
+          <div style="
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            text-align: center;
+            background: rgba(30, 35, 55, 0.6);
+            border: 1px solid rgba(230, 199, 73, 0.3);
+            border-radius: 8px;
+            margin: 10px;
+          ">
+            <div style="font-size: 2.5rem; margin-bottom: 15px; color: var(--text-dim);">🔮</div>
+            <div style="color: var(--text-dim); font-size: 1rem; font-weight: bold; margin-bottom: 8px;">成就数据获取失败</div>
+            <div style="color: var(--gold-dim); font-size: 0.8rem; line-height: 1.4;">请检查网络连接后重试</div>
+          </div>
+        `;
+      }
+    }
+    
+
+    
+    // 领取成就奖励
+    async function claimAchievementReward(achievementId) {
+      try {
+        showLoading();
+        const roleId = window.AuthService ? window.AuthService.getCurrentRoleId() : (localStorage.getItem('currentRoleId') || localStorage.getItem('roleId'));
+        // 调用领取成就奖励API
+        // 注意：这里需要根据实际的API endpoint进行调整
+        const result = await apiService.claimAchievementReward(achievementId, parseInt(roleId));
+        ErrorHandler.showSuccess('奖励领取成功！');
+        // 重新打开成就弹窗，显示更新后的状态
+        await openAchievementPopup();
+        // 重新加载用户数据
+        await renderUI();
+      } catch (error) {
+        ErrorHandler.handleApiError(error, '领取成就奖励');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    function closeAchievementPopup(e) {
+      if (!e || e.target === document.getElementById('achievementPopup')) {
+        document.getElementById('achievementPopup').classList.remove('active');
+      }
+    }
+
+    async function openSocialPopup() {
+      try {
+        showLoading('正在加载道友列表...');
+        const roleId = window.AuthService ? window.AuthService.getCurrentRoleId() : (localStorage.getItem('currentRoleId') || localStorage.getItem('roleId'));
+        
+        // 从API获取道友列表
+        const friendsData = await apiService.getFriends(roleId);
+        
+        // 处理后端返回的数据格式
+        const friends = friendsData.friends || friendsData;
+        
+        const socialContent = document.getElementById('socialContent');
+        
+        if (Array.isArray(friends) && friends.length > 0) {
+          let html = `
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+          `;
+          
+          friends.forEach(friend => {
+            html += `
+              <div style="
+                background: rgba(30, 35, 50, 0.6);
+                border: 1px solid rgba(230, 199, 73, 0.3);
+                border-radius: 8px;
+                padding: 12px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+              ">
+                <div style="font-size: 1.5rem;">👤</div>
+                <div style="flex: 1;">
+                  <div style="font-weight: bold; color: var(--gold-primary);">${friend.nickname || friend.username || friend.name || '道友'}</div>
+                  <div style="font-size: 0.8rem; color: var(--text-dim);">${friend.realm || '炼气期'}</div>
+                </div>
+                <button class="popup-btn" onclick="showFriendDetail(${friend.friendId || friend.id})" style="width: auto; padding: 5px 10px; font-size: 0.8rem;">查看</button>
+              </div>
+            `;
+          });
+          
+          html += `</div>`;
+          socialContent.innerHTML = html;
+        } else {
+          socialContent.innerHTML = `
+            <div style="text-align: center; padding: 30px; color: var(--text-dim);">
+              <div style="font-size: 2rem; margin-bottom: 10px;">🤝</div>
+              <div>暂无道友</div>
+              <div style="font-size: 0.8rem; margin-top: 10px;">通过完成任务、加入宗门或参与活动结识道友</div>
+            </div>
+          `;
+        }
+        
+        document.getElementById('socialPopup').classList.add('active');
+      } catch (error) {
+        console.error('加载道友列表失败:', error);
+        const socialContent = document.getElementById('socialContent');
+        socialContent.innerHTML = `
+          <div style="text-align: center; padding: 30px; color: var(--text-dim);">
+            <div style="font-size: 2rem; margin-bottom: 10px;">❌</div>
+            <div>加载失败</div>
+            <div style="font-size: 0.8rem; margin-top: 10px;">请检查网络连接后重试</div>
+          </div>
+        `;
+        document.getElementById('socialPopup').classList.add('active');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    function closeSocialPopup(e) {
+      if (!e || e.target === document.getElementById('socialPopup')) {
+        document.getElementById('socialPopup').classList.remove('active');
+      }
+    }
+
+    function showFriendDetail(friendId) {
+      // 这里可以实现查看道友详情的功能
+      showToast(`查看道友ID: ${friendId}的详情`);
+    }
+
+    function getItemIcon(type) {
+      switch(type) {
+        case '药品':
+        case '丹药':
+          return '💊';
+        case '武器':
+          return '⚔️';
+        case '防具':
+          return '🛡️';
+        case '材料':
+          return '⛏️';
+        case '货币':
+          return '💰';
+        case '书籍':
+          return '📚';
+        case '饰品':
+          return '💍';
+        default:
+          return '📦';
+      }
+    }
+
+    function showItemDetail(itemId) {
+      // 这里可以实现查看物品详情的功能
+      showToast(`查看物品ID: ${itemId}的详情`);
+    }
+
+    function getProductIcon(type) {
+      const iconMap = {
+        '丹药': '🧪',
+        '药品': '💊',
+        '装备': '⚔️',
+        '材料': '📦'
+      };
+      return iconMap[type] || '🛒';
+    }
+
+    async function buyProduct(productId) {
+      try {
+        showLoading('正在购买商品...');
+        const roleId = window.AuthService ? window.AuthService.getCurrentRoleId() : (localStorage.getItem('currentRoleId') || localStorage.getItem('roleId'));
+        
+        // 调用购买商品API
+        const result = await apiService.buyProduct(roleId, productId);
+        
+        showToast('购买成功！');
+        
+        // 重新加载商城商品
+        await openMallPopup();
+        
+        // 重新加载用户数据
+        await renderUI();
+      } catch (error) {
+        console.error('购买商品失败:', error);
+        showToast('购买失败，请稍后重试');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    function openSettingsPopup() {
+      document.getElementById('settingsPopup').classList.add('active');
+    }
+
+    function closeSettingsPopup(e) {
+      if (!e || e.target === document.getElementById('settingsPopup')) {
+        document.getElementById('settingsPopup').classList.remove('active');
+      }
+    }
+
+    async function openBackpackPopup() {
+      try {
+        showLoading('正在加载背包物品...');
+        const roleId = window.AuthService ? window.AuthService.getCurrentRoleId() : (localStorage.getItem('currentRoleId') || localStorage.getItem('roleId'));
+        
+        // 从API获取背包物品
+        const inventoryData = await apiService.getInventory(roleId);
+        
+        // 处理后端返回的数据格式
+        const inventory = inventoryData.items || inventoryData;
+        
+        const backpackContent = document.getElementById('backpackContent');
+        
+        if (Array.isArray(inventory) && inventory.length > 0) {
+          let html = `
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
+          `;
+          
+          inventory.forEach(item => {
+            html += `
+              <div style="
+                background: rgba(30, 35, 50, 0.6);
+                border: 1px solid rgba(230, 199, 73, 0.3);
+                border-radius: 8px;
+                padding: 10px;
+                text-align: center;
+                cursor: pointer;
+                transition: all 0.3s;
+              " onclick="showItemDetail(${item.id || item.itemId})" onmouseenter="this.style.background='rgba(230, 199, 73, 0.2)'" onmouseleave="this.style.background='rgba(30, 35, 50, 0.6)'">
+                <div style="font-size: 1.5rem; margin-bottom: 5px;">${getItemIcon(item.type || item.itemType)}</div>
+                <div style="font-size: 0.8rem; margin-bottom: 3px;">${item.name || '物品'}</div>
+                <div style="font-size: 0.7rem; color: var(--gold-primary);">x${item.count || item.stackSize || 1}</div>
+              </div>
+            `;
+          });
+          
+          html += `</div>`;
+          backpackContent.innerHTML = html;
+        } else {
+          backpackContent.innerHTML = `
+            <div style="text-align: center; padding: 30px; color: var(--text-dim);">
+              <div style="font-size: 2rem; margin-bottom: 10px;">🎒</div>
+              <div>背包为空</div>
+              <div style="font-size: 0.8rem; margin-top: 10px;">通过任务、探索或购买获取物品</div>
+            </div>
+          `;
+        }
+        
+        document.getElementById('backpackPopup').classList.add('active');
+      } catch (error) {
+        console.error('加载背包物品失败:', error);
+        const backpackContent = document.getElementById('backpackContent');
+        backpackContent.innerHTML = `
+          <div style="text-align: center; padding: 30px; color: var(--text-dim);">
+            <div style="font-size: 2rem; margin-bottom: 10px;">❌</div>
+            <div>加载失败</div>
+            <div style="font-size: 0.8rem; margin-top: 10px;">请检查网络连接后重试</div>
+          </div>
+        `;
+        document.getElementById('backpackPopup').classList.add('active');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    function closeBackpackPopup(e) {
+      if (!e || e.target === document.getElementById('backpackPopup')) {
+        document.getElementById('backpackPopup').classList.remove('active');
+      }
+    }
+
+    // 通用弹窗关闭函数
+    function closeModal(id) {
+      const modal = document.getElementById(id);
+      if (modal) {
+        modal.classList.remove('active');
+      }
+    }
+
+    // 通用弹窗打开函数
+    function openModal(id) {
+      const modal = document.getElementById(id);
+      if (modal) {
+        modal.classList.add('active');
+      }
+    }
+
+    // --- 初始化 --- 
+    window.addEventListener('DOMContentLoaded', function() { 
+      loadCurrentBackground(); 
+      renderServerList(); 
+      loadSettings(); 
+      loadCurrentAccount(); 
+    }); 
+
+    // --- 账号管理逻辑 --- 
+    function loadCurrentAccount() { 
+      const username = localStorage.getItem('username'); 
+      const phone = localStorage.getItem('phone'); 
+      const nickname = localStorage.getItem('nickname'); 
+      
+      let accountText = '未登录'; 
+      if (nickname) { 
+        accountText = nickname; 
+      } else if (username) { 
+        accountText = username; 
+      } else if (phone) { 
+        accountText = phone; 
+      } 
+      
+      document.getElementById('currentAccount').textContent = accountText;
+      document.getElementById('settingsCurrentAccount').textContent = accountText; 
+      
+      // 加载绑定的手机号 
+      if (phone) { 
+        const maskedPhone = phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2'); 
+        document.getElementById('boundAccount').textContent = `手机：${maskedPhone}`; 
+      } 
+    } 
+
+    function openSwitchAccountModal() { 
+      document.getElementById('switchAccountModal').classList.add('active'); 
+    } 
+
+    function confirmSwitchAccount() { 
+      closeModal('switchAccountModal'); 
+      showToast('正在退出当前账号...'); 
+      
+      // 清除角色相关数据，但保留用户登录信息 
+      localStorage.removeItem('currentRoleId'); 
+      localStorage.removeItem('selectedCharacterId'); 
+      localStorage.removeItem('character'); 
+      
+      setTimeout(() => { 
+        showToast('已切换账号，即将跳转至登录页'); 
+        setTimeout(() => { 
+          window.location.href = '../login.html'; 
+        }, 1500); 
+      }, 1000); 
+    } 
+
+    // --- 退出登录逻辑 --- 
+    function openLogoutModal() { 
+      document.getElementById('logoutModal').classList.add('active'); 
+    } 
+
+    function confirmLogout() { 
+      closeModal('logoutModal'); 
+      showToast('正在退出登录...'); 
+      
+      // 清除所有用户数据 
+      localStorage.removeItem('userId'); 
+      localStorage.removeItem('username'); 
+      localStorage.removeItem('nickname'); 
+      localStorage.removeItem('phone'); 
+      localStorage.removeItem('currentRoleId'); 
+      localStorage.removeItem('selectedCharacterId'); 
+      localStorage.removeItem('character'); 
+      
+      setTimeout(() => { 
+        showToast('已退出登录，即将跳转至登录页'); 
+        setTimeout(() => { 
+          window.location.href = '../login.html'; 
+        }, 1500); 
+      }, 1000); 
+    } 
+
+    // --- 服务器管理逻辑 --- 
+
+    function renderServerList() { 
+      const list = document.getElementById('serverList'); 
+      list.innerHTML = ''; 
+      
+      servers.forEach(server => { 
+        const div = document.createElement('div'); 
+        div.className = `server-option ${server.id === currentServerId ? 'selected' : ''}`; 
+        div.onclick = () => selectServer(server.id); 
+        div.innerHTML = ` 
+          <span>${server.name}</span> 
+          <div style="display:flex; align-items:center; gap:8px;"> 
+            <span style="font-size:0.8rem; color:${server.status==='新区'?'#f4d03f':'#4caf50'}">${server.status}</span> 
+            ${server.id === currentServerId ? '<span class="server-status"></span>' : ''} 
+          </div> 
+        `; 
+        list.appendChild(div); 
+      }); 
+    } 
+
+    function openServerModal() { 
+      renderServerList(); 
+      document.getElementById('serverModal').classList.add('active'); 
+    } 
+
+    function selectServer(id) { 
+      currentServerId = id; 
+      const server = servers.find(s => s.id === id); 
+      document.getElementById('currentServer').textContent = server.name; 
+      // 不立即关闭，让用户点击确认按钮 
+      renderServerList(); 
+    } 
+
+    function confirmServerSelect() { 
+      const server = servers.find(s => s.id === currentServerId); 
+      closeModal('serverModal'); 
+      showToast(`已切换至服务器：${server.name}`); 
+      localStorage.setItem('currentServerId', currentServerId); 
+      // 这里可以添加实际的重连逻辑 
+    } 
+
+    // --- 语言设置逻辑 --- 
+    function toggleLanguage() { 
+      isChinese = !isChinese; 
+      const langText = isChinese ? '简体中文' : 'English'; 
+      document.getElementById('currentLang').textContent = langText; 
+      showToast(`语言已切换为：${langText}`); 
+      localStorage.setItem('gameLanguage', isChinese ? 'zh' : 'en'); 
+    }
+
+    // --- BGM设置逻辑 --- 
+    function toggleBGM() {
+      bgmEnabled = !bgmEnabled;
+      ErrorHandler.showInfo(bgmEnabled ? '背景音乐已开启' : '背景音乐已关闭');
+    }
+
+    // --- 显示Toast提示 --- 
+    function showToast(message) {
+      const toastModal = document.getElementById('toastModal');
+      const toastMessage = document.getElementById('toastMessage');
+      
+      toastMessage.textContent = message;
+      toastModal.classList.add('active');
+      
+      setTimeout(() => {
+        toastModal.classList.remove('active');
+      }, 2000);
+    }
+
+    // --- 加载设置 --- 
+    function loadSettings() {
+      // 加载服务器设置
+      const savedServerId = localStorage.getItem('currentServerId');
+      if (savedServerId) {
+        currentServerId = parseInt(savedServerId);
+        const server = servers.find(s => s.id === currentServerId);
+        if (server && document.getElementById('currentServer')) {
+          document.getElementById('currentServer').textContent = server.name;
+        }
+      }
+      
+      // 加载语言设置
+      const savedLanguage = localStorage.getItem('gameLanguage');
+      if (savedLanguage) {
+        isChinese = savedLanguage === 'zh';
+        const langText = isChinese ? '简体中文' : 'English';
+        if (document.getElementById('currentLang')) {
+          document.getElementById('currentLang').textContent = langText;
+        }
+      }
+    }
+
+    // --- 加载背景 --- 
+    function loadCurrentBackground() {
+      // 可以在这里添加背景加载逻辑
+    }
+
+    function openCustomAmountPopup() {
+      // 自定义充值金额
+    }
+
+    function buyCard(type) {
+      // 购买月卡/季卡
+    }
+
+    function formatNumber(num) {
+      if (num >= 100000000) {
+        return (num / 100000000).toFixed(2) + ' 亿';
+      } else if (num >= 10000) {
+        return (num / 10000).toFixed(2) + 'w';
+      }
+      return num.toString();
+    }
+
+    // 显示加载状态
+    function showLoading(text = '加载中...') {
+      // 创建加载指示器
+      const loadingOverlay = document.createElement('div');
+      loadingOverlay.id = 'loadingOverlay';
+      loadingOverlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        backdrop-filter: blur(3px);
+      `;
+      
+      const loadingContent = document.createElement('div');
+      loadingContent.style.cssText = `
+        text-align: center;
+        color: var(--gold-primary);
+      `;
+      
+      const loadingIcon = document.createElement('div');
+      loadingIcon.style.cssText = `
+        font-size: 3rem;
+        animation: pulse 1.5s infinite;
+        margin-bottom: 10px;
+      `;
+      loadingIcon.textContent = '⏳';
+      
+      const loadingText = document.createElement('div');
+      loadingText.style.cssText = `
+        font-size: 1rem;
+        font-weight: bold;
+      `;
+      loadingText.textContent = text;
+      
+      loadingContent.appendChild(loadingIcon);
+      loadingContent.appendChild(loadingText);
+      loadingOverlay.appendChild(loadingContent);
+      document.body.appendChild(loadingOverlay);
+    }
+
+    // 隐藏加载状态
+    function hideLoading() {
+      const loadingOverlay = document.getElementById('loadingOverlay');
+      if (loadingOverlay) {
+        loadingOverlay.remove();
+      }
+    }
+
+    // 从角色详情接口获取数据（备用方案）
+    async function renderRoleDetail(roleId) {
+      showLoading();
+      
+      try {
+        console.log('开始获取角色详情 (ID: {})...', roleId);
+        
+        // 使用 getUserProfile 获取角色详情
+        const roleResponse = await apiService.getUserProfile(parseInt(roleId));
+        const role = roleResponse && roleResponse.data ? roleResponse.data : roleResponse;
+        
+        console.log('角色详情响应:', roleResponse);
+        console.log('角色详情:', role);
+        
+        if (!role) {
+          throw new Error('获取角色详情失败');
+        }
+        
+        // 确保境界信息不为null
+        if (!role.realm) {
+          role.realm = '凡人';
+        }
+        if (!role.bodyLevel) {
+          role.bodyLevel = '凡人';
+        }
+        
+        // 渲染角色信息
+        document.getElementById('charName').textContent = role.roleName || role.name || '未知';
+        document.getElementById('charLevel').textContent = role.realm || '凡人';
+        const charAvatar = document.getElementById('charAvatar');
+        // 使用统一工具设置头像（根据灵根）
+        window.GameUtils.setAvatar(charAvatar, role.spiritRoot);
+        charAvatar.onclick = function() {
+          window.location.href = 'character/character.html';
+        };
+        
+        // 渲染修炼状态
+        document.getElementById('immortalLevel').textContent = role.realm || '凡人';
+        
+        // 渲染锻体状态
+        document.getElementById('bodyLevel').textContent = role.bodyLevel || '凡人';
+        
+        // 从 API 获取资源数据
+        try {
+          // 获取资产数据
+          const assetsResponse = await apiService.getAssets(parseInt(roleId));
+          const assets = assetsResponse || [];
+          
+          // 获取角色详情数据（用于寿命显示）
+          const roleDetailResponse = await apiService.getRoleById(parseInt(roleId));
+          
+          console.log('资产响应:', assetsResponse);
+          console.log('资产数据:', assets);
+          console.log('角色详情响应:', roleDetailResponse);
+          
+          if (assets && Array.isArray(assets)) {
+            // 构建资源映射
+            const assetMap = {};
+            assets.forEach(asset => {
+              console.log('处理资产:', asset);
+              // 后端返回的是扁平化结构，使用 assetTypeCode 来判断资产类型
+              if (asset.assetTypeCode === 'LINGSHI') {
+                assetMap['LINGSHI'] = asset.quantity || 0;
+                console.log('找到灵石资产:', asset.quantity);
+              } else if (asset.assetTypeCode === 'XIANSHI') {
+                assetMap['XIANSHI'] = asset.quantity || 0;
+                console.log('找到仙石资产:', asset.quantity);
+              }
+            });
+            
+            // 获取寿命数据（优先使用角色详情中的 age/maxAge）
+            let lifespanText = '---';
+            if (roleDetailResponse && roleDetailResponse.age !== undefined && roleDetailResponse.maxAge !== undefined) {
+              lifespanText = `${roleDetailResponse.age}/${roleDetailResponse.maxAge}`;
+            } else {
+              // 如果角色详情中没有寿命数据，尝试从资产中获取
+              const lifespanAsset = assets.find(asset => asset.assetTypeCode === 'SHOUMING');
+              if (lifespanAsset && lifespanAsset.quantity) {
+                lifespanText = `0/${lifespanAsset.quantity}`;
+              }
+            }
+            
+            console.log('资产映射:', assetMap);
+            console.log('寿命显示:', lifespanText);
+            
+            // 渲染资源数据
+            const resGrid = document.getElementById('resourcesGrid');
+            if (resGrid) {
+              resGrid.innerHTML = `
+                <div class="resources-row">
+                  <div class="resource-item">
+                    <span class="res-icon">💰</span>
+                    <span class="res-label">灵石</span>
+                    <span class="res-value">${assetMap.LINGSHI !== undefined ? formatNumber(assetMap.LINGSHI) : '---'}</span>
+                    <span class="res-add" onclick="showResourcePopup('lingshi')">➕</span>
+                  </div>
+                  <div class="resource-item">
+                    <span class="res-icon">💎</span>
+                    <span class="res-label">仙石</span>
+                    <span class="res-value">${assetMap.XIANSHI !== undefined ? formatNumber(assetMap.XIANSHI) : '---'}</span>
+                    <span class="res-add" onclick="showResourcePopup('xianshi')">➕</span>
+                  </div>
+                </div>
+                <div class="resources-row">
+                  <div class="resource-item" style="flex: 0 0 calc(50% - 6px);">
+                    <span class="res-icon">⏰</span>
+                    <span class="res-label">寿命</span>
+                    <span class="res-value">${lifespanText}</span>
+                    <span class="res-add" onclick="showResourcePopup('shouming')">➕</span>
+                  </div>
+                </div>
+              `;
+            }
+          } else {
+            // 显示空资源状态
+            const resGrid = document.getElementById('resourcesGrid');
+            if (resGrid) {
+              resGrid.innerHTML = `
+                <div class="resource-item"><span class="res-icon">💰</span><span class="res-label">灵石</span><span class="res-value">---</span></div>
+                <div class="resource-item"><span class="res-icon">💎</span><span class="res-label">仙石</span><span class="res-value">---</span></div>
+                <div class="resource-item"><span class="res-icon">⏰</span><span class="res-label">寿命</span><span class="res-value">---</span></div>
+              `;
+            }
+          }
+        } catch (e) {
+          console.warn('获取资源数据失败:', e);
+          // 显示错误状态
+          const resGrid = document.getElementById('resourcesGrid');
+          if (resGrid) {
+            resGrid.innerHTML = `
+              <div class="resource-item"><span class="res-icon">💰</span><span class="res-label">灵石</span><span class="res-value">---</span></div>
+              <div class="resource-item"><span class="res-icon">💎</span><span class="res-label">仙石</span><span class="res-value">---</span></div>
+              <div class="resource-item"><span class="res-icon">⏰</span><span class="res-label">寿命</span><span class="res-value">---</span></div>
+            `;
+          }
+        }
+        
+        // 从 API 获取仙途快讯数据
+        await loadXiantuNews();
+        
+        // 获取邮件和礼物数量
+        await loadNotificationCounts();
+        
+        console.log('数据加载完成');
+        
+        hideLoading();
+      } catch (error) {
+        console.error('获取角色详情失败:', error);
+        handleApiError(error);
+        hideLoading();
+      }
+    }
+
+    function showDefaultPage() {
+      // 显示默认页面（未登录状态）
+      console.log('显示默认页面');
+      // 不执行任何操作，页面会显示默认内容
+    }
+
+    function showResourcePopup(resourceType) {
+      let title = '';
+      let icon = '';
+      let content = '';
+      
+      if (resourceType === 'lingshi') {
+        title = '灵石获取';
+        icon = '💰';
+        content = `
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:linear-gradient(135deg,rgba(230,199,73,0.08),rgba(30,35,55,0.6));border:1px solid rgba(230,199,73,0.25);border-radius:10px;">
+              <span style="font-size:1.4rem;width:36px;text-align:center;flex-shrink:0;">📋</span>
+              <div style="flex:1;min-width:0;">
+                <div style="font-weight:bold;color:var(--gold-primary);font-size:0.9rem;">每日签到</div>
+                <div style="font-size:0.75rem;color:var(--text-dim);margin-top:2px;">每日签到可获得灵石奖励</div>
+              </div>
+              <span style="font-size:0.7rem;color:var(--gold-dim);white-space:nowrap;">+50~2000</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:linear-gradient(135deg,rgba(230,199,73,0.08),rgba(30,35,55,0.6));border:1px solid rgba(230,199,73,0.25);border-radius:10px;">
+              <span style="font-size:1.4rem;width:36px;text-align:center;flex-shrink:0;">🏆</span>
+              <div style="flex:1;min-width:0;">
+                <div style="font-weight:bold;color:var(--gold-primary);font-size:0.9rem;">任务奖励</div>
+                <div style="font-size:0.75rem;color:var(--text-dim);margin-top:2px;">完成日常任务获得灵石</div>
+              </div>
+              <span style="font-size:0.7rem;color:var(--gold-dim);white-space:nowrap;">+100~500</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:linear-gradient(135deg,rgba(230,199,73,0.08),rgba(30,35,55,0.6));border:1px solid rgba(230,199,73,0.25);border-radius:10px;">
+              <span style="font-size:1.4rem;width:36px;text-align:center;flex-shrink:0;">🌌</span>
+              <div style="flex:1;min-width:0;">
+                <div style="font-weight:bold;color:var(--gold-primary);font-size:0.9rem;">仙途探索</div>
+                <div style="font-size:0.75rem;color:var(--text-dim);margin-top:2px;">探索秘境获取灵石</div>
+              </div>
+              <span style="font-size:0.7rem;color:var(--gold-dim);white-space:nowrap;">+200~1000</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:linear-gradient(135deg,rgba(230,199,73,0.08),rgba(30,35,55,0.6));border:1px solid rgba(230,199,73,0.25);border-radius:10px;">
+              <span style="font-size:1.4rem;width:36px;text-align:center;flex-shrink:0;">🏯</span>
+              <div style="flex:1;min-width:0;">
+                <div style="font-weight:bold;color:var(--gold-primary);font-size:0.9rem;">宗门贡献</div>
+                <div style="font-size:0.75rem;color:var(--text-dim);margin-top:2px;">宗门贡献兑换灵石</div>
+              </div>
+              <span style="font-size:0.7rem;color:var(--gold-dim);white-space:nowrap;">+50~300</span>
+            </div>
+          </div>
+        `;
+      } else if (resourceType === 'xianshi') {
+        title = '仙石购买';
+        icon = '💎';
+        const packs = [
+          { price: 6, amount: 100, bonus: '', tag: '' },
+          { price: 18, amount: 300, bonus: '', tag: '' },
+          { price: 28, amount: 500, bonus: '+30', tag: '热销' },
+          { price: 38, amount: 700, bonus: '+50', tag: '' },
+          { price: 58, amount: 1000, bonus: '+100', tag: '超值' },
+          { price: 128, amount: 2500, bonus: '+300', tag: '至尊' },
+        ];
+        content = `
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            ${packs.map(p => `
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:linear-gradient(135deg,rgba(230,199,73,0.08),rgba(30,35,55,0.6));border:1px solid rgba(230,199,73,0.25);border-radius:10px;position:relative;${p.tag ? 'border-color:rgba(230,199,73,0.5);' : ''}">
+                ${p.tag ? `<span style="position:absolute;top:-1px;right:10px;font-size:0.6rem;background:linear-gradient(90deg,var(--gold-primary),var(--gold-light));color:#000;padding:1px 8px;border-radius:0 0 6px 6px;font-weight:bold;">${p.tag}</span>` : ''}
+                <div style="width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,rgba(230,199,73,0.2),rgba(230,199,73,0.05));border:1px solid rgba(230,199,73,0.3);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;">💎</div>
+                <div style="flex:1;min-width:0;">
+                  <div style="font-weight:bold;color:var(--gold-primary);font-size:0.9rem;">${p.amount}仙石${p.bonus ? `<span style="font-size:0.7rem;color:#4CAF50;margin-left:4px;">${p.bonus}</span>` : ''}</div>
+                  <div style="font-size:0.75rem;color:var(--text-dim);margin-top:2px;">¥${p.price}</div>
+                </div>
+                <button onclick="buyXianshi(${p.price})" style="flex-shrink:0;padding:6px 14px;background:linear-gradient(135deg,rgba(230,199,73,0.3),rgba(230,199,73,0.1));border:1px solid var(--gold-primary);color:var(--gold-primary);border-radius:6px;font-size:0.8rem;font-weight:bold;cursor:pointer;transition:all 0.2s;" onmouseenter="this.style.background='rgba(230,199,73,0.4)';this.style.boxShadow='0 0 10px rgba(230,199,73,0.4)'" onmouseleave="this.style.background='linear-gradient(135deg,rgba(230,199,73,0.3),rgba(230,199,73,0.1))';this.style.boxShadow='none'">购买</button>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      } else if (resourceType === 'shouming') {
+        title = '寿命信息';
+        icon = '⏰';
+        content = `
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:linear-gradient(135deg,rgba(230,199,73,0.08),rgba(30,35,55,0.6));border:1px solid rgba(230,199,73,0.25);border-radius:10px;">
+              <span style="font-size:1.4rem;width:36px;text-align:center;flex-shrink:0;">⏰</span>
+              <div style="flex:1;min-width:0;">
+                <div style="font-weight:bold;color:var(--gold-primary);font-size:0.9rem;">寿命用途</div>
+                <div style="font-size:0.75rem;color:var(--text-dim);margin-top:2px;">修炼、探索、战斗均消耗寿命</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:linear-gradient(135deg,rgba(76,175,80,0.08),rgba(30,35,55,0.6));border:1px solid rgba(76,175,80,0.25);border-radius:10px;">
+              <span style="font-size:1.4rem;width:36px;text-align:center;flex-shrink:0;">💊</span>
+              <div style="flex:1;min-width:0;">
+                <div style="font-weight:bold;color:#4CAF50;font-size:0.9rem;">增加途径</div>
+                <div style="font-size:0.75rem;color:var(--text-dim);margin-top:2px;">使用延寿丹药、突破境界</div>
+              </div>
+              <span style="font-size:0.7rem;color:#4CAF50;white-space:nowrap;">↑ 增加</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:linear-gradient(135deg,rgba(255,68,68,0.08),rgba(30,35,55,0.6));border:1px solid rgba(255,68,68,0.25);border-radius:10px;">
+              <span style="font-size:1.4rem;width:36px;text-align:center;flex-shrink:0;">🧘</span>
+              <div style="flex:1;min-width:0;">
+                <div style="font-weight:bold;color:#ff6b6b;font-size:0.9rem;">消耗原因</div>
+                <div style="font-size:0.75rem;color:var(--text-dim);margin-top:2px;">修炼和探索消耗寿命</div>
+              </div>
+              <span style="font-size:0.7rem;color:#ff6b6b;white-space:nowrap;">↓ 减少</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:linear-gradient(135deg,rgba(230,199,73,0.08),rgba(30,35,55,0.6));border:1px solid rgba(230,199,73,0.25);border-radius:10px;">
+              <span style="font-size:1.4rem;width:36px;text-align:center;flex-shrink:0;">⚠️</span>
+              <div style="flex:1;min-width:0;">
+                <div style="font-weight:bold;color:var(--gold-primary);font-size:0.9rem;">寿命耗尽</div>
+                <div style="font-size:0.75rem;color:var(--text-dim);margin-top:2px;">寿命归零将导致角色死亡</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      
+      showResourceCustomPopup(title, icon, content);
+    }
+
+    function showResourceCustomPopup(title, icon, content) {
+      const overlay = document.getElementById('popupOverlay');
+      const popupContent = overlay.querySelector('.popup-content');
+      popupContent.style.maxWidth = '360px';
+      popupContent.style.maxHeight = '80vh';
+      popupContent.style.overflowY = 'auto';
+      
+      document.getElementById('popupTitle').innerHTML = `<span style="margin-right:6px;">${icon}</span>${title}`;
+      document.getElementById('popupBody').innerHTML = content;
+      document.getElementById('popupOverlay').classList.add('active');
+    }
+
+    function buyXianshi(amount) {
+      // 这里可以实现实际的购买逻辑
+      console.log('购买仙石:', amount, '元');
+      // 关闭弹窗
+      closePopup();
+      // 显示购买成功提示
+      ErrorHandler.showSuccess(`购买${amount}元仙石成功！`);
+      // 重新加载资源数据
+      setTimeout(() => renderUI(), 1000);
+    }
+
+    async function renderUI() {
+      // 检查是否有 token
+      const token = localStorage.getItem('token');
+      console.log('Token:', token ? '存在' : '不存在');
+      if (!token) {
+        console.log('未找到 token，但不强制跳转');
+        // 不跳转，允许用户浏览
+        // showToast('请先登录', 'warning');
+      }
+      
+      // 获取用户 ID（不是角色 ID）
+      const userId = localStorage.getItem('userId') || localStorage.getItem('currentUserId');
+      console.log('用户 ID:', userId);
+      console.log('LocalStorage 内容:', localStorage);
+      
+      if (!userId) {
+        console.warn('未找到用户 ID，尝试使用角色 ID');
+        // 如果没有用户 ID，尝试使用角色 ID
+        const roleId = window.AuthService ? window.AuthService.getCurrentRoleId() : (localStorage.getItem('currentRoleId') || localStorage.getItem('roleId'));
+        if (roleId) {
+          // 从角色详情接口获取数据
+          await renderRoleDetail(roleId);
+          return;
+        } else {
+          console.error('未找到用户 ID 和角色 ID，显示默认页面');
+          // 不跳转，显示默认页面
+          showDefaultPage();
+          return;
+        }
+      }
+      
+      // 显示加载状态
+      showLoading();
+      
+      try {
+        console.log('开始获取角色数据...');
+        
+        // 使用统一 API 获取用户的所有角色
+        let roles = [];
+        try {
+          const roleResponse = await apiService.getRole(parseInt(userId));
+          roles = Array.isArray(roleResponse) ? roleResponse : [];
+          console.log('角色响应:', roleResponse);
+          console.log('角色列表:', roles);
+        } catch (error) {
+          console.warn('获取用户角色失败，尝试获取所有角色:', error);
+          // 备用方案：获取所有角色
+          const allRolesResponse = await apiService.get('/role/all');
+          roles = Array.isArray(allRolesResponse) ? allRolesResponse : [];
+          console.log('所有角色响应:', allRolesResponse);
+          console.log('所有角色列表:', roles);
+        }
+        
+        // 检查是否是错误响应
+        if (!roles || !Array.isArray(roles) || roles.length === 0) {
+          console.warn('获取角色列表失败，使用角色详情接口作为备用');
+          // 使用角色详情接口作为备用
+          const defaultRoleId = window.getRoleId ? window.getRoleId() : localStorage.getItem('currentRoleId');
+          if (defaultRoleId) await renderRoleDetail(String(defaultRoleId));
+          return;
+        }
+        
+        // 获取第一个角色（或根据 currentRoleId 选择）
+        const currentRoleId = localStorage.getItem('currentRoleId');
+        let role = roles[0];
+        if (currentRoleId) {
+          const found = roles.find(r => r.id == currentRoleId);
+          if (found) role = found;
+        }
+        
+        console.log('当前角色:', role);
+        
+        // 获取完整的角色详情，包含境界信息
+        try {
+          const roleDetailResponse = await apiService.getRoleById(role.id);
+          const roleDetail = roleDetailResponse;
+          console.log('角色详情响应:', roleDetailResponse);
+          console.log('角色详情:', roleDetail);
+          // 使用完整的角色详情数据
+          role = roleDetail;
+        } catch (error) {
+          console.warn('获取角色详情失败，使用基本信息:', error);
+          // 继续使用基本信息
+        }
+        
+        // 确保境界信息不为null
+        if (!role.realm) {
+          role.realm = '凡人';
+        }
+        if (!role.bodyLevel) {
+          role.bodyLevel = '凡人';
+        }
+        
+        // 渲染角色信息
+        document.getElementById('charName').textContent = role.roleName || role.name || '未知';
+        document.getElementById('charLevel').textContent = role.realm || '凡人';
+        const charAvatar = document.getElementById('charAvatar');
+        // 使用统一工具设置头像（根据灵根）
+        window.GameUtils.setAvatar(charAvatar, role.spiritRoot);
+        charAvatar.onclick = function() {
+          window.location.href = 'character/character.html';
+        };
+        
+        // 从 API 获取资源数据
+        try {
+          // 获取资产数据
+          const response = await apiService.getAssets(parseInt(role.id));
+          const assets = response || [];
+          
+          // 获取角色详情数据（用于寿命显示）
+          const roleDetailResponse = await apiService.getRoleById(parseInt(role.id));
+          
+          console.log('资产响应:', response);
+          console.log('资产数据:', assets);
+          console.log('角色详情响应:', roleDetailResponse);
+          
+          if (assets && Array.isArray(assets)) {
+            // 构建资源映射
+            const assetMap = {};
+            assets.forEach(asset => {
+              console.log('资产数据:', asset);
+              // 后端返回的是扁平化结构，使用 assetTypeCode 来判断资产类型
+              if (asset.assetTypeCode === 'LINGSHI') {
+                assetMap['LINGSHI'] = asset.quantity || 0;
+                console.log('找到灵石资产:', asset.quantity);
+              } else if (asset.assetTypeCode === 'XIANSHI') {
+                assetMap['XIANSHI'] = asset.quantity || 0;
+                console.log('找到仙石资产:', asset.quantity);
+              }
+            });
+            
+            // 获取寿命数据（优先使用角色详情中的 age/maxAge）
+            let lifespanText = '---';
+            if (roleDetailResponse && roleDetailResponse.age !== undefined && roleDetailResponse.maxAge !== undefined) {
+              lifespanText = `${roleDetailResponse.age}/${roleDetailResponse.maxAge}`;
+            } else if (role.age !== undefined && role.maxAge !== undefined) {
+              // 如果角色详情中没有寿命数据，尝试从当前角色对象中获取
+              lifespanText = `${role.age}/${role.maxAge}`;
+            } else {
+              // 如果都没有，尝试从资产中获取
+              const lifespanAsset = assets.find(asset => asset.assetTypeCode === 'SHOUMING');
+              if (lifespanAsset && lifespanAsset.quantity) {
+                lifespanText = `0/${lifespanAsset.quantity}`;
+              }
+            }
+            
+            console.log('资产映射:', assetMap);
+            console.log('寿命显示:', lifespanText);
+            
+            // 渲染资源数据
+            const resGrid = document.getElementById('resourcesGrid');
+            if (resGrid) {
+              resGrid.innerHTML = `
+                <div class="resources-row">
+                  <div class="resource-item">
+                    <span class="res-icon">💰</span>
+                    <span class="res-label">灵石</span>
+                    <span class="res-value">${formatNumber(assetMap.LINGSHI || 0)}</span>
+                    <span class="res-add" onclick="showResourcePopup('lingshi')">➕</span>
+                  </div>
+                  <div class="resource-item">
+                    <span class="res-icon">💎</span>
+                    <span class="res-label">仙石</span>
+                    <span class="res-value">${formatNumber(assetMap.XIANSHI || 0)}</span>
+                    <span class="res-add" onclick="showResourcePopup('xianshi')">➕</span>
+                  </div>
+                </div>
+                <div class="resources-row">
+                  <div class="resource-item" style="flex: 0 0 calc(50% - 6px);">
+                    <span class="res-icon">⏰</span>
+                    <span class="res-label">寿命</span>
+                    <span class="res-value">${lifespanText}</span>
+                    <span class="res-add" onclick="showResourcePopup('shouming')">➕</span>
+                  </div>
+                </div>
+              `;
+            }
+          } else {
+            // 显示空资源状态
+            const resGrid = document.getElementById('resourcesGrid');
+            if (resGrid) {
+              resGrid.innerHTML = `
+                <div class="resource-item"><span class="res-icon">💰</span><span class="res-label">灵石</span><span class="res-value">0</span></div>
+                <div class="resource-item"><span class="res-icon">💎</span><span class="res-label">仙石</span><span class="res-value">0</span></div>
+                <div class="resource-item"><span class="res-icon">⏰</span><span class="res-label">寿命</span><span class="res-value">---</span></div>
+              `;
+            }
+          }
+        } catch (assetError) {
+          console.error('获取资源数据失败:', assetError);
+          // 显示错误状态
+          const resGrid = document.getElementById('resourcesGrid');
+          if (resGrid) {
+            resGrid.innerHTML = `
+              <div class="resource-item"><span class="res-icon">💰</span><span class="res-label">灵石</span><span class="res-value">0</span></div>
+              <div class="resource-item"><span class="res-icon">💎</span><span class="res-label">仙石</span><span class="res-value">0</span></div>
+              <div class="resource-item"><span class="res-icon">⏰</span><span class="res-label">寿命</span><span class="res-value">---</span></div>
+            `;
+          }
+        }
+        
+        // 渲染修炼状态
+        document.getElementById('immortalLevel').textContent = role.realm || '凡人';
+        
+        // 渲染锻体状态
+        document.getElementById('bodyLevel').textContent = role.bodyLevel || '凡人';
+        
+        // 从 API 获取仙途快讯数据
+        await loadXiantuNews();
+        
+        // 获取邮件和礼物数量
+        await loadNotificationCounts();
+        
+        console.log('数据加载完成');
+        // 不显示成功提示，避免打扰用户
+        
+      } catch (error) {
+        console.error('获取数据失败:', error);
+        ErrorHandler.handleApiError(error, '获取数据');
+        
+        // 显示默认数据作为 fallback
+        const defaultRole = {
+          name: "李逍遥",
+          realm: "筑基初期"
+        };
+        
+        document.getElementById('charName').textContent = defaultRole.name;
+        document.getElementById('charLevel').textContent = defaultRole.realm;
+        
+        // 使用默认资源数据
+        const resGrid = document.getElementById('resourcesGrid');
+        if (resGrid) {
+          resGrid.innerHTML = `
+            <div class="resource-item"><span class="res-icon">💰</span><span class="res-label">灵石</span><span class="res-value">0</span></div>
+            <div class="resource-item"><span class="res-icon">💎</span><span class="res-label">仙石</span><span class="res-value">0</span></div>
+            <div class="resource-item"><span class="res-icon">⏰</span><span class="res-label">寿命</span><span class="res-value">0</span></div>
+          `;
+        }
+        
+        document.getElementById('immortalLevel').textContent = '凡人';
+        // 移除消耗显示
+        document.getElementById('bodyLevel').textContent = '凡人';
+        // 移除消耗显示
+        
+        // 加载默认的仙途快讯
+        await loadXiantuNews();
+        
+      } finally {
+        // 隐藏加载状态
+        hideLoading();
+      }
+    }
+    
+
+
+    // 页面加载时验证登录状态
+    function initPage() {
+      return new Promise(async (resolve, reject) => {
+        try {
+          // 检查是否有 token
+          const token = localStorage.getItem('token');
+          const userId = localStorage.getItem('userId');
+          
+          if (token && userId) {
+            console.log('检测到登录信息，验证 Token 有效性...');
+            
+            // 验证 token 是否有效
+            const isValid = await window.LoginManager.validateToken();
+            
+            if (!isValid) {
+              console.warn('Token 已过期或无效，但不清除数据');
+              // 不清除数据，允许用户继续使用
+              // 只是某些需要认证的功能会失败
+              
+              // 显示警告提示
+              if (window.uiUtils && typeof window.uiUtils.showToast === 'function') {
+                window.uiUtils.showToast('登录已过期，部分功能可能不可用', 'warning');
+              }
+              
+              // 不跳转，让用户自己决定
+              resolve();
+              return;
+            }
+            
+            console.log('Token 验证成功，加载页面...');
+          }
+          
+          // 渲染页面
+          await renderUI();
+          resolve();
+        } catch (error) {
+          console.error('页面初始化失败:', error);
+          hideLoading();
+          reject(error);
+        }
+      });
+    }
+
+    // 在 DOM 内容加载完成后执行
+    document.addEventListener('DOMContentLoaded', async () => {
+      // 等待所有脚本加载完成
+      await new Promise(resolve => {
+        const checkScriptsLoaded = () => {
+          if (window.apiService) {
+            resolve();
+          } else {
+            setTimeout(checkScriptsLoaded, 100);
+          }
+        };
+        checkScriptsLoaded();
+      });
+      
+      // 执行页面初始化
+      await initPage();
+    });
+  </script>
+
+  <div class="popup-overlay" id="popupOverlay" onclick="closePopup(event)">
+    <div class="popup-content" onclick="event.stopPropagation()">
+      <div style="position: absolute; top: 10px; right: 15px; z-index: 10;">
+        <button onclick="closePopup()" style="
+          background: none;
+          border: none;
+          color: var(--gold-primary);
+          font-size: 1.5rem;
+          cursor: pointer;
+          padding: 0;
+          width: 30px;
+          height: 30px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+          transition: all 0.3s;
+        " onmouseenter="this.style.background='rgba(230, 199, 73, 0.2)'" onmouseleave="this.style.background='none'">×</button>
+      </div>
+      <div class="popup-title" id="popupTitle">标题</div>
+      <div class="popup-body" id="popupBody">内容</div>
+      <button class="popup-btn" onclick="closePopup()">确定</button>
+    </div>
+  </div>
+
+  <div class="popup-overlay" id="mailPopupOverlay" onclick="closeMailPopup(event)">
+    <div class="popup-content" onclick="event.stopPropagation()" style="max-height: 80vh; overflow-y: auto;">
+      <div style="position: absolute; top: 10px; right: 15px; z-index: 10;">
+        <button onclick="closeMailPopup()" style="
+          background: none;
+          border: none;
+          color: var(--gold-primary);
+          font-size: 1.5rem;
+          cursor: pointer;
+          padding: 0;
+          width: 30px;
+          height: 30px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+          transition: all 0.3s;
+        " onmouseenter="this.style.background='rgba(230, 199, 73, 0.2)'" onmouseleave="this.style.background='none'">×</button>
+      </div>
+      <div class="popup-title">邮件中心</div>
+      <div class="mail-list" id="mailList" style="display: flex; flex-direction: column; gap: 10px;">
+      </div>
+      <button class="popup-btn" onclick="closeMailPopup()" style="margin-top: 20px;">关闭</button>
+    </div>
+  </div>
+  
+  <div class="popup-overlay" id="loginSuccessPopup" onclick="closeLoginSuccessPopup(event)">
+    <div class="popup-content" onclick="event.stopPropagation()" style="max-width: 350px;">
+      <div style="position: absolute; top: 10px; right: 15px; z-index: 10;">
+        <button onclick="closeLoginSuccessPopup()" style="
+          background: none;
+          border: none;
+          color: var(--gold-primary);
+          font-size: 1.5rem;
+          cursor: pointer;
+          padding: 0;
+          width: 30px;
+          height: 30px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+          transition: all 0.3s;
+        " onmouseenter="this.style.background='rgba(230, 199, 73, 0.2)'" onmouseleave="this.style.background='none'">×</button>
+      </div>
+      <div class="popup-title">闭关修炼</div>
+      <div class="popup-body" style="text-align: left;" id="loginStatsBody">
+      </div>
+      <button class="popup-btn" onclick="closeLoginSuccessPopup()">知道了</button>
+    </div>
+  </div>
+  
+  <div class="popup-overlay" id="leaderboardPopup" onclick="closeLeaderboardPopup(event)">
+    <div class="popup-content" onclick="event.stopPropagation()" style="max-width: 600px; max-height: 80vh; display: flex; flex-direction: column;">
+      <div style="position: relative; padding: 20px 20px 15px; border-bottom: 1px solid rgba(230, 199, 73, 0.2);">
+        <div style="position: absolute; top: 10px; right: 15px; z-index: 10;">
+          <button onclick="closeLeaderboardPopup()" style="
+            background: none;
+            border: none;
+            color: var(--gold-primary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s;
+          " onmouseenter="this.style.background='rgba(230, 199, 73, 0.2)'" onmouseleave="this.style.background='none'">×</button>
+        </div>
+        <div class="popup-title">🏆 排行榜</div>
+        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+          <button class="popup-btn" onclick="switchLeaderboardTab('realm')" id="lbRealmTab" style="flex: 1;">境界榜</button>
+          <button class="popup-btn" onclick="switchLeaderboardTab('wealth')" id="lbWealthTab" style="flex: 1;">财富榜</button>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <div style="color: var(--gold-dim); font-size: 0.85rem;">
+            <span id="leaderboardUpdateTime">更新于：--:--:--</span>
+          </div>
+          <button onclick="refreshLeaderboard()" style="
+            background: rgba(230, 199, 73, 0.1);
+            border: 1px solid rgba(230, 199, 73, 0.3);
+            color: var(--gold-primary);
+            padding: 5px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+          " onmouseenter="this.style.background='rgba(230, 199, 73, 0.2)'" onmouseleave="this.style.background='rgba(230, 199, 73, 0.1)'">
+            🔄 刷新
+          </button>
+        </div>
+      </div>
+      <div id="leaderboardList" style="flex: 1; background: rgba(0,0,0,0.3); border-radius: 8px; padding: 10px; overflow-y: auto;">
+        <div style="text-align: center; padding: 30px; color: var(--text-dim);">加载中...</div>
+      </div>
+      <div style="padding: 15px 20px; border-top: 1px solid rgba(230, 199, 73, 0.2);">
+        <button class="popup-btn" onclick="closeLeaderboardPopup()">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="popup-overlay" id="checkinPopup" onclick="closeCheckinPopup(event)" style="display: flex; align-items: center; justify-content: center;">
+    <div style="position: relative; width: 90%; max-width: 400px; background: rgba(20, 25, 45, 0.95); border: 2px solid var(--gold-primary); border-radius: 15px; box-shadow: 0 0 30px rgba(230, 199, 73, 0.3);">
+      <!-- 标题 -->
+      <div class="popup-title" style="padding: 20px 20px 10px; text-align: center;">📅 每日签到</div>
+      
+      <!-- 内容区域 -->
+      <div id="checkinContent" style="padding: 0 20px 20px;">
+      </div>
+    </div>
+  </div>
+
+  <div class="popup-overlay" id="taskPopup" onclick="closeTaskPopup(event)">
+    <div class="popup-content" onclick="event.stopPropagation()" style="max-width: 500px; max-height: 80vh; overflow-y: auto;">
+      <div style="position: absolute; top: 10px; right: 15px; z-index: 10;">
+        <button onclick="closeTaskPopup()" style="
+          background: none;
+          border: none;
+          color: var(--gold-primary);
+          font-size: 1.5rem;
+          cursor: pointer;
+          padding: 0;
+          width: 30px;
+          height: 30px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+          transition: all 0.3s;
+        " onmouseenter="this.style.background='rgba(230, 199, 73, 0.2)'" onmouseleave="this.style.background='none'">×</button>
+      </div>
+      <div class="popup-title">📋 任务大厅</div>
+      <div id="taskContent" style="margin-bottom: 20px;">
+      </div>
+      <button class="popup-btn" onclick="closeTaskPopup()" style="margin-top: 15px;">关闭</button>
+    </div>
+  </div>
+
+  <div class="popup-overlay" id="achievementPopup" onclick="closeAchievementPopup(event)">
+    <div class="popup-content" onclick="event.stopPropagation()" style="max-width: 500px; max-height: 80vh; overflow-y: auto;">
+      <div style="position: absolute; top: 10px; right: 15px; z-index: 10;">
+        <button onclick="closeAchievementPopup()" style="
+          background: none;
+          border: none;
+          color: var(--gold-primary);
+          font-size: 1.5rem;
+          cursor: pointer;
+          padding: 0;
+          width: 30px;
+          height: 30px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+          transition: all 0.3s;
+        " onmouseenter="this.style.background='rgba(230, 199, 73, 0.2)'" onmouseleave="this.style.background='none'">×</button>
+      </div>
+      <div class="popup-title">🏅 成就系统</div>
+      <div id="achievementContent" style="margin-bottom: 20px;">
+      </div>
+      <button class="popup-btn" onclick="closeAchievementPopup()" style="margin-top: 15px;">关闭</button>
+    </div>
+  </div>
+  
+  <div class="popup-overlay" id="socialPopup" onclick="closeSocialPopup(event)">
+    <div class="popup-content" onclick="event.stopPropagation()" style="max-width: 500px; max-height: 80vh; overflow-y: auto;">
+      <div style="position: absolute; top: 10px; right: 15px; z-index: 10;">
+        <button onclick="closeSocialPopup()" style="
+          background: none;
+          border: none;
+          color: var(--gold-primary);
+          font-size: 1.5rem;
+          cursor: pointer;
+          padding: 0;
+          width: 30px;
+          height: 30px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+          transition: all 0.3s;
+        " onmouseenter="this.style.background='rgba(230, 199, 73, 0.2)'" onmouseleave="this.style.background='none'">×</button>
+      </div>
+      <div class="popup-title">👥 道友社交</div>
+      <div id="socialContent" style="margin-bottom: 20px;">
+        <div style="text-align: center; padding: 30px; color: var(--text-dim);">
+          <div style="font-size: 2rem; margin-bottom: 10px;">🤝</div>
+          <div>正在加载道友列表...</div>
+        </div>
+      </div>
+      <button class="popup-btn" onclick="closeSocialPopup()" style="margin-top: 15px;">关闭</button>
+    </div>
+  </div>
+
+  <div class="popup-overlay" id="settingsPopup" onclick="closeSettingsPopup(event)">
+    <div class="popup-content" onclick="event.stopPropagation()" style="max-width: 400px; max-height: 80vh; overflow-y: auto;">
+      <div style="position: absolute; top: 10px; right: 15px; z-index: 10;">
+        <button onclick="closeSettingsPopup()" style="
+          background: none;
+          border: none;
+          color: var(--gold-primary);
+          font-size: 1.5rem;
+          cursor: pointer;
+          padding: 0;
+          width: 30px;
+          height: 30px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+          transition: all 0.3s;
+        " onmouseenter="this.style.background='rgba(230, 199, 73, 0.2)'" onmouseleave="this.style.background='none'">×</button>
+      </div>
+      <div class="popup-title">⚙️ 游戏设置</div>
+      <div class="settings-section" style="background: rgba(30, 35, 50, 0.6); border: 1px solid rgba(230, 199, 73, 0.3); border-radius: 8px; padding: 15px; margin-bottom: 15px;">
+        <h3 style="color: var(--gold-primary); margin-bottom: 10px; font-size: 1rem; border-bottom: 1px solid rgba(230, 199, 73, 0.2); padding-bottom: 8px;">🔐 账号安全</h3>
+        <div class="setting-item" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+          <span>当前账号</span>
+          <span id="settingsCurrentAccount" style="color: var(--gold-light);">加载中...</span>
+        </div>
+        <div class="setting-item" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+          <span>绑定手机</span>
+          <span id="boundAccount" style="color: var(--text-dim);">未绑定</span>
+        </div>
+        <div class="setting-item" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+          <span>切换账号</span>
+          <button class="popup-btn" onclick="openSwitchAccountModal()" style="background: var(--gold-primary); color: #000; width: auto;">切换</button>
+        </div>
+        <div class="setting-item" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0;">
+          <span>退出登录</span>
+          <button class="popup-btn" onclick="openLogoutModal()" style="background: var(--danger); color: white; width: auto;">退出</button>
+        </div>
+      </div>
+      
+      <div class="settings-section" style="background: rgba(30, 35, 50, 0.6); border: 1px solid rgba(230, 199, 73, 0.3); border-radius: 8px; padding: 15px; margin-bottom: 15px;">
+        <h3 style="color: var(--gold-primary); margin-bottom: 10px; font-size: 1rem; border-bottom: 1px solid rgba(230, 199, 73, 0.2); padding-bottom: 8px;">🖥️ 服务器</h3>
+        <div class="setting-item" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+          <span>当前服务器</span>
+          <span id="currentServer" style="color: var(--gold-light);">万夫之勇</span>
+        </div>
+        <div class="setting-item" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0;">
+          <span>选择服务器</span>
+          <button class="popup-btn" onclick="openServerModal()" style="background: var(--gold-primary); color: #000; width: auto;">选择</button>
+        </div>
+      </div>
+      
+      <div class="settings-section" style="background: rgba(30, 35, 50, 0.6); border: 1px solid rgba(230, 199, 73, 0.3); border-radius: 8px; padding: 15px; margin-bottom: 15px;">
+        <h3 style="color: var(--gold-primary); margin-bottom: 10px; font-size: 1rem; border-bottom: 1px solid rgba(230, 199, 73, 0.2); padding-bottom: 8px;">🌐 语言</h3>
+        <div class="setting-item" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+          <span>当前语言</span>
+          <span id="currentLang" style="color: var(--gold-light);">简体中文</span>
+        </div>
+        <div class="setting-item" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0;">
+          <span>切换语言</span>
+          <button class="popup-btn" onclick="toggleLanguage()" style="background: var(--gold-primary); color: #000; width: auto;">切换</button>
+        </div>
+      </div>
+      <button class="popup-btn" onclick="closeSettingsPopup()" style="margin-top: 15px;">关闭</button>
+    </div>
+  </div>
+
+  <div class="popup-overlay" id="switchAccountModal" onclick="closeModal('switchAccountModal')">
+    <div class="popup-content" onclick="event.stopPropagation()">
+      <div style="position: absolute; top: 10px; right: 15px; z-index: 10;">
+        <button onclick="closeModal('switchAccountModal')" style="
+          background: none;
+          border: none;
+          color: var(--gold-primary);
+          font-size: 1.5rem;
+          cursor: pointer;
+          padding: 0;
+          width: 30px;
+          height: 30px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+          transition: all 0.3s;
+        " onmouseenter="this.style.background='rgba(230, 199, 73, 0.2)'" onmouseleave="this.style.background='none'">×</button>
+      </div>
+      <div class="popup-title">🔄 切换账号</div>
+      <div class="popup-body">
+        <p>确定要切换账号吗？</p>
+      </div>
+      <button class="popup-btn" onclick="closeModal('switchAccountModal')" style="margin-bottom: 10px;">取消</button>
+      <button class="popup-btn" onclick="confirmSwitchAccount()">确认切换</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="switchAccountModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="modal-icon">🔄</span>
+        切换账号
+      </div>
+      <div class="modal-body">
+        <div class="modal-message">
+          <p>确定要切换账号吗？</p>
+          <p class="modal-hint">当前角色将自动下线，未保存的数据可能会丢失。</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn cancel" onclick="closeModal('switchAccountModal')">取消</button>
+        <button class="modal-btn confirm" onclick="confirmSwitchAccount()">确认切换</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="logoutModal">
+    <div class="modal-content">
+      <div class="modal-header danger">
+        <span class="modal-icon">🚪</span>
+        退出登录
+      </div>
+      <div class="modal-body">
+        <div class="modal-message">
+          <p>确定要退出当前账号吗？</p>
+          <p class="modal-hint">退出后需要重新登录才能继续游戏。</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn cancel" onclick="closeModal('logoutModal')">取消</button>
+        <button class="modal-btn danger" onclick="confirmLogout()">确认退出</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="toastModal">
+    <div class="modal-content toast-content">
+      <div class="toast-message" id="toastMessage">操作成功</div>
+    </div>
+  </div>
+
+  <!-- 服务器选择弹窗 -->
+  <div class="modal-overlay" id="serverModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="modal-icon">🖥️</span>
+        选择服务器
+      </div>
+      <div class="modal-body">
+        <div id="serverList" style="max-height: 300px; overflow-y: auto;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn cancel" onclick="closeModal('serverModal')">取消</button>
+        <button class="modal-btn confirm" onclick="confirmServerSelect()">确认</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 活动弹窗 -->
+  <div class="modal-overlay" id="activityModal" style="background: rgba(44, 24, 16, 0.9);">
+    <div class="modal-content" style="max-width: 800px; max-height: 85vh; overflow-y: auto; background: linear-gradient(135deg, #2c1810 0%, #3d2914 100%); border: 2px solid #b87333; box-shadow: 0 0 30px rgba(184, 115, 51, 0.4);">
+      <div class="modal-header" style="color: #f5f5dc;">
+        <span class="modal-icon">🏮</span>
+        活动中心
+      </div>
+      <div class="modal-body" style="padding: 0;">
+        <div style="display: flex; border-bottom: 1px solid rgba(184, 115, 51, 0.3);">
+          <button class="activity-tab-btn active" onclick="switchActivityTab('hot')" style="flex: 1; padding: 15px; background: none; border: none; color: #f5f5dc; cursor: pointer;">热门活动</button>
+          <button class="activity-tab-btn" onclick="switchActivityTab('limited')" style="flex: 1; padding: 15px; background: none; border: none; color: rgba(245, 245, 220, 0.6); cursor: pointer;">限时活动</button>
+          <button class="activity-tab-btn" onclick="switchActivityTab('daily')" style="flex: 1; padding: 15px; background: none; border: none; color: rgba(245, 245, 220, 0.6); cursor: pointer;">每日活动</button>
+        </div>
+        <div id="activityContent" style="padding: 20px; max-height: 500px; overflow-y: auto; color: #f5f5dc;">
+          <!-- 活动列表将通过 JS 动态加载 -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn cancel" onclick="closeModal('activityModal')" style="background: #3d2914; border: 1px solid #b87333; color: #f5f5dc;">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="popup-overlay" id="mallPopup" onclick="closeMallPopup(event)">
+    <div class="popup-content" onclick="event.stopPropagation()" style="max-width: 500px; max-height: 85vh; overflow-y: auto;">
+      <div style="position: absolute; top: 10px; right: 15px; z-index: 10;">
+        <button onclick="closeMallPopup()" style="
+          background: none;
+          border: none;
+          color: var(--gold-primary);
+          font-size: 1.5rem;
+          cursor: pointer;
+          padding: 0;
+          width: 30px;
+          height: 30px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+          transition: all 0.3s;
+        " onmouseenter="this.style.background='rgba(230, 199, 73, 0.2)'" onmouseleave="this.style.background='none'">×</button>
+      </div>
+      <div class="mall-header" style="margin-bottom: 20px;">
+        <div class="mall-title" style="font-size: 1.3rem; color: var(--gold-primary); font-weight: bold; text-align: center; margin-bottom: 15px;">🛒 仙缘商城</div>
+      </div>
+      <div class="mall-content" id="rechargeContent">
+        <div style="text-align: center; padding: 30px; color: var(--text-dim);">商城功能</div>
+      </div>
+      <button class="popup-btn" onclick="closeMallPopup()" style="margin-top: 15px;">关闭</button>
+    </div>
+  </div>
+
+  <div class="popup-overlay" id="backpackPopup" onclick="closeBackpackPopup(event)">
+    <div class="popup-content" onclick="event.stopPropagation()" style="max-width: 500px; max-height: 85vh; overflow-y: auto;">
+      <div style="position: absolute; top: 10px; right: 15px; z-index: 10;">
+        <button onclick="closeBackpackPopup()" style="
+          background: none;
+          border: none;
+          color: var(--gold-primary);
+          font-size: 1.5rem;
+          cursor: pointer;
+          padding: 0;
+          width: 30px;
+          height: 30px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+          transition: all 0.3s;
+        " onmouseenter="this.style.background='rgba(230, 199, 73, 0.2)'" onmouseleave="this.style.background='none'">×</button>
+      </div>
+      <div class="popup-title">🎒 背包</div>
+      <div id="backpackContent" style="margin-bottom: 20px;">
+        <div style="text-align: center; padding: 30px; color: var(--text-dim);">背包功能</div>
+      </div>
+      <button class="popup-btn" onclick="closeBackpackPopup()" style="margin-top: 15px;">关闭</button>
+    </div>
+  </div>
+
+  <script>
+    // 生成粒子效果
+    function createParticles(element, particleClass, count = 8) {
+      for (let i = 0; i < count; i++) {
+        const particle = document.createElement('div');
+        particle.className = `particle ${particleClass}`;
+        
+        // 随机位置和大小
+        const size = 3 + Math.random() * 5;
+        const posX = Math.random() * 140 - 70;
+        const posY = Math.random() * 140 - 70;
+        
+        particle.style.width = size + 'px';
+        particle.style.height = size + 'px';
+        particle.style.left = '50%';
+        particle.style.top = '50%';
+        particle.style.transform = `translate(${posX}px, ${posY}px)`;
+        particle.style.animationDelay = (i * 0.5) + 's';
+        particle.style.animationDuration = (4 + Math.random() * 2) + 's';
+        
+        element.appendChild(particle);
+        
+        // 粒子消失后重新创建
+        setTimeout(() => {
+          particle.remove();
+          createParticles(element, particleClass, 1);
+        }, (4 + Math.random() * 2) * 1000);
+      }
+    }
+
+    // 创建进度环
+    function createProgressRing(element, progress = 0.5) {
+      const ring = document.createElement('div');
+      ring.className = 'progress-ring';
+      
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('width', '100');
+      svg.setAttribute('height', '20');
+      svg.setAttribute('viewBox', '0 0 100 20');
+      
+      // 背景圆环
+      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      circle.setAttribute('class', 'progress-ring-circle');
+      circle.setAttribute('cx', '50');
+      circle.setAttribute('cy', '10');
+      circle.setAttribute('r', '8');
+      svg.appendChild(circle);
+      
+      // 进度圆环
+      const progressCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      progressCircle.setAttribute('class', 'progress-ring-progress');
+      progressCircle.setAttribute('cx', '50');
+      progressCircle.setAttribute('cy', '10');
+      progressCircle.setAttribute('r', '8');
+      
+      // 计算进度
+      const circumference = 2 * Math.PI * 8;
+      progressCircle.setAttribute('stroke-dasharray', circumference);
+      progressCircle.setAttribute('stroke-dashoffset', circumference - (progress * circumference));
+      
+      svg.appendChild(progressCircle);
+      ring.appendChild(svg);
+      element.appendChild(ring);
+    }
+
+    // ========== 活动中心相关函数 ==========
+    
+    // 打开活动弹窗
+    function openActivityModal() {
+      document.getElementById('activityModal').classList.add('active');
+      loadActivities('hot'); // 默认加载热门活动
+    }
+    
+    // 切换活动标签
+    function switchActivityTab(type) {
+      // 更新按钮样式
+      document.querySelectorAll('.activity-tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+        btn.style.color = 'var(--text-secondary)';
+      });
+      event.target.classList.add('active');
+      event.target.style.color = 'var(--gold-primary)';
+      
+      // 加载对应类型的活动
+      loadActivities(type);
+    }
+    
+    // 加载活动列表
+    async function loadActivities(type) {
+      const content = document.getElementById('activityContent');
+      content.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-dim);">加载中...</div>';
+      
+      try {
+        const activities = await apiService.getActivities();
+        const list = Array.isArray(activities) ? activities : [];
+        
+        let filteredActivities = list.filter(a => a.status === 1);
+        if (type === 'hot') {
+          filteredActivities = filteredActivities.filter(a => a.isHot === true || a.isHot === 1 || a.type === 'hot');
+        } else if (type === 'limited') {
+          filteredActivities = filteredActivities.filter(a => a.type === 'limited');
+        } else if (type === 'daily') {
+          filteredActivities = filteredActivities.filter(a => a.type === 'daily');
+        }
+        
+        if (filteredActivities.length === 0) {
+          content.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-dim);">暂无活动</div>';
+          return;
+        }
+        
+        let html = '<div style="display: grid; gap: 12px;">';
+        
+        filteredActivities.forEach(activity => {
+          const isHot = activity.isHot === true || activity.isHot === 1;
+          let hoursLeft = 0;
+          try {
+            const endTime = new Date(activity.endTime);
+            const now = new Date();
+            hoursLeft = Math.max(0, Math.floor((endTime - now) / (1000 * 60 * 60)));
+          } catch(e) {}
+          
+          let startDate = '', endDate = '';
+          try {
+            startDate = (activity.startTime || '').split('T')[0].split(' ')[0];
+            endDate = (activity.endTime || '').split('T')[0].split(' ')[0];
+          } catch(e) {}
+          
+          const rewardTags = parseActivityRewards(activity.rewards);
+          
+          html += `
+            <div style="
+              background: linear-gradient(135deg, rgba(30, 35, 55, 0.9), rgba(45, 50, 75, 0.9));
+              border: 1px solid ${isHot ? 'rgba(230, 199, 73, 0.5)' : 'rgba(230, 199, 73, 0.2)'};
+              border-radius: 12px;
+              padding: 15px;
+              position: relative;
+              overflow: hidden;
+            ">
+              ${isHot ? '<div style="position: absolute; top: 8px; right: 10px; background: linear-gradient(90deg, #e6c749, #f4d03f); color: #1a1a2e; padding: 2px 10px; border-radius: 10px; font-size: 0.7rem; font-weight: bold;">🔥热门</div>' : ''}
+              <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                <div style="font-size: 1.8rem; margin-right: 12px; width: 40px; text-align: center;">${activity.icon || '🎁'}</div>
+                <div style="flex:1;min-width:0;">
+                  <div style="font-size: 1rem; font-weight: bold; color: var(--gold-primary); margin-bottom: 3px;">${activity.name || '未命名活动'}</div>
+                  <div style="font-size: 0.8rem; color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${activity.description || ''}</div>
+                </div>
+              </div>
+              
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <div style="font-size: 0.75rem; color: var(--text-dim);">
+                  <div>${startDate} 至 ${endDate}</div>
+                  ${hoursLeft > 0 ? `<div style="color: var(--gold-dim);">剩余 ${hoursLeft < 24 ? hoursLeft + '小时' : Math.floor(hoursLeft/24) + '天'}</div>` : '<div style="color: #ff6b6b;">已结束</div>'}
+                </div>
+                <button onclick="participateActivity(${activity.id})" style="
+                  background: linear-gradient(135deg, var(--gold-primary), var(--gold-dim));
+                  border: none;
+                  color: #1a1a2e;
+                  padding: 6px 16px;
+                  border-radius: 6px;
+                  font-size: 0.85rem;
+                  font-weight: bold;
+                  cursor: pointer;
+                  transition: all 0.2s;
+                " onmouseenter="this.style.transform='scale(1.05)';this.style.boxShadow='0 0 10px rgba(230,199,73,0.4)'" onmouseleave="this.style.transform='scale(1)';this.style.boxShadow='none'">
+                  参与活动
+                </button>
+              </div>
+              
+              ${rewardTags ? `<div style="display: flex; gap: 8px; flex-wrap: wrap;">${rewardTags}</div>` : ''}
+            </div>
+          `;
+        });
+        
+        html += '</div>';
+        content.innerHTML = html;
+      } catch (error) {
+        console.error('加载活动失败:', error);
+        content.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--danger-color);">加载失败，请稍后重试</div>';
+      }
+    }
+    
+    function parseActivityRewards(rewardsStr) {
+      if (!rewardsStr) return '';
+      const iconMap = { LINGSHI: '💰', XIUWEI: '⚡', XIANSHI: '💎', HUNSHI: '💀', SHOUMING: '⏰' };
+      const nameMap = { LINGSHI: '灵石', XIUWEI: '修为', XIANSHI: '仙石', HUNSHI: '魂石', SHOUMING: '寿命' };
+      const parts = rewardsStr.split(';');
+      let html = '';
+      parts.forEach(part => {
+        const [code, qty] = part.split(':');
+        if (code && qty) {
+          const icon = iconMap[code.trim()] || '🎁';
+          const name = nameMap[code.trim()] || code.trim();
+          html += `<div style="background:rgba(230,199,73,0.1);border:1px solid rgba(230,199,73,0.3);border-radius:6px;padding:4px 10px;display:flex;align-items:center;font-size:0.75rem;">
+            <span style="margin-right:4px;">${icon}</span><span style="color:var(--gold-primary);">${name} x${qty.trim()}</span></div>`;
+        }
+      });
+      return html;
+    }
+    
+    // 参与活动
+    async function participateActivity(activityId) {
+      try {
+        const roleId = localStorage.getItem('currentRoleId') || localStorage.getItem('roleId');
+        if (!roleId) {
+          window.showToast('请先选择角色', 'error');
+          return;
+        }
+        
+        const result = await window.apiService.participateActivity(roleId, activityId);
+        if (result && result.success === false) {
+          window.showToast(result.message || '参与失败', 'error');
+        } else {
+          const msg = result && result.message ? result.message : '参与成功';
+          window.showToast(msg, 'success');
+        }
+      } catch (error) {
+        console.error('参与活动失败:', error);
+        window.showToast(error.message || '参与失败', 'error');
+      }
+    }
+
+    // 页面加载完成后初始化
+    window.addEventListener('DOMContentLoaded', function() {
+      // 为渡仙和炼体法阵添加粒子效果
+      const immortalCard = document.getElementById('cardImmortal');
+      const bodyCard = document.getElementById('cardBody');
+      
+      if (immortalCard) {
+        createParticles(immortalCard, 'immortal-particle');
+        const roleState = window.store ? window.store.getState().role : null;
+        const immortalProgress = roleState?.realmProgress || 0.5;
+        createProgressRing(immortalCard, immortalProgress);
+      }
+      
+      if (bodyCard) {
+        createParticles(bodyCard, 'body-particle');
+        const roleState2 = window.store ? window.store.getState().role : null;
+        const bodyProgress = roleState2?.bodyProgress || 0.3;
+        createProgressRing(bodyCard, bodyProgress);
+      }
+    });
+  </script>
+
+</body>
+</html>

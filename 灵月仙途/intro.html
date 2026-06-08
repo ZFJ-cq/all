@@ -1,0 +1,1583 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="css/mobile-adapt.css">
+  <title>灵月仙途 - 开场动画</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      font-family: 'Microsoft YaHei', 'SimSun', serif;
+      background: #000;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      position: relative;
+      touch-action: manipulation;
+    }
+
+    /* 添加背景光晕效果 */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(ellipse at 50% 30%, rgba(230, 199, 73, 0.05), transparent 60%);
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    .container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .scene {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      transition: opacity 3.5s cubic-bezier(0.4, 0, 0.2, 1);
+      pointer-events: none;
+    }
+
+    .scene.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .scene.inactive {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* 添加场景内元素浮动效果 */
+    .scene.active .floating {
+      animation: elementFloat 3s ease-in-out infinite;
+    }
+
+    @keyframes elementFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    /* 背景层 */
+    .bg-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    /* 水墨粒子层 */
+    .ink-particles {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    /* 文字层 */
+    .text-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    /* 第一幕：天裂 */
+    .scene1 .bg-layer {
+      background: linear-gradient(180deg, 
+        #000000 0%, 
+        #0a0a0a 40%, 
+        #1a1a2e 70%, 
+        #16213e 100%);
+      animation: bgPulse1 8s ease-in-out infinite;
+    }
+
+    @keyframes bgPulse1 {
+      0%, 100% { filter: brightness(1); }
+      50% { filter: brightness(1.1); }
+    }
+
+    .golden-crack {
+      position: absolute;
+      top: -50px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 300px;
+      height: 200px;
+      z-index: 3;
+      opacity: 0;
+      animation: crackAppear 3s ease-out forwards;
+    }
+
+    @keyframes crackAppear {
+      0% { opacity: 0; transform: translateX(-50%) scaleY(0); }
+      30% { opacity: 1; transform: translateX(-50%) scaleY(0.3); }
+      100% { opacity: 1; transform: translateX(-50%) scaleY(1); }
+    }
+
+    .golden-ink-drip {
+      position: absolute;
+      top: 150px;
+      left: 50%;
+      width: 2px;
+      height: 0;
+      background: linear-gradient(180deg, #e6c749, transparent);
+      z-index: 3;
+      animation: inkDrip 4s ease-out forwards;
+      animation-delay: 2s;
+    }
+
+    @keyframes inkDrip {
+      0% { height: 0; opacity: 1; }
+      100% { height: 60vh; opacity: 0; }
+    }
+
+    .landscape-left {
+      position: absolute;
+      top: 35%;
+      left: 10%;
+      width: 35%;
+      height: 30%;
+      background: linear-gradient(135deg, rgba(100, 150, 200, 0.3), transparent);
+      border-radius: 50% 50% 0 0;
+      filter: blur(20px);
+      opacity: 0;
+      animation: landscapeFade 3s ease-out forwards;
+      animation-delay: 3s;
+    }
+
+    .landscape-right {
+      position: absolute;
+      top: 35%;
+      right: 10%;
+      width: 35%;
+      height: 30%;
+      background: linear-gradient(135deg, rgba(200, 100, 100, 0.3), transparent);
+      border-radius: 50% 50% 0 0;
+      filter: blur(20px);
+      opacity: 0;
+      animation: landscapeFade 3s ease-out forwards;
+      animation-delay: 3s;
+    }
+
+    @keyframes landscapeFade {
+      0% { opacity: 0; transform: scale(0.8); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    .scholar-silhouette {
+      position: absolute;
+      bottom: 15%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 120px;
+      background: radial-gradient(ellipse at bottom, #000 0%, transparent 70%);
+      z-index: 4;
+      opacity: 0;
+      animation: scholarAppear 2s ease-out forwards;
+      animation-delay: 4s;
+    }
+
+    @keyframes scholarAppear {
+      0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+      100% { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+
+    .moon-fragment {
+      position: absolute;
+      top: 20%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 30px;
+      height: 30px;
+      background: radial-gradient(circle, #fff 0%, #c0c0c0 50%, transparent 70%);
+      border-radius: 50%;
+      box-shadow: 0 0 20px #fff, 0 0 40px #e6c749, 0 0 60px rgba(230, 199, 73, 0.5);
+      z-index: 5;
+      opacity: 0;
+      animation: moonFall 6s ease-in-out forwards, moonGlow 3s ease-in-out infinite;
+      animation-delay: 3.5s, 4s;
+    }
+
+    @keyframes moonGlow {
+      0%, 100% { 
+        box-shadow: 0 0 20px #fff, 0 0 40px #e6c749, 0 0 60px rgba(230, 199, 73, 0.5);
+        transform: translateX(-50%) scale(1);
+      }
+      50% { 
+        box-shadow: 0 0 30px #fff, 0 0 60px #e6c749, 0 0 90px rgba(230, 199, 73, 0.8);
+        transform: translateX(-50%) scale(1.1);
+      }
+    }
+
+    @keyframes moonFall {
+      0% { opacity: 0; top: 20%; transform: translateX(-50%) scale(0.5); }
+      20% { opacity: 1; transform: translateX(-50%) scale(1); }
+      100% { opacity: 1; top: 65%; transform: translateX(-50%) scale(1.2); }
+    }
+
+    /* 竖排文字 - 第一段 */
+    .vertical-text {
+      position: absolute;
+      right: 10%;
+      top: 10%;
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+      font-size: 20px;
+      color: #e6c749;
+      letter-spacing: 8px;
+      text-shadow: 0 0 10px rgba(230, 199, 73, 0.5), 0 0 20px rgba(0, 0, 0, 0.8);
+      opacity: 1 !important;
+      z-index: 1000 !important;
+      line-height: 2.4;
+      font-weight: bold;
+      max-height: 80%;
+      overflow: visible;
+    }
+
+    .text-column {
+      display: inline-block;
+      margin-left: 8px;
+      opacity: 0;
+      animation: columnFadeIn 2.5s ease-out forwards;
+      text-shadow: 0 0 10px rgba(230, 199, 73, 0.5), 0 0 20px rgba(0, 0, 0, 0.8);
+    }
+
+    .text-column:nth-child(1) { animation-delay: 2s; }
+    .text-column:nth-child(2) { animation-delay: 4s; }
+    .text-column:nth-child(3) { animation-delay: 6s; }
+    .text-column:nth-child(4) { animation-delay: 8s; }
+    .text-column:nth-child(5) { animation-delay: 10s; }
+    .text-column:nth-child(6) { animation-delay: 12s; }
+    .text-column:nth-child(7) { animation-delay: 14s; }
+    .text-column:nth-child(8) { animation-delay: 16s; }
+    .text-column:nth-child(9) { animation-delay: 18s; }
+    .text-column:nth-child(10) { animation-delay: 20s; }
+
+    @keyframes columnFadeIn {
+      0% { opacity: 0; transform: translateY(-20px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 横排文字 - 第二段 */
+    .horizontal-text {
+      position: absolute;
+      top: 45%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      z-index: 50;
+      width: 85%;
+    }
+
+    .text-line {
+      font-size: 16px;
+      color: #d4c5a9;
+      margin: 8px 0;
+      opacity: 0;
+      text-shadow: 0 0 8px rgba(212, 197, 169, 0.4);
+      letter-spacing: 3px;
+      line-height: 1.8;
+      transform: translateX(-20px);
+    }
+
+    .text-line.show {
+      animation: textLineAppear 1.5s ease-out forwards;
+    }
+
+    @keyframes textLineAppear {
+      0% { opacity: 0; transform: translateX(-20px); }
+      100% { opacity: 1; transform: translateX(0); }
+    }
+
+    .text-line.highlight {
+      color: #e6c749;
+      font-weight: bold;
+      text-shadow: 0 0 12px rgba(230, 199, 73, 0.6);
+    }
+
+    .text-line.question {
+      color: #fff;
+      font-size: 18px;
+      text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+    }
+
+    /* 第三段文字 */
+    .final-text {
+      position: absolute;
+      bottom: 25%;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+      z-index: 50;
+      width: 85%;
+      padding: 15px;
+    }
+
+    .final-text p {
+      font-size: 16px;
+      color: #d4c5a9;
+      margin: 10px 0;
+      opacity: 0;
+      letter-spacing: 3px;
+      line-height: 2.2;
+      transform: translateY(20px);
+      text-shadow: 0 0 10px rgba(0, 0, 0, 1), 0 2px 4px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .final-text p.show {
+      animation: finalTextAppear 1.5s ease-out forwards;
+    }
+
+    @keyframes finalTextAppear {
+      0% { opacity: 0; transform: translateY(20px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .final-text p.highlight {
+      color: #e6c749;
+      font-weight: bold;
+      font-size: 18px;
+      text-shadow: 0 0 15px rgba(230, 199, 73, 0.8), 0 2px 4px rgba(0, 0, 0, 1);
+    }
+
+    .final-text p.cta {
+      color: #fff;
+      font-size: 20px;
+      font-weight: bold;
+      text-shadow: 0 0 20px rgba(255, 255, 255, 1), 0 0 40px rgba(230, 199, 73, 0.8), 0 2px 4px rgba(0, 0, 0, 1);
+      margin-top: 20px;
+    }
+
+    /* 第二幕：迷雾 */
+    .scene2 .bg-layer {
+      background: radial-gradient(ellipse at center, #2a2a2a 0%, #0a0a0a 70%, #000000 100%);
+      animation: bgPulse2 10s ease-in-out infinite;
+    }
+
+    @keyframes bgPulse2 {
+      0%, 100% { 
+        background: radial-gradient(ellipse at center, #2a2a2a 0%, #0a0a0a 70%, #000000 100%);
+      }
+      50% { 
+        background: radial-gradient(ellipse at center, #333333 0%, #111111 70%, #050505 100%);
+      }
+    }
+
+    .fog-container {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .fog {
+      position: absolute;
+      width: 200%;
+      height: 100%;
+      background: linear-gradient(90deg, 
+        transparent 0%, 
+        rgba(100, 100, 100, 0.1) 20%, 
+        rgba(150, 150, 150, 0.15) 50%, 
+        rgba(100, 100, 100, 0.1) 80%, 
+        transparent 100%);
+      filter: blur(30px);
+      animation: fogMove 20s ease-in-out infinite;
+    }
+
+    @keyframes fogMove {
+      0%, 100% { transform: translateX(-25%); }
+      50% { transform: translateX(0%); }
+    }
+
+    .skill-icons {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+      z-index: 10;
+    }
+
+    .skill-icon {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      font-weight: bold;
+      color: #fff;
+      opacity: 0;
+      transform: scale(0.5);
+      box-shadow: 0 0 20px currentColor, inset 0 0 20px rgba(255,255,255,0.2);
+      animation: iconPulse 2s ease-in-out infinite;
+      position: relative;
+    }
+
+    .skill-icon::after {
+      content: '';
+      position: absolute;
+      top: -5px;
+      left: -5px;
+      right: -5px;
+      bottom: -5px;
+      border-radius: 50%;
+      border: 2px solid currentColor;
+      opacity: 0.3;
+      animation: iconRing 2s ease-in-out infinite;
+      animation-delay: 0.5s;
+    }
+
+    @keyframes iconRing {
+      0%, 100% { 
+        transform: scale(1); 
+        opacity: 0.3;
+      }
+      50% { 
+        transform: scale(1.2); 
+        opacity: 0.6;
+      }
+    }
+
+    .skill-icon.dan {
+      background: radial-gradient(circle, rgba(100, 200, 100, 0.6), rgba(50, 100, 50, 0.8));
+      color: #64c864;
+      animation-delay: 0s;
+      animation: iconAppear 0.5s ease-out 0.5s forwards, iconPulse 2s ease-in-out 1s infinite;
+    }
+
+    .skill-icon.qi {
+      background: radial-gradient(circle, rgba(200, 100, 100, 0.6), rgba(100, 50, 50, 0.8));
+      color: #c86464;
+      animation-delay: 0s;
+      animation: iconAppear 0.5s ease-out 1s forwards, iconPulse 2s ease-in-out 1.5s infinite;
+    }
+
+    .skill-icon.zhen {
+      background: radial-gradient(circle, rgba(100, 100, 200, 0.6), rgba(50, 50, 100, 0.8));
+      color: #6464c8;
+      animation-delay: 0s;
+      animation: iconAppear 0.5s ease-out 1.5s forwards, iconPulse 2s ease-in-out 2s infinite;
+    }
+
+    .skill-icon.fu {
+      background: radial-gradient(circle, rgba(200, 200, 100, 0.6), rgba(100, 100, 50, 0.8));
+      color: #c8c864;
+      animation-delay: 0s;
+      animation: iconAppear 0.5s ease-out 2s forwards, iconPulse 2s ease-in-out 2.5s infinite;
+    }
+
+    @keyframes iconAppear {
+      0% { opacity: 0; transform: scale(0.5); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes iconPulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 20px currentColor; }
+      50% { transform: scale(1.05); box-shadow: 0 0 30px currentColor; }
+    }
+
+    .question-text {
+      position: absolute;
+      top: 35%;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 28px;
+      color: #fff;
+      text-align: center;
+      opacity: 0;
+      z-index: 11;
+      text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+      animation: questionShake 1s ease-in-out 3s forwards;
+    }
+
+    @keyframes questionShake {
+      0% { opacity: 0; transform: translateX(-50%) scale(0.8); }
+      20% { opacity: 1; transform: translateX(-50%) scale(1.1); }
+      40% { transform: translateX(-50%) scale(0.95); }
+      60% { transform: translateX(-50%) scale(1.05); }
+      80% { transform: translateX(-50%) scale(0.98); }
+      100% { opacity: 1; transform: translateX(-50%) scale(1); }
+    }
+
+    /* 第三幕：入局 */
+    .scene3 .bg-layer {
+      background: linear-gradient(180deg, 
+        #2d1f4e 0%, 
+        #1a1a2e 40%, 
+        #0f0f1a 70%, 
+        #000000 100%);
+      animation: bgPulse3 6s ease-in-out infinite;
+    }
+
+    @keyframes bgPulse3 {
+      0%, 100% { 
+        filter: brightness(1) hue-rotate(0deg);
+      }
+      50% { 
+        filter: brightness(1.15) hue-rotate(10deg);
+      }
+    }
+
+    .golden-path {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 60%;
+      background: linear-gradient(0deg, 
+        rgba(230, 199, 73, 0) 0%, 
+        rgba(230, 199, 73, 0.3) 50%, 
+        rgba(230, 199, 73, 0.6) 100%);
+      filter: blur(20px);
+      z-index: 3;
+      opacity: 0;
+      animation: pathAppear 3s ease-out forwards;
+    }
+
+    @keyframes pathAppear {
+      0% { opacity: 0; height: 0; }
+      100% { opacity: 1; height: 60%; }
+    }
+
+    .purple-vortex {
+      position: absolute;
+      top: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(150, 100, 200, 0.6), rgba(100, 50, 150, 0.4), transparent 70%);
+      border-radius: 50%;
+      z-index: 2;
+      opacity: 0;
+      animation: vortexSpin 10s linear infinite;
+      animation-delay: 2s;
+    }
+
+    @keyframes vortexSpin {
+      0% { transform: translateX(-50%) rotate(0deg) scale(1); }
+      100% { transform: translateX(-50%) rotate(360deg) scale(1.2); }
+    }
+
+    .cottage {
+      position: absolute;
+      bottom: 20%;
+      left: 15%;
+      width: 60px;
+      height: 40px;
+      background: radial-gradient(ellipse, rgba(200, 150, 150, 0.4), transparent 70%);
+      border-radius: 50% 50% 0 0;
+      z-index: 4;
+      opacity: 0;
+      animation: buildingAppear 2s ease-out forwards;
+      animation-delay: 1s;
+    }
+
+    .sect-gate {
+      position: absolute;
+      bottom: 20%;
+      right: 15%;
+      width: 80px;
+      height: 60px;
+      background: radial-gradient(ellipse, rgba(200, 150, 100, 0.4), transparent 70%);
+      border-radius: 10px 10px 0 0;
+      z-index: 4;
+      opacity: 0;
+      animation: buildingAppear 2s ease-out forwards;
+      animation-delay: 1.5s;
+    }
+
+    @keyframes buildingAppear {
+      0% { opacity: 0; transform: scale(0.5) translateY(20px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .scholar-scene3 {
+      position: absolute;
+      bottom: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 100px;
+      background: radial-gradient(ellipse at bottom, #000 0%, transparent 70%);
+      z-index: 5;
+      opacity: 0;
+      animation: scholarWalk 3s ease-out forwards;
+    }
+
+    @keyframes scholarWalk {
+      0% { opacity: 0; transform: translateX(-50%) scale(0.8); }
+      30% { opacity: 1; transform: translateX(-50%) scale(1); }
+      100% { opacity: 1; transform: translateX(-50%) scale(1.1); }
+    }
+
+    .game-logo {
+      position: absolute;
+      top: 15%;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 42px;
+      font-weight: bold;
+      color: #e6c749;
+      text-align: center;
+      opacity: 0;
+      z-index: 100;
+      text-shadow: 0 0 10px rgba(0, 0, 0, 1), 0 2px 4px rgba(0, 0, 0, 0.8), 0 4px 8px rgba(0, 0, 0, 0.6);
+      animation: logoAppear 2s ease-out forwards, logoShine 4s ease-in-out infinite;
+      animation-delay: 3s, 5s;
+      letter-spacing: 15px;
+      background: linear-gradient(180deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.4) 100%);
+      padding: 15px 30px;
+      border-radius: 8px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(230, 199, 73, 0.2);
+      white-space: nowrap;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(230, 199, 73, 0.1);
+    }
+
+    @keyframes logoShine {
+      0%, 100% { 
+        text-shadow: 0 0 30px rgba(230, 199, 73, 0.8), 0 0 60px rgba(230, 199, 73, 0.4), 0 0 90px rgba(230, 199, 73, 0.2);
+        transform: translateX(-50%) scale(1);
+      }
+      50% { 
+        text-shadow: 0 0 40px rgba(230, 199, 73, 1), 0 0 80px rgba(230, 199, 73, 0.6), 0 0 120px rgba(230, 199, 73, 0.4);
+        transform: translateX(-50%) scale(1.05);
+      }
+    }
+
+    @keyframes logoAppear {
+      0% { opacity: 0; transform: translateX(-50%) scale(0.5) rotate(-10deg); }
+      50% { transform: translateX(-50%) scale(1.1) rotate(5deg); }
+      100% { opacity: 1; transform: translateX(-50%) scale(1) rotate(0deg); }
+    }
+
+    .cta-button {
+      position: absolute;
+      bottom: 20%;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 15px 40px;
+      font-size: 24px;
+      font-weight: bold;
+      color: #000;
+      background: linear-gradient(135deg, #e6c749 0%, #f4d03f 50%, #e6c749 100%);
+      border: 2px solid #fff;
+      border-radius: 5px;
+      cursor: pointer;
+      z-index: 20;
+      opacity: 0;
+      pointer-events: auto;
+      box-shadow: 0 0 20px rgba(230, 199, 73, 0.6), 0 0 40px rgba(230, 199, 73, 0.3), inset 0 0 20px rgba(255,255,255,0.3);
+      animation: ctaAppear 1s ease-out 4s forwards, ctaPulse 2s ease-in-out 5s infinite, ctaFloat 3s ease-in-out 6s infinite;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-button::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+      transform: rotate(45deg);
+      animation: ctaShine 3s ease-in-out infinite;
+      animation-delay: 5s;
+    }
+
+    @keyframes ctaShine {
+      0% { transform: translateX(-100%) rotate(45deg); }
+      100% { transform: translateX(100%) rotate(45deg); }
+    }
+
+    @keyframes ctaFloat {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(-8px); }
+    }
+
+    @keyframes ctaAppear {
+      0% { opacity: 0; transform: translateX(-50%) scale(0.8); }
+      100% { opacity: 1; transform: translateX(-50%) scale(1); }
+    }
+
+    @keyframes ctaPulse {
+      0%, 100% { transform: translateX(-50%) scale(1); box-shadow: 0 0 20px rgba(230, 199, 73, 0.6); }
+      50% { transform: translateX(-50%) scale(1.05); box-shadow: 0 0 40px rgba(230, 199, 73, 0.8); }
+    }
+
+    .cta-button:active {
+      transform: translateX(-50%) scale(0.95);
+    }
+
+    /* 跳过按钮 */
+    .skip-button {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      padding: 8px 16px;
+      font-size: 14px;
+      color: #d4c5a9;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(230, 199, 73, 0.3);
+      border-radius: 4px;
+      cursor: pointer;
+      z-index: 100;
+      opacity: 0;
+      animation: skipAppear 1s ease-out 2s forwards;
+      pointer-events: auto;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(5px);
+    }
+
+    .skip-button:hover {
+      background: rgba(230, 199, 73, 0.2);
+      border-color: rgba(230, 199, 73, 0.6);
+      color: #e6c749;
+      transform: scale(1.05);
+    }
+
+    .skip-button:active {
+      background: rgba(230, 199, 73, 0.3);
+      transform: scale(0.95);
+    }
+
+    /* 进度指示器 */
+    .progress-bar {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 200px;
+      height: 3px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 2px;
+      z-index: 100;
+      overflow: hidden;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #e6c749, #f4d03f, #e6c749);
+      background-size: 200% 100%;
+      width: 0%;
+      animation: progressFill 55s linear forwards, progressShine 3s ease-in-out infinite;
+      box-shadow: 0 0 10px rgba(230, 199, 73, 0.6);
+    }
+
+    @keyframes progressShine {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    @keyframes progressFill {
+      0% { width: 0%; }
+      100% { width: 100%; }
+    }
+
+    /* 墨水晕染转场 - 优化 */
+    .ink-transition {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, rgba(0, 0, 0, 0.9) 0%, transparent 60%);
+      z-index: 50;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .ink-transition.active {
+      animation: inkSpread 2.5s ease-in-out forwards;
+    }
+
+    @keyframes inkSpread {
+      0% { opacity: 0; transform: scale(0); }
+      40% { opacity: 1; transform: scale(1.3); }
+      100% { opacity: 0; transform: scale(2); }
+    }
+
+    /* 增强水墨粒子效果 */
+    .ink-particle {
+      position: absolute;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.8), transparent 70%);
+      border-radius: 50%;
+      opacity: 0;
+      pointer-events: none;
+      filter: blur(2px);
+    }
+
+    .ink-particle.large {
+      width: 12px;
+      height: 12px;
+      background: radial-gradient(circle, rgba(230, 199, 73, 0.6), transparent 70%);
+      filter: blur(3px);
+    }
+
+    .ink-particle.small {
+      width: 4px;
+      height: 4px;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.9), transparent 70%);
+      filter: blur(1px);
+    }
+
+    .ink-drop {
+      position: absolute;
+      width: 3px;
+      height: 15px;
+      background: linear-gradient(180deg, rgba(230, 199, 73, 0.8), transparent);
+      border-radius: 50%;
+      filter: blur(2px);
+      opacity: 0;
+    }
+
+    /* 添加星光效果 */
+    .star {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: #fff;
+      border-radius: 50%;
+      opacity: 0;
+      animation: starTwinkle 3s ease-in-out infinite;
+    }
+
+    @keyframes starTwinkle {
+      0%, 100% { opacity: 0.3; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.5); }
+    }
+
+    /* 音频控制按钮 */
+    .audio-control {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(230, 199, 73, 0.3);
+      cursor: pointer;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: #e6c749;
+      opacity: 0;
+      animation: skipAppear 1s ease-out 2s forwards;
+      pointer-events: auto;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(5px);
+    }
+
+    .audio-control:hover {
+      background: rgba(230, 199, 73, 0.2);
+      border-color: rgba(230, 199, 73, 0.6);
+      transform: scale(1.1);
+    }
+
+    .audio-control:active {
+      transform: scale(0.9);
+    }
+
+    .audio-control.muted {
+      color: #888;
+      border-color: rgba(136, 136, 136, 0.3);
+    }
+
+    /* 响应式调整 */
+    @media (max-width: 375px) {
+      .vertical-text {
+        font-size: 18px;
+        right: 10%;
+      }
+
+      .skill-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 28px;
+      }
+
+      .game-logo {
+        font-size: 36px;
+        letter-spacing: 10px;
+        top: 15% !important;
+        padding: 12px 20px;
+      }
+
+      .cta-button {
+        padding: 12px 30px;
+        font-size: 20px;
+      }
+      
+      .final-text {
+        bottom: 22% !important;
+      }
+      
+      .final-text p {
+        font-size: 15px;
+        margin: 8px 0;
+      }
+      
+      .horizontal-text {
+        top: 42% !important;
+      }
+    }
+
+    /* 横屏提示 */
+    .landscape-warning {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .landscape-warning.show {
+      display: flex;
+    }
+
+    .landscape-warning p {
+      color: #e6c749;
+      font-size: 18px;
+      line-height: 1.6;
+    }
+  </style>
+
+  </head>
+<body>
+  <!-- 横屏提示 -->
+  <div class="landscape-warning" id="landscapeWarning">
+    <p>📱 为获得最佳体验<br/>请使用竖屏观看</p>
+  </div>
+
+  <div class="container">
+    <!-- 音频控制按钮 -->
+    <button class="audio-control" id="audioBtn" onclick="toggleAudio()">🎵</button>
+    
+    <!-- 语音朗读控制按钮 -->
+    <button class="audio-control" id="voiceBtn" onclick="toggleVoice()" style="left: 70px;">🔇</button>
+    
+    <!-- 跳过按钮 -->
+    <button class="skip-button" id="skipBtn" onclick="skipIntro()">跳过动画</button>
+
+    <!-- 进度条 -->
+    <div class="progress-bar">
+      <div class="progress-fill"></div>
+    </div>
+
+    <!-- 墨水转场 -->
+    <div class="ink-transition" id="inkTransition"></div>
+    
+    <!-- 隐藏的音频元素 -->
+    <audio id="bgmAudio" loop>
+      <source src="" type="audio/mp3">
+    </audio>
+    
+    <!-- 音效音频元素 -->
+    <audio id="sfxCrack">
+      <source src="" type="audio/mp3">
+    </audio>
+    <audio id="sfxInk">
+      <source src="" type="audio/mp3">
+    </audio>
+    <audio id="sfxBell">
+      <source src="" type="audio/mp3">
+    </audio>
+    <audio id="sfxStamp">
+      <source src="" type="audio/mp3">
+    </audio>
+
+    <!-- 第一幕：天裂 -->
+    <div class="scene scene1 active" id="scene1">
+      <div class="bg-layer"></div>
+      <div class="ink-particles" id="inkParticles1"></div>
+      
+      <svg class="golden-crack" viewBox="0 0 300 200">
+        <path d="M150,0 L160,30 L145,50 L165,80 L150,120 L170,160 L150,200 L130,160 L150,120 L135,80 L155,50 L140,30 Z" 
+              fill="none" stroke="#e6c749" stroke-width="2" 
+              filter="drop-shadow(0 0 10px #e6c749)"/>
+      </svg>
+      
+      <div class="golden-ink-drip"></div>
+      <div class="landscape-left"></div>
+      <div class="landscape-right"></div>
+      <div class="scholar-silhouette"></div>
+      <div class="moon-fragment"></div>
+      
+      <div class="text-layer">
+        <div class="vertical-text">
+          <span class="text-column">鸿蒙纪元三千载</span>
+          <span class="text-column">天裂地崩九气散</span>
+          <span class="text-column">仙尊化阵难挡厄</span>
+          <span class="text-column">冬夏无序冰封城</span>
+          <span class="text-column">王朝更迭如走马</span>
+          <span class="text-column">宗门林立似繁星</span>
+          <span class="text-column">你生东华洲一角</span>
+          <span class="text-column">本是凡尘微末身</span>
+          <span class="text-column">偶得灵月残碎片</span>
+          <span class="text-column">窥见惊天大秘密</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 第二幕：迷雾 -->
+    <div class="scene scene2" id="scene2">
+      <div class="bg-layer"></div>
+      <div class="fog-container">
+        <div class="fog"></div>
+      </div>
+      <div class="ink-particles" id="inkParticles2"></div>
+      
+      <div class="skill-icons">
+        <div class="skill-icon dan">丹</div>
+        <div class="skill-icon qi">器</div>
+        <div class="skill-icon zhen">阵</div>
+        <div class="skill-icon fu">符</div>
+      </div>
+      
+      <div class="text-layer">
+        <div class="horizontal-text">
+          <div class="text-line">传闻飞升者，皆入三千灵域迷局</div>
+          <div class="text-line">南宫氏欲铸神器逆天改命</div>
+          <div class="text-line">慕容氏誓以杀伐破障</div>
+          <div class="text-line">百里氏独守古卷沉默不语</div>
+          <div class="text-line question">是天命不可违？</div>
+          <div class="text-line question">还是有人在编织谎言？</div>
+          <div class="text-line">丹炉中那一抹异香能解百毒？</div>
+          <div class="text-line">铁锤下那一缕器灵能破万古？</div>
+          <div class="text-line">阵图上那一笔玄机能困神魔？</div>
+          <div class="text-line">符箓间那一道金光能换生死？</div>
+          <div class="text-line highlight">真相，藏在你的指尖技艺之中</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 第三幕：入局 -->
+    <div class="scene scene3" id="scene3">
+      <div class="bg-layer"></div>
+      <div class="golden-path"></div>
+      <div class="purple-vortex"></div>
+      <div class="cottage"></div>
+      <div class="sect-gate"></div>
+      <div class="scholar-scene3"></div>
+      <div class="ink-particles" id="inkParticles3"></div>
+      
+      <div class="game-logo">灵月仙途</div>
+      
+      <div class="text-layer">
+        <div class="final-text">
+          <p>路在脚下，道在心中</p>
+          <p>独善其身，逍遥山水，结庐而居？</p>
+          <p>广收门徒，建立圣地，率领万宗？</p>
+          <p class="highlight">集齐九道鸿蒙紫气，重开天门？</p>
+          <p>改写命运，直面混沌</p>
+          <p>灵月已升，仙途始开</p>
+          <p class="cta">道友，请入局</p>
+        </div>
+      </div>
+      
+      <button class="cta-button" id="startBtn" onclick="startGame()">
+        点击开始
+      </button>
+    </div>
+  </div>
+
+  <script>
+    let currentScene = 1;
+    let introTimer = null;
+    let isPlaying = true;
+    let isAudioMuted = true;
+    let isVoiceEnabled = false; // 语音朗读开关
+    let audioContext = null;
+    let bgmVolume = 0.6; // BGM 音量
+    let sfxVolume = 0.8; // 音效音量
+    let synth = window.speechSynthesis; // 语音合成
+    let currentUtterance = null; // 当前语音
+
+    // 检查屏幕方向
+    function checkOrientation() {
+      const warning = document.getElementById('landscapeWarning');
+      if (window.innerWidth > window.innerHeight) {
+        warning.classList.add('show');
+      } else {
+        warning.classList.remove('show');
+      }
+    }
+
+    window.addEventListener('resize', checkOrientation);
+    window.addEventListener('orientationchange', checkOrientation);
+    checkOrientation();
+
+    // 场景切换
+    function switchScene(from, to) {
+      const fromScene = document.getElementById(`scene${from}`);
+      const toScene = document.getElementById(`scene${to}`);
+      const transition = document.getElementById('inkTransition');
+
+      // 播放墨水转场
+      transition.classList.add('active');
+
+      setTimeout(() => {
+        fromScene.classList.remove('active');
+        fromScene.classList.add('inactive');
+        
+        toScene.classList.remove('inactive');
+        toScene.classList.add('active');
+        
+        currentScene = to;
+        
+        // 如果启用了语音，朗读新场景文字
+        if (isVoiceEnabled) {
+          setTimeout(() => {
+            speakCurrentScene();
+          }, 1500);
+        }
+        
+        // 重置转场
+        setTimeout(() => {
+          transition.classList.remove('active');
+        }, 500);
+      }, 1250);
+    }
+
+    // 创建水墨粒子效果（优化版）
+    function createInkParticles(containerId, count = 20) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      
+      for (let i = 0; i < count; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'ink-particle';
+        
+        // 随机大小类型
+        const sizeType = Math.random();
+        if (sizeType > 0.7) {
+          particle.classList.add('large');
+        } else if (sizeType < 0.3) {
+          particle.classList.add('small');
+        }
+        
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.top = Math.random() * 100 + '%';
+        particle.style.opacity = Math.random() * 0.5 + 0.2;
+        particle.style.animation = `particleFloat ${Math.random() * 30 + 20}s linear infinite`;
+        particle.style.animationDelay = Math.random() * 10 + 's';
+        container.appendChild(particle);
+      }
+    }
+
+    // 创建星光效果
+    function createStars(containerId, count = 30) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      
+      for (let i = 0; i < count; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 60 + '%'; // 只在上半部分
+        star.style.animationDelay = Math.random() * 3 + 's';
+        container.appendChild(star);
+      }
+    }
+
+    // 创建金墨滴落效果
+    function createInkDrops(containerId, count = 15) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      
+      for (let i = 0; i < count; i++) {
+        const drop = document.createElement('div');
+        drop.className = 'ink-drop';
+        drop.style.left = Math.random() * 100 + '%';
+        drop.style.top = '-20px';
+        drop.style.opacity = Math.random() * 0.6 + 0.3;
+        drop.style.animation = `inkDrip ${Math.random() * 2 + 2}s ease-out infinite`;
+        drop.style.animationDelay = Math.random() * 3 + 's';
+        container.appendChild(drop);
+      }
+    }
+
+    // 音频控制
+    function toggleAudio() {
+      const audioBtn = document.getElementById('audioBtn');
+      const bgmAudio = document.getElementById('bgmAudio');
+      
+      if (isAudioMuted) {
+        isAudioMuted = false;
+        audioBtn.classList.remove('muted');
+        audioBtn.textContent = '🔊';
+        // 如果有音频文件，取消静音并播放
+        if (bgmAudio.querySelector('source').src) {
+          bgmAudio.muted = false;
+          bgmAudio.volume = bgmVolume;
+          bgmAudio.play().catch(e => console.log('BGM play failed:', e));
+        }
+      } else {
+        isAudioMuted = true;
+        audioBtn.classList.add('muted');
+        audioBtn.textContent = '🎵';
+        if (bgmAudio.querySelector('source').src) {
+          bgmAudio.muted = true;
+        }
+      }
+    }
+
+    // 语音朗读控制
+    function toggleVoice() {
+      const voiceBtn = document.getElementById('voiceBtn');
+      
+      if (!isVoiceEnabled) {
+        isVoiceEnabled = true;
+        voiceBtn.textContent = '🔊';
+        voiceBtn.style.color = '#e6c749';
+        
+        // 立即朗读当前场景
+        setTimeout(() => {
+          speakCurrentScene();
+        }, 500);
+      } else {
+        isVoiceEnabled = false;
+        voiceBtn.textContent = '🔇';
+        voiceBtn.style.color = '#888';
+        // 停止朗读
+        if (synth) {
+          synth.cancel();
+        }
+      }
+    }
+
+    // 朗读文字
+    function speakText(text, rate = 0.8, pitch = 1.0) {
+      if (!isVoiceEnabled || !synth) {
+        console.log('语音未启用或不支持');
+        return;
+      }
+      
+      // 停止当前朗读
+      if (currentUtterance) {
+        synth.cancel();
+      }
+      
+      // 创建新的语音
+      currentUtterance = new SpeechSynthesisUtterance(text);
+      currentUtterance.lang = 'zh-CN'; // 中文
+      currentUtterance.rate = rate; // 语速（0.1-10）
+      currentUtterance.pitch = pitch; // 音调（0-2）
+      currentUtterance.volume = 1.0;
+      
+      // 选择中文语音（如果可用）
+      const voices = synth.getVoices();
+      console.log('可用语音数量:', voices.length);
+      const zhVoice = voices.find(voice => voice.lang.includes('zh'));
+      if (zhVoice) {
+        console.log('使用中文语音:', zhVoice.name);
+        currentUtterance.voice = zhVoice;
+      } else {
+        console.log('未找到中文语音，使用默认');
+      }
+      
+      // 播放
+      console.log('开始朗读:', text.substring(0, 20) + '...');
+      synth.speak(currentUtterance);
+      
+      // 朗读结束回调
+      currentUtterance.onend = function() {
+        console.log('朗读完成');
+      };
+      
+      currentUtterance.onerror = function(event) {
+        console.error('朗读错误:', event);
+      };
+    }
+
+    // 朗读当前场景文字
+    function speakCurrentScene() {
+      if (!isVoiceEnabled) return;
+      
+      if (currentScene === 1) {
+        // 第一幕：竖排文字
+        const columns = document.querySelectorAll('#scene1 .text-column');
+        const texts = Array.from(columns).map(col => col.textContent);
+        const fullText = texts.join('，');
+        speakText(fullText, 0.7, 0.9);
+      } else if (currentScene === 2) {
+        // 第二幕：横排文字
+        const lines = document.querySelectorAll('#scene2 .text-line');
+        const texts = Array.from(lines).map(line => line.textContent);
+        const fullText = texts.join('。');
+        speakText(fullText, 0.75, 1.0);
+      } else if (currentScene === 3) {
+        // 第三幕：最终文字
+        const paragraphs = document.querySelectorAll('#scene3 .final-text p');
+        const texts = Array.from(paragraphs).map(p => p.textContent);
+        const fullText = texts.join('。');
+        speakText(fullText, 0.8, 1.1);
+      }
+    }
+
+    // 播放音效
+    function playSFX(sfxId, volume = sfxVolume) {
+      const sfx = document.getElementById(sfxId);
+      if (!sfx) return;
+      
+      // 如果静音则不播放
+      if (isAudioMuted) return;
+      
+      // 重置到开头
+      sfx.currentTime = 0;
+      sfx.volume = volume;
+      
+      // 播放
+      sfx.play().catch(e => console.log(`SFX ${sfxId} play failed:`, e));
+    }
+
+    // 初始化音频（需要用户交互后才能播放）
+    function initAudio() {
+      // 尝试初始化 AudioContext（用于更精确的音效控制）
+      try {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      } catch (e) {
+        console.log('Web Audio API not supported');
+      }
+    }
+
+    // 显示第二段文字（逐行）
+    function showScene2Texts() {
+      const textLines = document.querySelectorAll('#scene2 .text-line');
+      const delays = [0.5, 2, 3.5, 5, 7, 9, 11, 13, 15, 17, 19]; // 每行显示的时间偏移
+      
+      textLines.forEach((line, index) => {
+        setTimeout(() => {
+          if (!isPlaying) return;
+          line.classList.add('show');
+        }, delays[index] * 1000);
+      });
+    }
+
+    // 显示第三段文字（逐行）
+    function showScene3Texts() {
+      const textParagraphs = document.querySelectorAll('#scene3 .final-text p');
+      const delays = [0.5, 2.5, 5, 7.5, 10, 12, 14]; // 每行显示的时间偏移
+      
+      textParagraphs.forEach((para, index) => {
+        setTimeout(() => {
+          if (!isPlaying) return;
+          para.classList.add('show');
+          
+          // 第 6 行显示时播放铃声（Logo 出现）
+          if (index === 5) {
+            setTimeout(() => {
+              if (!isPlaying) return;
+              playSFX('sfxBell', 0.7);
+            }, 1000);
+          }
+        }, delays[index] * 1000);
+      });
+    }
+
+    // 自动播放动画序列
+    function playIntro() {
+      // 创建粒子效果
+      createInkParticles('inkParticles1', 20);
+      createInkDrops('inkParticles1', 12);
+      createStars('inkParticles1', 25);
+      
+      createInkParticles('inkParticles2', 25);
+      createStars('inkParticles2', 20);
+      
+      createInkParticles('inkParticles3', 30);
+      createStars('inkParticles3', 35);
+
+      // 第一幕：0-24 秒（更慢展示完整文案）
+      setTimeout(() => {
+        if (!isPlaying) return;
+        // 播放天裂音效
+        playSFX('sfxCrack', 0.9);
+        switchScene(1, 2);
+        // 开始显示第二段文字
+        showScene2Texts();
+      }, 24000);
+
+      // 第二幕：24-50 秒
+      setTimeout(() => {
+        if (!isPlaying) return;
+        // 转场时播放墨滴声
+        playSFX('sfxInk', 0.5);
+        switchScene(2, 3);
+        // 开始显示第三段文字
+        showScene3Texts();
+      }, 50000);
+
+      // 第三幕：50 秒后，等待用户点击
+      introTimer = setTimeout(() => {
+        if (!isPlaying) return;
+        // 等待用户点击
+      }, 55000);
+      
+      // 如果启用了语音，延迟开始朗读第一幕
+      if (isVoiceEnabled) {
+        setTimeout(() => {
+          if (isPlaying && currentScene === 1) {
+            console.log('开始自动朗读第一幕');
+            speakCurrentScene();
+          }
+        }, 3000);
+      }
+    }
+
+    // 跳过动画
+    function skipIntro() {
+      isPlaying = false;
+      clearTimeout(introTimer);
+      startGame();
+    }
+
+    // 开始游戏
+    function startGame() {
+      isPlaying = false;
+      clearTimeout(introTimer);
+      
+      // 播放盖章音效
+      playSFX('sfxStamp', 1.0);
+      
+      // 添加点击特效
+      const btn = document.getElementById('startBtn');
+      if (btn) {
+        btn.style.transform = 'translateX(-50%) scale(0.9)';
+        btn.style.opacity = '0.7';
+        
+        // 创建点击波纹效果
+        createClickEffect(btn);
+      }
+      
+      // 延迟跳转
+      setTimeout(() => {
+        // 跳转到主页面
+        window.location.href = 'home/zhongtian.html';
+      }, 500);
+    }
+
+    // 创建点击波纹效果
+    function createClickEffect(element) {
+      const ripple = document.createElement('div');
+      ripple.style.position = 'absolute';
+      ripple.style.top = '50%';
+      ripple.style.left = '50%';
+      ripple.style.transform = 'translate(-50%, -50%)';
+      ripple.style.width = '100%';
+      ripple.style.height = '100%';
+      ripple.style.borderRadius = '5px';
+      ripple.style.background = 'radial-gradient(circle, rgba(255,255,255,0.8) 0%, transparent 70%)';
+      ripple.style.animation = 'rippleEffect 0.6s ease-out forwards';
+      ripple.style.pointerEvents = 'none';
+      ripple.style.zIndex = '100';
+      
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes rippleEffect {
+          0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
+          100% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
+        }
+      `;
+      document.head.appendChild(style);
+      
+      element.style.position = 'relative';
+      element.appendChild(ripple);
+      
+      setTimeout(() => {
+        ripple.remove();
+      }, 600);
+    }
+
+    // 初始化
+    window.addEventListener('load', () => {
+      checkOrientation();
+      playIntro();
+      
+      // 预加载语音（某些浏览器需要）
+      if (window.speechSynthesis) {
+        // 加载语音列表
+        speechSynthesis.getVoices();
+        // 某些浏览器需要等待语音加载
+        if (speechSynthesis.onvoiceschanged !== undefined) {
+          speechSynthesis.onvoiceschanged = () => {
+            console.log('Voices loaded:', speechSynthesis.getVoices().length);
+          };
+        }
+      }
+    });
+
+    // 首次用户交互时初始化音频（浏览器策略需要）
+    document.addEventListener('click', function initAudioOnClick() {
+      initAudio();
+      // 只触发一次
+      document.removeEventListener('click', initAudioOnClick);
+    }, { once: true });
+
+    // 阻止双击缩放
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', (e) => {
+      const now = Date.now();
+      if (now - lastTouchEnd <= 300) {
+        e.preventDefault();
+      }
+      lastTouchEnd = now;
+    }, false);
+
+    // 添加 CSS 动画关键帧
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes inkDrip {
+        0% { transform: translateY(0); opacity: 0.8; }
+        100% { transform: translateY(80vh); opacity: 0; }
+      }
+    `;
+    document.head.appendChild(style);
+  </script>
+</body>
+</html>

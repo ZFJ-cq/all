@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>签到管理</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <div class="module-content">
+        <h2>签到管理</h2>
+        <div class="module-description">
+            管理玩家的签到记录和奖励
+        </div>
+        
+        <div class="search-bar">
+            <input type="text" id="searchKeyword" placeholder="搜索玩家...">
+            <button onclick="searchPlayers()">搜索</button>
+        </div>
+        
+        <div class="filter-bar">
+            <select id="checkinStatus">
+                <option value="">所有状态</option>
+                <option value="checked">已签到</option>
+                <option value="unchecked">未签到</option>
+            </select>
+            <input type="date" id="checkinDate">
+            <button onclick="filterCheckins()">筛选</button>
+        </div>
+        
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>玩家ID</th>
+                        <th>玩家名称</th>
+                        <th>签到日期</th>
+                        <th>签到状态</th>
+                        <th>连续签到天数</th>
+                        <th>签到奖励</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="checkinTableBody">
+                    <!-- 数据将通过JS动态加载 -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="pagination" id="pagination">
+            <!-- 分页将通过JS动态生成 -->
+        </div>
+    </div>
+    
+    <script>
+        function initCheckin() {
+            console.log('初始化签到管理模块');
+            loadCheckinData();
+        }
+        
+        function loadCheckinData(page = 1) {
+            const tableBody = document.getElementById('checkinTableBody');
+            tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px;">加载中...</td></tr>';
+            
+            // 模拟数据加载
+            setTimeout(() => {
+                tableBody.innerHTML = '';
+                for (let i = 1; i <= 10; i++) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${(page - 1) * 10 + i}</td>
+                        <td>100${i}</td>
+                        <td>玩家${i}</td>
+                        <td>2024-01-${i.toString().padStart(2, '0')}</td>
+                        <td>${Math.random() > 0.5 ? '已签到' : '未签到'}</td>
+                        <td>${Math.floor(Math.random() * 7) + 1}</td>
+                        <td>灵石 x ${Math.floor(Math.random() * 100) + 50}</td>
+                        <td>
+                            <button onclick="editCheckin(${i})">编辑</button>
+                            <button onclick="resetCheckin(${i})">重置</button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                }
+                
+                // 生成分页
+                generatePagination(page, 5);
+            }, 1000);
+        }
+        
+        function searchPlayers() {
+            const keyword = document.getElementById('searchKeyword').value;
+            console.log('搜索玩家:', keyword);
+            loadCheckinData();
+        }
+        
+        function filterCheckins() {
+            const status = document.getElementById('checkinStatus').value;
+            const date = document.getElementById('checkinDate').value;
+            console.log('筛选签到:', status, date);
+            loadCheckinData();
+        }
+        
+        function editCheckin(id) {
+            console.log('编辑签到记录:', id);
+            alert('编辑签到记录功能开发中');
+        }
+        
+        function resetCheckin(id) {
+            if (confirm('确定要重置签到记录吗？')) {
+                console.log('重置签到记录:', id);
+                alert('重置成功');
+            }
+        }
+        
+        function generatePagination(currentPage, totalPages) {
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+            
+            for (let i = 1; i <= totalPages; i++) {
+                const button = document.createElement('button');
+                button.textContent = i;
+                button.className = i === currentPage ? 'active' : '';
+                button.onclick = () => loadCheckinData(i);
+                pagination.appendChild(button);
+            }
+        }
+    </script>
+</body>
+</html>

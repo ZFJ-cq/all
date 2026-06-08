@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="../js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="../css/mobile-adapt.css">
+    <title>宗门商店 - 灵月仙途</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-body: #f0f2f5;
+            --bg-card: #2c3e50;
+            --bg-card-light: #34495e;
+            --text-gold: #d4af37;
+            --text-gold-dim: #aa8c2c;
+            --text-white: #ecf0f1;
+            --text-grey: #95a5a6;
+            --border-radius: 8px;
+            --nav-height: 60px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-white);
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            background: rgba(44, 62, 80, 0.05);
+            min-height: 100vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            padding-bottom: calc(var(--nav-height) + 20px);
+        }
+
+        /* 头部 */
+        .header {
+            background: var(--bg-card);
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--text-gold-dim);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .header-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--text-gold);
+        }
+
+        .header-btn {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--text-gold-dim);
+            color: var(--text-gold);
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        /* 贡献显示 */
+        .contribution-bar {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(170, 140, 44, 0.1));
+            margin: 15px;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .contribution-label {
+            font-size: 14px;
+            color: var(--text-grey);
+        }
+
+        .contribution-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--text-gold);
+        }
+
+        /* 分类筛选 */
+        .category-tabs {
+            margin: 0 15px 15px;
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+
+        .tab-btn {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            color: var(--text-grey);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: rgba(212, 175, 55, 0.2);
+            border-color: var(--text-gold);
+            color: var(--text-gold);
+        }
+
+        /* 商品列表 */
+        .shop-items {
+            padding: 0 15px;
+        }
+
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .item-card {
+            background: var(--bg-card);
+            border-radius: var(--border-radius);
+            padding: 12px;
+            border: 1px solid rgba(212, 175, 55, 0.1);
+            transition: all 0.2s;
+        }
+
+        .item-card:hover {
+            border-color: var(--text-gold);
+            transform: translateY(-2px);
+        }
+
+        .item-icon {
+            width: 100%;
+            aspect-ratio: 1;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+        }
+
+        .item-name {
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--text-white);
+            margin-bottom: 5px;
+        }
+
+        .item-desc {
+            font-size: 11px;
+            color: var(--text-grey);
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .item-price {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .price {
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--text-gold);
+        }
+
+        .buy-btn {
+            padding: 4px 10px;
+            background: linear-gradient(135deg, var(--text-gold), var(--text-gold-dim));
+            border: none;
+            border-radius: 4px;
+            color: #1a252f;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .buy-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .buy-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* 底部导航 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #1a252f;
+            border-top: 1px solid var(--text-gold-dim);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+            max-width: 480px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: var(--text-grey);
+            text-decoration: none;
+            font-size: 10px;
+            width: 20%;
+        }
+
+        .nav-item.active {
+            color: var(--text-gold);
+        }
+
+        .nav-icon {
+            font-size: 18px;
+        }
+
+        /* 通知 */
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(20, 30, 60, 0.95);
+            color: #aaccff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: 1px solid rgba(100, 150, 255, 0.4);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+            z-index: 3000;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .notification.show {
+            opacity: 1;
+        }
+    </style>
+
+  </head>
+<body>
+    <div class="app-container">
+        <!-- 头部 -->
+        <header class="header">
+            <button class="header-btn" onclick="history.back()">← 返回</button>
+            <div class="header-title">宗门商店</div>
+            <button class="header-btn" onclick="showHelp()">❓</button>
+        </header>
+
+        <!-- 贡献显示 -->
+        <div class="contribution-bar">
+            <div>
+                <div class="contribution-label">我的贡献值</div>
+                <div class="contribution-value" id="myContribution">0</div>
+            </div>
+            <div style="text-align: right;">
+                <div class="contribution-label">宗门灵石</div>
+                <div class="contribution-value" id="clanSpiritStone" style="color: #4CAF50;">0</div>
+            </div>
+        </div>
+
+        <!-- 分类筛选 -->
+        <div class="category-tabs">
+            <button class="tab-btn active" onclick="filterCategory('all')">全部</button>
+            <button class="tab-btn" onclick="filterCategory('pill')">丹药</button>
+            <button class="tab-btn" onclick="filterCategory('weapon')">法器</button>
+            <button class="tab-btn" onclick="filterCategory('material')">材料</button>
+            <button class="tab-btn" onclick="filterCategory('skill')">功法</button>
+        </div>
+
+        <!-- 商品列表 -->
+        <div class="shop-items">
+            <div class="items-grid" id="itemsGrid">
+                <!-- 商品将通过 JS 动态加载 -->
+            </div>
+        </div>
+
+        <!-- 底部导航 -->
+        <nav class="bottom-nav" role="navigation" aria-label="主导航">
+            <a href="../index.html" class="nav-item" aria-label="修炼页面">
+                <div class="nav-icon">🧘</div>
+                <div class="nav-text">修炼</div>
+            </a>
+            <a href="../skills/skills.html" class="nav-item" aria-label="功法页面">
+                <div class="nav-icon">📜</div>
+                <div class="nav-text">功法</div>
+            </a>
+            <a href="clan.html" class="nav-item active" aria-label="宗门页面" aria-current="page">
+                <div class="nav-icon">🏯</div>
+                <div class="nav-text">宗门</div>
+            </a>
+            <a href="../word/world.html" class="nav-item" aria-label="仙途页面">
+                <div class="nav-icon">🌌</div>
+                <div class="nav-text">仙途</div>
+            </a>
+            <a href="../map/map.html" class="nav-item" aria-label="云游页面">
+                <div class="nav-icon">🗺️</div>
+                <div class="nav-text">云游</div>
+            </a>
+        </nav>
+    </div>
+
+    <script>
+        const API_BASE_URL = window.APP_CONFIG?.API_BASE_URL || 'http://localhost:8088/api';
+        const roleId = window.AuthService ? window.AuthService.getCurrentRoleId() : localStorage.getItem('currentRoleId');
+        let currentClanId = null;
+        let myContribution = 0;
+        let clanSpiritStone = 0;
+        let shopItems = [];
+        let currentCategory = 'all';
+
+        // 商品数据
+        const itemsData = [
+            {
+                id: 1,
+                name: '聚气丹',
+                icon: '💊',
+                category: 'pill',
+                description: '增加 100 点修为',
+                price: 100,
+                currency: 'contribution'
+            },
+            {
+                id: 2,
+                name: '筑基丹',
+                icon: '💎',
+                category: 'pill',
+                description: '增加 500 点修为，突破瓶颈',
+                price: 500,
+                currency: 'contribution'
+            },
+            {
+                id: 3,
+                name: '金丹',
+                icon: '🔮',
+                category: 'pill',
+                description: '增加 2000 点修为，凝结金丹',
+                price: 2000,
+                currency: 'contribution'
+            },
+            {
+                id: 4,
+                name: '元婴果',
+                icon: '🍎',
+                category: 'pill',
+                description: '增加 5000 点修为，孕育元婴',
+                price: 5000,
+                currency: 'contribution'
+            },
+            {
+                id: 5,
+                name: '青云剑',
+                icon: '⚔️',
+                category: 'weapon',
+                description: '下品法器，攻击力 +50',
+                price: 1000,
+                currency: 'contribution'
+            },
+            {
+                id: 6,
+                name: '紫电锤',
+                icon: '🔨',
+                category: 'weapon',
+                description: '中品法器，攻击力 +100',
+                price: 3000,
+                currency: 'contribution'
+            },
+            {
+                id: 7,
+                name: '灵石',
+                icon: '💰',
+                category: 'material',
+                description: '基础修炼资源',
+                price: 100,
+                currency: 'contribution'
+            },
+            {
+                id: 8,
+                name: '灵草',
+                icon: '🌿',
+                category: 'material',
+                description: '炼丹基础材料',
+                price: 50,
+                currency: 'contribution'
+            },
+            {
+                id: 9,
+                name: '基础剑诀',
+                icon: '📖',
+                category: 'skill',
+                description: '黄阶功法，剑法入门',
+                price: 500,
+                currency: 'contribution'
+            },
+            {
+                id: 10,
+                name: '雷法秘籍',
+                icon: '📜',
+                category: 'skill',
+                description: '玄阶功法，雷系法术',
+                price: 2000,
+                currency: 'contribution'
+            }
+        ];
+
+        // 页面加载
+        window.addEventListener('DOMContentLoaded', () => {
+            loadMyClanInfo();
+            shopItems = itemsData;
+            renderItems();
+        });
+
+        // 加载我的宗门信息
+        async function loadMyClanInfo() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/clan/member/role/${roleId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data && data.clanId) {
+                        currentClanId = data.clanId;
+                        myContribution = data.contribution || 0;
+                        updateDisplay();
+                    } else {
+                        showNotification('您还未加入任何宗门');
+                        setTimeout(() => {
+                            window.location.href = 'clan-list.html';
+                        }, 1500);
+                    }
+                }
+            } catch (error) {
+                console.error('加载宗门信息失败:', error);
+                // 使用模拟数据
+                myContribution = 15000;
+                clanSpiritStone = 100000;
+                updateDisplay();
+            }
+        }
+
+        // 更新显示
+        function updateDisplay() {
+            document.getElementById('myContribution').textContent = myContribution.toLocaleString();
+            document.getElementById('clanSpiritStone').textContent = clanSpiritStone.toLocaleString();
+        }
+
+        // 筛选分类
+        function filterCategory(category) {
+            currentCategory = category;
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            if (category === 'all') {
+                shopItems = itemsData;
+            } else {
+                shopItems = itemsData.filter(item => item.category === category);
+            }
+            renderItems();
+        }
+
+        // 渲染商品列表
+        function renderItems() {
+            const grid = document.getElementById('itemsGrid');
+            grid.innerHTML = shopItems.map(item => `
+                <div class="item-card">
+                    <div class="item-icon">${item.icon}</div>
+                    <div class="item-name">${item.name}</div>
+                    <div class="item-desc">${item.description}</div>
+                    <div class="item-price">
+                        <div class="price">${item.price} 贡献</div>
+                        <button class="buy-btn" onclick="buyItem(${item.id})" ${myContribution < item.price ? 'disabled' : ''}>
+                            购买
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 购买商品
+        async function buyItem(itemId) {
+            const item = itemsData.find(i => i.id === itemId);
+            if (!item) return;
+
+            if (myContribution < item.price) {
+                showNotification('贡献值不足！');
+                return;
+            }
+
+            showConfirm(`确定要购买 ${item.name} 吗？\n消耗：${item.price} 贡献值`, async () => {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/clan/shop/exchange`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            roleId: roleId,
+                            itemId: item.id,
+                            price: item.price
+                        })
+                    });
+
+                    if (response.ok) {
+                        myContribution -= item.price;
+                        updateDisplay();
+                        renderItems();
+                        showNotification(`购买成功！获得 ${item.name}`);
+                        
+                        // 添加到背包
+                        addToInventory(item);
+                    } else {
+                        throw new Error('购买失败');
+                    }
+                } catch (error) {
+                    console.error('购买失败:', error);
+                    showNotification('购买失败，请重试');
+                }
+            });
+        }
+
+        // 添加到背包
+        function addToInventory(item) {
+            // 这里可以调用背包 API 或者本地存储
+            console.log('添加到背包:', item);
+        }
+
+        // 显示帮助
+        function showHelp() {
+            showToast('宗门商店说明：贡献值和宗门灵石可购买商品');
+            
+            // 可以在这里添加更详细的帮助模态框
+            // 暂时使用简单提示，后续可扩展为完整帮助系统
+        }
+
+        // 显示通知
+        function showNotification(message, duration = 3000) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => notification.classList.add('show'), 10);
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 300);
+            }, duration);
+        }
+    </script>
+  <script src="../js/ui-components.js"></script>
+  <script src="../js/auth-service.js"></script>
+</body>
+</html>

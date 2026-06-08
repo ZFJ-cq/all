@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="../js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="../css/mobile-adapt.css">
+    <title>修仙大世界 - 古风交互地图</title>
+    <link rel="stylesheet" href="style.css">
+
+  </head>
+<body>
+    <!-- 加载动画 -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <p class="loading-text">加载修仙世界...
+        <p class="loading-subtext">请稍候，正在初始化地图数据
+    </div>
+
+    <!-- 地图容器 -->
+    <div class="map-wrapper">
+        <div class="map-container" id="mapContainer">
+            <!-- 地图背景 -->
+            <img 
+                src="map-background2.jpg" 
+                alt="修仙大世界地图" 
+                class="map-background" 
+                id="mapImage" 
+            />
+
+            <!-- 地图区域标记 -->
+            <div class="map-regions" id="mapRegions">
+                <!-- 区域标记将通过JavaScript动态生成 -->
+            </div>
+        </div>
+
+        <!-- 功能卡片 -->
+        <div class="function-cards">
+            <div class="card-item" data-card="world">
+                <i class="card-icon">🌍</i>
+                <span>世界地图</span>
+            </div>
+            <div class="card-item" data-card="location">
+                <i class="card-icon">📍</i>
+                <span>我的位置</span>
+            </div>
+            <div class="card-item" data-card="settings">
+                <i class="card-icon">⚙️</i>
+                <span>地图设置</span>
+            </div>
+            <div class="card-item" data-card="legend">
+                <i class="card-icon">📜</i>
+                <span>图例说明</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 信息面板 -->
+    <div class="info-panel" id="infoPanel">
+        <div class="panel-header">
+            <h3 id="regionTitle">区域名称</h3>
+            <button class="close-btn" id="closePanelBtn">×</button>
+        </div>
+        <div class="panel-content">
+            <p id="regionDesc">区域描述将在这里显示...
+            <div class="resource-stats">
+                <div class="stat-item">
+                    <span class="stat-label">灵气：</span>
+                    <span id="statLingqi" class="stat-value">中等</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">危险：</span>
+                    <span id="statDanger" class="stat-value">低</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">资源：</span>
+                    <span id="statResource" class="stat-value">灵脉</span>
+                </div>
+            </div>
+            <div class="panel-buttons">
+                <button class="btn-primary" id="enterRegionBtn">进入区域</button>
+                <button class="btn-secondary" id="detailBtn">查看详情</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+  <script src="js/ui-components.js"></script>
+</body>
+</html>

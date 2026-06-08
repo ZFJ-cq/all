@@ -1,0 +1,217 @@
+{
+  "id": "case_011",
+  "title": "狮儿巷",
+  "subtitle": "第十一案",
+  "difficulty": 3,
+  "description": "曹国舅为夺美人害死秀才一家，冤魂拦路告状，包拯智破皇亲大案！",
+  "background": "潮州秀才袁文正携妻张氏赴京赶考，曹国舅见张氏美貌，起歹意，谋害袁秀才并囚禁其妻。袁文正冤魂化作旋风拦路鸣冤，包拯决心为弱者讨回公道。",
+  "stages": {
+    "report": {
+      "id": "report",
+      "name": "报案",
+      "dialogues": [
+        {
+          "speaker": "系统",
+          "speakerTitle": "旁白",
+          "content": "包拯从边庭赏劳三军回朝复命，行至石桥边，忽见马前狂风大作，旋绕不散。",
+          "emotion": "narrator"
+        },
+        {
+          "speaker": "包拯",
+          "speakerTitle": "包青天",
+          "content": "此风来得蹊跷，必有冤情！王兴、李吉，随风而去，看其下落！",
+          "emotion": "serious"
+        },
+        {
+          "speaker": "系统",
+          "speakerTitle": "旁白",
+          "content": "二公差随狂风而去，见一座高墙大门，上书'有人看者割去眼睛，用手指者砍去手掌'。",
+          "emotion": "narrator"
+        },
+        {
+          "speaker": "袁文正（冤魂）",
+          "speakerTitle": "冤魂",
+          "content": "包大人……小生袁文正，潮州秀才……被曹国舅所害……求大人为小生申冤……",
+          "emotion": "cry"
+        },
+        {
+          "speaker": "包拯",
+          "speakerTitle": "包青天",
+          "content": "你且细细说来，曹国舅如何害你？你妻如今何在？",
+          "emotion": "serious"
+        },
+        {
+          "speaker": "袁文正（冤魂）",
+          "speakerTitle": "冤魂",
+          "content": "小生携妻入京赴考……那曹国舅见妻美貌……用麻绳将小生绞死……将三岁孩儿亦打死……我妻被囚于府中……求大人搭救！",
+          "emotion": "cry"
+        },
+        {
+          "speaker": "包拯",
+          "speakerTitle": "包青天",
+          "content": "朗朗乾坤，皇亲竟如此横行！本官必为你讨回公道！",
+          "emotion": "angry"
+        }
+      ]
+    },
+    "investigation": {
+      "id": "investigation",
+      "name": "取证",
+      "scenes": [
+        {
+          "id": "cao_manor",
+          "name": "曹府旧址",
+          "description": "曹国舅旧日府邸，因害人多，白日生鬼，已移往狮儿巷新宅。",
+          "searchHints": ["查找后花园古井", "询问府中老人", "寻找证人"]
+        },
+        {
+          "id": "lion_street",
+          "name": "狮儿巷新府",
+          "description": "曹国舅新建府邸，金碧辉煌，权势滔天。",
+          "searchHints": ["搜集黄金证据", "探查张氏下落", "寻找曹府下人"]
+        },
+        {
+          "id": "prison",
+          "name": "开封府牢",
+          "description": "开封府大牢，有人被囚禁其中。",
+          "searchHints": ["探监", "询问狱卒", "寻找张氏"]
+        }
+      ],
+      "evidences": [
+        {
+          "id": "ev_1101",
+          "name": "袁文正尸身",
+          "icon": "bone",
+          "description": "曹府后花园井中打捞出的尸体，正是袁文正本人。",
+          "sceneId": "cao_manor",
+          "isKey": true,
+          "clue": "尸身证明袁文正已死，且死于非命。"
+        },
+        {
+          "id": "ev_1102",
+          "name": "曹国舅府规",
+          "icon": "seal",
+          "description": "曹府大门上写着'有人看者割去眼睛，用手指者砍去手掌'，横行霸道。",
+          "sceneId": "cao_manor",
+          "isKey": true,
+          "clue": "曹府目无王法，气焰嚣张至此。"
+        },
+        {
+          "id": "ev_1103",
+          "name": "张千李万贺礼",
+          "icon": "package",
+          "description": "包拯命张千、李万以贺礼为名前往曹府，探得曹府虚实。",
+          "sceneId": "lion_street",
+          "isKey": false,
+          "clue": "曹府戒备森严，但已露端倪。"
+        },
+        {
+          "id": "ev_1104",
+          "name": "郡太夫人书信",
+          "icon": "note",
+          "description": "郡太夫人命二国舅杀张娘子灭口的亲笔书信。",
+          "sceneId": "lion_street",
+          "isKey": true,
+          "clue": "书信证明曹家高层参与谋害，罪行昭然。"
+        },
+        {
+          "id": "ev_1105",
+          "name": "张公证词",
+          "icon": "witness",
+          "description": "曹府院子张公证实，二国舅欲杀张氏，被他劝阻后将其推入古井。",
+          "sceneId": "lion_street",
+          "isKey": true,
+          "clue": "张公是直接证人，掌握关键证据。"
+        }
+      ]
+    },
+    "interrogation": {
+      "id": "interrogation",
+      "name": "审讯",
+      "suspects": [
+        {
+          "id": "sus_1101",
+          "name": "曹大国舅",
+          "role": "皇亲",
+          "description": "曹国舅之长兄，霸占袁文正之妻，罪魁祸首之一。",
+          "dialogues": [
+            {
+              "speaker": "曹大国舅",
+              "speakerTitle": "嫌疑人",
+              "content": "包拯！你一个小小府尹，也敢来查本皇亲的府邸？",
+              "emotion": "arrogant"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "皇亲犯法，与庶民同罪！你霸占人妻，谋杀人命，可知罪？",
+              "emotion": "angry"
+            },
+            {
+              "speaker": "曹大国舅",
+              "speakerTitle": "嫌疑人",
+              "content": "你有何证据？空口白牙想加罪于皇亲？",
+              "emotion": "defensive"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "你府中井里有千两黄金，是也不是？",
+              "emotion": "serious"
+            },
+            {
+              "speaker": "曹大国舅",
+              "speakerTitle": "嫌疑人",
+              "content": "这……",
+              "emotion": "panic"
+            }
+          ],
+          "isGuilty": true
+        },
+        {
+          "id": "sus_1102",
+          "name": "曹二国舅",
+          "role": "皇亲",
+          "description": "曹国舅之二弟，奉母命欲杀张娘子灭口。",
+          "dialogues": [
+            {
+              "speaker": "曹二国舅",
+              "speakerTitle": "嫌疑人",
+              "content": "我……我是奉母亲之命行事……",
+              "emotion": "fear"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "奉命行事？袁秀才与你何仇？你将他满门杀害？",
+              "emotion": "angry"
+            },
+            {
+              "speaker": "曹二国舅",
+              "speakerTitle": "嫌疑人",
+              "content": "大人饶命……是大哥看中了那妇人……我不敢不从……",
+              "emotion": "surrender"
+            }
+          ],
+          "isGuilty": true
+        }
+      ]
+    },
+    "judgment": {
+      "id": "judgment",
+      "name": "断案",
+      "correctSuspectId": "sus_1101",
+      "requiredEvidenceIds": ["ev_1101", "ev_1102", "ev_1104", "ev_1105"],
+      "judgmentText": {
+        "correct": "经查明，曹大国舅见色起意，谋害袁文正并囚禁其妻张氏，又命二国舅杀张娘子灭口，其母郡太夫人修书主谋，曹府上下狼狈为奸。袁家满门被害，家产被占，罪行累累！判曹大国舅绑赴法场处斩，二国舅同谋论死，郡太夫人教子不严，罚银万两赈济灾民。张娘子得以生还，表彰其节烈。包拯不畏权贵，为民申冤，传为千古佳话！",
+        "wrong": "案情错综，需仔细梳理证据链。",
+        "partial": "已查明部分真相，但主谋尚未落网。"
+      }
+    }
+  },
+  "hints": [
+    { "id": "hint_11_1", "content": "曹府后花园井中有黄金和尸体，这两样都是证据。", "cost": 1 },
+    { "id": "hint_11_2", "content": "郡太夫人的书信是铁证，需设法获取。", "cost": 1 },
+    { "id": "hint_11_3", "content": "张公是知情人，找到他就能打开突破口。", "cost": 1 }
+  ]
+}

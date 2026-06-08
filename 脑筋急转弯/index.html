@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>脑筋急转弯</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;overflow:hidden}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;background:#f5f5f5;color:#333}
+.app{width:100%;max-width:480px;margin:0 auto;height:100vh;position:relative;overflow:hidden}
+.page{position:absolute;top:0;left:0;width:100%;height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.page.hidden{display:none}
+
+/* 封面页 */
+.cover-page{display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(180deg,#ffecd2 0%,#fcb69f 100%);padding:20px 16px;padding-bottom:calc(env(safe-area-inset-bottom,20px)+20px)}
+.cover-icon{width:140px;height:140px;border-radius:30px;background:linear-gradient(135deg,#ff6b6b,#ee5a24);display:flex;align-items:center;justify-content:center;margin-bottom:24px;box-shadow:0 12px 28px rgba(238,90,36,.35);position:relative;z-index:1}
+.cover-icon span{font-size:64px}
+.cover-title{font-size:28px;font-weight:800;color:#2d3436;margin-bottom:6px;letter-spacing:3px;text-align:center}
+.cover-sub{font-size:14px;color:#636e72;margin-bottom:40px;letter-spacing:1px}
+.cover-btn{width:220px;height:52px;border-radius:26px;border:none;background:linear-gradient(135deg,#00b894,#00cec9);color:#fff;font-size:16px;font-weight:700;letter-spacing:2px;box-shadow:0 8px 24px rgba(0,184,148,.25);cursor:pointer;position:relative;z-index:1}
+.cover-btn:active{transform:scale(.96)}
+.cover-stats{display:flex;gap:32px;margin-top:36px;position:relative;z-index:1}
+.cover-stat{text-align:center;background:rgba(255,255,255,.7);padding:16px 20px;border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.06)}
+.cover-stat b{display:block;font-size:24px;color:#2d3436;font-weight:800}
+.cover-stat small{font-size:11px;color:#636e72}
+
+/* 关卡选择页 */
+.select-page{display:flex;flex-direction:column;background:#f5f5f5}
+.sel-head{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;padding-top:calc(env(safe-area-inset-top,0)+12px);background:#fff;position:sticky;top:0;z-index:5;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.sel-back{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#00b894,#00cec9);color:#fff;border:none;font-size:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sel-back:active{transform:scale(.92)}
+.sel-head h2{font-size:20px;color:#2d3436;font-weight:700}
+.sel-head-right{width:40px}
+.sel-progress{margin:16px 16px 12px}
+.sel-bar{height:8px;background:#e0e0e0;border-radius:4px;overflow:hidden}
+.sel-bar-fill{height:100%;background:linear-gradient(90deg,#00b894,#00cec9);border-radius:4px;transition:width .4s}
+.sel-bar-text{display:flex;justify-content:space-between;margin-top:6px;font-size:12px;color:#636e72}
+.sel-pn{font-size:13px;color:#636e72;text-align:center;padding:4px 0 14px}
+.sel-grid{flex:1;padding:0 12px 140px;display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.level-card{background:#fff;border-radius:16px;border:2px solid #e0e0e0;overflow:hidden;cursor:pointer;transition:all .2s;position:relative}
+.level-card:active{transform:scale(.96)}
+.level-card.done{border-color:#00b894;background:linear-gradient(135deg,#f0fff9,#e0fff0)}
+.level-card-top{height:76px;background:linear-gradient(135deg,#f8f9fa,#e9ecef);display:flex;align-items:center;justify-content:center;position:relative}
+.level-card.done .level-card-top{background:linear-gradient(135deg,#e0fff0,#c0ffdf)}
+.level-card-top span{font-size:36px}
+.level-card-tag{position:absolute;top:8px;right:8px;background:linear-gradient(135deg,#ff9f43,#ee5a24);color:#fff;font-size:10px;padding:3px 10px;border-radius:10px;font-weight:700}
+.level-card.done .level-card-tag{background:linear-gradient(135deg,#00b894,#00cec9)}
+.level-card-bot{padding:10px 12px 12px}
+.level-card-name{font-size:14px;font-weight:700;color:#2d3436;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px}
+.level-card-info{font-size:11px;color:#636e72}
+.level-card-check{position:absolute;top:8px;left:8px;width:26px;height:26px;background:linear-gradient(135deg,#00b894,#00cec9);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700}
+.sel-foot{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:linear-gradient(0deg,#f5f5f5 85%,transparent);padding:14px 12px;padding-bottom:calc(env(safe-area-inset-bottom,14px)+14px);display:flex;gap:8px;z-index:5}
+.sel-fbtn{flex:1;height:48px;border-radius:14px;border:2px solid #e0e0e0;background:#fff;color:#2d3436;font-size:13px;font-weight:700;cursor:pointer}
+.sel-fbtn:active{opacity:.8}
+.sel-fbtn.pri{background:linear-gradient(135deg,#00b894,#00cec9);color:#fff;border:none;box-shadow:0 4px 12px rgba(0,184,148,.25)}
+.sel-fbtn.dan{background:linear-gradient(135deg,#ff6b6b,#ee5a24);color:#fff;border:none}
+
+/* 答题页 */
+.game-page{display:flex;flex-direction:column;background:#fff}
+.g-head{background:linear-gradient(135deg,#00b894,#00cec9);padding:12px 16px;padding-top:calc(env(safe-area-inset-top,0)+12px);color:#fff}
+.g-head-top{display:flex;align-items:center;justify-content:space-between}
+.g-back{width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.18);color:#fff;border:none;font-size:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.g-back:active{transform:scale(.92)}
+.g-tag{background:rgba(255,255,255,.18);padding:4px 10px;border-radius:14px;font-size:13px;font-weight:700}
+.g-head-r{width:40px}
+.g-bar{height:6px;background:rgba(255,255,255,.25);border-radius:3px;margin-top:10px;overflow:hidden}
+.g-bar-fill{height:100%;background:#fff;border-radius:3px;transition:width .35s}
+.g-body{flex:1;padding:20px 16px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.g-title{font-size:18px;font-weight:800;color:#2d3436;margin-bottom:14px;line-height:1.4}
+.g-q{background:linear-gradient(135deg,#f8f9fa,#e9ecef);padding:18px;border-radius:16px;font-size:15px;line-height:1.8;color:#2d3436;border:2px solid #e0e0e0}
+.g-ans{margin-top:14px;background:linear-gradient(135deg,#fff3cd,#ffeeba);padding:16px;border-radius:16px;border:2px solid #ffc107;display:none}
+.g-ans.show{display:block}
+.g-ans-label{font-size:13px;color:#856404;font-weight:800;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.g-ans-label::before{content:'';width:4px;height:14px;background:#ffc107;border-radius:2px}
+.g-ans-text{font-size:16px;font-weight:800;color:#2d3436;line-height:1.7}
+.g-input-area{margin-top:14px;display:flex;gap:10px}
+.g-input{flex:1;height:48px;padding:0 16px;border:2px solid #e0e0e0;border-radius:14px;font-size:15px;background:#fff;outline:none;transition:border-color .2s}
+.g-input:focus{border-color:#00b894}
+.g-submit-btn{height:48px;padding:0 24px;background:linear-gradient(135deg,#00b894,#00cec9);color:#fff;border:none;border-radius:14px;font-size:15px;font-weight:700;cursor:pointer}
+.g-submit-btn:active{opacity:.85}
+.g-result{margin-top:14px;padding:14px;border-radius:12px;text-align:center;font-weight:700;font-size:15px;display:none}
+.g-result.correct{background:linear-gradient(135deg,#d4edda,#c3e6cb);color:#155724;border:2px solid #28a745}
+.g-result.wrong{background:linear-gradient(135deg,#f8d7da,#f5c6cb);color:#721c24;border:2px solid #dc3545}
+.g-foot{padding:14px 16px;padding-bottom:calc(env(safe-area-inset-bottom,14px)+14px);display:flex;gap:8px;background:#f5f5f5}
+.g-btn{height:50px;border-radius:14px;border:none;font-size:15px;font-weight:700;cursor:pointer}
+.g-btn:active{opacity:.85}
+.g-btn-prev{width:56px;background:#fff;border:2px solid #e0e0e0;color:#636e72;font-size:20px}
+.g-btn-ans{flex:1;background:#fff;border:2px solid #e0e0e0;color:#2d3436}
+.g-btn-next{flex:1;background:linear-gradient(135deg,#00b894,#00cec9);color:#fff;box-shadow:0 4px 12px rgba(0,184,148,.25)}
+
+/* 弹窗 */
+.modal-bg{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:100;padding:24px}
+.modal-bg.show{display:flex}
+.modal{background:#fff;border-radius:24px;padding:32px 26px;max-width:330px;width:100%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.2)}
+.modal-emoji{font-size:64px;margin-bottom:8px}
+.modal h2{font-size:22px;color:#2d3436;margin-bottom:6px}
+.modal p{color:#636e72;font-size:14px;margin-bottom:22px;line-height:1.6}
+.modal-btn{background:linear-gradient(135deg,#00b894,#00cec9);color:#fff;border:none;padding:14px 48px;border-radius:24px;font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(0,184,148,.25)}
+.modal-btn:active{transform:scale(.96)}
+
+/* 提示 */
+.float-hint{position:fixed;top:45%;left:50%;transform:translate(-50%,-50%);background:rgba(45,52,54,.92);color:#00cec9;padding:12px 28px;border-radius:14px;font-size:16px;font-weight:700;z-index:50;pointer-events:none;animation:floatUp .85s ease forwards}
+@keyframes floatUp{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}30%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}50%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-60%)}}
+.confetti{position:fixed;top:-10px;z-index:99;pointer-events:none;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:0}}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+<div class="page cover-page" id="pgCover">
+    <div class="cover-icon"><span>🧠</span></div>
+    <div class="cover-title">脑筋急转弯</div>
+    <div class="cover-sub">500道趣味智力题</div>
+    <button class="cover-btn" id="btnStart">开始挑战</button>
+    <div class="cover-stats">
+        <div class="cover-stat"><b id="cvTotal">500</b><small>总关卡</small></div>
+        <div class="cover-stat"><b id="cvDone">0</b><small>已通关</small></div>
+        <div class="cover-stat"><b id="cvRate">0%</b><small>完成度</small></div>
+    </div>
+</div>
+
+<div class="page select-page hidden" id="pgSelect">
+    <div class="sel-head">
+        <button class="sel-back" id="btnSelBack">‹</button>
+        <h2>选择关卡</h2>
+        <div class="sel-head-right"></div>
+    </div>
+    <div class="sel-progress">
+        <div class="sel-bar"><div class="sel-bar-fill" id="selBarFill"></div></div>
+        <div class="sel-bar-text"><span>已通关</span><span id="selProgress">0/500</span></div>
+    </div>
+    <div class="sel-pn" id="selPn">1 / 50</div>
+    <div class="sel-grid" id="selGrid"></div>
+    <div class="sel-foot">
+        <button class="sel-fbtn" id="btnPrev">上一页</button>
+        <button class="sel-fbtn pri" id="btnContinue">继续挑战</button>
+        <button class="sel-fbtn dan" id="btnReset">重置</button>
+        <button class="sel-fbtn" id="btnNext">下一页</button>
+    </div>
+</div>
+
+<div class="page game-page hidden" id="pgGame">
+    <div class="g-head">
+        <div class="g-head-top">
+            <button class="g-back" id="btnGameBack">‹</button>
+            <div class="g-tag" id="gTag">第 1 关</div>
+            <div class="g-head-r"></div>
+        </div>
+        <div class="g-bar"><div class="g-bar-fill" id="gBarFill"></div></div>
+    </div>
+    <div class="g-body" id="gBody">
+        <div class="g-title" id="gTitle"></div>
+        <div class="g-q" id="gQ"></div>
+        <div class="g-input-area">
+            <input type="text" class="g-input" id="gInput" placeholder="请输入你的答案..." maxlength="50">
+            <button class="g-submit-btn" id="gSubmitBtn">提交答案</button>
+        </div>
+        <div class="g-result" id="gResult"></div>
+        <div class="g-ans" id="gAns">
+            <div class="g-ans-label">正确答案</div>
+            <div class="g-ans-text" id="gAnsText"></div>
+        </div>
+    </div>
+    <div class="g-foot">
+        <button class="g-btn g-btn-prev" id="btnPrevLv">‹</button>
+        <button class="g-btn g-btn-ans" id="btnAns">查看答案</button>
+        <button class="g-btn g-btn-next" id="btnNextLv">下一关 ›</button>
+    </div>
+</div>
+
+<div class="modal-bg" id="modalBg">
+    <div class="modal">
+        <div class="modal-emoji">🎉</div>
+        <h2>恭喜通关！</h2>
+        <p>你已完成全部500道脑筋急转弯！<br>太厉害了！</p>
+        <button class="modal-btn" id="btnModal">再来一次</button>
+    </div>
+</div>
+
+</div>
+<script>
+var L = [
+{t:"什么东西越洗越脏",q:"什么东西越洗越脏？",a:"水"},
+{t:"剪不断的布",q:"什么布剪不断？",a:"瀑布"},
+{t:"打破才能用",q:"什么东西打破了才能用？",a:"鸡蛋"},
+{t:"没有水的河",q:"什么河里面没有水？",a:"银河"},
+{t:"有脚不能走",q:"什么东西有脚却不能走？",a:"桌子"},
+{t:"晚上才出现",q:"什么东西晚上才出来白天就消失？",a:"星星"},
+{t:"越吹越旺",q:"什么东西越吹越旺？",a:"火"},
+{t:"越用越有钱",q:"什么东西越用越有钱？",a:"存钱罐"},
+{t:"有嘴不能说",q:"什么东西有嘴却不能说话？",a:"茶壶"},
+{t:"没有叶子的树",q:"什么树没有叶子？",a:"枯树"},
+{t:"不能爬的山",q:"什么山不能爬？",a:"假山"},
+{t:"关不上的门",q:"什么门永远关不上？",a:"球门"},
+{t:"越生气越大",q:"什么东西越生气越大？",a:"脾气"},
+{t:"不能踢的球",q:"什么球不能踢？",a:"眼球"},
+{t:"没有水的海",q:"什么海没有水？",a:"辞海"},
+{t:"不会掉的牙",q:"什么牙不会掉？",a:"月牙"},
+{t:"不能戴的帽",q:"什么帽不能戴？",a:"螺帽"},
+{t:"没有翅膀的鸡",q:"什么鸡没有翅膀？",a:"田鸡"},
+{t:"不能摸的花",q:"什么花不能摸？",a:"火花"},
+{t:"不会跑的马",q:"什么马不会跑？",a:"海马"},
+{t:"左手抓不到",q:"你左手永远抓不到的是什么？",a:"左手"},
+{t:"永远到不了",q:"什么地方永远到不了？",a:"明天"},
+{t:"越擦越湿",q:"什么东西越擦越湿？",a:"毛巾"},
+{t:"越老越短",q:"什么东西越老越短？",a:"铅笔"},
+{t:"越吃越饿",q:"什么东西越吃越饿？",a:"开胃药"},
+{t:"越热越出来",q:"什么东西越热越出来？",a:"汗"},
+{t:"越冷越出来",q:"什么东西越冷越出来？",a:"鼻涕"},
+{t:"看不见摸得着",q:"什么东西看不见但摸得着？",a:"风"},
+{t:"看得见摸不着",q:"什么东西看得见但摸不着？",a:"影子"},
+{t:"永远跟着你",q:"什么东西永远跟着你？",a:"影子"},
+{t:"没有重量人人怕",q:"什么东西没有重量但人人都怕？",a:"谣言"},
+{t:"越分越多",q:"什么东西越分越多？",a:"快乐"},
+{t:"越合越少",q:"什么东西越合越少？",a:"秘密"},
+{t:"越学越无知",q:"什么东西越学越觉得自己无知？",a:"知识"},
+{t:"越走越远",q:"什么东西越走越远？",a:"脚印"},
+{t:"越站越矮",q:"什么东西越站越矮？",a:"雪人"},
+{t:"越吃越渴",q:"什么东西越吃越渴？",a:"盐"},
+{t:"越洗越小",q:"什么东西越洗越小？",a:"肥皂"},
+{t:"越用越短",q:"什么东西越用越短？",a:"蜡烛"},
+{t:"越烧越长",q:"什么东西越烧越长？",a:"烟"},
+{t:"最不听话的人",q:"什么人最不听话？",a:"聋子"},
+{t:"最怕冷的东西",q:"什么东西最怕冷？",a:"温度计"},
+{t:"最大的影子",q:"什么影子最大？",a:"黑夜"},
+{t:"最长的腿",q:"什么腿最长？",a:"一步登天"},
+{t:"最难做的饭",q:"最难做的饭是什么？",a:"无米之炊"},
+{t:"最宝贵的话",q:"什么话最宝贵？",a:"金玉良言"},
+{t:"最值钱的话",q:"什么话最值钱？",a:"一诺千金"},
+{t:"最厉害的手",q:"什么手最厉害？",a:"一手遮天"},
+{t:"最厉害的嘴",q:"什么嘴最厉害？",a:"口若悬河"},
+{t:"最厉害的眼睛",q:"什么眼睛最厉害？",a:"火眼金睛"},
+{t:"一头牛加一捆草",q:"一头牛加一捆草等于什么？",a:"还是一头牛（牛把草吃了）"},
+{t:"1加1不等于2",q:"什么时候1加1不等于2？",a:"算错的时候"},
+{t:"三天不喝水",q:"一个人三天不喝水会怎么样？",a:"会渴死"},
+{t:"五只鸟打死一只",q:"树上有五只鸟，打死一只还剩几只？",a:"0只，其他吓飞了"},
+{t:"十个苹果",q:"十个苹果分给十个人，篮子里还有一个，为什么？",a:"最后一人连篮子一起拿走"},
+{t:"两个妈妈两个女儿",q:"两个妈妈和两个女儿去逛街，只买了三件衣服，为什么？",a:"外婆、妈妈、女儿三人"},
+{t:"一个月28天",q:"一年中哪个月有28天？",a:"每个月都有28天"},
+{t:"三个人六只手",q:"三个人为什么有六只手？",a:"因为每人两只手"},
+{t:"两只狗四条腿",q:"两只狗为什么只有四条腿？",a:"因为每只狗两条腿？不对，题目就是两只狗八条腿，你被骗了"},
+{t:"一半是水一半是山",q:"什么字一半是水一半是山？",a:"汕"},
+{t:"一半是日一半是月",q:"什么字一半是日一半是月？",a:"明"},
+{t:"一半是火一半是水",q:"什么字一半是火一半是水？",a:"灾"},
+{t:"一半是木一半是目",q:"什么字一半是木一半是目？",a:"相"},
+{t:"一半是日一半是生",q:"什么字一半是日一半是生？",a:"星"},
+{t:"一半是女一半是子",q:"什么字一半是女一半是子？",a:"好"},
+{t:"一半是鱼一半是羊",q:"什么字一半是鱼一半是羊？",a:"鲜"},
+{t:"一半是日一半是立",q:"什么字一半是日一半是立？",a:"音"},
+{t:"一半是口一半是十",q:"什么字一半是口一半是十？",a:"叶"},
+{t:"一半是白一半是水",q:"什么字一半是白一半是水？",a:"泉"},
+{t:"小明的爸爸",q:"小明的爸爸有三个儿子，老大叫大毛，老二叫二毛，老三叫什么？",a:"小明"},
+{t:"小红妈妈",q:"小红的妈妈有四个女儿，大姐叫大春，二姐叫二春，三姐叫三春，四姐叫什么？",a:"小红"},
+{t:"火车过隧道",q:"一列火车从北京开到上海要六小时，行驶三小时后火车在哪儿？",a:"在铁轨上"},
+{t:"蜗牛爬墙",q:"一只蜗牛爬十米高的墙，白天爬三米晚上滑两米，几天能爬到顶？",a:"八天（第八天白天爬到顶）"},
+{t:"井底之蛙",q:"青蛙在十米深的井里，每天爬三米滑两米，几天能出来？",a:"八天"},
+{t:"蜡烛燃烧",q:"一根蜡烛可以烧两小时，同时点两根可以烧多久？",a:"两小时"},
+{t:"锯木头",q:"一根木头锯成三段要十分钟，锯成六段要几分钟？",a:"二十五分钟"},
+{t:"猫吃鱼",q:"三只猫三分钟吃三条鱼，一百只猫吃一百条鱼要几分钟？",a:"三分钟"},
+{t:"鸡生蛋",q:"五只鸡五天生五个蛋，一百只鸡一百天生多少蛋？",a:"两千个"},
+{t:"爬楼梯",q:"从一楼到三楼要六分钟，从一楼到六楼要几分钟？",a:"十五分钟"},
+{t:"钟敲响",q:"钟敲六下要三十秒，敲十二下要多少秒？",a:"六十六秒"},
+{t:"过河问题",q:"一个人带一只狼一只羊一棵菜过河，船只能带一样，怎么过？",a:"先带羊，回来带狼，把羊带回来，带菜过去，再带羊"},
+{t:"分蛋糕",q:"切三刀最多能把蛋糕分成几块？",a:"八块"},
+{t:"分苹果",q:"七个苹果分给十二个人，怎么分公平？",a:"榨成果汁"},
+{t:"称球问题",q:"八个球一个较重，用天平最少称几次找出？",a:"两次"},
+{t:"排队问题",q:"十个人排成一排，从左数第七个从右数第几个？",a:"第四个"},
+{t:"握手问题",q:"五个人互相握手，一共握几次？",a:"十次"},
+{t:"年龄问题",q:"小明今年八岁，妈妈三十二岁，几年后妈妈年龄是小明两倍？",a:"十六年后"},
+{t:"跑步比赛",q:"跑步比赛中你超过了第二名，你是第几名？",a:"第二名"},
+{t:"再超一人",q:"跑步比赛中你超过了最后一名，你是第几名？",a:"不可能超过最后一名"},
+{t:"房间里的灯",q:"房间里有三盏灯和三个开关，在门外只能进一次门，怎么确定哪个开关控制哪盏灯？",a:"先开第一个等十分钟关掉，再开第二个进去，亮的第二个，热不亮的第一个，冷不亮的第三个"},
+{t:"两个门",q:"两扇门一扇通天堂一扇通地狱，两个守卫一个说真话一个说假话，只能问一个问题，怎么找到天堂之门？",a:"问任意守卫：另一个守卫会说哪扇门通天堂？选相反的那扇"},
+{t:"三个开关",q:"楼下三个开关控制楼上三盏灯，只能上楼看一次，怎么确定对应关系？",a:"开第一个等十分钟关掉，开第二个上楼：亮的第二个，热的第一个，冷的第三个"},
+{t:"烧绳子计时",q:"一根绳子烧完要一小时但粗细不均匀，怎么用两根绳子量出四十五分钟？",a:"一号两头同时点+二号点一头，一号烧完时点二号另一头，二号烧完就是四十五分钟"},
+{t:"海盗分金",q:"五个海盗分一百金币，按顺序提方案，半数以上同意就通过否则扔海里，第一个海盗怎么分？",a:"97:0:1:2:0 或 97:0:1:0:2"},
+{t:"囚徒困境",q:"两个囚犯不能沟通，都沉默各判一年，都坦白各判五年，一个坦白一个沉默坦白释放沉默判十年，怎么选？",a:"坦白（纳什均衡）"},
+{t:"猴子搬香蕉",q:"猴子搬五十根香蕉到家五十米远，每走一米吃一根，最多搬多少根到家？",a:"十六根"},
+{t:"倒水问题",q:"三升和五升杯子，怎么量出四升水？",a:"五升倒满→倒入三升→三升倒掉→五升剩两升倒入三升→五升再倒满→倒入三升（差一升）→五升剩四升"},
+{t:"过桥问题",q:"四人过桥分别要一、二、五、十分钟，只有一个手电筒，桥最多两人，最少几分钟？",a:"十七分钟"},
+{t:"黑白帽子",q:"三人排成一列戴黑白帽子，后面能看到前面，第三人说我不知道，第二人也说我不知道，第一人怎么知道自己帽子颜色？",a:"黑色（推理得出）"},
+{t:"毒酒问题",q:"一千瓶酒一瓶有毒，用最少的老鼠在一周内找出毒酒？",a:"十只（2^10=1024>1000）"},
+{t:"称盐问题",q:"七克和两克砝码各一个，天平称三次把一百四十克盐分成五十克和九十克？",a:"第一次分70+70，第二次35+35，第三次15+20+砝码"},
+{t:"电梯重量",q:"电梯最多载十人，你第九个进去超重了，你退出来，为什么？",a:"因为你太胖了"},
+{t:"掉进河里",q:"一个人掉进河里为什么头发没湿？",a:"他是光头"},
+{t:"打针不疼",q:"小明打针为什么不疼？",a:"针打在别人身上"},
+{t:"考试作弊",q:"小明考试为什么总抄别人的？",a:"因为别人不会抄他的"},
+{t:"睡觉打呼噜",q:"小明睡觉为什么打呼噜？",a:"因为他醒了就不打了"},
+{t:"吃苹果",q:"一个苹果两个人分，怎么分最公平？",a:"榨成果汁"},
+{t:"过独木桥",q:"一个人过独木桥，桥中间有老虎，他怎么过去的？",a:"晕过去的"},
+{t:"长颈鹿",q:"长颈鹿的脖子为什么那么长？",a:"因为头太高了"},
+{t:"大象鼻子",q:"大象的鼻子为什么那么长？",a:"因为头太重了需要平衡"},
+{t:"老鼠过街",q:"老鼠过街人人喊打，为什么没人打？",a:"因为只是喊喊"},
+{t:"猪圈里的猪",q:"猪圈里的猪为什么越来越少了？",a:"被卖了"},
+{t:"树上的鸟",q:"树上有十只鸟，开枪打死一只，还剩几只？",a:"0只，全飞了"},
+{t:"水里的鱼",q:"水里有十条鱼，死了三条，还剩几条？",a:"十条，死鱼还在水里"},
+{t:"房间里的蜡烛",q:"房间里有十支蜡烛，吹灭了三支，还剩几支？",a:"三支（其余七支烧完了）"},
+{t:"口袋里的糖",q:"口袋里有十颗糖，吃了两颗，还剩几颗？",a:"两颗（其余八颗在肚子里）"},
+{t:"桌上的苹果",q:"桌上有五个苹果，五个人分一人一个，为什么还剩一个？",a:"最后一人连盘子一起拿走"},
+{t:"篮子里的鸡蛋",q:"篮子里有六个鸡蛋，六个人分一人一个，为什么篮子里还有一个？",a:"最后一人连篮子一起拿走"},
+{t:"铁放到外面",q:"铁放到外面会怎么样？",a:"会生锈"},
+{t:"金放到外面",q:"金放到外面会怎么样？",a:"会被偷"},
+{t:"木头放到水里",q:"木头放到水里会怎么样？",a:"会浮起来"},
+{t:"石头放到水里",q:"石头放到水里会怎么样？",a:"会沉下去"},
+{t:"盐放到水里",q:"盐放到水里会怎么样？",a:"会融化"},
+{t:"糖放到水里",q:"糖放到水里会怎么样？",a:"会溶解"},
+{t:"冰放到太阳下",q:"冰放到太阳下会怎么样？",a:"会融化"},
+{t:"雪放到火旁边",q:"雪放到火旁边会怎么样？",a:"会融化"},
+{t:"蜡烛放到风里",q:"蜡烛放到风里会怎么样？",a:"会熄灭"},
+{t:"火放到水里",q:"火放到水里会怎么样？",a:"会熄灭"},
+{t:"种子放到土里",q:"种子放到土里会怎么样？",a:"会发芽"},
+{t:"鸡蛋放到盐水里",q:"鸡蛋放到盐水里会怎么样？",a:"会浮起来"},
+{t:"铁球放到水里",q:"铁球放到水里会怎么样？",a:"会沉下去"},
+{t:"气球放到天上",q:"气球放到天上会怎么样？",a:"会飞走"},
+{t:"风筝放到天上",q:"风筝放到天上会怎么样？",a:"会飞起来"},
+{t:"镜子对着镜子",q:"镜子对着镜子会看到什么？",a:"无数面镜子"},
+{t:"两个人背对背",q:"两个人背对背站着怎么看到对方？",a:"用镜子"},
+{t:"闭着眼睛做事",q:"什么事闭着眼睛也能做？",a:"做梦"},
+{t:"睁着眼睛做不了",q:"什么事睁着眼睛做不了？",a:"做梦"},
+{t:"一只手做的事",q:"什么事只能用一只手做？",a:"剪自己的另一只手的手指甲"},
+{t:"两只手做的事",q:"什么事必须两只手才能做？",a:"鼓掌"},
+{t:"用脚做的事",q:"什么事只能用脚做？",a:"穿袜子"},
+{t:"不能做的事",q:"什么事永远做不完？",a:"做梦"},
+{t:"只能做一次",q:"什么事只能做一次？",a:"出生"},
+{t:"做了会后悔",q:"什么事做了会后悔不做也会后悔？",a:"结婚"},
+{t:"越做越开心",q:"什么事越做越开心？",a:"帮助别人"},
+{t:"越做越难过",q:"什么事越做越难过？",a:"回忆往事"},
+{t:"做了没人知道",q:"什么事做了没人知道？",a:"做梦"},
+{t:"不做有人知道",q:"什么事不做有人知道？",a:"作业没写"},
+{t:"做了等于没做",q:"什么事做了等于没做？",a:"白做"},
+{t:"不做等于做了",q:"什么事不做等于做了？",a:"放弃"},
+{t:"先做后想",q:"什么事应该先做后想？",a:"没有，凡事三思而后行"},
+{t:"想了也白想",q:"什么事想了也白想？",a:"白日梦"},
+{t:"说了也白说",q:"什么事说了也白说？",a:"废话"},
+{t:"看了也白看",q:"什么事看了也白看？",a:"白看"},
+{t:"听了也白听",q:"什么事听了也白听？",a:"废话"},
+{t:"做了也白做",q:"什么事做了也白做？",a:"白做"},
+{t:"吃了也白吃",q:"什么东西吃了也白吃？",a:"白吃"},
+{t:"喝了也白喝",q:"什么东西喝了也白喝？",a:"白开水"},
+{t:"走了也白走",q:"什么路走了也白走？",a:"回头路"},
+{t:"等了也白等",q:"什么人等了也白等？",a:"等死"},
+{t:"买了也白买",q:"什么东西买了也白买？",a:"白买"},
+{t:"卖了也白卖",q:"什么东西卖了也白卖？",a:"白卖"},
+{t:"学了也白学",q:"什么东西学了也白学？",a:"白学"},
+{t:"用了也白用",q:"什么东西用了也白用？",a:"白用功"},
+{t:"穿了也白穿",q:"什么东西穿了也白穿？",a:"白穿"},
+{t:"戴了也白戴",q:"什么东西戴了也白戴？",a:"白戴"},
+{t:"洗了也白洗",q:"什么东西洗了也白洗？",a:"黑炭"},
+{t:"擦了也白擦",q:"什么东西擦了也白擦？",a:"黑板"},
+{t:"画了也白画",q:"什么东西画了也白画？",a:"白纸"},
+{t:"写了也白写",q:"什么东西写了也白写？",a:"白纸"},
+{t:"说了不算",q:"谁说了不算？",a:"哑巴"},
+{t:"看了不见",q:"谁看了不见？",a:"瞎子"},
+{t:"吃了不饱",q:"什么吃了不饱？",a:"亏"},
+{t:"喝了不解渴",q:"什么喝了不解渴？",a:"海水"},
+{t:"看了不开心",q:"什么看了不开心？",a:"成绩单"},
+{t:"听了不舒服",q:"什么听了不舒服？",a:"批评"},
+{t:"做了不后悔",q:"什么做了不后悔？",a:"好事"},
+{t:"说了不后悔",q:"什么说了不后悔？",a:"真话"},
+{t:"看了还想看",q:"什么看了还想看？",a:"好书"},
+{t:"听了还想听",q:"什么听了还想听？",a:"好歌"},
+{t:"做了有人夸",q:"什么做了有人夸？",a:"好事"},
+{t:"说了有人笑",q:"什么说了有人笑？",a:"笑话"},
+{t:"看了有人哭",q:"什么看了有人哭？",a:"悲剧"},
+{t:"做了有人学",q:"什么做了有人学？",a:"好榜样"},
+{t:"说了有人信",q:"什么说了有人信？",a:"真话"},
+{t:"看了有人买",q:"什么看了有人买？",a:"好东西"},
+{t:"听了有人传",q:"什么听了有人传？",a:"好消息"},
+{t:"想了有人做",q:"什么想了有人做？",a:"好主意"},
+{t:"做了有人看",q:"什么做了有人看？",a:"表演"},
+{t:"说了有人听",q:"什么说了有人听？",a:"演讲"},
+{t:"看了有人说",q:"什么看了有人说？",a:"新闻"},
+{t:"听了有人想",q:"什么听了有人想？",a:"故事"},
+{t:"做了有人跟",q:"什么做了有人跟？",a:"领路"},
+{t:"说了有人记",q:"什么说了有人记？",a:"名言"},
+{t:"看了有人抄",q:"什么看了有人抄？",a:"好文章"},
+{t:"听了有人唱",q:"什么听了有人唱？",a:"好歌"},
+{t:"想了有人写",q:"什么想了有人写？",a:"好故事"},
+{t:"做了有人想",q:"什么做了有人想？",a:"好事"},
+{t:"说了有人看",q:"什么说了有人看？",a:"文章"},
+{t:"看了有人想",q:"什么看了有人想？",a:"好书"},
+{t:"听了有人做",q:"什么听了有人做？",a:"指令"},
+{t:"想了有人说",q:"什么想了有人说？",a:"想法"},
+{t:"做了有人听",q:"什么做了有人听？",a:"音乐"},
+{t:"说了有人想",q:"什么说了有人想？",a:"谜语"},
+{t:"看了有人做",q:"什么看了有人做？",a:"教程"},
+{t:"听了有人说",q:"什么听了有人说？",a:"八卦"},
+{t:"想了有人听",q:"什么想了有人听？",a:"主意"},
+{t:"做了有人说",q:"什么做了有人说？",a:"新闻"},
+{t:"说了有人做",q:"什么说了有人做？",a:"命令"},
+{t:"看了有人听",q:"什么看了有人听？",a:"视频"},
+{t:"听了有人看",q:"什么听了有人看？",a:"推荐"},
+{t:"想了有人做",q:"什么想了有人做？",a:"创意"},
+{t:"做了有人抄",q:"什么做了有人抄？",a:"作业"},
+{t:"说了有人学",q:"什么说了有人学？",a:"知识"},
+{t:"看了有人记",q:"什么看了有人记？",a:"笔记"},
+{t:"听了有人写",q:"什么听了有人写？",a:"歌词"},
+{t:"想了有人画",q:"什么想了有人画？",a:"设计"},
+{t:"做了有人拍",q:"什么做了有人拍？",a:"电影"},
+{t:"说了有人录",q:"什么说了有人录？",a:"录音"},
+{t:"看了有人拍",q:"什么看了有人拍？",a:"照片"},
+{t:"听了有人记",q:"什么听了有人记？",a:"课堂笔记"},
+{t:"想了有人写",q:"什么想了有人写？",a:"文章"},
+{t:"什么人不怕冷",q:"什么人不怕冷？",a:"雪人"},
+{t:"什么人不怕热",q:"什么人不怕热？",a:"假人"},
+{t:"什么人不怕苦",q:"什么人不怕苦？",a:"苦行僧"},
+{t:"什么人不怕死",q:"什么人不怕死？",a:"死人"},
+{t:"什么人不怕鬼",q:"什么人不怕鬼？",a:"胆大的人"},
+{t:"什么人不怕水",q:"什么人不怕水？",a:"鱼人"},
+{t:"什么人不怕火",q:"什么人不怕火？",a:"消防员"},
+{t:"什么人不怕高",q:"什么人不怕高？",a:"飞行员"},
+{t:"什么人不怕黑",q:"什么人不怕黑？",a:"盲人"},
+{t:"什么人不怕饿",q:"什么人不怕饿？",a:"吃饱的人"},
+{t:"什么人不怕累",q:"什么人不怕累？",a:"机器人"},
+{t:"什么人不怕病",q:"什么人不怕病？",a:"医生"},
+{t:"什么人不怕穷",q:"什么人不怕穷？",a:"富人"},
+{t:"什么人不怕老",q:"什么人不怕老？",a:"年轻人"},
+{t:"什么人不怕丑",q:"什么人不怕丑？",a:"戴面具的人"},
+{t:"什么人不怕骂",q:"什么人不怕骂？",a:"聋子"},
+{t:"什么人不怕打",q:"什么人不怕打？",a:"沙袋"},
+{t:"什么人不怕摔",q:"什么人不怕摔？",a:"不倒翁"},
+{t:"什么人不怕咬",q:"什么人不怕咬？",a:"假人"},
+{t:"什么人不怕抓",q:"什么人不怕抓？",a:"光头"},
+{t:"什么人不怕踩",q:"什么人不怕踩？",a:"地毯"},
+{t:"什么人不怕压",q:"什么人不怕压？",a:"弹簧"},
+{t:"什么人不怕砍",q:"什么人不怕砍？",a:"稻草人"},
+{t:"什么人不怕烧",q:"什么人不怕烧？",a:"陶瓷人"},
+{t:"什么人不怕淹",q:"什么人不怕淹？",a:"鱼"},
+{t:"什么人不怕闷",q:"什么人不怕闷？",a:"种子"},
+{t:"什么人不怕晒",q:"什么人不怕晒？",a:"黑人"},
+{t:"什么人不怕冻",q:"什么人不怕冻？",a:"冰雕"},
+{t:"什么人不怕风",q:"什么人不怕风？",a:"风车"},
+{t:"什么人不怕雨",q:"什么人不怕雨？",a:"雨伞"},
+{t:"什么人不怕雪",q:"什么人不怕雪？",a:"雪人"},
+{t:"什么人不怕雷",q:"什么人不怕雷？",a:"避雷针"},
+{t:"什么人不怕电",q:"什么人不怕电？",a:"绝缘体"},
+{t:"什么人不怕毒",q:"什么人不怕毒？",a:"百毒不侵的人"},
+{t:"什么人不怕刀",q:"什么人不怕刀？",a:"磨刀石"},
+{t:"什么人不怕枪",q:"什么人不怕枪？",a:"靶子"},
+{t:"什么人不怕炮",q:"什么人不怕炮？",a:"炮筒"},
+{t:"什么人不怕炸",q:"什么人不怕炸？",a:"炸弹"},
+{t:"什么人不怕摔跤",q:"什么人不怕摔跤？",a:"柔道选手"},
+{t:"什么人不怕失败",q:"什么人不怕失败？",a:"成功者"},
+{t:"什么人不怕困难",q:"什么人不怕困难？",a:"勇者"},
+{t:"什么人不怕挫折",q:"什么人不怕挫折？",a:"坚强的人"},
+{t:"什么人不怕挑战",q:"什么人不怕挑战？",a:"冒险家"},
+{t:"什么人不怕变化",q:"什么人不怕变化？",a:"变色龙"},
+{t:"什么人不怕孤独",q:"什么人不怕孤独？",a:"隐士"},
+{t:"什么人不怕黑暗",q:"什么人不怕黑暗？",a:"矿工"},
+{t:"什么人不怕寂寞",q:"什么人不怕寂寞？",a:"修行者"},
+{t:"什么人不怕批评",q:"什么人不怕批评？",a:"虚心的人"},
+{t:"什么人不怕嘲笑",q:"什么人不怕嘲笑？",a:"自信的人"},
+{t:"什么人不怕误解",q:"什么人不怕误解？",a:"坦荡的人"},
+{t:"什么人不怕流言",q:"什么人不怕流言？",a:"清白的人"},
+{t:"什么人不怕是非",q:"什么人不怕是非？",a:"正直的人"},
+{t:"什么人不怕诱惑",q:"什么人不怕诱惑？",a:"自律的人"},
+{t:"什么人不怕压力",q:"什么人不怕压力？",a:"钻石"},
+{t:"什么人不怕竞争",q:"什么人不怕竞争？",a:"冠军"},
+{t:"什么人不怕考试",q:"什么人不怕考试？",a:"学霸"},
+{t:"什么人不怕面试",q:"什么人不怕面试？",a:"有准备的人"},
+{t:"什么人不怕演讲",q:"什么人不怕演讲？",a:"演说家"},
+{t:"什么人不怕社交",q:"什么人不怕社交？",a:"外向的人"},
+{t:"什么人不怕表白",q:"什么人不怕表白？",a:"勇敢的人"},
+{t:"什么人不怕失恋",q:"什么人不怕失恋？",a:"乐观的人"},
+{t:"什么人不怕离别",q:"什么人不怕离别？",a:"洒脱的人"},
+{t:"什么人不怕失去",q:"什么人不怕失去？",a:"一无所有的人"},
+{t:"什么人不怕死亡",q:"什么人不怕死亡？",a:"英雄"},
+{t:"什么人不怕未来",q:"什么人不怕未来？",a:"有梦想的人"},
+{t:"什么人不怕过去",q:"什么人不怕过去？",a:"问心无愧的人"},
+{t:"什么人不怕现在",q:"什么人不怕现在？",a:"活在当下的人"},
+{t:"什么人不怕一切",q:"什么人不怕一切？",a:"无所畏惧的人"},
+{t:"农民靠什么吃饭",q:"农民、工人、军人、科学家都靠什么吃饭？",a:"靠嘴吃饭"},
+{t:"最长的腿",q:"什么样的腿最长？打一成语",a:"一步登天"},
+{t:"和尚带帽子",q:"和尚带帽子，猜一成语？",a:"无法无天"},
+{t:"哪个连的人最多",q:"哪个连的人最多？",a:"大连"},
+{t:"什么门没有门扇",q:"什么门没有门扇？",a:"球门"},
+{t:"头在海里尾在天上",q:"头在海里游泳，尾在天上发光？打一字",a:"鲁"},
+{t:"四兄弟的年龄",q:"有一家四兄弟他们个人的年龄乘起来是十四，请问他们各自是多少岁？",a:"其中有一对双胞胎"},
+{t:"什么东西没脚走天下",q:"什么东西没脚走天下？",a:"船"},
+{t:"可乘人的船",q:"可乘人的船，才装了十人后就沉进了水里？",a:"此船是潜艇"},
+{t:"永远走不出去",q:"一个圆画在哪里永远走不出去？",a:"自己的腰上"},
+{t:"什么书买不到",q:"什么书你不可能在书店里买到？",a:"秘书"},
+{t:"什么伤不能治",q:"什么伤医院不能治？",a:"伤脑筋"},
+{t:"什么酒最贵",q:"什么酒价格最贵？",a:"喜酒"},
+{t:"上升下降",q:"有一种东西，上升的时候同时会下降下降的同时会上升，这是什么？",a:"跷跷板"},
+{t:"什么蛋能走能跳",q:"什么蛋又能走又能跳还会说话？",a:"笨蛋"},
+{t:"偷什么不犯法",q:"偷什么不犯法？",a:"偷笑"},
+{t:"买不到的药",q:"有一种药，你想吃上药店却买不到，这是什么药？",a:"后悔药"},
+{t:"离不开绳子",q:"小波比的一举一动都离不开绳子，为什么？",a:"小波是个木偶"},
+{t:"木不成林",q:"木不成林！打一字",a:"相"},
+{t:"扛不起的东西",q:"什么东西力气再大的人也扛不起？",a:"罪名"},
+{t:"兵强马壮的城市",q:"兵强马壮的城市是哪里？",a:"武昌"},
+{t:"警察不抓抢劫",q:"警察看见有人抢银行却不抓。为什么？",a:"因为抢银行的人是在拍电影"},
+{t:"飞机撞树",q:"飞机撞在大树上怎样会坏了？",a:"是纸飞机"},
+{t:"大雁南飞",q:"为什么冬天大雁要飞到南方去？",a:"因为它只会飞呀"},
+{t:"最细的针",q:"最细的针？打一成语",a:"无孔不入"},
+{t:"大家齐欢乐",q:"大家齐欢乐！打一地名？",a:"齐齐哈尔"},
+{t:"最拿手的菜",q:"经理不会做饭，可有一道菜异常拿手，是什么？",a:"炒鱿鱼"},
+{t:"专门教坏人",q:"有一种地方专门教坏人，但没有一个警察敢对它采取行动加以扫荡。这是什么地方？",a:"看守所"},
+{t:"什么最长",q:"什么最长？",a:"时间"},
+{t:"说话要付钱",q:"什么时候开口说话要付钱？",a:"打电话"},
+{t:"看不到的苹果",q:"你看不到房间里唯一的苹果。为什么？",a:"苹果放在头上"},
+{t:"海水淹没软梯",q:"船边挂着软梯，离海面二米，海水每小时上涨半米，几个小时海水能淹没软梯？",a:"水涨船高，所以永远不会淹没软梯"},
+{t:"最难的题",q:"世界上最难的一道题是哪道题？",a:"这道题"},
+{t:"世界上什么最大",q:"世界上什么最大？",a:"眼皮"},
+{t:"拖什么最简便",q:"拖什么东西最简便？",a:"拖鞋"},
+{t:"爬得越高",q:"什么东西天气越热，它爬的越高？",a:"温度计"},
+{t:"最快打开魔方",q:"有什么办法在最短的时间内打开魔方？",a:"打碎"},
+{t:"把大象装进冰箱",q:"一个很古老的题目。把大象装进冰箱要几步？",a:"三步，先打开冰箱，再把大象放进去，最终把冰箱门关上"},
+{t:"中看不中吃",q:"什么蛋中看不中吃？",a:"脸蛋"},
+{t:"捡肉不捡钱",q:"小立在街上走，前面有个人掉了一块肉和一个钱包，小立为什么捡肉不捡钱包，钱包里有很多钱？",a:"因为小立是狗"},
+{t:"最怕别人说什么",q:"胖姐生病了，他最怕来看她的人说些什么？",a:"请多多保重"},
+{t:"捉迷藏",q:"个人捉迷藏，捉了十个还剩几个？",a:"两个"},
+{t:"空中飞人",q:"空中飞人？打一字",a:"会"},
+{t:"小王小李",q:"小李说我前的人是小王小王说我前面的人是小李怎样回事？",a:"很简单，他们面对面的站着"},
+{t:"最小正整数",q:"一个最小正整数，除余，除余，除余，除余？",a:"答案是多少"},
+{t:"不敢往下跳",q:"胖胖是个颇有名气的跳水运动员，可是有一天，他站在跳台上，却不敢往下跳。这是为什么？",a:"因为池里没有水"},
+{t:"太平洋中间",q:"太平洋的中间是什么？",a:"平"},
+{t:"自讨苦吃",q:"自讨苦吃的地方是哪？",a:"药店"},
+{t:"火车在哪里",q:"从北京到天津要一小时，火车从北京开往天津，发车半小时后，问火车此刻在那里？",a:"在铁轨上"},
+{t:"一阴一阳",q:"一阴一阳，一短一长，一昼一夜，合为一双？一字",a:"明"},
+{t:"失火没人报",q:"有一个地方失火，可是却没人打火警电话？",a:"因为那个地方就是消防局"},
+{t:"最不听话的",q:"最不听话的是谁？",a:"聋子"},
+{t:"不去领奖",q:"小赵买一张奖票，中了一等奖，去领奖却不给？",a:"还没到领奖的日期"},
+{t:"画圣",q:"画圣是我国哪位著名画家？",a:"吴道子"},
+{t:"猎人打兔子",q:"一个猎人有一杆猎枪只能打一米远，一只兔子离他一百米为什么被他一枪打死了？",a:"他的枪长九十九米"},
+{t:"空肚子吃鸡蛋",q:"一个人空肚子最多能吃几个鸡蛋？",a:"一个，吃了一个就不是空肚子了"},
+{t:"老虎吃羊",q:"一只凶猛的饿猫，看到老鼠，为何拔腿就跑？",a:"去追老鼠"},
+{t:"什么路最窄",q:"什么路最窄？打一成语",a:"冤家路窄"},
+{t:"什么东西越用越有钱",q:"什么东西越用越有钱？",a:"存钱罐"},
+{t:"什么东西越洗越脏",q:"什么东西越洗越脏？",a:"水"},
+{t:"什么东西越生气越大",q:"什么东西越生气越大？",a:"脾气"},
+{t:"什么东西越洗越小",q:"什么东西越洗越小？",a:"肥皂"},
+{t:"什么东西越冷越出来",q:"什么东西越冷越出来？",a:"鼻涕"},
+{t:"什么东西越热越出来",q:"什么东西越热越出来？",a:"汗"},
+{t:"什么东西越擦越湿",q:"什么东西越擦越湿？",a:"毛巾"},
+{t:"什么东西越老越短",q:"什么东西越老越短？",a:"铅笔"},
+{t:"什么东西越吹越旺",q:"什么东西越吹越旺？",a:"火"},
+{t:"什么东西越烧越长",q:"什么东西越烧越长？",a:"烟"},
+{t:"什么东西越站越矮",q:"什么东西越站越矮？",a:"雪人"},
+{t:"什么东西越用越短",q:"什么东西越用越短？",a:"蜡烛"},
+{t:"什么东西越吃越饿",q:"什么东西越吃越饿？",a:"开胃药"},
+{t:"什么东西越吃越渴",q:"什么东西越吃越渴？",a:"盐"},
+{t:"什么东西越分越多",q:"什么东西越分越多？",a:"快乐"},
+{t:"什么东西越合越少",q:"什么东西越合越少？",a:"秘密"},
+{t:"什么东西越学越无知",q:"什么东西越学越觉得自己无知？",a:"知识"},
+{t:"什么东西越走越远",q:"什么东西越走越远？",a:"脚印"},
+{t:"什么水取之不尽",q:"什么水取之不尽用之不竭？",a:"口水"},
+{t:"什么人最不听话",q:"什么人最不听话？",a:"聋子"},
+{t:"什么人最怕冷",q:"什么人最怕冷？",a:"雪人"},
+{t:"什么东西最怕冷",q:"什么东西最怕冷？",a:"温度计"},
+{t:"什么东西最不怕冷",q:"什么东西最不怕冷？",a:"雪人"},
+{t:"什么东西最不怕热",q:"什么东西最不怕热？",a:"假人"},
+{t:"什么东西最不怕水",q:"什么东西最不怕水？",a:"鱼"},
+{t:"什么东西最不怕火",q:"什么东西最不怕火？",a:"消防员"},
+{t:"什么东西最不怕黑",q:"什么东西最不怕黑？",a:"盲人"},
+{t:"什么东西最不怕高",q:"什么东西最不怕高？",a:"飞行员"},
+{t:"什么东西最不怕电",q:"什么东西最不怕电？",a:"绝缘体"},
+{t:"什么东西最不怕毒",q:"什么东西最不怕毒？",a:"百毒不侵的人"},
+{t:"什么东西最不怕压",q:"什么东西最不怕压？",a:"弹簧"},
+{t:"什么东西最不怕摔",q:"什么东西最不怕摔？",a:"不倒翁"},
+{t:"什么东西最不怕咬",q:"什么东西最不怕咬？",a:"假人"},
+{t:"什么东西最不怕晒",q:"什么东西最不怕晒？",a:"黑人"},
+{t:"什么东西最不怕冻",q:"什么东西最不怕冻？",a:"冰雕"},
+{t:"什么东西最不怕风",q:"什么东西最不怕风？",a:"风车"},
+{t:"什么东西最不怕雨",q:"什么东西最不怕雨？",a:"雨伞"},
+{t:"什么东西最不怕雪",q:"什么东西最不怕雪？",a:"雪人"},
+{t:"什么东西最不怕雷",q:"什么东西最不怕雷？",a:"避雷针"},
+{t:"什么东西最不怕炸",q:"什么东西最不怕炸？",a:"炸弹"},
+{t:"什么东西最不怕枪",q:"什么东西最不怕枪？",a:"靶子"},
+{t:"什么东西最不怕刀",q:"什么东西最不怕刀？",a:"磨刀石"},
+{t:"什么东西最不怕砍",q:"什么东西最不怕砍？",a:"稻草人"},
+{t:"什么东西最不怕烧",q:"什么东西最不怕烧？",a:"陶瓷人"},
+{t:"什么东西最不怕淹",q:"什么东西最不怕淹？",a:"鱼"},
+{t:"什么东西最不怕闷",q:"什么东西最不怕闷？",a:"种子"},
+{t:"什么东西最不怕踩",q:"什么东西最不怕踩？",a:"地毯"},
+{t:"什么东西最不怕抓",q:"什么东西最不怕抓？",a:"光头"},
+{t:"什么东西最不怕打",q:"什么东西最不怕打？",a:"沙袋"},
+{t:"什么东西最不怕骂",q:"什么东西最不怕骂？",a:"聋子"},
+{t:"什么东西最不怕丑",q:"什么东西最不怕丑？",a:"戴面具的人"},
+{t:"什么东西最不怕老",q:"什么东西最不怕老？",a:"年轻人"},
+{t:"什么东西最不怕穷",q:"什么东西最不怕穷？",a:"富人"},
+{t:"什么东西最不怕病",q:"什么东西最不怕病？",a:"医生"},
+{t:"什么东西最不怕累",q:"什么东西最不怕累？",a:"机器人"},
+{t:"什么东西最不怕饿",q:"什么东西最不怕饿？",a:"吃饱的人"},
+{t:"什么东西最不怕孤独",q:"什么东西最不怕孤独？",a:"隐士"},
+{t:"什么东西最不怕黑暗",q:"什么东西最不怕黑暗？",a:"矿工"},
+{t:"什么东西最不怕寂寞",q:"什么东西最不怕寂寞？",a:"修行者"},
+{t:"什么东西最不怕批评",q:"什么东西最不怕批评？",a:"虚心的人"},
+{t:"什么东西最不怕嘲笑",q:"什么东西最不怕嘲笑？",a:"自信的人"},
+{t:"什么东西最不怕误解",q:"什么东西最不怕误解？",a:"坦荡的人"},
+{t:"什么东西最不怕流言",q:"什么东西最不怕流言？",a:"清白的人"},
+{t:"什么东西最不怕是非",q:"什么东西最不怕是非？",a:"正直的人"},
+{t:"什么东西最不怕诱惑",q:"什么东西最不怕诱惑？",a:"自律的人"},
+{t:"什么东西最不怕压力",q:"什么东西最不怕压力？",a:"钻石"},
+{t:"什么东西最不怕竞争",q:"什么东西最不怕竞争？",a:"冠军"},
+{t:"什么东西最不怕考试",q:"什么东西最不怕考试？",a:"学霸"},
+{t:"什么东西最不怕面试",q:"什么东西最不怕面试？",a:"有准备的人"},
+{t:"什么东西最不怕演讲",q:"什么东西最不怕演讲？",a:"演说家"},
+{t:"什么东西最不怕社交",q:"什么东西最不怕社交？",a:"外向的人"},
+{t:"什么东西最不怕表白",q:"什么东西最不怕表白？",a:"勇敢的人"},
+{t:"什么东西最不怕失恋",q:"什么东西最不怕失恋？",a:"乐观的人"},
+{t:"什么东西最不怕离别",q:"什么东西最不怕离别？",a:"洒脱的人"},
+{t:"什么东西最不怕失去",q:"什么东西最不怕失去？",a:"一无所有的人"},
+{t:"什么东西最不怕死亡",q:"什么东西最不怕死亡？",a:"英雄"},
+{t:"什么东西最不怕未来",q:"什么东西最不怕未来？",a:"有梦想的人"},
+{t:"什么东西最不怕过去",q:"什么东西最不怕过去？",a:"问心无愧的人"},
+{t:"什么东西最不怕现在",q:"什么东西最不怕现在？",a:"活在当下的人"},
+{t:"什么东西最不怕一切",q:"什么东西最不怕一切？",a:"无所畏惧的人"},
+{t:"房间有三盏灯",q:"房间里有三盏灯，分别由房外的三个开关控制。你现在在房外，只能进房间一次，如何判断哪个开关控制哪盏灯？",a:"先打开第一个开关，让灯亮几分钟，然后关闭。接着打开第二个开关，立即走进房间。此时亮着的灯由第二个开关控制。用手触摸另外两盏熄灭的灯，发热的那盏由第一个开关控制，剩下的那盏则由第三个开关控制。"},
+{t:"两人两扇门",q:"有两个人，一个永远说真话，一个永远说假话。你不知道谁是说真话的，谁是说假话的。现在你只能问其中一个人一个问题，来确定哪条路是通往目的地的正确道路。你会问什么？",a:"你可以问任意一个人：如果我问另一个人，哪条路是正确的，他会指哪一条？然后选择与他所指方向相反的道路即可。"},
+{t:"两个盒子的谜题",q:"两个盒子（A、B），其一装奖品，另一为空。盒子上的纸条分别写着：A盒：B盒里有奖品。B盒：两个盒子的纸条都在说谎。请问奖品在哪个盒子？",a:"假设A盒纸条为真，则B盒有奖品。此时B盒纸条两个都在说谎必为假（因A盒为真），符合至少一个纸条为真的逻辑，假设成立。因此，奖品在B盒。"},
+{t:"真假守卫",q:"真假守卫两扇门分别通向自由与陷阱，门口有两个守卫（一真一假，不知身份）。你只能问一个守卫一个问题，如何找到自由之门？",a:"问任意守卫：如果我问另一个守卫哪扇门通向自由，他会指哪扇？若问真话守卫：他会如实转述假话守卫的错误答案（指向陷阱门）；若问假话守卫：他会颠倒真话守卫的正确答案（同样指向陷阱门）。因此，选择与回答相反的门即可。"},
+{t:"右转弯轮胎",q:"汽车在右转弯时，哪一条轮胎不转？",a:"备用轮胎"},
+{t:"书店买不到的书",q:"什么书你不可能在书店里买到？",a:"秘书"},
+{t:"永远用不完的水",q:"什么水永远用不完？",a:"口水"},
+{t:"老虎追人",q:"一人被老虎穷追不舍，突然前有条大河，他不会游泳，但他过去了，为什么？",a:"吓昏过去了"},
+{t:"三人应征",q:"模样相同的哥俩同时应征入伍，他们有血缘关系且出生日期及父母的名字完全相同。连长问他俩是不是双胞胎。他们说不是。请问这是为什么？",a:"三胞胎中的两个"},
+{t:"犯人全都逃跑",q:"监狱里关着两名犯人，一天晚上犯人全都逃跑了，可是第二天看守员打开牢门一看，里面还有一个犯人？",a:"逃跑的犯人名字叫全都"},
+{t:"个体户靠什么吃饭",q:"当今社会，发财的个体户大都靠什么吃饭？",a:"嘴巴"},
+{t:"暗地里用的东西",q:"什么东西要藏起来暗地里用，用完之后再暗地里交给别人？",a:"底片"},
+{t:"爸爸修钟表",q:"六岁的小明总是喜欢把家里的闹钟整坏，妈妈为什么总是让不会修理钟表的爸爸代为修理？",a:"因为妈妈让爸爸好好的修理一下小明"},
+{t:"卡车撞摩托车",q:"一位卡车司机撞倒一个骑摩托车的人，卡车司机受重伤，摩托车手却没事？",a:"卡车司机当时没有开车"},
+{t:"贴创可贴",q:"小李喝酒，撞伤了脸，回家怕太太知道会责备，去洗手间对着镜子贴上创口贴，可第二天还是被太太骂了一顿，为什么？",a:"创口贴在镜子上"},
+{t:"最怕问路",q:"如果有人向你问路，你最怕听到哪一句话？",a:"这里是地球吗？"},
+{t:"输的有奖品",q:"哪种比赛，赢的得不到奖品，输的却有奖品？",a:"划拳喝酒"},
+{t:"打不开的门",q:"小张被关在一间没有上锁的房里，可是他使出吃奶的力气也不能把门拉开，这是为什么？",a:"推开就可以了"},
+{t:"牛的尾巴",q:"有一头头朝北的牛，它向右转原地转三圈，然后向后转原地转三圈，接着再往右转，这时候它尾巴朝哪？",a:"朝下"},
+{t:"不给人看病的医院",q:"为什么有家医院从不给人看病？",a:"兽医院"},
+{t:"两对父子买帽子",q:"两对父子去买帽子，每人买了一顶，却为什么只买了三顶？",a:"祖孙三代人"},
+{t:"什么瓜不能吃",q:"什么瓜不能吃？",a:"傻瓜"},
+{t:"最细的针成语",q:"最细的针？打一成语",a:"无孔不入"},
+{t:"大家齐欢乐地名",q:"大家齐欢乐！打一地名？",a:"齐齐哈尔"}
+];
+
+var curLv=0,curPg=0,ansShow=false;
+var done=new Set();
+var KEY='riddle_v3',PPG=10;
+var emojis=['🧠','💡','❓','🎯','🔑','🎲','🧩','⚡','🌟','🎪'];
+
+function load(){try{var s=localStorage.getItem(KEY);if(s)done=new Set(JSON.parse(s))}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify([...done]))}catch(e){}}
+
+function $(id){return document.getElementById(id)}
+
+function showPg(id){
+  ['pgCover','pgSelect','pgGame'].forEach(function(p){
+    $(p).classList.toggle('hidden',p!==id);
+  });
+  if(id==='pgCover') updCover();
+  if(id==='pgSelect') renderSel();
+  if(id==='pgGame') renderGame();
+}
+
+function updCover(){
+  $('cvTotal').textContent=L.length;
+  $('cvDone').textContent=done.size;
+  $('cvRate').textContent=Math.round(done.size/L.length*100)+'%';
+}
+
+function renderSel(){
+  var tp=Math.ceil(L.length/PPG);
+  $('selPn').textContent=(curPg+1)+' / '+tp;
+  $('selBarFill').style.width=(done.size/L.length*100)+'%';
+  $('selProgress').textContent=done.size+'/'+L.length;
+  $('btnPrev').style.opacity=curPg>0?'1':'.4';
+  $('btnNext').style.opacity=curPg<tp-1?'1':'.4';
+  var g=$('selGrid');
+  g.innerHTML='';
+  var s=curPg*PPG,e=Math.min(s+PPG,L.length);
+  for(var i=s;i<e;i++){
+    var d=done.has(i);
+    var c=document.createElement('div');
+    c.className='level-card'+(d?' done':'');
+    c.setAttribute('data-i',i);
+    c.innerHTML='<div class="level-card-top"><span>'+emojis[i%10]+'</span><span class="level-card-tag">'+(i+1)+'</span></div><div class="level-card-bot"><div class="level-card-name">'+L[i].t+'</div><div class="level-card-info">'+(d?'已通关':'待挑战')+'</div></div>'+(d?'<div class="level-card-check">✓</div>':'');
+    g.appendChild(c);
+  }
+}
+
+function renderGame(){
+  var lv=L[curLv];
+  $('gTag').textContent='第 '+(curLv+1)+' 关';
+  $('gBarFill').style.width=(done.size/L.length*100)+'%';
+  $('gTitle').textContent=lv.t;
+  $('gQ').textContent=lv.q;
+  $('gAnsText').textContent=lv.a;
+  $('gInput').value='';
+  $('gResult').style.display='none';
+  $('gResult').className='g-result';
+  ansShow=false;
+  $('gAns').classList.remove('show');
+  $('btnAns').textContent='查看答案';
+  $('gBody').scrollTop=0;
+  $('btnPrevLv').style.opacity=curLv>0?'1':'.3';
+  $('btnNextLv').style.opacity=curLv<L.length-1?'1':'.3';
+}
+
+function submitAnswer(){
+  var userAnswer=$('gInput').value.trim();
+  if(!userAnswer){
+    floatHint('请输入答案');
+    return;
+  }
+  var lv=L[curLv];
+  var ca=lv.a;
+  var ua=userAnswer;
+  var caLower=ca.toLowerCase();
+  var uaLower=ua.toLowerCase();
+  var isCorrect=false;
+
+  if(uaLower===caLower){
+    isCorrect=true;
+  }else if(caLower.length<=6&&uaLower.length>=2){
+    isCorrect=uaLower===caLower||caLower.indexOf(uaLower)===0||uaLower.indexOf(caLower)===0;
+  }else if(caLower.length>6&&uaLower.length>=Math.ceil(caLower.length*0.4)){
+    isCorrect=caLower.indexOf(uaLower)!==-1;
+  }
+
+  var result=$('gResult');
+  result.style.display='block';
+  if(isCorrect){
+    result.className='g-result correct';
+    result.innerHTML='🎉 回答正确！太棒了！';
+    if(!done.has(curLv)){
+      done.add(curLv);
+      save();
+      floatHint('✨ 通关！');
+      if(done.size===L.length) setTimeout(showModal,800);
+    }
+    ansShow=true;
+    $('gAns').classList.add('show');
+    $('btnAns').textContent='隐藏答案';
+  }else{
+    result.className='g-result wrong';
+    result.innerHTML='😅 回答错误，再想想吧！';
+  }
+}
+
+function toggleAns(){
+  if(!ansShow){
+    ansShow=true;
+    $('gAns').classList.add('show');
+    $('btnAns').textContent='隐藏答案';
+    if(!done.has(curLv)){
+      done.add(curLv);
+      save();
+      floatHint('✨ 通关！');
+      if(done.size===L.length) setTimeout(showModal,800);
+    }
+  }else{
+    ansShow=false;
+    $('gAns').classList.remove('show');
+    $('btnAns').textContent='查看答案';
+  }
+}
+
+function firstUndone(){for(var i=0;i<L.length;i++)if(!done.has(i))return i;return 0;}
+
+function showModal(){$('modalBg').classList.add('show');confetti();}
+function closeModal(){$('modalBg').classList.remove('show');done.clear();save();curLv=0;curPg=0;showPg('pgCover');}
+
+function floatHint(t){
+  var e=document.createElement('div');
+  e.className='float-hint';e.textContent=t;
+  document.body.appendChild(e);
+  setTimeout(function(){e.remove()},850);
+}
+
+function confetti(){
+  var cs=['#00b894','#00cec9','#ff9f43','#ee5a24','#ff6b6b','#a29bfe','#fd79a8'];
+  for(var i=0;i<35;i++){
+    (function(j){
+      setTimeout(function(){
+        var e=document.createElement('div');
+        e.className='confetti';
+        e.style.left=Math.random()*100+'vw';
+        e.style.width=(6+Math.random()*8)+'px';
+        e.style.height=(6+Math.random()*8)+'px';
+        e.style.background=cs[Math.floor(Math.random()*cs.length)];
+        e.style.borderRadius=Math.random()>.5?'50%':'2px';
+        e.style.animationDuration=(2+Math.random()*2)+'s';
+        document.body.appendChild(e);
+        setTimeout(function(){e.remove()},4500);
+      },j*50);
+    })(i);
+  }
+}
+
+function bindEvents(){
+  $('btnStart').addEventListener('click',function(){showPg('pgSelect')});
+  $('btnSelBack').addEventListener('click',function(){showPg('pgCover')});
+  $('btnGameBack').addEventListener('click',function(){showPg('pgSelect')});
+  $('btnPrev').addEventListener('click',function(){if(curPg>0){curPg--;renderSel()}});
+  $('btnNext').addEventListener('click',function(){var tp=Math.ceil(L.length/PPG);if(curPg<tp-1){curPg++;renderSel()}});
+  $('btnContinue').addEventListener('click',function(){curLv=firstUndone();showPg('pgGame')});
+  $('btnReset').addEventListener('click',function(){if(confirm('确定重置所有进度？')){done.clear();save();curPg=0;renderSel();updCover()}});
+  $('btnAns').addEventListener('click',toggleAns);
+  $('btnPrevLv').addEventListener('click',function(){if(curLv>0){curLv--;renderGame()}});
+  $('btnNextLv').addEventListener('click',function(){if(curLv<L.length-1){curLv++;renderGame()}});
+  $('btnModal').addEventListener('click',closeModal);
+  $('gSubmitBtn').addEventListener('click',submitAnswer);
+  $('gInput').addEventListener('keyup',function(e){if(e.key==='Enter')submitAnswer()});
+
+  $('selGrid').addEventListener('click',function(e){
+    var c=e.target;
+    while(c&&!c.classList.contains('level-card'))c=c.parentElement;
+    if(c){var i=parseInt(c.getAttribute('data-i'));if(!isNaN(i)){curLv=i;showPg('pgGame')}}
+  });
+}
+
+load();
+updCover();
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',bindEvents);
+}else{
+  bindEvents();
+}
+</script>
+</body>
+</html>
+

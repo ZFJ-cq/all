@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="../js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="../css/mobile-adapt.css">
+  <title>灵月仙途 - 宗门战争</title>
+  <style>
+    :root {
+      --gold-primary: #e6c749;
+      --gold-light: #f4d03f;
+      --gold-dark: #b8860b;
+      --text-main: #fdfbf7;
+      --text-dim: #d4c5a9;
+      --bg-glass: rgba(20, 25, 40, 0.85);
+      --danger-color: #e53e3e;
+      --success-color: #4caf50;
+      --war-bg: rgba(229, 62, 62, 0.1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Microsoft YaHei', 'SimSun', serif;
+      background: linear-gradient(to bottom, #2b3242, #1a1f2e);
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 顶部状态栏 */
+    .top-bar {
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(230, 199, 73, 0.3);
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .clan-name {
+      font-size: 1.2rem;
+      color: var(--gold-primary);
+      font-weight: bold;
+    }
+
+    .clan-stats {
+      display: flex;
+      gap: 15px;
+      font-size: 0.85rem;
+    }
+
+    .stat-item {
+      color: var(--text-dim);
+    }
+
+    .stat-value {
+      color: var(--gold-light);
+      margin-left: 5px;
+    }
+
+    /* 主要内容 */
+    .main-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    .section {
+      background: var(--bg-glass);
+      border: 1px solid rgba(230, 199, 73, 0.3);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      color: var(--gold-primary);
+      font-size: 1.1rem;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* 战争状态 */
+    .war-status {
+      background: var(--war-bg);
+      border: 1px solid var(--danger-color);
+    }
+
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin-top: 15px;
+    }
+
+    .status-item {
+      text-align: center;
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+    }
+
+    .status-label {
+      color: var(--text-dim);
+      font-size: 0.8rem;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .status-value {
+      color: var(--gold-light);
+      font-size: 0.95rem;
+      font-weight: bold;
+    }
+
+    .status-value.danger {
+      color: var(--danger-color);
+    }
+
+    .status-value.success {
+      color: var(--success-color);
+    }
+
+    /* 战争列表 */
+    .war-list-item {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(230, 199, 73, 0.3);
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 15px;
+      transition: all 0.3s;
+    }
+
+    .war-list-item:hover {
+      border-color: var(--gold-primary);
+      background: rgba(230, 199, 73, 0.05);
+    }
+
+    .war-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .war-name {
+      font-size: 1rem;
+      color: var(--gold-primary);
+      font-weight: bold;
+    }
+
+    .war-reward {
+      color: var(--success-color);
+      font-size: 0.85rem;
+    }
+
+    .war-info {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+      line-height: 1.6;
+    }
+
+    .war-details {
+      display: flex;
+      gap: 15px;
+      font-size: 0.8rem;
+      margin-top: 10px;
+    }
+
+    .detail-item {
+      color: var(--text-dim);
+    }
+
+    .btn {
+      padding: 8px 20px;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-family: 'SimSun', serif;
+    }
+
+    .btn-primary {
+      background: var(--gold-primary);
+      color: #1a202c;
+      font-weight: bold;
+    }
+
+    .btn-primary:hover {
+      background: var(--gold-light);
+      box-shadow: 0 0 15px rgba(230, 199, 73, 0.5);
+    }
+
+    .btn-danger {
+      background: var(--danger-color);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #c53030;
+      box-shadow: 0 0 15px rgba(229, 62, 62, 0.5);
+    }
+
+    .btn-success {
+      background: var(--success-color);
+      color: white;
+    }
+
+    .btn-success:hover {
+      background: #45a049;
+      box-shadow: 0 0 15px rgba(76, 175, 80, 0.5);
+    }
+
+    /* 战斗历史 */
+    .history-item {
+      padding: 15px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .history-item:last-child {
+      border-bottom: none;
+    }
+
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .history-result {
+      padding: 3px 10px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: bold;
+    }
+
+    .history-result.win {
+      background: rgba(76, 175, 80, 0.2);
+      color: var(--success-color);
+    }
+
+    .history-result.lose {
+      background: rgba(229, 62, 62, 0.2);
+      color: var(--danger-color);
+    }
+
+    /* 底部导航 */
+    .bottom-nav {
+      background: rgba(20, 25, 40, 0.95);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(230, 199, 73, 0.3);
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 0.75rem;
+      transition: all 0.3s;
+    }
+
+    .nav-item:hover, .nav-item.active {
+      color: var(--gold-primary);
+      transform: translateY(-2px);
+    }
+
+    .nav-icon {
+      font-size: 1.2rem;
+    }
+
+    /* 弹窗样式 */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(5px);
+      z-index: 1000;
+      display: none;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: #1a202c;
+      border: 2px solid var(--gold-primary);
+      border-radius: 12px;
+      width: 90%;
+      max-width: 400px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      padding: 20px;
+      background: linear-gradient(to right, rgba(230, 199, 73, 0.15), rgba(230, 199, 73, 0.05));
+      border-bottom: 1px solid rgba(230, 199, 73, 0.3);
+      text-align: center;
+      color: var(--gold-primary);
+      font-size: 1.1rem;
+      font-weight: bold;
+    }
+
+    .modal-body {
+      padding: 20px;
+      color: var(--text-main);
+    }
+
+    .modal-footer {
+      padding: 15px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    /* 进度条 */
+    .progress-bar {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 10px;
+      height: 8px;
+      overflow: hidden;
+      margin-top: 5px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(to right, var(--gold-primary), var(--gold-light));
+      transition: width 0.3s;
+    }
+
+    @media (max-width: 480px) {
+      .status-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .war-details {
+        flex-wrap: wrap;
+      }
+    }
+  </style>
+
+  </head>
+<body>
+  <!-- 顶部状态栏 -->
+  <div class="top-bar">
+    <div class="clan-name">灵月仙宗</div>
+    <div class="clan-stats">
+      <div class="stat-item">
+        战力：<span class="stat-value" id="totalPower">8500</span>
+      </div>
+      <div class="stat-item">
+        排名：<span class="stat-value" id="ranking">12</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 主要内容 -->
+  <div class="main-content">
+    <!-- 战争状态 -->
+    <div class="section war-status">
+      <h3 class="section-title">⚔️ 战争状态</h3>
+      <div class="status-grid">
+        <div class="status-item">
+          <span class="status-label">当前状态</span>
+          <span class="status-value success" id="warStatus">和平期</span>
+        </div>
+        <div class="status-item">
+          <span class="status-label">距离下次战争</span>
+          <span class="status-value" id="countdown">3 天 12 小时</span>
+        </div>
+        <div class="status-item">
+          <span class="status-label">参战人数</span>
+          <span class="status-value" id="participants">25/50</span>
+        </div>
+      </div>
+      <div style="margin-top: 15px;">
+        <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-dim);">
+          <span>参战进度</span>
+          <span id="progressText">50%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressBar" style="width: 50%;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 可参与战争 -->
+    <div class="section">
+      <h3 class="section-title">🔥 可参与战争</h3>
+      <div id="warList">
+        <!-- 战争列表由 JS 生成 -->
+      </div>
+    </div>
+
+    <!-- 战斗历史 -->
+    <div class="section">
+      <h3 class="section-title">📜 战斗历史</h3>
+      <div id="historyList">
+        <!-- 历史记录由 JS 生成 -->
+      </div>
+    </div>
+
+    <!-- 操作按钮 -->
+    <div class="section">
+      <h3 class="section-title">🎯 战争准备</h3>
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+        <button class="btn btn-primary" onclick="joinWar()">报名参战</button>
+        <button class="btn btn-success" onclick="donateResources()">捐献资源</button>
+        <button class="btn btn-danger" onclick="viewStrategy()">查看战略</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 底部导航 -->
+  <nav class="bottom-nav" role="navigation" aria-label="主导航">
+            <a href="../index.html" class="nav-item" aria-label="修炼页面">
+                <div class="nav-icon">🧘</div>
+                <div class="nav-text">修炼</div>
+            </a>
+            <a href="../skills/skills.html" class="nav-item" aria-label="功法页面">
+                <div class="nav-icon">📜</div>
+                <div class="nav-text">功法</div>
+            </a>
+            <a href="clan.html" class="nav-item active" aria-label="宗门页面" aria-current="page">
+                <div class="nav-icon">🏯</div>
+                <div class="nav-text">宗门</div>
+            </a>
+            <a href="../word/world.html" class="nav-item" aria-label="仙途页面">
+                <div class="nav-icon">🌌</div>
+                <div class="nav-text">仙途</div>
+            </a>
+            <a href="../map/map.html" class="nav-item" aria-label="云游页面">
+                <div class="nav-icon">🗺️</div>
+                <div class="nav-text">云游</div>
+            </a>
+        </nav>
+
+  <!-- 捐献资源弹窗 -->
+  <div class="modal-overlay" id="donateModal">
+    <div class="modal-content">
+      <div class="modal-header">💰 捐献资源</div>
+      <div class="modal-body">
+        <div style="margin-bottom: 15px;">
+          <p style="color: var(--text-dim); margin-bottom: 10px;">选择捐献类型：</p>
+          <button class="btn btn-primary" style="width: 100%; margin-bottom: 10px;" onclick="donate('energy')">
+            捐献灵石 (1000)
+          </button>
+          <button class="btn btn-primary" style="width: 100%;" onclick="donate('gold')">
+            捐献金币 (5000)
+          </button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" style="background: transparent; border: 1px solid var(--text-dim); color: var(--text-dim);" onclick="closeModal('donateModal')">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = window.APP_CONFIG?.API_BASE_URL || 'http://localhost:8088/api';
+    let currentRoleId = localStorage.getItem('currentRoleId');
+    let currentClanId = null;
+
+    // 页面加载
+    window.addEventListener('DOMContentLoaded', async () => {
+      await loadClanInfo();
+      await loadWarList();
+      await loadBattleHistory();
+      startCountdown();
+    });
+
+    // 加载宗门信息
+    async function loadClanInfo() {
+      try {
+        const userId = localStorage.getItem('userId');
+        const response = await fetch(`${API_BASE}/clan/member/role/${currentRoleId}`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data.clanId) {
+            currentClanId = data.clanId;
+            await loadClanStats();
+          }
+        }
+      } catch (error) {
+        console.error('加载宗门信息失败:', error);
+      }
+    }
+
+    // 加载宗门统计
+    async function loadClanStats() {
+      try {
+        const response = await fetch(`${API_BASE}/clan/${currentClanId}`);
+        if (response.ok) {
+          const clan = await response.json();
+          document.getElementById('totalPower').textContent = clan.power || 8500;
+          document.getElementById('ranking').textContent = clan.ranking || 12;
+        }
+      } catch (error) {
+        console.error('加载宗门统计失败:', error);
+      }
+    }
+
+    // 加载战争列表
+    async function loadWarList() {
+      const warList = document.getElementById('warList');
+      warList.innerHTML = '<div style="text-align: center; color: var(--text-dim); padding: 20px;">加载中...</div>';
+
+      try {
+        // 模拟数据，实际应该从 API 获取
+        const wars = [
+          {
+            id: 1,
+            name: '资源争夺战',
+            opponent: '天剑宗',
+            reward: '灵石×5000, 贡献点×500',
+            time: '2 天后',
+            description: '争夺灵脉资源，获胜方可获得灵脉 7 天控制权'
+          },
+          {
+            id: 2,
+            name: '宗门擂台赛',
+            opponent: '青云门',
+            reward: '灵石×3000, 贡献点×300',
+            time: '5 天后',
+            description: '双方各派 10 名弟子进行擂台比试'
+          }
+        ];
+
+        warList.innerHTML = '';
+        wars.forEach(war => {
+          const warItem = document.createElement('div');
+          warItem.className = 'war-list-item';
+          warItem.innerHTML = `
+            <div class="war-header">
+              <span class="war-name">${war.name}</span>
+              <span class="war-reward">🎁 ${war.reward}</span>
+            </div>
+            <div class="war-info">${war.description}</div>
+            <div class="war-details">
+              <span class="detail-item">⚔️ 对手：${war.opponent}</span>
+              <span class="detail-item">⏰ 时间：${war.time}</span>
+            </div>
+            <button class="btn btn-primary" style="margin-top: 10px; width: 100%;" onclick="participateWar(${war.id})">
+              立即参与
+            </button>
+          `;
+          warList.appendChild(warItem);
+        });
+      } catch (error) {
+        console.error('加载战争列表失败:', error);
+        warList.innerHTML = '<div style="text-align: center; color: var(--danger-color); padding: 20px;">加载失败</div>';
+      }
+    }
+
+    // 加载战斗历史
+    async function loadBattleHistory() {
+      const historyList = document.getElementById('historyList');
+
+      try {
+        // 模拟数据
+        const battles = [
+          {
+            id: 1,
+            name: '灵脉争夺战',
+            opponent: '血煞门',
+            result: '胜利',
+            time: '3 天前',
+            contribution: 1200
+          },
+          {
+            id: 2,
+            name: '宗门擂台赛',
+            opponent: '万药谷',
+            result: '失败',
+            time: '7 天前',
+            contribution: 500
+          }
+        ];
+
+        historyList.innerHTML = '';
+        battles.forEach(battle => {
+          const historyItem = document.createElement('div');
+          historyItem.className = 'history-item';
+          historyItem.innerHTML = `
+            <div class="history-header">
+              <span style="color: var(--gold-primary); font-weight: bold;">${battle.name}</span>
+              <span class="history-result ${battle.result === '胜利' ? 'win' : 'lose'}">${battle.result}</span>
+            </div>
+            <div style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 5px;">
+              对手：${battle.opponent} | 时间：${battle.time}
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-dim);">
+              获得贡献：${battle.contribution}
+            </div>
+          `;
+          historyList.appendChild(historyItem);
+        });
+      } catch (error) {
+        console.error('加载战斗历史失败:', error);
+        historyList.innerHTML = '<div style="text-align: center; color: var(--text-dim); padding: 20px;">暂无战斗记录</div>';
+      }
+    }
+
+    // 参与战争
+    async function participateWar(warId) {
+      try {
+        const response = await fetch(`${API_BASE}/clan/war/${warId}/join`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ roleId: currentRoleId })
+        });
+
+        if (response.ok) {
+          showToast('报名成功！');
+          // 更新参战人数
+          const participantsEl = document.getElementById('participants');
+          const [current, max] = participantsEl.textContent.split('/').map(Number);
+          if (current < max) {
+            participantsEl.textContent = `${current + 1}/${max}`;
+            updateProgress(current + 1, max);
+          }
+        } else {
+          showToast('报名失败，请稍后重试');
+        }
+      } catch (error) {
+        console.error('参与战争失败:', error);
+        showToast('报名失败，请稍后重试');
+      }
+    }
+
+    // 报名参战
+    function joinWar() {
+      showToast('报名成功！');
+      const participantsEl = document.getElementById('participants');
+      const [current, max] = participantsEl.textContent.split('/').map(Number);
+      if (current < max) {
+        participantsEl.textContent = `${current + 1}/${max}`;
+        updateProgress(current + 1, max);
+      }
+    }
+
+    // 捐献资源
+    function donateResources() {
+      document.getElementById('donateModal').classList.add('active');
+    }
+
+    // 捐献
+    function donate(type) {
+      showToast('捐献成功！宗门感谢你贡献');
+      closeModal('donateModal');
+    }
+
+    // 查看战略
+    function viewStrategy() {
+      showToast('战略信息：集中优势兵力，先攻对方薄弱环节');
+    }
+
+    // 关闭弹窗
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('active');
+    }
+
+    // Toast 提示
+    function showToast(message) {
+      const toast = document.createElement('div');
+      toast.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(30, 35, 50, 0.95);
+        border: 1px solid var(--gold-primary);
+        padding: 15px 30px;
+        border-radius: 50px;
+        color: var(--gold-primary);
+        font-weight: bold;
+        z-index: 2000;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+      `;
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 2000);
+    }
+
+    // 更新进度条
+    function updateProgress(current, max) {
+      const percentage = Math.floor((current / max) * 100);
+      document.getElementById('progressBar').style.width = `${percentage}%`;
+      document.getElementById('progressText').textContent = `${percentage}%`;
+    }
+
+    // 倒计时
+    function startCountdown() {
+      let countdown = 300;
+      const countdownEl = document.getElementById('countdownText');
+      const timer = setInterval(() => {
+        countdown--;
+        if (countdownEl) {
+          const minutes = Math.floor(countdown / 60);
+          const seconds = countdown % 60;
+          countdownEl.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+        if (countdown <= 0) {
+          clearInterval(timer);
+        }
+      }, 1000);
+    }
+
+    // 点击外部关闭弹窗
+    document.querySelectorAll('.modal-overlay').forEach(modal => {
+      modal.addEventListener('click', function(e) {
+        if (e.target === this) {
+          this.classList.remove('active');
+        }
+      });
+    });
+  </script>
+  <script src="../js/ui-components.js"></script>
+</body>
+</html>

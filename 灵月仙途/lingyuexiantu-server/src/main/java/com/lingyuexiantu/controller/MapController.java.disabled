@@ -1,0 +1,79 @@
+package com.lingyuexiantu.controller;
+
+import com.lingyuexiantu.common.Result;
+import com.lingyuexiantu.dto.MapTeleportRequest;
+import com.lingyue.entity.GameRole;
+import com.lingyuexiantu.entity.MapNode;
+import com.lingyue.service.GameRoleService;
+import com.lingyuexiantu.service.MapNodeService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/map")
+public class MapController {
+
+    @Autowired
+    private MapNodeService mapNodeService;
+
+    @Autowired
+    private GameRoleService gameRoleService;
+
+    // 获取角色可访问的地图节点
+    @GetMapping("/role/{roleId}")
+    public Result<List<MapNode>> getMapNodesByRoleId(@PathVariable Long roleId) {
+        try {
+            List<MapNode> mapNodes = mapNodeService.getMapNodesByRoleId(roleId);
+            return Result.success(mapNodes);
+        } catch (Exception e) {
+            return Result.error("获取地图节点失败: " + e.getMessage());
+        }
+    }
+
+    // 传送到指定地图节点
+    @PostMapping("/teleport")
+    public Result<String> teleportToNode(@RequestBody MapTeleportRequest request) {
+        try {
+            Long roleId = request.getRoleId();
+            Long mapNodeId = request.getMapNodeId();
+
+            // 验证角色是否存在
+            GameRole role = gameRoleService.getById(roleId);
+            if (role == null) {
+                return Result.error("角色不存在");
+            }
+
+            // 验证地图节点是否存在
+            MapNode mapNode = mapNodeService.getById(mapNodeId);
+            if (mapNode == null) {
+                return Result.error("地图节点不存在");
+            }
+
+            // 验证角色是否解锁该地图节点
+            boolean isUnlocked = mapNodeService.isMapNodeUnlocked(roleId, mapNodeId);
+            if (!isUnlocked) {
+                return Result.error("该地图节点未解锁");
+            }
+
+            // 执行传送逻辑（这里只是示例，实际项目中可能需要更多逻辑）
+            // 例如：扣除灵石、更新角色位置等
+
+            return Result.success("传送成功", mapNode.getName());
+        } catch (Exception e) {
+            return Result.error("传送失败: " + e.getMessage());
+        }
+    }
+
+    // 获取所有地图节点（管理员用）
+    @GetMapping("/all")
+    public Result<List<MapNode>> getAllMapNodes() {
+        try {
+            List<MapNode> mapNodes = mapNodeService.list();
+            return Result.success(mapNodes);
+        } catch (Exception e) {
+            return Result.error("获取地图节点失败: " + e.getMessage());
+        }
+    }
+}

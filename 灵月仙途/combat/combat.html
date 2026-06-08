@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="../js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="../css/mobile-adapt.css">
+  <title>灵月仙途 - 战斗</title>
+  <style>
+    /* 全局样式重置 */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Microsoft YaHei", "SimSun", serif;
+    }
+
+    :root {
+      --primary: #4a6fa5;
+      --secondary: #d9b17a;
+      --danger: #e74c3c;
+      --success: #27ae60;
+      --bg-dark: #1a202c;
+      --bg-light: #f8f9fa;
+      --text-light: #f8f9fa;
+      --text-dark: #2d3748;
+      --player-color: #3498db;
+      --enemy-color: #e74c3c;
+      --skill-bg: rgba(255, 255, 255, 0.1);
+      --skill-hover: rgba(255, 255, 255, 0.2);
+      --toggle-on: #27ae60;
+      --toggle-off: #7f8c8d;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: var(--text-light);
+      min-height: 100vh;
+      overflow-x: hidden;
+      padding: 20px;
+    }
+
+    .game-container {
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    /* 主内容区 */
+    .main-content {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      border-radius: 8px;
+      padding: 15px;
+      border: 1px solid var(--secondary);
+    }
+
+    .section-title {
+      color: var(--secondary);
+      font-size: 1.4rem;
+      margin-bottom: 15px;
+      position: relative;
+      padding-bottom: 8px;
+      text-align: center;
+    }
+
+    .section-title::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 50px;
+      height: 2px;
+      background: var(--secondary);
+      border-radius: 2px;
+    }
+
+    /* 小巧的自动战斗按钮样式 */
+    .auto-battle-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 40;
+      width: 60px;
+      height: 25px;
+      border-radius: 12px;
+      border: none;
+      font-size: 0.7rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+
+    .auto-battle-off {
+      background: var(--toggle-off);
+      color: white;
+    }
+
+    .auto-battle-on {
+      background: var(--toggle-on);
+      color: white;
+      box-shadow: 0 0 8px rgba(39, 174, 96, 0.6);
+    }
+
+    /* 自动战斗提示 */
+    .auto-battle-hint {
+      position: absolute;
+      top: 40px;
+      right: 10px;
+      z-index: 40;
+      font-size: 0.7rem;
+      color: #f1c40f;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 2px 8px;
+      border-radius: 4px;
+      animation: blink 1.5s infinite;
+      display: none;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* 战斗场景样式 */
+    .battle-arena {
+      position: relative;
+      height: 280px;
+      background: url('https://picsum.photos/id/1018/800/400') center/cover no-repeat;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      overflow: hidden;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
+    }
+
+    .battle-arena::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+    }
+
+    /* 角色样式 */
+    .character {
+      position: absolute;
+      width: 80px;
+      height: 140px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 10;
+      transition: all 0.2s ease;
+      border-radius: 6px;
+    }
+
+    .player-char {
+      left: 20px;
+      background: url('https://picsum.photos/id/1005/80/140') center/cover no-repeat;
+      border: 2px solid var(--player-color);
+      box-shadow: 0 0 10px var(--player-color);
+    }
+
+    .enemy-char {
+      right: 20px;
+      background: url('https://picsum.photos/id/1011/80/140') center/cover no-repeat;
+      border: 2px solid var(--enemy-color);
+      box-shadow: 0 0 10px var(--enemy-color);
+    }
+
+    /* 角色受击动画 */
+    .character.hit {
+      animation: hitEffect 0.4s ease-in-out;
+    }
+
+    @keyframes hitEffect {
+      0% { transform: translateY(-50%) scale(1); }
+      25% { transform: translateY(-50%) scale(0.9) rotate(3deg); }
+      50% { transform: translateY(-50%) scale(1.05); }
+      75% { transform: translateY(-50%) scale(0.95) rotate(-3deg); }
+      100% { transform: translateY(-50%) scale(1); }
+    }
+
+    /* 角色施法动画 */
+    .character.cast {
+      animation: castEffect 0.6s ease-in-out;
+    }
+
+    @keyframes castEffect {
+      0% { transform: translateY(-50%) scale(1); box-shadow: 0 0 10px currentColor; }
+      50% { transform: translateY(-50%) scale(1.05); box-shadow: 0 0 20px currentColor, 0 0 30px currentColor; }
+      100% { transform: translateY(-50%) scale(1); box-shadow: 0 0 10px currentColor; }
+    }
+
+    /* 血条样式 */
+    .health-bar {
+      position: absolute;
+      bottom: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 12px;
+      background: #333;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid #555;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .health-fill {
+      height: 100%;
+      border-radius: 5px;
+      transition: width 0.5s ease-in-out;
+      position: relative;
+    }
+
+    /* 血条流光效果 */
+    .health-fill::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 50%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      animation: healthGlow 2s infinite linear;
+    }
+
+    @keyframes healthGlow {
+      0% { left: -100%; }
+      100% { left: 200%; }
+    }
+
+    .player-health {
+      background: linear-gradient(90deg, #2ecc71, #27ae60);
+      width: 100%;
+    }
+
+    .enemy-health {
+      background: linear-gradient(90deg, #e74c3c, #c0392b);
+      width: 100%;
+    }
+
+    .health-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 8px;
+      font-weight: bold;
+      color: white;
+      text-shadow: 1px 1px 2px black;
+      z-index: 1;
+    }
+
+    .char-name {
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-weight: bold;
+      font-size: 0.9rem;
+      text-shadow: 0 0 5px black;
+      animation: namePulse 3s infinite ease-in-out;
+    }
+
+    @keyframes namePulse {
+      0%, 100% { opacity: 0.9; }
+      50% { opacity: 1; }
+    }
+
+    .player-name {
+      color: var(--player-color);
+    }
+
+    .enemy-name {
+      color: var(--enemy-color);
+    }
+
+    /* 技能栏样式 */
+    .skills-container {
+      background: rgba(0, 0, 0, 0.7);
+      border-radius: 8px;
+      padding: 15px;
+      border: 1px solid var(--secondary);
+      margin-bottom: 15px;
+    }
+
+    .skills-title {
+      color: var(--secondary);
+      font-size: 1.1rem;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .skill-btn {
+      background: var(--skill-bg);
+      border: 1px solid var(--secondary);
+      color: var(--text-light);
+      padding: 12px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      font-size: 0.85rem;
+    }
+
+    /* 技能按钮点击动画 */
+    .skill-btn:active {
+      transform: translateY(1px) scale(0.98);
+    }
+
+    .skill-btn:hover {
+      background: var(--skill-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .skill-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .skill-name {
+      font-weight: bold;
+      color: var(--secondary);
+      margin-bottom: 3px;
+      font-size: 0.9rem;
+    }
+
+    .skill-cost {
+      font-size: 0.7rem;
+      opacity: 0.8;
+      color: #9b59b6;
+    }
+
+    .skill-desc {
+      font-size: 0.7rem;
+      opacity: 0.7;
+      margin-top: 3px;
+    }
+
+    /* 战斗日志 */
+    .battle-log {
+      background: rgba(0, 0, 0, 0.7);
+      border-radius: 8px;
+      padding: 10px;
+      border: 1px solid var(--secondary);
+      height: 120px;
+      overflow-y: auto;
+      margin-bottom: 15px;
+      font-size: 0.85rem;
+    }
+
+    /* 日志条目动画 */
+    .log-entry {
+      margin-bottom: 5px;
+      padding: 3px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      animation: logFadeIn 0.5s ease-out;
+    }
+
+    @keyframes logFadeIn {
+      0% { opacity: 0; transform: translateY(5px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .log-player {
+      color: var(--player-color);
+    }
+
+    .log-enemy {
+      color: var(--enemy-color);
+    }
+
+    .log-damage {
+      color: #e74c3c;
+      font-weight: bold;
+    }
+
+    .log-heal {
+      color: #2ecc71;
+      font-weight: bold;
+    }
+
+    .log-system {
+      color: var(--secondary);
+    }
+
+    /* 按钮样式 */
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, var(--secondary), #c89e68);
+      color: var(--bg-dark);
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+      flex: 1;
+      min-width: 100px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* 按钮点击波纹效果 */
+    .btn::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: rgba(255,255,255,0.3);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: width 0.6s ease, height 0.6s ease;
+    }
+
+    .btn:active::after {
+      width: 300px;
+      height: 300px;
+      opacity: 0;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 3px 10px rgba(217, 177, 122, 0.4);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #e74c3c, #c0392b);
+      color: white;
+    }
+
+    /* 技能特效 - 增强版 */
+    .skill-effect {
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      z-index: 20;
+      display: none;
+    }
+
+    /* 攻击技能特效 */
+    .skill-effect.attack {
+      background: radial-gradient(circle, rgba(255, 100, 100, 0.8) 0%, rgba(220, 50, 50, 0.6) 70%, transparent 100%);
+      box-shadow: 0 0 20px rgba(255, 100, 100, 0.8), 0 0 40px rgba(220, 50, 50, 0.6);
+      animation: attackEffect 1.2s ease-out forwards;
+    }
+
+    @keyframes attackEffect {
+      0% {
+        opacity: 1;
+        transform: scale(0);
+      }
+      30% {
+        transform: scale(1.2);
+      }
+      100% {
+        opacity: 0;
+        transform: scale(1.8);
+      }
+    }
+
+    /* 治疗技能特效 */
+    .skill-effect.heal {
+      background: radial-gradient(circle, rgba(100, 255, 100, 0.8) 0%, rgba(50, 220, 50, 0.6) 70%, transparent 100%);
+      box-shadow: 0 0 20px rgba(100, 255, 100, 0.8), 0 0 40px rgba(50, 220, 50, 0.6);
+      animation: healEffect 1.2s ease-out forwards;
+    }
+
+    @keyframes healEffect {
+      0% {
+        opacity: 1;
+        transform: scale(0);
+      }
+      30% {
+        transform: scale(1.2);
+      }
+      100% {
+        opacity: 0;
+        transform: scale(1.8);
+      }
+    }
+
+    /* 伤害数字飘出 - 增强版 */
+    .damage-float {
+      position: absolute;
+      font-size: 1.4rem;
+      font-weight: bold;
+      text-shadow: 2px 2px 4px black, 0 0 10px black;
+      z-index: 30;
+      display: none;
+      font-family: 'Arial Black', sans-serif;
+    }
+
+    /* 伤害数字动画 */
+    .damage-float.damage {
+      color: #ff4757;
+      animation: damageFloat 1.2s ease-out forwards;
+    }
+
+    /* 治疗数字动画 */
+    .damage-float.heal {
+      color: #2ecc71;
+      animation: healFloat 1.2s ease-out forwards;
+    }
+
+    @keyframes damageFloat {
+      0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+      50% {
+        opacity: 1;
+        transform: translateY(-20px) scale(1.2);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-40px) scale(0.8);
+      }
+    }
+
+    @keyframes healFloat {
+      0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+      50% {
+        opacity: 1;
+        transform: translateY(-20px) scale(1.2) rotate(5deg);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-40px) scale(0.8) rotate(-5deg);
+      }
+    }
+
+    /* 通知提示 - 增强动画 */
+    .notification {
+      position: fixed;
+      top: 15px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.8);
+      border: 1px solid var(--secondary);
+      border-radius: 6px;
+      padding: 10px 15px;
+      color: var(--text-light);
+      z-index: 1000;
+      display: none;
+      animation: notificationSlide 0.4s ease-out forwards, notificationFade 0.4s ease-out 2.6s forwards;
+      max-width: 90%;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    @keyframes notificationSlide {
+      from {
+        transform: translate(-50%, -20px);
+        opacity: 0;
+      }
+      to {
+        transform: translate(-50%, 0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes notificationFade {
+      to {
+        opacity: 0;
+        transform: translate(-50%, -10px);
+      }
+    }
+
+    /* 战斗结束弹窗 - 增强动画 */
+    .battle-over-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      padding: 20px;
+      animation: modalBgFade 0.5s ease-out forwards;
+    }
+
+    @keyframes modalBgFade {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal-content {
+      background: var(--bg-dark);
+      border: 2px solid var(--secondary);
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      width: 100%;
+      max-width: 350px;
+      animation: modalPopIn 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+      box-shadow: 0 0 30px rgba(217, 177, 122, 0.5);
+    }
+
+    @keyframes modalPopIn {
+      0% {
+        transform: scale(0.7);
+        opacity: 0;
+      }
+      70% {
+        transform: scale(1.05);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .modal-title {
+      color: var(--secondary);
+      font-size: 1.5rem;
+      margin-bottom: 15px;
+      animation: titleGlow 2s infinite ease-in-out;
+    }
+
+    @keyframes titleGlow {
+      0%, 100% { text-shadow: 0 0 5px var(--secondary); }
+      50% { text-shadow: 0 0 15px var(--secondary), 0 0 25px var(--secondary); }
+    }
+
+    .modal-text {
+      font-size: 1rem;
+      margin-bottom: 20px;
+    }
+
+    .reward-text {
+      color: #f1c40f;
+      font-weight: bold;
+      margin: 8px 0;
+      font-size: 0.95rem;
+      animation: rewardPulse 1.5s infinite ease-in-out;
+    }
+
+    @keyframes rewardPulse {
+      0%, 100% { opacity: 0.9; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.05); }
+    }
+
+    /* 横屏适配 */
+    @media (min-width: 768px) {
+      .battle-arena {
+        height: 350px;
+      }
+
+      .character {
+        width: 100px;
+        height: 180px;
+      }
+
+      .player-char {
+        left: 80px;
+      }
+
+      .enemy-char {
+        right: 80px;
+      }
+
+      .skills-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+
+      .notification {
+        top: 20px;
+        right: 20px;
+        left: auto;
+        transform: translateX(0);
+        animation: notificationSlideRight 0.4s ease-out forwards, notificationFadeRight 0.4s ease-out 2.6s forwards;
+      }
+
+      @keyframes notificationSlideRight {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+
+      @keyframes notificationFadeRight {
+        to {
+          opacity: 0;
+          transform: translateX(20px);
+        }
+      }
+    }
+  </style>
+
+  </head>
+<body>
+  <div class="game-container">
+    <div class="main-content">
+      <div class="section" style="display:block;">
+        <h2 class="section-title">修仙斗法</h2>
+        
+        <!-- 战斗场景 -->
+        <div class="battle-arena" id="battleArena">
+          <!-- 小巧的自动战斗按钮 -->
+          <button class="auto-battle-btn auto-battle-off" id="autoBattleBtn" onclick="toggleAutoBattle()">
+            自动
+          </button>
+          <!-- 自动战斗提示 -->
+          <div class="auto-battle-hint" id="autoBattleHint">
+            自动战斗中...
+          </div>
+          
+          <!-- 玩家角色 -->
+          <div class="character player-char">
+            <div class="char-name player-name">玩家</div>
+            <div class="health-bar">
+              <div class="health-fill player-health" id="playerHealthBar"></div>
+              <div class="health-text" id="playerHealthText">100/100</div>
+            </div>
+          </div>
+          
+          <!-- 敌人角色 -->
+          <div class="character enemy-char">
+            <div class="char-name enemy-name" id="enemyName">魔修</div>
+            <div class="health-bar">
+              <div class="health-fill enemy-health" id="enemyHealthBar"></div>
+              <div class="health-text" id="enemyHealthText">150/150</div>
+            </div>
+          </div>
+          
+          <!-- 技能特效容器 -->
+          <div class="skill-effect" id="skillEffect"></div>
+          <!-- 伤害数字容器 -->
+          <div class="damage-float" id="damageFloat"></div>
+        </div>
+        
+        <!-- 技能栏 -->
+        <div class="skills-container">
+          <h3 class="skills-title">神通技能</h3>
+          <div class="skills-grid" id="skillButtons">
+            <button class="skill-btn" disabled>
+              <div class="skill-name">加载中...</div>
+            </button>
+          </div>
+        </div>
+        
+        <!-- 战斗日志 -->
+        <div class="battle-log" id="battleLog">
+          <div class="log-entry log-system">战斗开始！魔修向你发起挑战！</div>
+        </div>
+        
+        <!-- 操作按钮 -->
+        <div class="action-buttons">
+          <button class="btn btn-danger" onclick="fleeBattle()">遁走</button>
+          <button class="btn" onclick="refreshBattle()">重置战斗</button>
+          <button class="btn" onclick="window.location.href='../index.html'">返回修仙界</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 通知提示 -->
+  <div class="notification" id="notification">提示信息</div>
+  
+  <!-- 战斗结束弹窗 -->
+  <div class="battle-over-modal" id="battleOverModal">
+    <div class="modal-content">
+      <h3 class="modal-title" id="modalTitle">战斗胜利！</h3>
+      <div class="modal-text" id="modalText">你成功击败了魔修，修为大进！</div>
+      <div class="reward-text" id="rewardText">获得：灵石 x 50，修为 x 100</div>
+      <button class="btn" onclick="closeBattleModal()">继续修行</button>
+    </div>
+  </div>
+
+  <script src="../js/store.js"></script>
+  <script src="../js/api-service.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/ui-components.js"></script>
+  <script>
+    let currentRoleId = null;
+    let player = { health: 100, healthMax: 100, mana: 80, manaMax: 80, attack: 10, defense: 5, speed: 10, critRate: 5, critDamage: 150, dodgeRate: 0, spiritStones: 0 };
+    let enemy = { name: "魔修", health: 150, healthMax: 150, attack: 12, defense: 3, spiritStonesReward: 50, expReward: 100 };
+    let skills = [];
+    let battleActive = true;
+    let playerTurn = true;
+    let autoBattle = false;
+    let autoBattleInterval = null;
+    let battleRoundCount = 0;
+
+    async function loadPlayerData() {
+      currentRoleId = window.getRoleId ? window.getRoleId() : null;
+      if (!currentRoleId) { window.showToast('未找到角色信息', 'error'); return; }
+      try {
+        const roleData = await window.apiService.getRoleById(currentRoleId);
+        if (roleData) {
+          player.healthMax = roleData.hp || 100;
+          player.health = player.healthMax;
+        }
+        const stats = await window.apiService.getAttributes(currentRoleId);
+        if (stats) {
+          player.healthMax = stats.hpMax || stats.hp || 100;
+          player.health = player.healthMax;
+          player.attack = stats.atk || 10;
+          player.defense = stats.def || 5;
+          player.speed = stats.speed || 10;
+          player.critRate = stats.critRate || 5;
+          player.critDamage = stats.critDmg || 150;
+          player.dodgeRate = stats.dodgeRate || 0;
+        }
+        const roleSkills = await window.apiService.getRoleSkills(currentRoleId);
+        if (roleSkills && Array.isArray(roleSkills) && roleSkills.length > 0) {
+          skills = roleSkills.map((rs, idx) => ({
+            id: rs.skillId || idx + 1,
+            name: rs.skillName || '技能' + (idx + 1),
+            cost: rs.manaCost || Math.floor(10 + idx * 8),
+            damage: rs.damage ? [rs.damage, Math.floor(rs.damage * 1.5)] : [10 + idx * 5, 15 + idx * 8],
+            type: rs.type === 'heal' || (rs.skillName && rs.skillName.includes('治愈')) ? 'heal' : 'attack',
+            heal: rs.heal ? [rs.heal, Math.floor(rs.heal * 1.3)] : [15, 25],
+            desc: rs.description || rs.skillName || '技能'
+          }));
+        }
+        if (skills.length === 0) {
+          skills = [
+            { id: 1, name: "御剑术", cost: 10, damage: [Math.floor(player.attack * 0.8), Math.floor(player.attack * 1.2)], type: "attack", desc: "基础剑术" },
+            { id: 2, name: "火球术", cost: 15, damage: [Math.floor(player.attack * 1.0), Math.floor(player.attack * 1.5)], type: "attack", desc: "火焰法术" },
+            { id: 3, name: "治愈术", cost: 20, heal: [Math.floor(player.healthMax * 0.15), Math.floor(player.healthMax * 0.25)], type: "heal", desc: "恢复气血" },
+            { id: 4, name: "雷劫术", cost: 30, damage: [Math.floor(player.attack * 1.5), Math.floor(player.attack * 2.0)], type: "attack", desc: "强力雷法" }
+          ];
+        }
+        renderSkillButtons();
+      } catch (e) {
+        console.error('加载角色数据失败:', e);
+        window.showToast('加载角色数据失败，使用默认数据', 'warning');
+        skills = [
+          { id: 1, name: "御剑术", cost: 10, damage: [10, 15], type: "attack", desc: "基础剑术" },
+          { id: 2, name: "火球术", cost: 15, damage: [15, 22], type: "attack", desc: "火焰法术" },
+          { id: 3, name: "治愈术", cost: 20, heal: [15, 25], type: "heal", desc: "恢复气血" },
+          { id: 4, name: "雷劫术", cost: 30, damage: [25, 35], type: "attack", desc: "强力雷法" }
+        ];
+        renderSkillButtons();
+      }
+      generateEnemy();
+      updatePlayerStatus();
+      updateEnemyHealth();
+      updateSkillButtons();
+    }
+
+    function renderSkillButtons() {
+      const container = document.getElementById('skillButtons');
+      if (!container) return;
+      container.innerHTML = '';
+      skills.forEach(skill => {
+        const btn = document.createElement('button');
+        btn.id = 'skill' + skill.id;
+        btn.className = 'skill-btn';
+        const nameDiv = document.createElement('div');
+        nameDiv.className = 'skill-name';
+        nameDiv.textContent = skill.name;
+        const costDiv = document.createElement('div');
+        costDiv.className = 'skill-cost';
+        costDiv.textContent = '灵力: ' + skill.cost;
+        const descDiv = document.createElement('div');
+        descDiv.className = 'skill-desc';
+        descDiv.textContent = skill.desc;
+        btn.appendChild(nameDiv);
+        btn.appendChild(costDiv);
+        btn.appendChild(descDiv);
+        btn.addEventListener('click', () => useSkill(skill.id));
+        container.appendChild(btn);
+      });
+    }
+
+    function generateEnemy() {
+      const enemyNames = ['魔修', '妖兽', '邪修', '鬼修', '散修', '魔将'];
+      const tier = Math.max(1, Math.floor(player.attack / 15));
+      enemy.name = enemyNames[Math.floor(Math.random() * enemyNames.length)];
+      enemy.healthMax = Math.floor(80 + tier * 40 + Math.random() * 30);
+      enemy.health = enemy.healthMax;
+      enemy.attack = Math.floor(8 + tier * 5 + Math.random() * 5);
+      enemy.defense = Math.floor(2 + tier * 2);
+      enemy.spiritStonesReward = Math.floor(20 + tier * 15 + Math.random() * 20);
+      enemy.expReward = Math.floor(50 + tier * 30 + Math.random() * 30);
+      const nameEl = document.getElementById('enemyName');
+      if (nameEl) nameEl.textContent = enemy.name;
+    }
+
+    async function saveBattleResult(won) {
+      if (!currentRoleId) return;
+      try {
+        await window.apiService.post('/combat/result', {
+          roleId: currentRoleId,
+          victory: won,
+          enemyType: enemy.name || 'default',
+          enemyName: enemy.name,
+          rounds: battleRoundCount || 1,
+          expAmount: won ? enemy.expReward : 0,
+          spiritStonesChange: won ? enemy.spiritStonesReward : -Math.floor(player.spiritStones * 0.1)
+        });
+        if (window.roleStore) await window.roleStore.fetchAssets();
+      } catch (e) { console.error('保存战斗结果失败:', e); }
+    }
+
+    function updatePlayerStatus() {
+      const pct = (player.health / player.healthMax) * 100;
+      const bar = document.getElementById('playerHealthBar');
+      const txt = document.getElementById('playerHealthText');
+      if (bar) bar.style.width = pct + '%';
+      if (txt) txt.textContent = player.health + '/' + player.healthMax;
+    }
+
+    function updateEnemyHealth() {
+      const pct = (enemy.health / enemy.healthMax) * 100;
+      const bar = document.getElementById('enemyHealthBar');
+      const txt = document.getElementById('enemyHealthText');
+      if (bar) bar.style.width = pct + '%';
+      if (txt) txt.textContent = enemy.health + '/' + enemy.healthMax;
+    }
+
+    function updateSkillButtons() {
+      skills.forEach(skill => {
+        const btn = document.getElementById('skill' + skill.id);
+        if (btn) btn.disabled = player.mana < skill.cost;
+      });
+    }
+
+    function toggleAutoBattle() {
+      autoBattle = !autoBattle;
+      const btn = document.getElementById('autoBattleBtn');
+      const hint = document.getElementById('autoBattleHint');
+      if (autoBattle) {
+        btn.className = 'auto-battle-btn auto-battle-on';
+        btn.textContent = '自动√';
+        if (hint) hint.style.display = 'block';
+        window.showToast('已开启自动战斗');
+        startAutoBattle();
+      } else {
+        btn.className = 'auto-battle-btn auto-battle-off';
+        btn.textContent = '自动';
+        if (hint) hint.style.display = 'none';
+        window.showToast('已关闭自动战斗');
+        stopAutoBattle();
+      }
+    }
+
+    function startAutoBattle() {
+      stopAutoBattle();
+      autoBattleInterval = setInterval(() => {
+        if (!battleActive || !playerTurn) return;
+        autoSelectSkill();
+      }, 2000);
+    }
+
+    function stopAutoBattle() {
+      if (autoBattleInterval) { clearInterval(autoBattleInterval); autoBattleInterval = null; }
+    }
+
+    function autoSelectSkill() {
+      if (player.health / player.healthMax < 0.3) {
+        const healSkill = skills.find(s => s.type === 'heal' && player.mana >= s.cost);
+        if (healSkill) { useSkill(healSkill.id); return; }
+      }
+      for (let i = skills.length - 1; i >= 0; i--) {
+        if (skills[i].type === 'attack' && player.mana >= skills[i].cost) { useSkill(skills[i].id); return; }
+      }
+      addBattleLog('<span class="log-system">灵力不足，调息恢复...</span>');
+      player.mana = Math.min(player.manaMax, player.mana + 5);
+      updatePlayerStatus();
+      updateSkillButtons();
+    }
+
+    function useSkill(skillId) {
+      if (!battleActive || (!playerTurn && !autoBattle)) return;
+      const skill = skills.find(s => s.id === skillId);
+      if (!skill || player.mana < skill.cost) { window.showToast('灵力不足！', 'warning'); return; }
+      const playerChar = document.querySelector('.player-char');
+      if (playerChar) { playerChar.classList.add('cast'); setTimeout(() => playerChar.classList.remove('cast'), 600); }
+      player.mana -= skill.cost;
+      if (skill.type === 'attack') {
+        let dmg = Math.floor(Math.random() * (skill.damage[1] - skill.damage[0] + 1)) + skill.damage[0];
+        const isCrit = Math.random() * 100 < player.critRate;
+        if (isCrit) dmg = Math.floor(dmg * player.critDamage / 100);
+        const finalDmg = Math.max(1, dmg - enemy.defense);
+        enemy.health = Math.max(0, enemy.health - finalDmg);
+        addBattleLog('你使用了<span class="log-player">' + skill.name + '</span>' + (isCrit ? ' <span class="log-damage">暴击！</span>' : '') + '，对<span class="log-enemy">' + enemy.name + '</span>造成了<span class="log-damage">' + finalDmg + '</span>点伤害！');
+        showSkillEffect('enemy', 'attack');
+        showDamageFloat(finalDmg, 'enemy', false);
+        const ec = document.querySelector('.enemy-char');
+        if (ec) { ec.classList.add('hit'); setTimeout(() => ec.classList.remove('hit'), 400); }
+        updateEnemyHealth();
+        if (enemy.health <= 0) { stopAutoBattle(); resetAutoBtn(); battleWin(); return; }
+      } else if (skill.type === 'heal') {
+        const heal = Math.floor(Math.random() * (skill.heal[1] - skill.heal[0] + 1)) + skill.heal[0];
+        player.health = Math.min(player.healthMax, player.health + heal);
+        addBattleLog('你使用了<span class="log-player">' + skill.name + '</span>，恢复了<span class="log-heal">' + heal + '</span>点气血！');
+        showSkillEffect('player', 'heal');
+        showDamageFloat(heal, 'player', true);
+      }
+      updatePlayerStatus();
+      updateSkillButtons();
+      battleRoundCount++;
+      playerTurn = false;
+      setTimeout(enemyTurn, 1500);
+    }
+
+    function enemyTurn() {
+      if (!battleActive) return;
+      const ec = document.querySelector('.enemy-char');
+      if (ec) { ec.classList.add('cast'); setTimeout(() => ec.classList.remove('cast'), 600); }
+      const isDodge = Math.random() * 100 < player.dodgeRate;
+      if (isDodge) {
+        addBattleLog('<span class="log-enemy">' + enemy.name + '</span>发起攻击，你<span class="log-heal">闪避</span>了！');
+      } else {
+        const dmg = Math.max(1, enemy.attack - player.defense);
+        player.health = Math.max(0, player.health - dmg);
+        addBattleLog('<span class="log-enemy">' + enemy.name + '</span>对你发起攻击，造成了<span class="log-damage">' + dmg + '</span>点伤害！');
+        showSkillEffect('player', 'attack');
+        showDamageFloat(dmg, 'player', false);
+        const pc = document.querySelector('.player-char');
+        if (pc) { pc.classList.add('hit'); setTimeout(() => pc.classList.remove('hit'), 400); }
+      }
+      updatePlayerStatus();
+      if (player.health <= 0) { stopAutoBattle(); resetAutoBtn(); battleLose(); return; }
+      playerTurn = true;
+      addBattleLog('<span class="log-system">轮到你的回合了！</span>');
+      if (autoBattle) setTimeout(autoSelectSkill, 500);
+    }
+
+    function battleWin() {
+      battleActive = false;
+      player.spiritStones += enemy.spiritStonesReward;
+      addBattleLog('<span class="log-system">恭喜！你击败了' + enemy.name + '！</span>');
+      addBattleLog('<span class="log-system">获得' + enemy.spiritStonesReward + '灵石和' + enemy.expReward + '修为！</span>');
+      saveBattleResult(true);
+      const ec = document.querySelector('.enemy-char');
+      if (ec) { ec.style.transition = 'all 1s ease-out'; ec.style.opacity = 0; ec.style.transform = 'translateY(-50%) scale(0.8)'; }
+      document.getElementById('modalTitle').textContent = '战斗胜利！';
+      document.getElementById('modalText').textContent = '你成功击败了' + enemy.name + '，修为大进！';
+      document.getElementById('rewardText').textContent = '获得：灵石 x ' + enemy.spiritStonesReward + '，修为 x ' + enemy.expReward;
+      document.getElementById('battleOverModal').style.display = 'flex';
+      disableAllSkills();
+    }
+
+    function battleLose() {
+      battleActive = false;
+      const lost = Math.floor(player.spiritStones * 0.1);
+      addBattleLog('<span class="log-system">你被' + enemy.name + '击败了！</span>');
+      addBattleLog('<span class="log-system">损失了' + lost + '灵石...</span>');
+      player.spiritStones = Math.max(0, player.spiritStones - lost);
+      saveBattleResult(false);
+      const pc = document.querySelector('.player-char');
+      if (pc) { pc.style.transition = 'all 1s ease-out'; pc.style.opacity = 0; pc.style.transform = 'translateY(-50%) scale(0.8)'; }
+      document.getElementById('modalTitle').textContent = '战斗失败！';
+      document.getElementById('modalText').textContent = '你被' + enemy.name + '击败，身受重伤！';
+      document.getElementById('rewardText').textContent = '损失：灵石 x ' + lost;
+      document.getElementById('battleOverModal').style.display = 'flex';
+      disableAllSkills();
+    }
+
+    function fleeBattle() {
+      if (!battleActive) return;
+      stopAutoBattle(); resetAutoBtn();
+      if (Math.random() > 0.5) {
+        const pc = document.querySelector('.player-char');
+        if (pc) { pc.style.transition = 'all 0.8s ease-out'; pc.style.left = '-100px'; pc.style.opacity = 0; }
+        addBattleLog('<span class="log-system">你成功遁走！</span>');
+        battleActive = false; disableAllSkills();
+        window.showToast('成功逃离战斗');
+      } else {
+        addBattleLog('<span class="log-system">遁走失败！</span>');
+        window.showToast('遁走失败！', 'warning');
+        setTimeout(() => {
+          const dmg = Math.max(1, enemy.attack - player.defense);
+          player.health = Math.max(0, player.health - dmg);
+          addBattleLog('<span class="log-enemy">' + enemy.name + '</span>追击，造成<span class="log-damage">' + dmg + '</span>点伤害！');
+          updatePlayerStatus();
+          if (player.health <= 0) battleLose();
+        }, 1000);
+      }
+    }
+
+    function refreshBattle() {
+      stopAutoBattle(); resetAutoBtn();
+      player.health = player.healthMax;
+      player.mana = player.manaMax;
+      generateEnemy();
+      const pc = document.querySelector('.player-char');
+      const ec = document.querySelector('.enemy-char');
+      if (pc) { pc.style.transition = 'all 0.2s ease'; pc.style.opacity = 1; pc.style.transform = 'translateY(-50%)'; pc.style.left = window.innerWidth >= 768 ? '80px' : '20px'; }
+      if (ec) { ec.style.transition = 'all 0.2s ease'; ec.style.opacity = 1; ec.style.transform = 'translateY(-50%)'; }
+      battleActive = true; playerTurn = true;
+      battleRoundCount = 0;
+      document.getElementById('battleLog').innerHTML = '<div class="log-entry log-system">战斗开始！' + enemy.name + '向你发起挑战！</div>';
+      updatePlayerStatus(); updateEnemyHealth(); updateSkillButtons();
+      window.showToast('战斗已重置');
+    }
+
+    function resetAutoBtn() {
+      const btn = document.getElementById('autoBattleBtn');
+      if (btn) { btn.className = 'auto-battle-btn auto-battle-off'; btn.textContent = '自动'; }
+      const hint = document.getElementById('autoBattleHint');
+      if (hint) hint.style.display = 'none';
+      autoBattle = false;
+    }
+
+    function closeBattleModal() { document.getElementById('battleOverModal').style.display = 'none'; }
+
+    function addBattleLog(message) {
+      const log = document.getElementById('battleLog');
+      const entry = document.createElement('div');
+      entry.className = 'log-entry';
+      entry.innerHTML = message;
+      log.appendChild(entry);
+      log.scrollTop = log.scrollHeight;
+    }
+
+    function showSkillEffect(target, effectType) {
+      const effect = document.getElementById('skillEffect');
+      const char = document.querySelector('.' + target + '-char');
+      if (!effect || !char) return;
+      const rect = char.getBoundingClientRect();
+      const arenaRect = document.getElementById('battleArena').getBoundingClientRect();
+      effect.style.left = (rect.left - arenaRect.left + rect.width / 2 - 40) + 'px';
+      effect.style.top = (rect.top - arenaRect.top + rect.height / 2 - 40) + 'px';
+      effect.className = 'skill-effect ' + effectType;
+      effect.style.display = 'block';
+      setTimeout(() => { effect.style.display = 'none'; }, 1200);
+    }
+
+    function showDamageFloat(value, target, isHeal) {
+      const float = document.getElementById('damageFloat');
+      const char = document.querySelector('.' + target + '-char');
+      if (!float || !char) return;
+      const rect = char.getBoundingClientRect();
+      const arenaRect = document.getElementById('battleArena').getBoundingClientRect();
+      float.style.left = (rect.left - arenaRect.left + rect.width / 2 - 20 + Math.random() * 20 - 10) + 'px';
+      float.style.top = (rect.top - arenaRect.top + 20) + 'px';
+      float.className = 'damage-float ' + (isHeal ? 'heal' : 'damage');
+      float.textContent = (isHeal ? '+' : '-') + value;
+      float.style.display = 'block';
+      setTimeout(() => { float.style.display = 'none'; }, 1200);
+    }
+
+    function disableAllSkills() { skills.forEach(s => { const b = document.getElementById('skill' + s.id); if (b) b.disabled = true; }); }
+
+    window.addEventListener('DOMContentLoaded', () => { loadPlayerData(); });
+    window.addEventListener('beforeunload', () => { stopAutoBattle(); });
+    window.addEventListener('resize', () => {
+      if (!battleActive) return;
+      const pc = document.querySelector('.player-char');
+      if (pc) pc.style.left = window.innerWidth >= 768 ? '80px' : '20px';
+    });
+  </script>
+</body>
+</html>

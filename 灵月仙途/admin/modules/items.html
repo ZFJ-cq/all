@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>物品管理</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <div class="module-content">
+        <h2>物品管理</h2>
+        <div class="module-description">
+            管理游戏中的物品数据
+        </div>
+        
+        <div class="action-bar">
+            <button onclick="openCreateItemModal()" class="add-btn">添加物品</button>
+        </div>
+        
+        <div class="search-bar">
+            <input type="text" id="searchKeyword" placeholder="搜索物品...">
+            <button onclick="searchItems()">搜索</button>
+        </div>
+        
+        <div class="filter-bar">
+            <select id="itemType">
+                <option value="">所有类型</option>
+                <option value="1">消耗品</option>
+                <option value="2">材料</option>
+                <option value="3">特殊物品</option>
+            </select>
+            <select id="itemStatus">
+                <option value="">所有状态</option>
+                <option value="1">启用</option>
+                <option value="0">禁用</option>
+            </select>
+            <button onclick="filterItems()">筛选</button>
+        </div>
+        
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>物品名称</th>
+                        <th>类型</th>
+                        <th>价格</th>
+                        <th>可堆叠</th>
+                        <th>最大堆叠</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="itemsTableBody">
+                    <!-- 数据将通过JS动态加载 -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="pagination" id="pagination">
+            <!-- 分页将通过JS动态生成 -->
+        </div>
+    </div>
+    
+    <!-- 创建物品模态框 -->
+    <div id="createItemModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>创建物品</h3>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="createItemForm">
+                    <div class="form-group">
+                        <label>物品名称</label>
+                        <input type="text" id="itemName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>描述</label>
+                        <textarea id="itemDescription" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>类型</label>
+                        <select id="itemTypeSelect" required>
+                            <option value="1">消耗品</option>
+                            <option value="2">材料</option>
+                            <option value="3">特殊物品</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>使用效果</label>
+                        <input type="text" id="itemUseEffect">
+                    </div>
+                    <div class="form-group">
+                        <label>可堆叠</label>
+                        <select id="itemStackable" required>
+                            <option value="1">是</option>
+                            <option value="0">否</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>最大堆叠</label>
+                        <input type="number" id="itemMaxStack" min="1" value="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label>价格</label>
+                        <input type="number" id="itemPrice" min="0" value="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label>状态</label>
+                        <select id="itemStatusSelect" required>
+                            <option value="1">启用</option>
+                            <option value="0">禁用</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button onclick="closeModal()">取消</button>
+                <button onclick="createItem()" class="confirm-btn">创建</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 编辑物品模态框 -->
+    <div id="editItemModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>编辑物品</h3>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="editItemForm">
+                    <input type="hidden" id="editItemId">
+                    <div class="form-group">
+                        <label>物品名称</label>
+                        <input type="text" id="editItemName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>描述</label>
+                        <textarea id="editItemDescription" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>类型</label>
+                        <select id="editItemTypeSelect" required>
+                            <option value="1">消耗品</option>
+                            <option value="2">材料</option>
+                            <option value="3">特殊物品</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>使用效果</label>
+                        <input type="text" id="editItemUseEffect">
+                    </div>
+                    <div class="form-group">
+                        <label>可堆叠</label>
+                        <select id="editItemStackable" required>
+                            <option value="1">是</option>
+                            <option value="0">否</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>最大堆叠</label>
+                        <input type="number" id="editItemMaxStack" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label>价格</label>
+                        <input type="number" id="editItemPrice" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label>状态</label>
+                        <select id="editItemStatusSelect" required>
+                            <option value="1">启用</option>
+                            <option value="0">禁用</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button onclick="closeModal()">取消</button>
+                <button onclick="updateItem()" class="confirm-btn">保存</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function initItems() {
+            console.log('初始化物品管理模块');
+            loadItemsData();
+        }
+        
+        function loadItemsData() {
+            const tableBody = document.getElementById('itemsTableBody');
+            tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px;">加载中...</td></tr>';
+            
+            // 调用后端API获取物品列表
+            fetch('/api/item/list')
+                .then(response => response.json())
+                .then(items => {
+                    tableBody.innerHTML = '';
+                    if (items.length === 0) {
+                        tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px;">暂无物品数据</td></tr>';
+                        return;
+                    }
+                    
+                    items.forEach(item => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${item.id}</td>
+                            <td>${item.name}</td>
+                            <td>${getItemTypeName(item.type)}</td>
+                            <td>${item.price}</td>
+                            <td>${item.stackable === 1 ? '是' : '否'}</td>
+                            <td>${item.maxStack}</td>
+                            <td>${item.status === 1 ? '启用' : '禁用'}</td>
+                            <td>
+                                <button onclick="editItem(${item.id})">编辑</button>
+                                <button onclick="deleteItem(${item.id})">删除</button>
+                            </td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                })
+                .catch(error => {
+                    console.error('加载物品数据失败:', error);
+                    tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px; color: red;">加载失败</td></tr>';
+                });
+        }
+        
+        function getItemTypeName(type) {
+            switch(type) {
+                case 1: return '消耗品';
+                case 2: return '材料';
+                case 3: return '特殊物品';
+                default: return '未知';
+            }
+        }
+        
+        function searchItems() {
+            const keyword = document.getElementById('searchKeyword').value;
+            const tableBody = document.getElementById('itemsTableBody');
+            tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px;">搜索中...</td></tr>';
+            
+            fetch(`/api/item/search?keyword=${encodeURIComponent(keyword)}`)
+                .then(response => response.json())
+                .then(items => {
+                    tableBody.innerHTML = '';
+                    if (items.length === 0) {
+                        tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px;">没有找到匹配的物品</td></tr>';
+                        return;
+                    }
+                    
+                    items.forEach(item => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${item.id}</td>
+                            <td>${item.name}</td>
+                            <td>${getItemTypeName(item.type)}</td>
+                            <td>${item.price}</td>
+                            <td>${item.stackable === 1 ? '是' : '否'}</td>
+                            <td>${item.maxStack}</td>
+                            <td>${item.status === 1 ? '启用' : '禁用'}</td>
+                            <td>
+                                <button onclick="editItem(${item.id})">编辑</button>
+                                <button onclick="deleteItem(${item.id})">删除</button>
+                            </td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                })
+                .catch(error => {
+                    console.error('搜索物品失败:', error);
+                    tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px; color: red;">搜索失败</td></tr>';
+                });
+        }
+        
+        function filterItems() {
+            const type = document.getElementById('itemType').value;
+            const status = document.getElementById('itemStatus').value;
+            const tableBody = document.getElementById('itemsTableBody');
+            tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px;">筛选中...</td></tr>';
+            
+            let url = '/api/item/filter';
+            if (type || status) {
+                url += '?';
+                if (type) url += `type=${type}&`;
+                if (status) url += `status=${status}`;
+                url = url.replace(/&$/, '');
+            }
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(items => {
+                    tableBody.innerHTML = '';
+                    if (items.length === 0) {
+                        tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px;">没有找到匹配的物品</td></tr>';
+                        return;
+                    }
+                    
+                    items.forEach(item => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${item.id}</td>
+                            <td>${item.name}</td>
+                            <td>${getItemTypeName(item.type)}</td>
+                            <td>${item.price}</td>
+                            <td>${item.stackable === 1 ? '是' : '否'}</td>
+                            <td>${item.maxStack}</td>
+                            <td>${item.status === 1 ? '启用' : '禁用'}</td>
+                            <td>
+                                <button onclick="editItem(${item.id})">编辑</button>
+                                <button onclick="deleteItem(${item.id})">删除</button>
+                            </td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                })
+                .catch(error => {
+                    console.error('筛选物品失败:', error);
+                    tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px; color: red;">筛选失败</td></tr>';
+                });
+        }
+        
+        function openCreateItemModal() {
+            document.getElementById('createItemModal').style.display = 'flex';
+        }
+        
+        function createItem() {
+            const item = {
+                name: document.getElementById('itemName').value,
+                description: document.getElementById('itemDescription').value,
+                type: parseInt(document.getElementById('itemTypeSelect').value),
+                useEffect: document.getElementById('itemUseEffect').value,
+                stackable: parseInt(document.getElementById('itemStackable').value),
+                maxStack: parseInt(document.getElementById('itemMaxStack').value),
+                price: parseInt(document.getElementById('itemPrice').value),
+                status: parseInt(document.getElementById('itemStatusSelect').value)
+            };
+            
+            fetch('/api/item/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(item)
+            })
+            .then(response => response.json())
+            .then(() => {
+                closeModal();
+                loadItemsData();
+                alert('物品创建成功');
+            })
+            .catch(error => {
+                console.error('创建物品失败:', error);
+                alert('创建物品失败');
+            });
+        }
+        
+        function editItem(id) {
+            fetch(`/api/item/${id}`)
+                .then(response => response.json())
+                .then(item => {
+                    document.getElementById('editItemId').value = item.id;
+                    document.getElementById('editItemName').value = item.name;
+                    document.getElementById('editItemDescription').value = item.description;
+                    document.getElementById('editItemTypeSelect').value = item.type;
+                    document.getElementById('editItemUseEffect').value = item.useEffect || '';
+                    document.getElementById('editItemStackable').value = item.stackable;
+                    document.getElementById('editItemMaxStack').value = item.maxStack;
+                    document.getElementById('editItemPrice').value = item.price;
+                    document.getElementById('editItemStatusSelect').value = item.status;
+                    document.getElementById('editItemModal').style.display = 'flex';
+                })
+                .catch(error => {
+                    console.error('获取物品详情失败:', error);
+                    alert('获取物品详情失败');
+                });
+        }
+        
+        function updateItem() {
+            const id = document.getElementById('editItemId').value;
+            const item = {
+                name: document.getElementById('editItemName').value,
+                description: document.getElementById('editItemDescription').value,
+                type: parseInt(document.getElementById('editItemTypeSelect').value),
+                useEffect: document.getElementById('editItemUseEffect').value,
+                stackable: parseInt(document.getElementById('editItemStackable').value),
+                maxStack: parseInt(document.getElementById('editItemMaxStack').value),
+                price: parseInt(document.getElementById('editItemPrice').value),
+                status: parseInt(document.getElementById('editItemStatusSelect').value)
+            };
+            
+            fetch(`/api/item/update/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(item)
+            })
+            .then(response => response.json())
+            .then(() => {
+                closeModal();
+                loadItemsData();
+                alert('物品更新成功');
+            })
+            .catch(error => {
+                console.error('更新物品失败:', error);
+                alert('更新物品失败');
+            });
+        }
+        
+        function deleteItem(id) {
+            if (confirm('确定要删除物品吗？')) {
+                fetch(`/api/item/delete/${id}`, {
+                    method: 'DELETE'
+                })
+                .then(() => {
+                    loadItemsData();
+                    alert('物品删除成功');
+                })
+                .catch(error => {
+                    console.error('删除物品失败:', error);
+                    alert('删除物品失败');
+                });
+            }
+        }
+        
+        function closeModal() {
+            document.getElementById('createItemModal').style.display = 'none';
+            document.getElementById('editItemModal').style.display = 'none';
+        }
+        
+        // 点击模态框外部关闭
+        window.onclick = function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target == modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        };
+    </script>
+</body>
+</html>

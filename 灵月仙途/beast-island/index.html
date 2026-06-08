@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="../js/viewport-adapt.js"></script>
+  <script src="../js/config.js"></script>
+  <link rel="stylesheet" href="../css/mobile-adapt.css">
+  <title>灵月仙途 - 灵兽岛</title>
+  <style>
+    :root {
+      --gold-primary: #e6c749;
+      --gold-light: #f4d03f;
+      --gold-dim: #8a7525;
+      --text-main: #fdfbf7;
+      --text-dim: #d4c5a9;
+      --bg-dark: rgba(15, 20, 35, 0.95);
+      --bg-panel: rgba(20, 25, 45, 0.85);
+      --border-glow: 0 0 10px rgba(230, 199, 73, 0.3);
+      --success: #4CAF50;
+      --danger: #ff4444;
+      --rarity-common: #a0a0a0;
+      --rarity-rare: #3498db;
+      --rarity-epic: #9b59b6;
+      --rarity-legendary: #f39c12;
+      --rarity-mythic: #e74c3c;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      font-family: 'Microsoft YaHei', 'SimSun', serif;
+      background: linear-gradient(to bottom, #0f1420, #1a202c), 
+                  url('https://images.unsplash.com/photo-1518063319789-7217e6706b04?q=80&w=2070&auto=format&fit=crop');
+      background-size: cover;
+      background-position: center;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .particles {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      background-image: radial-gradient(var(--gold-primary) 1px, transparent 1px);
+      background-size: 60px 60px;
+      animation: particleFloat 30s linear infinite;
+      opacity: 0.15;
+    }
+
+    @keyframes particleFloat {
+      from { background-position: 0 0; }
+      to { background-position: 0 1000px; }
+    }
+
+    .main-container {
+      position: relative;
+      z-index: 10;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 8px;
+      gap: 8px;
+      overflow-y: auto;
+    }
+
+    .top-bar {
+      display: grid;
+      grid-template-columns: auto auto 1fr;
+      gap: 8px;
+      align-items: center;
+      background: var(--bg-panel);
+      border: 1px solid rgba(230, 199, 73, 0.3);
+      border-radius: 6px;
+      padding: 6px 10px;
+      backdrop-filter: blur(10px);
+    }
+
+    .back-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(230, 199, 73, 0.3);
+      border-radius: 50%;
+      color: var(--gold-primary);
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 1.2rem;
+    }
+
+    .back-btn:hover {
+      background: rgba(230, 199, 73, 0.2);
+      border-color: var(--gold-primary);
+      transform: scale(1.05);
+    }
+
+    .player-info {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .player-avatar-small {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 2px solid var(--gold-primary);
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+
+    .player-name-small {
+      font-size: 0.8rem;
+      color: var(--gold-primary);
+      font-weight: bold;
+    }
+
+    .resources-mini {
+      display: flex;
+      gap: 6px;
+      font-size: 0.7rem;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .resource-mini {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      background: rgba(0,0,0,0.3);
+      padding: 2px 5px;
+      border-radius: 3px;
+      white-space: nowrap;
+    }
+
+    .map-container {
+      position: relative;
+      height: 160px;
+      background: rgba(0,0,0,0.5);
+      border: 2px solid rgba(230, 199, 73, 0.3);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .map-bg {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #1a2a3a 0%, #2a3a4a 100%);
+      position: relative;
+    }
+
+    .area-selector {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      justify-content: center;
+      z-index: 20;
+      max-width: 95%;
+    }
+
+    .area-btn {
+      padding: 5px 10px;
+      background: rgba(0,0,0,0.6);
+      border: 1px solid rgba(230, 199, 73, 0.3);
+      color: var(--text-dim);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 0.7rem;
+      white-space: nowrap;
+    }
+
+    .area-btn:hover {
+      border-color: var(--gold-primary);
+      color: var(--gold-primary);
+    }
+
+    .area-btn.active {
+      background: rgba(230,199,73,0.3);
+      border-color: var(--gold-primary);
+      color: var(--gold-primary);
+      box-shadow: 0 0 10px rgba(230,199,73,0.3);
+    }
+
+    .area-btn.locked {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .action-bar {
+      display: flex;
+      gap: 6px;
+      justify-content: space-between;
+    }
+
+    .refresh-btn {
+      flex: 1;
+      padding: 8px;
+      background: linear-gradient(90deg, transparent, rgba(230,199,73,0.2), transparent);
+      border: 1px solid var(--gold-primary);
+      color: var(--gold-primary);
+      font-weight: bold;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 0.8rem;
+    }
+
+    .refresh-btn:hover {
+      background: rgba(230,199,73,0.3);
+      box-shadow: 0 0 15px rgba(230,199,73,0.4);
+    }
+
+    .beast-list {
+      flex: 1;
+      background: var(--bg-panel);
+      border: 1px solid rgba(230, 199, 73, 0.3);
+      border-radius: 6px;
+      padding: 8px;
+      backdrop-filter: blur(10px);
+      overflow-y: auto;
+    }
+
+    .section-title {
+      font-size: 0.85rem;
+      color: var(--gold-primary);
+      font-weight: bold;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .beast-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+    }
+
+    .beast-card {
+      background: rgba(0,0,0,0.4);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 5px;
+      padding: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .beast-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    .beast-card.selected {
+      border-color: var(--gold-primary);
+      box-shadow: 0 0 15px rgba(230,199,73,0.4);
+    }
+
+    .beast-card.common { border-left: 3px solid var(--rarity-common); }
+    .beast-card.rare { border-left: 3px solid var(--rarity-rare); }
+    .beast-card.epic { border-left: 3px solid var(--rarity-epic); }
+    .beast-card.legendary { border-left: 3px solid var(--rarity-legendary); }
+    .beast-card.mythic { border-left: 3px solid var(--rarity-mythic); }
+
+    .beast-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
+    .beast-name {
+      font-size: 0.75rem;
+      font-weight: bold;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .beast-level {
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      background: rgba(0,0,0,0.3);
+      padding: 1px 3px;
+      border-radius: 3px;
+    }
+
+    .beast-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      margin: 2px 0;
+    }
+
+    .beast-rarity {
+      font-size: 0.6rem;
+      padding: 1px 3px;
+      border-radius: 2px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .beast-rarity.common { background: var(--rarity-common); color: #000; }
+    .beast-rarity.rare { background: var(--rarity-rare); color: #fff; }
+    .beast-rarity.epic { background: var(--rarity-epic); color: #fff; }
+    .beast-rarity.legendary { background: var(--rarity-legendary); color: #000; }
+    .beast-rarity.mythic { background: var(--rarity-mythic); color: #fff; }
+
+    .beast-actions {
+      display: flex;
+      gap: 4px;
+      margin-top: 5px;
+    }
+
+    .beast-action-btn {
+      flex: 1;
+      padding: 5px;
+      border: 1px solid rgba(230, 199, 73, 0.3);
+      background: rgba(0,0,0,0.3);
+      color: var(--text-dim);
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 0.65rem;
+    }
+
+    .beast-action-btn:hover {
+      border-color: var(--gold-primary);
+      color: var(--gold-primary);
+      background: rgba(230,199,73,0.2);
+    }
+
+    .beast-action-btn.catch {
+      background: rgba(76, 175, 80, 0.2);
+      border-color: rgba(76, 175, 80, 0.5);
+    }
+
+    .beast-action-btn.catch:hover {
+      background: rgba(76, 175, 80, 0.3);
+    }
+
+    .beast-action-btn.fight {
+      background: rgba(255, 68, 68, 0.2);
+      border-color: rgba(255, 68, 68, 0.5);
+    }
+
+    .beast-action-btn.fight:hover {
+      background: rgba(255, 68, 68, 0.3);
+    }
+
+    .popup-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      z-index: 2000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+
+    .popup-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .popup-content {
+      background: var(--bg-panel);
+      border: 2px solid var(--gold-primary);
+      border-radius: 10px;
+      padding: 15px;
+      width: 90%;
+      max-width: 350px;
+      box-shadow: 0 0 30px rgba(230, 199, 73, 0.4);
+      transform: scale(0.9);
+      transition: transform 0.3s;
+    }
+
+    .popup-overlay.active .popup-content {
+      transform: scale(1);
+    }
+
+    .popup-title {
+      font-size: 1.1rem;
+      color: var(--gold-primary);
+      text-align: center;
+      margin-bottom: 12px;
+      font-weight: bold;
+    }
+
+    .popup-body {
+      color: var(--text-dim);
+      font-size: 0.85rem;
+      line-height: 1.5;
+      margin-bottom: 15px;
+    }
+
+    .popup-btn {
+      width: 100%;
+      padding: 10px;
+      background: linear-gradient(90deg, transparent, rgba(230,199,73,0.2), transparent);
+      border: 1px solid var(--gold-primary);
+      color: var(--gold-primary);
+      font-weight: bold;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .popup-btn:hover {
+      background: rgba(230,199,73,0.3);
+      box-shadow: 0 0 15px rgba(230,199,73,0.4);
+    }
+
+    .catch-tool-selector {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin: 12px 0;
+    }
+
+    .catch-tool-option {
+      padding: 10px;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(230, 199, 73, 0.2);
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+    }
+
+    .catch-tool-option:hover {
+      border-color: var(--gold-primary);
+      background: rgba(230,199,73,0.1);
+    }
+
+    .catch-tool-option.selected {
+      border-color: var(--gold-primary);
+      background: rgba(230,199,73,0.2);
+      box-shadow: 0 0 10px rgba(230,199,73,0.3);
+    }
+
+    .tool-name {
+      color: var(--gold-primary);
+      font-weight: bold;
+      font-size: 0.8rem;
+      margin-bottom: 4px;
+    }
+
+    .tool-rate {
+      color: var(--text-dim);
+      font-size: 0.65rem;
+    }
+
+    .catch-result {
+      text-align: center;
+      padding: 15px;
+    }
+
+    .catch-result-icon {
+      font-size: 3rem;
+      margin-bottom: 12px;
+      animation: bounceIn 0.6s ease-out;
+    }
+
+    @keyframes bounceIn {
+      0% { transform: scale(0); opacity: 0; }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .catch-result-name {
+      font-size: 1.1rem;
+      color: var(--gold-primary);
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .catch-result-rarity {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 10px;
+      font-size: 0.7rem;
+      font-weight: bold;
+      margin-bottom: 12px;
+    }
+
+    .catch-result-stats {
+      background: rgba(0,0,0,0.3);
+      border-radius: 5px;
+      padding: 8px;
+      margin-bottom: 12px;
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 4px 0;
+      font-size: 0.75rem;
+    }
+
+    .stat-label {
+      color: var(--text-dim);
+    }
+
+    .stat-value {
+      color: var(--gold-light);
+      font-weight: bold;
+    }
+
+    /* 竖屏优化 - 适配小屏手机 */
+    @media (max-width: 375px) {
+      .main-container {
+        padding: 6px;
+        gap: 6px;
+      }
+      
+      .map-container {
+        height: 140px;
+      }
+      
+      .area-btn {
+        padding: 4px 8px;
+        font-size: 0.65rem;
+      }
+      
+      .beast-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 4px;
+      }
+      
+      .beast-card {
+        padding: 5px;
+      }
+      
+      .beast-name {
+        font-size: 0.7rem;
+      }
+      
+      .beast-action-btn {
+        font-size: 0.6rem;
+        padding: 4px;
+      }
+    }
+
+    /* 超小屏幕优化 */
+    @media (max-width: 320px) {
+      .top-bar {
+        grid-template-columns: 1fr;
+        gap: 6px;
+      }
+      
+      .resources-mini {
+        justify-content: center;
+      }
+      
+      .map-container {
+        height: 120px;
+      }
+      
+      .area-selector {
+        gap: 3px;
+      }
+      
+      .area-btn {
+        padding: 3px 6px;
+        font-size: 0.6rem;
+      }
+    }
+
+    /* 横屏适配 */
+    @media (min-width: 768px) and (max-height: 500px) {
+      .main-container {
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
+      
+      .map-container {
+        width: 50%;
+        height: auto;
+        min-height: 200px;
+      }
+      
+      .beast-list {
+        width: 50%;
+      }
+    }
+  </style>
+  <script src="../js/auth-service.js"></script>
+
+  </head>
+<body>
+  <div class="particles"></div>
+
+  <div class="main-container">
+    
+    <div class="top-bar">
+      <button class="back-btn" id="backBtn" onclick="goBack()">←</button>
+      <div class="player-info">
+        <div class="player-avatar-small" id="charAvatar">👤</div>
+        <div class="player-name-small" id="charName">加载中...</div>
+      </div>
+      <div class="resources-mini">
+        <div class="resource-mini">
+          <span>💎</span>
+          <span id="xianshiValue">0</span>
+        </div>
+        <div class="resource-mini">
+          <span>💰</span>
+          <span id="lingshiValue">0</span>
+        </div>
+        <div class="resource-mini">
+          <span>🎫</span>
+          <span id="catchTickets">10</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="map-container">
+      <div class="map-bg" id="mapBg"></div>
+      <div class="area-selector">
+        <button class="area-btn active" data-area="qingmu" data-level="1-20">青木林</button>
+        <button class="area-btn locked" data-area="chiyan" data-level="21-40" data-require="30">赤焰山</button>
+        <button class="area-btn locked" data-area="xuanbing" data-level="41-60" data-require="50">玄冰洞</button>
+        <button class="area-btn locked" data-area="yunxiao" data-level="61-80" data-require="70">云霄天</button>
+        <button class="area-btn locked" data-area="hundun" data-level="81-100" data-require="special">混沌境</button>
+      </div>
+    </div>
+
+    <div class="action-bar">
+      <button class="refresh-btn" id="refreshBtn">🔄 刷新灵兽 (30 分钟)</button>
+    </div>
+
+    <div class="beast-list">
+      <div class="section-title">
+        <span>🦌 灵兽列表</span>
+        <span style="font-size: 0.75rem; font-weight: normal;" id="beastCount">0/5</span>
+      </div>
+      <div class="beast-grid" id="beastGrid">
+      </div>
+    </div>
+  </div>
+
+  <div class="popup-overlay" id="popupOverlay" onclick="closePopup(event)">
+    <div class="popup-content" onclick="event.stopPropagation()">
+      <div class="popup-title" id="popupTitle">标题</div>
+      <div class="popup-body" id="popupBody">内容</div>
+      <button class="popup-btn" onclick="closePopup()">确定</button>
+    </div>
+  </div>
+
+  <script>
+    let currentRoleId = null;
+    let currentUserId = null;
+    let currentArea = 'qingmu';
+    let selectedBeastIndex = null;
+    let resourceMap = {};
+    let beastList = [];
+    let catchTickets = 10;
+
+    const areas = {
+      qingmu: { name: '青木林', level: '1-20', require: 1 },
+      chiyan: { name: '赤焰山', level: '21-40', require: 30 },
+      xuanbing: { name: '玄冰洞', level: '41-60', require: 50 },
+      yunxiao: { name: '云霄天', level: '61-80', require: 70 },
+      hundun: { name: '混沌境', level: '81-100', require: 'special' }
+    };
+
+    const beastTemplates = [
+      { name: '当康', baseLevel: 5, spiritRoot: '土灵根', attack: 50, defense: 30, health: 200, icon: '🐗' },
+      { name: '毕方', baseLevel: 8, spiritRoot: '火灵根', attack: 60, defense: 25, health: 180, icon: '🔥' },
+      { name: '蠃鱼', baseLevel: 10, spiritRoot: '水灵根', attack: 55, defense: 35, health: 220, icon: '🐟' },
+      { name: '鹿蜀', baseLevel: 7, spiritRoot: '木灵根', attack: 45, defense: 40, health: 240, icon: '🦌' },
+      { name: '夫诸', baseLevel: 12, spiritRoot: '水灵根', attack: 65, defense: 45, health: 280, icon: '🦌' },
+      { name: '狌狌', baseLevel: 15, spiritRoot: '金灵根', attack: 75, defense: 30, health: 190, icon: '🐒' },
+      { name: '蛊雕', baseLevel: 18, spiritRoot: '金灵根', attack: 85, defense: 35, health: 250, icon: '🦅' },
+      { name: '瞿如', baseLevel: 20, spiritRoot: '金灵根', attack: 90, defense: 40, health: 260, icon: '🦅' },
+      { name: '饕餮', baseLevel: 25, spiritRoot: '土灵根', attack: 95, defense: 50, health: 300, icon: '👹' },
+      { name: '混沌', baseLevel: 30, spiritRoot: '土灵根', attack: 100, defense: 55, health: 320, icon: '👺' },
+      { name: '梼杌', baseLevel: 35, spiritRoot: '金灵根', attack: 105, defense: 60, health: 340, icon: '🐯' },
+      { name: '穷奇', baseLevel: 40, spiritRoot: '金灵根', attack: 110, defense: 65, health: 360, icon: '🐺' },
+      { name: '凤凰', baseLevel: 50, spiritRoot: '火灵根', attack: 120, defense: 70, health: 400, icon: '🦚' },
+      { name: '麒麟', baseLevel: 55, spiritRoot: '土灵根', attack: 125, defense: 75, health: 420, icon: '🦄' },
+      { name: '青龙', baseLevel: 60, spiritRoot: '木灵根', attack: 130, defense: 80, health: 450, icon: '🐉' },
+      { name: '白虎', baseLevel: 65, spiritRoot: '金灵根', attack: 135, defense: 85, health: 480, icon: '🐯' },
+      { name: '朱雀', baseLevel: 70, spiritRoot: '火灵根', attack: 140, defense: 90, health: 500, icon: '🔥' },
+      { name: '玄武', baseLevel: 75, spiritRoot: '水灵根', attack: 145, defense: 95, health: 550, icon: '🐢' },
+      { name: '应龙', baseLevel: 80, spiritRoot: '水灵根', attack: 150, defense: 100, health: 600, icon: '🐉' },
+      { name: '烛龙', baseLevel: 90, spiritRoot: '火灵根', attack: 160, defense: 110, health: 700, icon: '🐉' },
+      { name: '鲲鹏', baseLevel: 100, spiritRoot: '水灵根', attack: 180, defense: 120, health: 800, icon: '🦅' }
+    ];
+
+    const rarities = ['common', 'common', 'common', 'common', 'common', 'common', 'common', 'rare', 'rare', 'rare', 'rare', 'rare', 'epic', 'epic', 'epic', 'legendary', 'mythic'];
+
+    window.addEventListener('DOMContentLoaded', () => {
+      currentUserId = localStorage.getItem('userId');
+      if (!currentUserId) {
+        showToast('请先登录！');
+        window.location.href = '../login.html';
+        return;
+      }
+      
+      currentRoleId = localStorage.getItem('currentRoleId');
+      
+      if (currentRoleId) {
+        loadCharacterInfo(currentUserId);
+        loadRoleResources(currentRoleId);
+      } else {
+        window.location.href = '../start/start.html';
+      }
+
+      bindEvents();
+      generateBeasts();
+      updateBeastList();
+    });
+
+    function bindEvents() {
+      document.querySelectorAll('.area-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          if (this.classList.contains('locked')) {
+            const require = this.dataset.require;
+            if (require === 'special') {
+              showPopup('区域锁定', '混沌境需要特殊活动解锁！');
+            } else {
+              showPopup('区域锁定', `需要玩家等级达到${require}级才能解锁此区域！`);
+            }
+            return;
+          }
+
+          document.querySelectorAll('.area-btn').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          currentArea = this.dataset.area;
+          generateBeasts();
+          updateBeastList();
+        });
+      });
+
+      document.getElementById('refreshBtn').addEventListener('click', function() {
+        refreshBeasts();
+      });
+    }
+
+    function loadCharacterInfo(userId) {
+      fetch(`${window.getApiBaseUrl()}/role/user/${userId}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data && data.length > 0) {
+            let charData;
+            if (currentRoleId) {
+              charData = data.find(role => role.id == currentRoleId);
+            }
+            if (!charData) {
+              charData = data[0];
+              currentRoleId = charData.id;
+              localStorage.setItem('currentRoleId', charData.id);
+            }
+            
+            document.getElementById('charName').textContent = charData.roleName;
+            setAvatarBySpiritRoot(charData.spiritRoot);
+          }
+        })
+        .catch(error => {
+          console.error('获取角色信息失败:', error);
+        });
+    }
+
+    function loadRoleResources(roleId) {
+      fetch(`${window.getApiBaseUrl()}/resource/types`)
+        .then(response => response.json())
+        .then(resourceTypes => {
+          const typeMap = {};
+          resourceTypes.forEach(type => {
+            typeMap[type.id] = type.code;
+          });
+          return fetch(`${window.getApiBaseUrl()}/resource/role/${roleId}`)
+            .then(response => response.json())
+            .then(data => {
+              resourceMap = {};
+              data.forEach(resource => {
+                const resourceCode = typeMap[resource.id];
+                if (resourceCode) {
+                  resourceMap[resourceCode] = resource.quantity;
+                }
+              });
+              updateResourceDisplay();
+            });
+        })
+        .catch(error => {
+          console.error('获取角色资源失败:', error);
+        });
+    }
+
+    function updateResourceDisplay() {
+      function formatQuantity(quantity) {
+        if (quantity >= 100000000) {
+          return (quantity / 100000000).toFixed(2) + ' 亿';
+        } else if (quantity >= 10000) {
+          return (quantity / 10000).toFixed(2) + 'w';
+        } else {
+          return quantity.toString();
+        }
+      }
+
+      document.getElementById('xianshiValue').textContent = resourceMap['xianshi'] ? formatQuantity(resourceMap['xianshi']) : '0';
+      document.getElementById('lingshiValue').textContent = resourceMap['lingshi'] ? formatQuantity(resourceMap['lingshi']) : '0';
+    }
+
+    function setAvatarBySpiritRoot(spiritRoot) {
+      const avatarElement = document.getElementById('charAvatar');
+      switch(spiritRoot) {
+        case '金灵根': avatarElement.textContent = '⚡'; break;
+        case '木灵根': avatarElement.textContent = '🌿'; break;
+        case '水灵根': avatarElement.textContent = '💧'; break;
+        case '火灵根': avatarElement.textContent = '🔥'; break;
+        case '土灵根': avatarElement.textContent = '⛰️'; break;
+        case '雷灵根': avatarElement.textContent = '⚡'; break;
+        default: avatarElement.textContent = '👤';
+      }
+    }
+
+    function goBack() {
+      if (document.referrer) {
+        window.history.back();
+      } else {
+        window.location.href = '../home/zhongtian.html';
+      }
+    }
+
+    function generateBeasts() {
+      beastList = [];
+      const areaInfo = areas[currentArea];
+      const levelRange = areaInfo.level.split('-');
+      const minLevel = parseInt(levelRange[0]);
+      const maxLevel = parseInt(levelRange[1]);
+
+      for (let i = 0; i < 5; i++) {
+        const template = beastTemplates[Math.floor(Math.random() * beastTemplates.length)];
+        const level = Math.floor(Math.random() * (maxLevel - minLevel + 1)) + minLevel;
+        const rarity = rarities[Math.floor(Math.random() * rarities.length)];
+        
+        const beast = {
+          id: i,
+          name: template.name,
+          level: level,
+          spiritRoot: template.spiritRoot,
+          attack: template.attack + Math.floor(Math.random() * 20),
+          defense: template.defense + Math.floor(Math.random() * 15),
+          health: template.health + Math.floor(Math.random() * 50),
+          rarity: rarity
+        };
+        
+        beastList.push(beast);
+      }
+
+      document.getElementById('beastCount').textContent = `${beastList.length}/5`;
+    }
+
+    function updateBeastList() {
+      const grid = document.getElementById('beastGrid');
+      grid.innerHTML = '';
+
+      beastList.forEach((beast, index) => {
+        const card = document.createElement('div');
+        card.className = `beast-card ${beast.rarity}`;
+        card.innerHTML = `
+          <div class="beast-header">
+            <span class="beast-name">${beast.icon} ${beast.name}</span>
+            <span class="beast-level">Lv.${beast.level}</span>
+          </div>
+          <div class="beast-info">
+            <span>${beast.spiritRoot}</span>
+            <span class="beast-rarity ${beast.rarity}">${getRarityName(beast.rarity)}</span>
+          </div>
+          <div class="beast-info">
+            <span>攻:${beast.attack}</span>
+            <span>防:${beast.defense}</span>
+            <span>血:${beast.health}</span>
+          </div>
+          <div class="beast-actions">
+            <button class="beast-action-btn catch" onclick="openCatchPopup(${index})">捕捉</button>
+            <button class="beast-action-btn fight" onclick="openFightPopup(${index})">战斗</button>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function getRarityName(rarity) {
+      const names = {
+        common: '普通',
+        rare: '稀有',
+        epic: '史诗',
+        legendary: '传说',
+        mythic: '神话'
+      };
+      return names[rarity] || rarity;
+    }
+
+    function refreshBeasts() {
+      if (catchTickets < 1) {
+        showPopup('提示', '今日免费刷新次数已用完！');
+        return;
+      }
+      
+      generateBeasts();
+      updateBeastList();
+      showPopup('刷新成功', '灵兽已刷新！');
+    }
+
+    function openCatchPopup(index) {
+      selectedBeastIndex = index;
+      const beast = beastList[index];
+      
+      document.getElementById('popupTitle').textContent = `捕捉 ${beast.name}`;
+      document.getElementById('popupBody').innerHTML = `
+        <div class="catch-tool-selector">
+          <div class="catch-tool-option selected" data-tool="normal" data-rate="30-60%">
+            <div class="tool-name">普通捕捉</div>
+            <div class="tool-rate">成功率：30-60%</div>
+            <div class="tool-rate">消耗：困兽符·普通</div>
+          </div>
+          <div class="catch-tool-option" data-tool="advanced" data-rate="60-80%">
+            <div class="tool-name">高级捕捉</div>
+            <div class="tool-rate">成功率：60-80%</div>
+            <div class="tool-rate">消耗：困兽符·高级</div>
+          </div>
+          <div class="catch-tool-option" data-tool="supreme" data-rate="80-95%">
+            <div class="tool-name">至尊捕捉</div>
+            <div class="tool-rate">成功率：80-95%</div>
+            <div class="tool-rate">消耗：困兽符·至尊</div>
+          </div>
+          <div class="catch-tool-option" data-tool="guaranteed" data-rate="100%">
+            <div class="tool-name">必中捕捉</div>
+            <div class="tool-rate">成功率：100%</div>
+            <div class="tool-rate">消耗：困兽符·必中</div>
+          </div>
+        </div>
+      `;
+      
+      document.querySelectorAll('.catch-tool-option').forEach(option => {
+        option.addEventListener('click', function() {
+          document.querySelectorAll('.catch-tool-option').forEach(o => o.classList.remove('selected'));
+          this.classList.add('selected');
+        });
+      });
+      
+      document.querySelector('.popup-btn').textContent = '开始捕捉';
+      document.querySelector('.popup-btn').onclick = executeCatch;
+      
+      document.getElementById('popupOverlay').classList.add('active');
+    }
+
+    function executeCatch() {
+      const selectedTool = document.querySelector('.catch-tool-option.selected');
+      const toolType = selectedTool.dataset.tool;
+      const rateRange = selectedTool.dataset.rate.split('-');
+      const minRate = parseInt(rateRange[0]);
+      const maxRate = parseInt(rateRange[1]);
+      const successRate = Math.floor(Math.random() * (maxRate - minRate + 1)) + minRate;
+      const roll = Math.floor(Math.random() * 100);
+      
+      const beast = beastList[selectedBeastIndex];
+      
+      if (roll < successRate) {
+        showCatchResult(true, beast);
+      } else {
+        showCatchResult(false, beast);
+      }
+    }
+
+    function showCatchResult(success, beast) {
+      const rarityColors = {
+        common: '#a0a0a0',
+        rare: '#3498db',
+        epic: '#9b59b6',
+        legendary: '#f39c12',
+        mythic: '#e74c3c'
+      };
+      
+      document.getElementById('popupTitle').textContent = success ? '捕捉成功！' : '捕捉失败！';
+      document.getElementById('popupBody').innerHTML = `
+        <div class="catch-result">
+          <div class="catch-result-icon">${beast.icon}</div>
+          <div class="catch-result-name">${beast.name}</div>
+          <div class="catch-result-rarity" style="background: ${rarityColors[beast.rarity]}; color: ${beast.rarity === 'legendary' ? '#000' : '#fff'}">
+            ${getRarityName(beast.rarity)}
+          </div>
+          <div class="catch-result-stats">
+            <div class="stat-row">
+              <span class="stat-label">等级</span>
+              <span class="stat-value">Lv.${beast.level}</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">灵根</span>
+              <span class="stat-value">${beast.spiritRoot}</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">攻击</span>
+              <span class="stat-value">${beast.attack}</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">防御</span>
+              <span class="stat-value">${beast.defense}</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">气血</span>
+              <span class="stat-value">${beast.health}</span>
+            </div>
+          </div>
+          <div style="color: ${success ? 'var(--success)' : 'var(--danger)'}; font-weight: bold;">
+            ${success ? '恭喜获得新灵兽！' : '灵兽逃跑了！'}
+          </div>
+        </div>
+      `;
+      
+      document.querySelector('.popup-btn').textContent = '确定';
+      document.querySelector('.popup-btn').onclick = closePopup;
+    }
+
+    function openFightPopup(index) {
+      const beast = beastList[index];
+      showPopup('战斗', `即将与 ${beast.name} (Lv.${beast.level}) 进行战斗！\n\n此功能正在开发中...`);
+    }
+
+    function showPopup(title, content) {
+      document.getElementById('popupTitle').textContent = title;
+      document.getElementById('popupBody').innerHTML = content.replace(/\n/g, '<br>');
+      document.getElementById('popupOverlay').classList.add('active');
+    }
+
+    function closePopup(e) {
+      if (!e || e.target === document.getElementById('popupOverlay')) {
+        document.getElementById('popupOverlay').classList.remove('active');
+        selectedBeastIndex = null;
+      }
+    }
+  </script>
+</body>
+</html>

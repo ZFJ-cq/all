@@ -1,0 +1,263 @@
+{
+  "id": "case_002",
+  "title": "陈州放粮案",
+  "subtitle": "第二案",
+  "difficulty": 2,
+  "description": "陈州大旱，朝廷拨粮赈灾，粮草却在半路被人调包盗走。包拯奉旨调查，发现这背后竟是一场官商勾结的惊天阴谋……",
+  "background": "陈州连年大旱，百姓颗粒无收。朝廷拨下赈灾粮草十万石，由钦差大臣曹国舅押运。不料粮草运抵陈州时，开仓查验竟全是沙土。十万石粮食不翼而飞，灾民嗷嗷待哺。",
+  "stages": {
+    "report": {
+      "id": "report",
+      "name": "报案",
+      "dialogues": [
+        {
+          "speaker": "系统",
+          "speakerTitle": "旁白",
+          "content": "陈州大旱，颗粒无收。朝廷拨粮十万石，命曹国舅押运赈灾。不料粮草抵达陈州时，开仓竟全是沙土！",
+          "emotion": "narrator"
+        },
+        {
+          "speaker": "陈州知府",
+          "speakerTitle": "地方官",
+          "content": "包大人！十万石粮食啊！现在粮仓里全是沙土，百姓们等不到粮食，已有饿死者……",
+          "emotion": "cry"
+        },
+        {
+          "speaker": "包拯",
+          "speakerTitle": "包青天",
+          "content": "曹国舅何在？粮食由他押运，怎会变成沙土？",
+          "emotion": "serious"
+        },
+        {
+          "speaker": "曹国舅",
+          "speakerTitle": "钦差大臣",
+          "content": "包大人明鉴！本官亲自押运，一路未曾离开半步。定是陈州粮仓的人监守自盗！",
+          "emotion": "defensive"
+        },
+        {
+          "speaker": "包拯",
+          "speakerTitle": "包青天",
+          "content": "此事非同小可。十万石粮食，岂能不翼而飞？王朝马汉，随本官去粮仓、码头、沿途驿站逐一查访！",
+          "emotion": "angry"
+        }
+      ]
+    },
+    "investigation": {
+      "id": "investigation",
+      "name": "取证",
+      "scenes": [
+        {
+          "id": "granary",
+          "name": "陈州粮仓",
+          "description": "陈州大粮仓，本应堆满粮食，如今开仓只见沙土。",
+          "searchHints": ["检查粮仓密封条", "查看仓底痕迹", "比对粮食与沙土的重量"]
+        },
+        {
+          "id": "dock",
+          "name": "漕运码头",
+          "description": "粮食从水路运来的码头，船工们正在歇息。",
+          "searchHints": ["询问船工", "检查卸货记录", "查看停靠船只"]
+        },
+        {
+          "id": "inn",
+          "name": "沿途驿站",
+          "description": "押粮队伍途中歇脚的驿站，有些蛛丝马迹。",
+          "searchHints": ["查看入住记录", "检查后院马厩", "询问驿丞"]
+        }
+      ],
+      "evidences": [
+        {
+          "id": "ev_101",
+          "name": "被破坏的粮仓封条",
+          "icon": "seal",
+          "description": "粮仓封条有明显被撕开后重新粘贴的痕迹，粘贴手法粗糙。",
+          "sceneId": "granary",
+          "isKey": true,
+          "clue": "封条被破坏说明有人曾私自打开粮仓，在粮食入库后动了手脚。"
+        },
+        {
+          "id": "ev_102",
+          "name": "仓底的谷物残渣",
+          "icon": "grain",
+          "description": "粮仓角落和木板缝隙中发现少量谷物残渣，证明此处确曾存放过粮食。",
+          "sceneId": "granary",
+          "isKey": true,
+          "clue": "残渣证明粮食确实到过粮仓，是在入库后才被调包。"
+        },
+        {
+          "id": "ev_103",
+          "name": "码头卸货记录册",
+          "icon": "book",
+          "description": "码头记录显示实际运到陈州的粮食只有五万石，而非应有的十万石。",
+          "sceneId": "dock",
+          "isKey": true,
+          "clue": "记录与曹国舅所言不符，粮食在运输途中就已少了一半。"
+        },
+        {
+          "id": "ev_104",
+          "name": "船工的证词",
+          "icon": "witness",
+          "description": "船工私下透露，押粮船队在途中曾在某渡口停靠一夜，次日启程时船只明显变轻。",
+          "sceneId": "dock",
+          "isKey": false,
+          "clue": "运输途中有异常停靠，粮食可能在此处被转移。"
+        },
+        {
+          "id": "ev_105",
+          "name": "神秘商人的交易记录",
+          "icon": "money",
+          "description": "驿站入住记录显示，一名叫周万利的粮商曾与曹国舅在同日入住同一驿站。",
+          "sceneId": "inn",
+          "isKey": true,
+          "clue": "曹国舅与粮商有秘密接触，官商勾结的可能性极大。"
+        },
+        {
+          "id": "ev_106",
+          "name": "驿站后院的粮车痕迹",
+          "icon": "wheel",
+          "description": "驿站后院发现大量马车轮印，且地上散落有谷物。",
+          "sceneId": "inn",
+          "isKey": true,
+          "clue": "驿站后院曾有大量粮食装卸，而这些粮食并未出现在官方账册中。"
+        },
+        {
+          "id": "ev_107",
+          "name": "周万利的仓库",
+          "icon": "warehouse",
+          "description": "查到粮商周万利名下的仓库中囤积了大量粮食，与朝廷赈灾粮品种一致。",
+          "sceneId": "granary",
+          "isKey": false,
+          "clue": "周万利仓库中的粮食来路不明，极可能是盗取的赈灾粮。"
+        }
+      ]
+    },
+    "interrogation": {
+      "id": "interrogation",
+      "name": "审讯",
+      "suspects": [
+        {
+          "id": "sus_101",
+          "name": "曹国舅",
+          "role": "钦差大臣",
+          "description": "负责押运赈灾粮草的钦差大臣，位高权重，态度倨傲。",
+          "dialogues": [
+            {
+              "speaker": "曹国舅",
+              "speakerTitle": "嫌疑人",
+              "content": "包拯！你一个小小的开封知府，也敢审问本钦差？",
+              "emotion": "arrogant"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "本官奉旨查案，王子犯法与庶民同罪！曹国舅，这码头卸货记录册上为何只写了五万石？",
+              "emotion": "serious"
+            },
+            {
+              "speaker": "曹国舅",
+              "speakerTitle": "嫌疑人",
+              "content": "这……定是码头账房记错了！本官押运的确是十万石！",
+              "emotion": "panic"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "那驿站的入住记录你又如何解释？与粮商周万利同日入住同一驿站，这是巧合吗？",
+              "emotion": "angry"
+            },
+            {
+              "speaker": "曹国舅",
+              "speakerTitle": "嫌疑人",
+              "content": "……本官无话可说。",
+              "emotion": "defeated"
+            }
+          ],
+          "isGuilty": true
+        },
+        {
+          "id": "sus_102",
+          "name": "周万利",
+          "role": "粮商",
+          "description": "陈州本地的粮食商人，暴富发家，行为可疑。",
+          "dialogues": [
+            {
+              "speaker": "周万利",
+              "speakerTitle": "嫌疑人",
+              "content": "包大人，小人是正经商人，做的是公平买卖！",
+              "emotion": "defensive"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "那你仓库中与赈灾粮品种完全一致的粮食，从何而来？",
+              "emotion": "serious"
+            },
+            {
+              "speaker": "周万利",
+              "speakerTitle": "嫌疑人",
+              "content": "小人……是从外地收来的！",
+              "emotion": "nervous"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "还敢狡辩！驿站后院的车轮印和谷物残渣是不是你留下的？",
+              "emotion": "angry"
+            },
+            {
+              "speaker": "周万利",
+              "speakerTitle": "嫌疑人",
+              "content": "大人饶命！都是曹国舅的主意！他说朝廷的粮食拿一些出来卖，没人会发现……",
+              "emotion": "surrender"
+            }
+          ],
+          "isGuilty": true
+        },
+        {
+          "id": "sus_103",
+          "name": "陈州粮仓吏",
+          "role": "仓管",
+          "description": "负责管理陈州粮仓的小吏，对仓内情况最为熟悉。",
+          "dialogues": [
+            {
+              "speaker": "粮仓吏",
+              "speakerTitle": "嫌疑人",
+              "content": "大人，小人只管看仓，粮食入库后就再没动过！",
+              "emotion": "fear"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "那粮仓封条为何被撕开过？你是仓管，岂会不知？",
+              "emotion": "serious"
+            },
+            {
+              "speaker": "粮仓吏",
+              "speakerTitle": "嫌疑人",
+              "content": "那夜……那夜曹国舅命人开了仓门，说是朝廷要重新验粮，小人不敢阻拦……",
+              "emotion": "guilty"
+            }
+          ],
+          "isGuilty": false,
+          "hint": "粮仓吏虽失职，但只是被曹国舅胁迫，并非案件主谋"
+        }
+      ]
+    },
+    "judgment": {
+      "id": "judgment",
+      "name": "断案",
+      "correctSuspectId": "sus_101",
+      "requiredEvidenceIds": ["ev_101", "ev_102", "ev_103", "ev_105", "ev_106"],
+      "judgmentText": {
+        "correct": "经查明，钦差大臣曹国舅利用押运赈灾粮草之机，勾结粮商周万利，在运输途中将五万石粮食转运至驿站，通过周万利销赃牟利；运抵陈州后又指示粮仓吏开仓，以沙土调包剩余粮食。此案内外勾结、贪赃枉法、罔顾灾民生死，罪大恶极！判曹国舅革职查办、秋后问斩；周万利斩立决、查抄家产；粮仓吏杖责四十、革职永不录用。追回粮食五万石赈济灾民，余下损失由曹国舅、周万利家产抵偿。",
+        "wrong": "此案案情复杂，大人所断未能击中要害。请仔细梳理证据链，找出真正的主谋。",
+        "partial": "大人已识破部分案情，但还有幕后主谋尚未揪出，请再多方查证。"
+      }
+    }
+  },
+  "hints": [
+    { "id": "hint_2_1", "content": "码头卸货记录与曹国舅所言数量不符，这是案件的关键突破口。", "cost": 1 },
+    { "id": "hint_2_2", "content": "驿站后院的粮车痕迹说明粮食曾在此处中转，注意入住记录中谁在此停留过。", "cost": 1 },
+    { "id": "hint_2_3", "content": "粮仓封条被破坏+仓底有谷物残渣，说明粮食是先入库后被调包的。", "cost": 1 }
+  ]
+}

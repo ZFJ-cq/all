@@ -1,0 +1,1568 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="../js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="../css/mobile-adapt.css">
+    <title>灵月仙途 - 须弥芥子</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-dark: #0f1420;
+            --bg-card: rgba(30, 35, 50, 0.7);
+            --bg-glass: rgba(20, 25, 40, 0.85);
+            --bg-panel: rgba(20, 25, 45, 0.85);
+            --gold: #d4af37;
+            --gold-glow: rgba(212, 175, 55, 0.4);
+            --text-main: #f0f0f0;
+            --text-dim: #8892b0;
+            --rare-common: #b0b0b0;
+            --rare-uncommon: #4CAF50;
+            --rare-rare: #2196F3;
+            --rare-epic: #9C27B0;
+            --rare-legendary: #FF9800;
+            --nav-height: 65px;
+            --header-height: 140px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(circle at 50% 30%, rgba(30, 40, 60, 0.4) 0%, transparent 70%),
+                linear-gradient(to bottom, #0f1420, #1a202c);
+            color: var(--text-main);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 顶部区域：资源与状态 */
+        .top-section {
+            height: var(--header-height);
+            padding: 15px 20px 10px;
+            background: linear-gradient(to bottom, rgba(15, 20, 32, 0.95), rgba(15, 20, 32, 0));
+            z-index: 10;
+            flex-shrink: 0;
+        }
+
+        .resource-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .currency-group {
+            display: flex;
+            gap: 15px;
+        }
+
+        .currency-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(0,0,0,0.3);
+            padding: 4px 10px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.05);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .currency-icon { font-size: 14px; }
+        .currency-val { color: var(--gold); }
+
+        .capacity-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .capacity-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--gold), #f4d03f);
+            width: 45%; /* 模拟进度 */
+            box-shadow: 0 0 10px var(--gold-glow);
+        }
+
+        .capacity-text {
+            font-size: 11px;
+            color: var(--text-dim);
+            text-align: right;
+            margin-top: 4px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* 中部：分类标签 (横向滚动) */
+        .tabs-container {
+            display: flex;
+            gap: 10px;
+            padding: 0 20px 10px;
+            overflow-x: auto;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE */
+            flex-shrink: 0;
+        }
+        .tabs-container::-webkit-scrollbar { display: none; }
+
+        .tab-pill {
+            padding: 6px 16px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            font-size: 13px;
+            color: var(--text-dim);
+            white-space: nowrap;
+            transition: all 0.3s;
+            border: 1px solid transparent;
+        }
+
+        .tab-pill.active {
+            background: rgba(212, 175, 55, 0.15);
+            color: var(--gold);
+            border-color: rgba(212, 175, 55, 0.3);
+            font-weight: 600;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.1);
+        }
+
+        /* 核心区域：物品网格 */
+        .grid-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 15px 80px; /* 底部留白给操作栏 */
+            display: grid;
+            grid-template-columns: repeat(5, 1fr); /* 5列更适合手机 */
+            grid-auto-rows: minmax(65px, auto);
+            gap: 8px;
+            align-content: start;
+        }
+
+        .item-slot {
+            aspect-ratio: 1;
+            background: rgba(30, 35, 50, 0.5);
+            border-radius: 8px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: transform 0.1s;
+            cursor: pointer;
+        }
+
+        .item-slot:active {
+            transform: scale(0.92);
+            background: rgba(255,255,255,0.08);
+        }
+
+        .item-slot.empty {
+            background: rgba(0,0,0,0.2);
+            border-style: dashed;
+            border-color: rgba(255,255,255,0.05);
+        }
+
+        .item-icon {
+            font-size: 28px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+        }
+
+        .item-count {
+            position: absolute;
+            bottom: 2px;
+            right: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #fff;
+            text-shadow: 0 1px 2px #000;
+        }
+
+        .quality-indicator {
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            border-radius: 8px 8px 0 0;
+        }
+
+        /* 品质颜色类 */
+        .q-common { border-bottom: 1px solid var(--rare-common); }
+        .q-uncommon { border-bottom: 1px solid var(--rare-uncommon); }
+        .q-rare { border-bottom: 1px solid var(--rare-rare); }
+        .q-epic { border-bottom: 1px solid var(--rare-epic); }
+        .q-legendary { border-bottom: 1px solid var(--rare-legendary); box-shadow: inset 0 0 10px rgba(255, 152, 0, 0.2); }
+
+        /* 底部操作栏 (悬浮) */
+        .bottom-action-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
+            background: rgba(15, 20, 32, 0.95);
+            backdrop-filter: blur(15px);
+            border-top: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            padding: 0 15px;
+            z-index: 100;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .action-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: var(--text-dim);
+            background: none;
+            border: none;
+            font-size: 11px;
+            cursor: pointer;
+            width: 50px;
+        }
+
+        .action-btn i {
+            font-size: 20px;
+            margin-bottom: 2px;
+            transition: color 0.3s;
+        }
+
+        .action-btn.primary {
+            color: var(--gold);
+        }
+        
+        .action-btn.primary i {
+            text-shadow: 0 0 10px var(--gold-glow);
+        }
+
+        .action-btn:active {
+            transform: scale(0.9);
+            opacity: 0.8;
+        }
+
+        /* 物品详情弹窗 (半屏) */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 200;
+            display: none;
+            justify-content: center;
+            align-items: flex-end;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: #1a202c;
+            width: 100%;
+            max-width: 500px;
+            border-radius: 20px 20px 0 0;
+            padding: 25px 20px 40px;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            border-top: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .modal-icon-box {
+            width: 60px;
+            height: 60px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .modal-info h2 {
+            font-size: 18px;
+            color: var(--gold);
+            margin-bottom: 4px;
+        }
+
+        .modal-info p {
+            font-size: 12px;
+            color: var(--text-dim);
+        }
+
+        .modal-desc {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #ccc;
+            margin-bottom: 25px;
+            background: rgba(0,0,0,0.2);
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .modal-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .modal-btn {
+            padding: 14px;
+            border-radius: 10px;
+            border: none;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.05);
+            color: var(--text-main);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold), #b8962e);
+            color: #000;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+            filter: brightness(0.9);
+        }
+
+        /* 底部导航 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
+            background: rgba(15, 20, 32, 0.95);
+            border-top: 2px solid var(--gold);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 100;
+            box-shadow: 0 -5px 30px rgba(212, 175, 55, 0.4);
+            backdrop-filter: blur(15px);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            color: var(--text-dim);
+            text-decoration: none;
+            padding: 8px 20px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            position: relative;
+            min-width: 70px;
+        }
+
+        .nav-item:hover {
+            color: var(--gold);
+            background: rgba(212, 175, 55, 0.2);
+            transform: translateY(-3px);
+        }
+
+        .nav-item.active {
+            color: var(--gold);
+            background: rgba(212, 175, 55, 0.3);
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+        }
+
+        .nav-item.active::after {
+            content: '';
+            position: absolute;
+            top: -8px;
+            width: 25px;
+            height: 4px;
+            background: var(--gold);
+            border-radius: 0 0 4px 4px;
+            box-shadow: 0 0 15px var(--gold);
+        }
+
+        .nav-icon { 
+            font-size: 1.6rem;
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+        }
+        .nav-text { 
+            font-size: 0.8rem; 
+            font-weight: 600;
+            text-shadow: 0 0 5px rgba(212, 175, 55, 0.3);
+        }
+
+        .nav-item.active .nav-icon {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+            }
+            50% {
+                text-shadow: 0 0 20px rgba(212, 175, 55, 0.8);
+            }
+            100% {
+                text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+            }
+        }
+
+        /* 动画 */
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .item-slot:not(.empty) {
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        /* 调整网格区域的底部padding，为底部导航栏留出空间 */
+        .grid-area {
+            padding-bottom: 150px;
+        }
+
+        /* 装备栏区域 */
+        .equip-section {
+            background: var(--bg-panel);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .panel-title {
+            font-size: 1rem;
+            color: var(--gold);
+            font-weight: bold;
+            margin-bottom: 12px;
+            text-align: center;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+            padding-bottom: 8px;
+        }
+
+        .equip-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* 3 列布局 */
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .equip-slot {
+            aspect-ratio: 1;
+            background: rgba(30, 35, 55, 0.6);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .equip-slot:active {
+            transform: scale(0.95);
+            background: rgba(212, 175, 55, 0.1);
+        }
+
+        .equip-slot.empty {
+            background: rgba(0,0,0,0.2);
+            border-style: dashed;
+            border-color: rgba(255,255,255,0.05);
+        }
+
+        .equip-slot.locked {
+            position: relative;
+            opacity: 0.6;
+        }
+
+        .equip-slot.locked::after {
+            content: '🔒';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.5rem;
+        }
+
+        .equip-label {
+            position: absolute;
+            bottom: 2px;
+            font-size: 0.6rem;
+            color: var(--text-dim);
+            opacity: 0.7;
+        }
+
+        .equip-status {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            background: rgba(0,0,0,0.2);
+            padding: 8px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+        }
+
+        .set-bonus-section {
+            margin-top: 15px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(212, 175, 55, 0.2);
+        }
+
+        .section-title {
+            font-size: 0.9rem;
+            color: var(--gold);
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .set-bonus-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .set-bonus-item {
+            font-size: 0.8rem;
+            padding: 6px 10px;
+            border-radius: 6px;
+            background: rgba(0,0,0,0.2);
+        }
+
+        .set-bonus-item.active {
+            background: rgba(212, 175, 55, 0.1);
+            border-left: 3px solid var(--gold);
+        }
+
+        .set-bonus-item.incomplete {
+            opacity: 0.6;
+            color: var(--text-dim);
+        }
+
+        /* 智能对比浮层 */
+        .compare-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 300;
+            display: none;
+            justify-content: center;
+            align-items: flex-end;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .compare-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .compare-content {
+            background: #1a202c;
+            width: 100%;
+            max-width: 500px;
+            border-radius: 20px 20px 0 0;
+            padding: 25px 20px 40px;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            border-top: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
+        }
+
+        .compare-overlay.active .compare-content {
+            transform: translateY(0);
+        }
+
+        .compare-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .compare-title {
+            font-size: 18px;
+            color: var(--gold);
+            font-weight: bold;
+        }
+
+        .compare-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .compare-stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 10px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 6px;
+        }
+
+        .compare-stat-name {
+            font-size: 14px;
+            color: var(--text-dim);
+        }
+
+        .compare-stat-values {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .stat-current {
+            font-size: 14px;
+            color: var(--text-main);
+        }
+
+        .stat-change {
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .stat-change.positive {
+            color: #4CAF50;
+        }
+
+        .stat-change.negative {
+            color: #f44336;
+        }
+
+        .compare-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        /* 筛选与排序区域 */
+        .filter-section {
+            display: flex;
+            gap: 10px;
+            padding: 0 20px 10px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            margin-bottom: 10px;
+        }
+
+        .filter-section::-webkit-scrollbar { display: none; }
+
+        .filter-btn {
+            padding: 6px 14px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 20px;
+            color: var(--text-dim);
+            font-size: 13px;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .filter-btn.active {
+            background: rgba(212, 175, 55, 0.15);
+            color: var(--gold);
+            border-color: rgba(212, 175, 55, 0.3);
+        }
+
+        /* 装备详情弹窗增强 */
+        .modal-affixes {
+            margin-bottom: 20px;
+        }
+
+        .affix-item {
+            padding: 8px 12px;
+            margin-bottom: 6px;
+            border-radius: 6px;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .affix-common {
+            background: rgba(176, 176, 176, 0.1);
+            color: var(--rare-common);
+        }
+
+        .affix-uncommon {
+            background: rgba(76, 175, 80, 0.1);
+            color: var(--rare-uncommon);
+        }
+
+        .affix-rare {
+            background: rgba(33, 150, 243, 0.1);
+            color: var(--rare-rare);
+        }
+
+        .affix-epic {
+            background: rgba(156, 39, 176, 0.1);
+            color: var(--rare-epic);
+        }
+
+        .affix-legendary {
+            background: rgba(255, 152, 0, 0.1);
+            color: var(--rare-legendary);
+        }
+
+        /* 装备方案保存区域 */
+        .preset-section {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 300px;
+            height: 100vh;
+            background: var(--bg-panel);
+            border-left: 1px solid rgba(212, 175, 55, 0.3);
+            backdrop-filter: blur(15px);
+            z-index: 400;
+            transition: right 0.3s ease;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .preset-section.active {
+            right: 0;
+        }
+
+        .preset-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+        }
+
+        .preset-title {
+            font-size: 18px;
+            color: var(--gold);
+            font-weight: bold;
+        }
+
+        .preset-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .preset-item {
+            padding: 12px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .preset-item:hover {
+            background: rgba(212, 175, 55, 0.1);
+        }
+
+        .preset-item.active {
+            border-left: 3px solid var(--gold);
+            background: rgba(212, 175, 55, 0.1);
+        }
+
+        .preset-name {
+            font-size: 14px;
+            color: var(--text-main);
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .preset-desc {
+            font-size: 12px;
+            color: var(--text-dim);
+        }
+
+    </style>
+
+  </head>
+<body>
+
+    <!-- 顶部资源区 -->
+    <div class="top-section">
+        <div class="resource-row">
+            <div style="font-size: 18px; font-weight: bold; color: #fff;">须弥芥子</div>
+            <div class="currency-group">
+                <div class="currency-item">
+                    <span class="currency-icon">💰</span>
+                    <span class="currency-val">1,250</span>
+                </div>
+                <div class="currency-item">
+                    <span class="currency-icon">💎</span>
+                    <span class="currency-val">50</span>
+                </div>
+            </div>
+        </div>
+        <div class="capacity-text">
+            <span>存储空间</span>
+            <span id="capacity-num">24 / 48</span>
+        </div>
+        <div class="capacity-bar">
+            <div class="capacity-fill"></div>
+        </div>
+    </div>
+
+    <!-- 装备栏区域 -->
+    <div class="equip-section">
+        <div class="panel-title">随身装备</div>
+        <div class="equip-grid" id="equip-grid">
+            <!-- 动态生成装备槽位 -->
+        </div>
+        <div class="equip-status">
+            <span>总战力：<strong style="color:var(--gold)" id="total-power">0</strong></span>
+            <span>负重：<span id="weight">45</span>/100</span>
+        </div>
+        <!-- 套装效果区域 -->
+        <div class="set-bonus-section" id="set-bonus-section">
+            <div class="section-title">套装效果</div>
+            <div class="set-bonus-list" id="set-bonus-list">
+                <!-- 动态生成套装效果 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 分类标签 -->
+    <div class="tabs-container">
+        <div class="tab-pill active" onclick="switchTab('all', this)">全部</div>
+        <div class="tab-pill" onclick="switchTab('equip', this)">装备</div>
+        <div class="tab-pill" onclick="switchTab('consumable', this)">消耗品</div>
+        <div class="tab-pill" onclick="switchTab('material', this)">材料</div>
+        <div class="tab-pill" onclick="switchTab('quest', this)">任务</div>
+    </div>
+
+    <!-- 物品网格 -->
+    <div class="grid-area" id="inventory-grid">
+        <!-- JS 生成内容 -->
+    </div>
+
+    <!-- 底部操作栏 -->
+    <div class="bottom-action-bar">
+        <button class="action-btn" onclick="sortInventory()">
+            <i class="fas fa-sort-amount-down"></i>
+            <span>整理</span>
+        </button>
+        <button class="action-btn" onclick="searchInventory()">
+            <i class="fas fa-search"></i>
+            <span>搜索</span>
+        </button>
+        <button class="action-btn primary" onclick="showToast('批量操作')">
+            <i class="fas fa-layer-group"></i>
+            <span>批量</span>
+        </button>
+        <button class="action-btn" onclick="showToast('仓库功能')">
+            <i class="fas fa-dungeon"></i>
+            <span>仓库</span>
+        </button>
+    </div>
+
+    <!-- 底部导航 -->
+    <div class="bottom-nav">
+      <a href="../index.html" class="nav-item">
+        <div class="nav-icon">🧘</div>
+        <div class="nav-text">修炼</div>
+      </a>
+      <a href="../skills/skills.html" class="nav-item">
+        <div class="nav-icon">📜</div>
+        <div class="nav-text">功法</div>
+      </a>
+      <a href="inventory.html" class="nav-item active">
+        <div class="nav-icon">🎒</div>
+        <div class="nav-text">背包</div>
+      </a>
+      <a href="javascript:void(0)" onclick="window.pageUtils.navigateToGuildPage()" class="nav-item">
+        <div class="nav-icon">🏯</div>
+        <div class="nav-text">宗门</div>
+      </a>
+      <a href="../map/map.html" class="nav-item">
+        <div class="nav-icon">🗺️</div>
+        <div class="nav-text">云游</div>
+      </a>
+    </div>
+
+    <!-- 详情弹窗 -->
+    <div class="modal-overlay" id="item-modal" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="modal-icon-box" id="m-icon">⚔️</div>
+                <div class="modal-info">
+                    <h2 id="m-name">精铁剑</h2>
+                    <p id="m-type">下品法器 · 武器</p>
+                </div>
+            </div>
+            <div class="modal-desc" id="m-desc">
+                由深海精铁打造，坚硬无比，是炼气期修士的得力助手。
+            </div>
+            <!-- 动态词条区域 -->
+            <div class="modal-affixes" id="m-affixes">
+                <!-- 动态生成词条 -->
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn btn-secondary" onclick="closeModalDirect()">关闭</button>
+                <button class="modal-btn btn-primary" id="m-action-btn">装备</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 智能对比浮层 -->
+    <div class="compare-overlay" id="compare-modal" onclick="closeCompareModal(event)">
+        <div class="compare-content" onclick="event.stopPropagation()">
+            <div class="compare-header">
+                <div class="compare-title">装备对比</div>
+                <button class="modal-btn btn-secondary" onclick="closeCompareModalDirect()">关闭</button>
+            </div>
+            <div class="compare-stats" id="compare-stats">
+                <!-- 动态生成对比数据 -->
+            </div>
+            <div class="compare-actions">
+                <button class="modal-btn btn-secondary" onclick="closeCompareModalDirect()">取消</button>
+                <button class="modal-btn btn-primary" id="compare-equip-btn">装备</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 装备方案保存区域 -->
+    <div class="preset-section" id="preset-section">
+        <div class="preset-header">
+            <div class="preset-title">装备方案</div>
+            <button class="modal-btn btn-secondary" onclick="togglePresetSection()">关闭</button>
+        </div>
+        <div class="preset-list" id="preset-list">
+            <!-- 动态生成方案列表 -->
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.APP_CONFIG?.apiBaseUrl || window.apiService?.baseURL || '/api';
+        let roleId = '';
+        let playerItems = [];
+        let equipmentSlots = [];
+        let equippedItems = {};
+        let setBonuses = [];
+        let equipmentPresets = [];
+        let currentSelectedItem = null;
+
+        async function loadPlayerItems() {
+            try {
+                const response = await window.AuthService.get(`${API_BASE}/inventory/${roleId}`);
+                if (!response || !response.ok) {
+                    throw new Error('Failed to load player items');
+                }
+                const data = await response.json();
+                const items = Array.isArray(data) ? data : (data.items || []);
+                playerItems = items.map(item => ({
+                    id: item.itemId || item.id,
+                    name: item.itemName || item.name,
+                    quantity: item.stackSize || item.count || item.quantity || 1,
+                    icon: item.icon || '',
+                    desc: item.description || '',
+                    itemType: item.itemType || item.item_type || '',
+                    rarity: item.rarity || 'common',
+                    affixes: item.affixes || [],
+                    setId: item.setId,
+                    setName: item.setName
+                }));
+                renderGrid();
+            } catch (error) {
+                console.error('Error loading player items:', error);
+                // 如果API调用失败，使用本地存储数据
+                loadPlayerItemsFromLocalStorage();
+            }
+        }
+
+        // 从本地存储加载玩家物品
+        function loadPlayerItemsFromLocalStorage() {
+            const storedItems = localStorage.getItem('playerItems');
+            if (storedItems) {
+                playerItems = JSON.parse(storedItems);
+            } else {
+                playerItems = [];
+                showToast('背包数据加载失败', 'error');
+            }
+            renderGrid();
+        }
+
+        // 加载装备槽位配置
+        async function loadEquipmentSlots() {
+            try {
+                const response = await window.AuthService.get(`${API_BASE}/config/equipment_slots`);
+                if (!response || !response.ok) {
+                    throw new Error('Failed to load equipment slots');
+                }
+                equipmentSlots = await response.json();
+                renderEquipmentSlots();
+            } catch (error) {
+                console.error('Error loading equipment slots:', error);
+                // 使用默认槽位配置
+                equipmentSlots = [
+                    { slot_id: 'weapon', name: '武器', icon_template: 'weapon_{}.png' },
+                    { slot_id: 'head', name: '头部', icon_template: 'helm_{}.png' },
+                    { slot_id: 'body', name: '身体', icon_template: 'armor_{}.png' },
+                    { slot_id: 'legs', name: '腿部', icon_template: 'legs_{}.png' },
+                    { slot_id: 'feet', name: '鞋子', icon_template: 'feet_{}.png' },
+                    { slot_id: 'accessory', name: '饰品', icon_template: 'accessory_{}.png' }
+                ];
+                renderEquipmentSlots();
+            }
+        }
+
+        // 加载装备栏状态
+        async function loadEquipmentStatus() {
+            try {
+                const response = await window.AuthService.get(`${API_BASE}/equipment/equipped/${roleId}`);
+                if (!response || !response.ok) {
+                    throw new Error('Failed to load equipment status');
+                }
+                const data = await response.json();
+                equippedItems = {};
+                const slotMap = { 1: 'weapon', 2: 'head', 3: 'body', 4: 'legs', 5: 'feet', 6: 'accessory' };
+                
+                if (data.equippedList && Array.isArray(data.equippedList)) {
+                    data.equippedList.forEach(item => {
+                        const slotKey = slotMap[item.slot || item.slotId];
+                        if (slotKey) {
+                            equippedItems[slotKey] = {
+                                id: item.id,
+                                name: item.name || item.assetName,
+                                icon: item.icon || '',
+                                attack: item.attack || 0,
+                                defense: item.defense || 0,
+                                hpBonus: item.hpBonus || 0,
+                                mpBonus: item.mpBonus || 0
+                            };
+                        }
+                    });
+                } else if (data.equippedItems && typeof data.equippedItems === 'object') {
+                    Object.entries(data.equippedItems).forEach(([slotId, item]) => {
+                        const slotKey = slotMap[parseInt(slotId)];
+                        if (slotKey && item) {
+                            equippedItems[slotKey] = {
+                                id: item.id,
+                                name: item.name,
+                                icon: item.icon || '',
+                                attack: item.attack || 0,
+                                defense: item.defense || 0,
+                                hpBonus: item.hpBonus || 0,
+                                mpBonus: item.mpBonus || 0
+                            };
+                        }
+                    });
+                }
+                document.getElementById('total-power').textContent = data.total_power || 0;
+                document.getElementById('weight').textContent = data.weight || 45;
+                loadSetBonuses(data.active_sets || []);
+                renderEquipmentSlots();
+            } catch (error) {
+                console.error('Error loading equipment status:', error);
+                // 使用默认数据
+                equippedItems = {
+                    weapon: { id: 1, name: "精铁剑", icon: "🗡️" },
+                    head: { id: 4, name: "青木冠", icon: "👒" }
+                };
+                loadSetBonuses(["剑修套(2/4)"]);
+                renderEquipmentSlots();
+            }
+        }
+
+        // 加载套装效果
+        function loadSetBonuses(activeSets) {
+            setBonuses = activeSets;
+            renderSetBonuses();
+        }
+
+        // 渲染装备槽位
+        function renderEquipmentSlots() {
+            const grid = document.getElementById('equip-grid');
+            grid.innerHTML = '';
+
+            equipmentSlots.forEach(slot => {
+                const slotElement = document.createElement('div');
+                const equippedItem = equippedItems[slot.slot_id];
+                
+                if (!equippedItem) {
+                    slotElement.className = 'equip-slot empty';
+                    slotElement.innerHTML = `
+                        <div class="equip-label">${slot.name}</div>
+                    `;
+                } else {
+                    slotElement.className = 'equip-slot';
+                    slotElement.innerHTML = `
+                        <div class="item-icon">${equippedItem.icon}</div>
+                        <div class="equip-label">${slot.name}</div>
+                    `;
+                }
+                
+                grid.appendChild(slotElement);
+            });
+        }
+
+        // 渲染套装效果
+        function renderSetBonuses() {
+            const list = document.getElementById('set-bonus-list');
+            list.innerHTML = '';
+
+            if (setBonuses.length === 0) {
+                const emptyItem = document.createElement('div');
+                emptyItem.className = 'set-bonus-item incomplete';
+                emptyItem.textContent = '暂无激活的套装效果';
+                list.appendChild(emptyItem);
+                return;
+            }
+
+            setBonuses.forEach(set => {
+                const setItem = document.createElement('div');
+                setItem.className = 'set-bonus-item active';
+                setItem.textContent = set;
+                list.appendChild(setItem);
+            });
+        }
+
+        // 获取分类对应的图标
+        function getIconForCategory(category) {
+            const icons = {
+                '丹药': '💊',
+                '材料': '🌿',
+                '法宝': '⚔️',
+                '功法': '📜'
+            };
+            return icons[category] || '📦';
+        }
+
+        // 为物品添加类型和品质信息
+        function enhanceItems(items) {
+            return items.map(item => {
+                // 根据物品名称推断类型和品质
+                let type = "material";
+                let quality = "common";
+
+                if (item.name.includes("剑") || item.name.includes("盾") || item.name.includes("冠") || item.name.includes("袍") || item.name.includes("袋")) {
+                    type = "equip";
+                } else if (item.name.includes("丹") || item.name.includes("散") || item.name.includes("丸")) {
+                    type = "consumable";
+                } else if (item.name.includes("钥匙") || item.name.includes("任务")) {
+                    type = "quest";
+                }
+
+                // 推断品质
+                if (item.name.includes("一阶") || item.name.includes("基础")) {
+                    quality = "common";
+                } else if (item.name.includes("精铁") || item.name.includes("青木")) {
+                    quality = "uncommon";
+                } else if (item.name.includes("妖丹") || item.name.includes("七星")) {
+                    quality = "rare";
+                } else if (item.name.includes("筑基")) {
+                    quality = "epic";
+                } else if (item.name.includes("神秘")) {
+                    quality = "legendary";
+                }
+
+                return {
+                    ...item,
+                    type,
+                    quality,
+                    desc: item.desc || `${item.name}，一种有用的物品。`
+                };
+            });
+        }
+
+        let currentFilter = 'all';
+
+        function sortInventory() {
+            if (!playerItems || !playerItems.length) return;
+            playerItems.sort((a, b) => {
+                const ro = window.RARITY_ORDER || ['common','uncommon','rare','epic','legendary'];
+                const ra = ro.indexOf(a.rarity || 'common');
+                const rb = ro.indexOf(b.rarity || 'common');
+                if (rb !== ra) return rb - ra;
+                return (a.itemType || '').localeCompare(b.itemType || '');
+            });
+            renderGrid();
+            window.showToast('整理完成', 'success');
+        }
+
+        function searchInventory() {
+            const keyword = prompt('搜索物品：');
+            if (!keyword || !keyword.trim()) return;
+            const filtered = playerItems.filter(item => (item.name || item.itemName || '').includes(keyword.trim()));
+            if (filtered.length === 0) {
+                window.showToast('未找到匹配物品', 'warning');
+                return;
+            }
+            playerItems = filtered;
+            renderGrid();
+            window.showToast('找到 ' + filtered.length + ' 个物品', 'success');
+        }
+
+        function renderGrid() {
+            const grid = document.getElementById('inventory-grid');
+            grid.innerHTML = '';
+            
+            // 获取并增强物品数据
+            const items = enhanceItems(playerItems);
+            const filtered = currentFilter === 'all' 
+                ? items 
+                : items.filter(i => i.type === currentFilter);
+
+            // 渲染物品
+            filtered.forEach((item, index) => {
+                const slot = document.createElement('div');
+                slot.className = `item-slot q-${item.quality}`;
+                slot.style.animationDelay = `${index * 0.05}s`;
+                slot.onclick = () => openModal(item);
+                
+                const indicator = document.createElement('div');
+                indicator.className = 'quality-indicator';
+                // 根据品质设置颜色逻辑已在CSS中通过类名处理，这里只需保留结构
+                slot.appendChild(indicator);
+
+                const icon = document.createElement('div');
+                icon.className = 'item-icon';
+                icon.textContent = item.icon;
+                slot.appendChild(icon);
+
+                if (item.quantity > 1) {
+                    const count = document.createElement('div');
+                    count.className = 'item-count';
+                    count.textContent = item.quantity;
+                    slot.appendChild(count);
+                }
+
+                grid.appendChild(slot);
+            });
+
+            // 填充空位 (视觉效果，填满到50个格子)
+            const totalSlots = 50;
+            for (let i = filtered.length; i < totalSlots; i++) {
+                const empty = document.createElement('div');
+                empty.className = 'item-slot empty';
+                grid.appendChild(empty);
+            }
+
+            // 更新容量文字
+            document.getElementById('capacity-num').textContent = `${filtered.length} / ${totalSlots}`;
+        }
+
+        function switchTab(type, el) {
+            currentFilter = type;
+            document.querySelectorAll('.tab-pill').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+            renderGrid();
+        }
+
+        // 弹窗逻辑
+        const modal = document.getElementById('item-modal');
+        const compareModal = document.getElementById('compare-modal');
+        
+        function openModal(item) {
+            currentSelectedItem = item;
+            document.getElementById('m-icon').textContent = item.icon;
+            document.getElementById('m-name').textContent = item.name;
+            
+            const qualityMap = { common: '凡品', uncommon: '良品', rare: '珍品', epic: '极品', legendary: '仙品' };
+            const typeMap = { equip: '装备', consumable: '消耗', material: '材料', quest: '任务' };
+            
+            document.getElementById('m-type').textContent = `${qualityMap[item.quality]} · ${typeMap[item.type]}`;
+            document.getElementById('m-desc').textContent = item.desc;
+            
+            // 渲染词条
+            renderItemAffixes(item.affixes || []);
+            
+            const actionBtn = document.getElementById('m-action-btn');
+            if (item.type === 'equip') {
+                actionBtn.textContent = '装备';
+                actionBtn.onclick = () => {
+                    showCompareModal(item);
+                };
+            } else if (item.type === 'consumable') {
+                actionBtn.textContent = '使用';
+                actionBtn.onclick = () => { 
+                    useItem(item);
+                    closeModalDirect(); 
+                };
+            } else {
+                actionBtn.textContent = '查看';
+                actionBtn.onclick = () => {};
+            }
+
+            modal.classList.add('active');
+        }
+
+        // 渲染物品词条
+        function renderItemAffixes(affixes) {
+            const container = document.getElementById('m-affixes');
+            container.innerHTML = '';
+
+            if (affixes.length === 0) {
+                return;
+            }
+
+            affixes.forEach(affix => {
+                const affixItem = document.createElement('div');
+                const rarityClass = `affix-${affix.rarity}`;
+                affixItem.className = `affix-item ${rarityClass}`;
+                
+                // 替换模板中的变量
+                let text = affix.template;
+                if (affix.params) {
+                    Object.keys(affix.params).forEach(key => {
+                        text = text.replace(`{${key}}`, affix.params[key]);
+                    });
+                }
+                text = text.replace('{value}', affix.value);
+                
+                affixItem.textContent = text;
+                container.appendChild(affixItem);
+            });
+        }
+
+        // 显示对比弹窗
+        function showCompareModal(item) {
+            // 这里应该调用API获取对比数据
+            // 暂时使用模拟数据
+            const compareData = {
+                current_stats: { attack: 500, defense: 200, mana: 300 },
+                preview_stats: { attack: 620, defense: 210, mana: 380 },
+                diff: { attack: "+120", defense: "+10", mana: "+80" },
+                conflict_warning: null,
+                new_set_effects: ["剑修套(3/4): 追加剑气"]
+            };
+            
+            renderCompareStats(compareData);
+            compareModal.classList.add('active');
+            
+            // 设置装备按钮点击事件
+            document.getElementById('compare-equip-btn').onclick = () => {
+                equipItem(item);
+                closeCompareModalDirect();
+                closeModalDirect();
+            };
+        }
+
+        // 渲染对比数据
+        function renderCompareStats(data) {
+            const container = document.getElementById('compare-stats');
+            container.innerHTML = '';
+
+            Object.keys(data.diff).forEach(stat => {
+                const statItem = document.createElement('div');
+                statItem.className = 'compare-stat-item';
+                
+                const statName = document.createElement('div');
+                statName.className = 'compare-stat-name';
+                statName.textContent = getStatName(stat);
+                
+                const statValues = document.createElement('div');
+                statValues.className = 'compare-stat-values';
+                
+                const currentValue = document.createElement('div');
+                currentValue.className = 'stat-current';
+                currentValue.textContent = data.current_stats[stat];
+                
+                const changeValue = document.createElement('div');
+                changeValue.className = `stat-change ${data.diff[stat].startsWith('+') ? 'positive' : 'negative'}`;
+                changeValue.textContent = data.diff[stat];
+                
+                statValues.appendChild(currentValue);
+                statValues.appendChild(changeValue);
+                statItem.appendChild(statName);
+                statItem.appendChild(statValues);
+                container.appendChild(statItem);
+            });
+
+            // 显示套装效果变化
+            if (data.new_set_effects && data.new_set_effects.length > 0) {
+                const setEffectItem = document.createElement('div');
+                setEffectItem.className = 'compare-stat-item';
+                
+                const setEffectName = document.createElement('div');
+                setEffectName.className = 'compare-stat-name';
+                setEffectName.textContent = '套装效果';
+                
+                const setEffectValue = document.createElement('div');
+                setEffectValue.className = 'compare-stat-values';
+                setEffectValue.innerHTML = `<div class="stat-change positive">${data.new_set_effects.join(', ')}</div>`;
+                
+                setEffectItem.appendChild(setEffectName);
+                setEffectItem.appendChild(setEffectValue);
+                container.appendChild(setEffectItem);
+            }
+        }
+
+        // 获取属性名称
+        function getStatName(stat) {
+            const statMap = {
+                attack: '攻击',
+                defense: '防御',
+                mana: '灵力',
+                health: '气血',
+                speed: '速度',
+                crit: '暴击'
+            };
+            return statMap[stat] || stat;
+        }
+
+        // 装备物品
+        async function equipItem(item) {
+            try {
+                const slotMap = {
+                  'weapon': 1, 'head': 2, 'body': 3,
+                  'legs': 4, 'feet': 5, 'accessory': 6
+                };
+                const slotId = slotMap[item.itemType] || slotMap[item.subtype] || 1;
+                
+                const response = await window.AuthService.post(`${API_BASE}/equipment/equip`, {
+                    roleId: roleId,
+                    roleAssetId: item.id
+                });
+
+                if (response && response.ok) {
+                    await loadEquipmentStatus();
+                    await loadPlayerItems();
+                    showToast(`已装备 ${item.name}`);
+                } else {
+                    throw new Error('装备失败');
+                }
+            } catch (error) {
+                console.error('Error equipping item:', error);
+                const slotMap = { 'weapon': 1, 'head': 2, 'body': 3, 'legs': 4, 'feet': 5, 'accessory': 6 };
+                const slotKey = slotMap[item.itemType] || 'weapon';
+                equippedItems[slotKey] = item;
+                renderEquipmentSlots();
+                showToast(`已装备 ${item.name}`);
+            }
+        }
+
+        // 使用物品
+        async function useItem(item) {
+            try {
+                const response = await window.AuthService.post(`${API_BASE}/inventory/use`, {
+                    roleId: roleId,
+                    itemId: item.id
+                });
+
+                if (response.ok) {
+                    // 使用成功，更新玩家物品
+                    await loadPlayerItems();
+                    showToast(`使用了 ${item.name}`);
+                } else {
+                    throw new Error('使用失败');
+                }
+            } catch (error) {
+                console.error('Error using item:', error);
+                //  fallback到本地存储
+                fallbackUseItem(item);
+            }
+        }
+
+        // 本地 fallback 使用逻辑
+        function fallbackUseItem(item) {
+            const existingItem = playerItems.find(i => i.id === item.id);
+            if (existingItem && existingItem.quantity > 0) {
+                existingItem.quantity -= 1;
+                if (existingItem.quantity === 0) {
+                    playerItems = playerItems.filter(i => i.id !== item.id);
+                }
+                // 保存到本地存储
+                localStorage.setItem('playerItems', JSON.stringify(playerItems));
+                // 重新渲染
+                renderGrid();
+                showToast(`使用了 ${item.name}`);
+            }
+        }
+
+        function closeModal(e) {
+            if (e.target === modal) {
+                closeModalDirect();
+            }
+        }
+
+        function closeModalDirect() {
+            modal.classList.remove('active');
+        }
+
+        function closeCompareModal(e) {
+            if (e.target === compareModal) {
+                closeCompareModalDirect();
+            }
+        }
+
+        function closeCompareModalDirect() {
+            compareModal.classList.remove('active');
+        }
+
+        // 切换装备方案面板
+        function togglePresetSection() {
+            const section = document.getElementById('preset-section');
+            section.classList.toggle('active');
+        }
+
+        // 初始化
+        async function init() {
+            roleId = window.getRoleId ? window.getRoleId() : window.AuthService.getCurrentRoleId();
+            if (!roleId) {
+                showToast('请先登录并选择角色');
+                setTimeout(() => { window.location.href = '../login.html'; }, 1500);
+                return;
+            }
+            await loadEquipmentSlots();
+            await loadEquipmentStatus();
+            await loadPlayerItems();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.AuthService) {
+                window.AuthService.init({ requireAuth: true, autoRefresh: false });
+            }
+            init();
+        });
+
+    </script>
+  <script src="../js/store.js"></script>
+  <script src="../js/api-service.js"></script>
+  <script src="../js/common.js"></script>
+  <script src="../js/auth-service.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/ui-components.js"></script>
+</body>
+</html>

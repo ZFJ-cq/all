@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="js/viewport-adapt.js"></script>
+  <script src="js/config.js"></script>
+  <link rel="stylesheet" href="css/mobile-adapt.css">
+  <title>背包系统 - 灵月仙途</title>
+  <style>
+    :root {
+      --bg-primary: #0a0e1a;
+      --bg-secondary: #1a1f2e;
+      --bg-panel: #1e2337;
+      --gold-primary: #e6c749;
+      --gold-dim: #b8a34a;
+      --text-primary: #f0f0f0;
+      --text-secondary: #c0c0c0;
+      --text-dim: #888888;
+      --border-color: rgba(230, 199, 73, 0.3);
+      
+      /* 品阶颜色 */
+      --rarity-common: #b0b0b0;      /* 白色/灰色 */
+      --rarity-uncommon: #4ade80;    /* 绿色 */
+      --rarity-rare: #60a5fa;        /* 蓝色 */
+      --rarity-epic: #a855f7;        /* 紫色 */
+      --rarity-legendary: #f97316;   /* 橙色 */
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Microsoft YaHei', sans-serif;
+      background: linear-gradient(135deg, #0a0e1a 0%, #1a1f2e 100%);
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding: 20px;
+      background: rgba(30, 35, 55, 0.8);
+      border: 2px solid var(--border-color);
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+    
+    .header h1 {
+      font-size: 2.5rem;
+      color: var(--gold-primary);
+      margin-bottom: 10px;
+      text-shadow: 0 0 20px rgba(230, 199, 73, 0.5);
+    }
+    
+    .stats-bar {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 20px;
+      padding: 15px;
+      background: rgba(30, 35, 55, 0.6);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+    }
+    
+    .stat-item {
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--gold-primary);
+    }
+    
+    .stat-label {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      margin-top: 5px;
+    }
+    
+    .filter-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .filter-btn {
+      padding: 10px 20px;
+      background: rgba(30, 35, 55, 0.6);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+    
+    .filter-btn:hover {
+      background: rgba(230, 199, 73, 0.1);
+      border-color: var(--gold-primary);
+    }
+    
+    .filter-btn.active {
+      background: linear-gradient(135deg, rgba(230, 199, 73, 0.2), rgba(230, 199, 73, 0.05));
+      border-color: var(--gold-primary);
+      color: var(--gold-primary);
+      box-shadow: 0 0 15px rgba(230, 199, 73, 0.3);
+    }
+    
+    .inventory-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 15px;
+      background: rgba(30, 35, 55, 0.6);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      min-height: 500px;
+    }
+    
+    .item-slot {
+      aspect-ratio: 1;
+      background: rgba(0, 0, 0, 0.3);
+      border: 2px solid var(--border-color);
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .item-slot:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 20px rgba(230, 199, 73, 0.3);
+    }
+    
+    /* 品阶边框颜色 */
+    .item-slot.common { border-color: var(--rarity-common); }
+    .item-slot.uncommon { border-color: var(--rarity-uncommon); box-shadow: 0 0 10px rgba(74, 222, 128, 0.3); }
+    .item-slot.rare { border-color: var(--rarity-rare); box-shadow: 0 0 10px rgba(96, 165, 250, 0.3); }
+    .item-slot.epic { border-color: var(--rarity-epic); box-shadow: 0 0 15px rgba(168, 85, 247, 0.4); }
+    .item-slot.legendary { border-color: var(--rarity-legendary); box-shadow: 0 0 20px rgba(249, 115, 22, 0.5); }
+    
+    .item-slot.selected {
+      border-color: var(--gold-primary);
+      box-shadow: 0 0 25px rgba(230, 199, 73, 0.6);
+      animation: selectedPulse 1.5s infinite;
+    }
+    
+    @keyframes selectedPulse {
+      0%, 100% { box-shadow: 0 0 25px rgba(230, 199, 73, 0.6); }
+      50% { box-shadow: 0 0 35px rgba(230, 199, 73, 0.8); }
+    }
+    
+    .item-icon {
+      font-size: 2.5rem;
+      margin-bottom: 5px;
+    }
+    
+    .item-count {
+      position: absolute;
+      bottom: 5px;
+      right: 8px;
+      font-size: 0.9rem;
+      font-weight: bold;
+      color: var(--text-primary);
+      text-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
+    }
+    
+    .item-name {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      text-align: center;
+      margin-top: 5px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      width: 90%;
+    }
+    
+    .action-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(30, 35, 55, 0.95);
+      border-top: 2px solid var(--border-color);
+      padding: 15px 30px;
+      display: none;
+      justify-content: center;
+      gap: 15px;
+      backdrop-filter: blur(10px);
+      z-index: 1000;
+    }
+    
+    .action-bar.active {
+      display: flex;
+    }
+    
+    .action-btn {
+      padding: 12px 30px;
+      background: linear-gradient(135deg, rgba(230, 199, 73, 0.2), rgba(230, 199, 73, 0.05));
+      border: 1px solid var(--border-color);
+      color: var(--gold-primary);
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 1rem;
+      transition: all 0.3s;
+    }
+    
+    .action-btn:hover {
+      background: rgba(230, 199, 73, 0.3);
+      box-shadow: 0 0 15px rgba(230, 199, 73, 0.4);
+      transform: translateY(-2px);
+    }
+    
+    .action-btn.danger {
+      background: linear-gradient(135deg, rgba(248, 113, 113, 0.2), rgba(248, 113, 113, 0.05));
+      border-color: rgba(248, 113, 113, 0.5);
+      color: #f87171;
+    }
+    
+    .action-btn.danger:hover {
+      background: rgba(248, 113, 113, 0.3);
+      box-shadow: 0 0 15px rgba(248, 113, 113, 0.4);
+    }
+    
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 100px 20px;
+      color: var(--text-dim);
+    }
+    
+    .empty-state-icon {
+      font-size: 5rem;
+      margin-bottom: 20px;
+      opacity: 0.5;
+    }
+    
+    /* 物品详情弹窗 */
+    .item-detail-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+    
+    .item-detail-modal.active {
+      display: flex;
+    }
+    
+    .item-detail-window {
+      width: 400px;
+      background: var(--bg-panel);
+      border: 2px solid var(--gold-primary);
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 0 30px rgba(230, 199, 73, 0.3);
+    }
+    
+    .item-detail-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    .item-detail-icon {
+      font-size: 4rem;
+      margin-bottom: 10px;
+    }
+    
+    .item-detail-name {
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: var(--gold-primary);
+      margin-bottom: 5px;
+    }
+    
+    .item-detail-type {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+    }
+    
+    .item-detail-info {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 0.95rem;
+    }
+    
+    .info-label {
+      color: var(--text-dim);
+    }
+    
+    .info-value {
+      color: var(--text-primary);
+    }
+    
+    .item-detail-description {
+      background: rgba(230, 199, 73, 0.05);
+      border-left: 3px solid var(--gold-primary);
+      padding: 10px 15px;
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      font-style: italic;
+    }
+    
+    .item-detail-actions {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .detail-action-btn {
+      flex: 1;
+      padding: 12px;
+      background: rgba(230, 199, 73, 0.1);
+      border: 1px solid var(--border-color);
+      color: var(--gold-primary);
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+    
+    .detail-action-btn:hover {
+      background: rgba(230, 199, 73, 0.25);
+      box-shadow: 0 0 10px rgba(230, 199, 73, 0.3);
+    }
+    
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 25px;
+      background: var(--bg-panel);
+      border: 1px solid var(--gold-primary);
+      border-radius: 8px;
+      color: var(--gold-primary);
+      z-index: 3000;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+      animation: slideIn 0.3s ease-out;
+    }
+    
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+  </style>
+
+  </head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎒 背包</h1>
+      <p style="color: var(--text-dim);">存放修仙物资的储物空间</p>
+    </div>
+    
+    <div class="stats-bar">
+      <div class="stat-item">
+        <div class="stat-value" id="totalItems">0</div>
+        <div class="stat-label">物品总数</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="totalValue">0</div>
+        <div class="stat-label">总价值（灵石）</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="gridUsage">0/100</div>
+        <div class="stat-label">格子使用</div>
+      </div>
+    </div>
+    
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="filterItems('all')">全部</button>
+      <button class="filter-btn" onclick="filterItems('dan_yao')">丹药</button>
+      <button class="filter-btn" onclick="filterItems('cai_liao')">材料</button>
+      <button class="filter-btn" onclick="filterItems('zhuang_bei')">装备</button>
+      <button class="filter-btn" onclick="filterItems('fa_bao')">法宝</button>
+      <button class="filter-btn" onclick="filterItems('qi_ta')">其他</button>
+    </div>
+    
+    <div id="inventoryGrid" class="inventory-grid">
+      <!-- 物品格子将通过 JS 渲染 -->
+    </div>
+  </div>
+  
+  <!-- 底部操作栏 -->
+  <div id="actionBar" class="action-bar">
+    <button class="action-btn" onclick="useItem()">✨ 使用</button>
+    <button class="action-btn" onclick="sellItem()">💰 出售</button>
+    <button class="action-btn danger" onclick="discardItem()">🗑️ 丢弃</button>
+    <button class="action-btn" onclick="closeActionBar()">取消</button>
+  </div>
+  
+  <!-- 物品详情弹窗 -->
+  <div id="itemDetailModal" class="item-detail-modal" onclick="closeItemDetail(event)">
+    <div class="item-detail-window" onclick="event.stopPropagation()">
+      <div class="item-detail-header">
+        <div class="item-detail-icon" id="detailIcon">🧪</div>
+        <div class="item-detail-name" id="detailName">聚气丹</div>
+        <div class="item-detail-type" id="detailType">丹药 · 精良</div>
+      </div>
+      
+      <div class="item-detail-info">
+        <div class="info-row">
+          <span class="info-label">品阶</span>
+          <span class="info-value" id="detailRarity">精良</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">数量</span>
+          <span class="info-value" id="detailCount">10</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">售价</span>
+          <span class="info-value" id="detailPrice">50 灵石</span>
+        </div>
+      </div>
+      
+      <div class="item-detail-description" id="detailDescription">
+        低阶丹药，可少量增加修为
+      </div>
+      
+      <div class="item-detail-actions">
+        <button class="detail-action-btn" onclick="useItemFromDetail()">使用</button>
+        <button class="detail-action-btn" onclick="sellItemFromDetail()">出售</button>
+        <button class="detail-action-btn" onclick="closeItemDetail()">关闭</button>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    let currentFilter = 'all';
+    let selectedItem = null;
+    let allItems = [];
+    let currentRoleId = null;
+    
+    // 品阶映射
+    const rarityMap = {
+      common: { name: '普通', color: '#b0b0b0' },
+      uncommon: { name: '精良', color: '#4ade80' },
+      rare: { name: '稀有', color: '#60a5fa' },
+      epic: { name: '史诗', color: '#a855f7' },
+      legendary: { name: '传说', color: '#f97316' }
+    };
+    
+    // 类型映射
+    const typeMap = {
+      dan_yao: '丹药',
+      cai_liao: '材料',
+      zhuang_bei: '装备',
+      fa_bao: '法宝',
+      qi_ta: '其他'
+    };
+    
+    // 初始化
+    async function init() {
+      const storedRoleId = localStorage.getItem('currentRoleId');
+      currentRoleId = storedRoleId && storedRoleId !== 'undefined' ? parseInt(storedRoleId) : null;
+      
+      if (!currentRoleId) {
+        showToast('请先选择角色');
+        setTimeout(() => {
+          window.location.href = 'start/start.html';
+        }, 1500);
+        return;
+      }
+      
+      await loadInventory();
+    }
+    
+    // 加载背包
+    async function loadInventory() {
+      const gridEl = document.getElementById('inventoryGrid');
+      gridEl.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-dim);">加载中...</div>';
+      
+      try {
+        const response = await fetch(`${window.getApiBaseUrl()}/inventory/${currentRoleId}`);
+        const result = await response.json();
+        
+        allItems = result.items || [];
+        
+        if (allItems.length === 0) {
+          gridEl.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">📦</div>
+              <div style="font-size: 1.2rem; margin-bottom: 10px;">背包空空如也</div>
+              <div style="color: var(--text-dim);">快去收集修仙物资吧！</div>
+            </div>
+          `;
+          updateStats();
+          return;
+        }
+        
+        renderItems(allItems);
+        updateStats();
+      } catch (error) {
+        console.error('加载背包失败:', error);
+        gridEl.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-dim);">加载失败，请重试</div>';
+      }
+    }
+    
+    // 渲染物品
+    function renderItems(items) {
+      const gridEl = document.getElementById('inventoryGrid');
+      
+      if (items.length === 0) {
+        gridEl.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">🔍</div>
+            <div style="font-size: 1.2rem; margin-bottom: 10px;">暂无此类物品</div>
+          </div>
+        `;
+        return;
+      }
+      
+      gridEl.innerHTML = items.map((item, index) => `
+        <div class="item-slot ${item.rarity} ${selectedItem && selectedItem.itemId === item.itemId ? 'selected' : ''}" 
+             onclick="selectItem(${index})"
+             ondblclick="showItemDetail(${index})">
+          <div class="item-icon">${item.icon || '📦'}</div>
+          <div class="item-count">x${item.count || 1}</div>
+          <div class="item-name">${item.name || '未知物品'}</div>
+        </div>
+      `).join('');
+    }
+    
+    // 筛选物品
+    function filterItems(type) {
+      currentFilter = type;
+      
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      event.target.classList.add('active');
+      
+      if (type === 'all') {
+        renderItems(allItems);
+      } else {
+        const filtered = allItems.filter(item => item.type === type);
+        renderItems(filtered);
+      }
+    }
+    
+    // 选择物品
+    function selectItem(index) {
+      const items = currentFilter === 'all' ? allItems : allItems.filter(item => item.type === currentFilter);
+      selectedItem = items[index];
+      
+      document.querySelectorAll('.item-slot').forEach(slot => {
+        slot.classList.remove('selected');
+      });
+      event.target.closest('.item-slot').classList.add('selected');
+      
+      document.getElementById('actionBar').classList.add('active');
+    }
+    
+    // 关闭操作栏
+    function closeActionBar() {
+      selectedItem = null;
+      document.querySelectorAll('.item-slot').forEach(slot => {
+        slot.classList.remove('selected');
+      });
+      document.getElementById('actionBar').classList.remove('active');
+    }
+    
+    // 显示物品详情
+    function showItemDetail(index) {
+      const items = currentFilter === 'all' ? allItems : allItems.filter(item => item.type === currentFilter);
+      const item = items[index];
+      
+      document.getElementById('detailIcon').textContent = item.icon || '📦';
+      document.getElementById('detailName').textContent = item.name || '未知物品';
+      document.getElementById('detailType').textContent = `${typeMap[item.type] || '其他'} · ${rarityMap[item.rarity]?.name || '普通'}`;
+      document.getElementById('detailRarity').textContent = rarityMap[item.rarity]?.name || '普通';
+      document.getElementById('detailCount').textContent = item.count || 1;
+      document.getElementById('detailPrice').textContent = `${getPriceByRarity(item.rarity)} 灵石`;
+      document.getElementById('detailDescription').textContent = item.description || '神秘的物品';
+      
+      selectedItem = item;
+      document.getElementById('itemDetailModal').classList.add('active');
+    }
+    
+    // 关闭详情弹窗
+    function closeItemDetail(event) {
+      if (!event || event.target === document.getElementById('itemDetailModal')) {
+        document.getElementById('itemDetailModal').classList.remove('active');
+      }
+    }
+    
+    // 使用物品
+    async function useItem() {
+      if (!selectedItem) return;
+      
+      try {
+        const response = await fetch(`${window.getApiBaseUrl()}/inventory/use`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            roleId: currentRoleId,
+            itemId: selectedItem.itemId
+          })
+        });
+        const result = await response.json();
+        
+        if (result.success) {
+          showToast(`使用${selectedItem.name}成功`);
+          closeActionBar();
+          await loadInventory();
+        } else {
+          showToast(result.message || '使用失败');
+        }
+      } catch (error) {
+        console.error('使用物品失败:', error);
+        showToast('操作失败，请重试');
+      }
+    }
+    
+    // 从详情使用
+    function useItemFromDetail() {
+      closeItemDetail();
+      useItem();
+    }
+    
+    // 出售物品
+    async function sellItem() {
+      if (!selectedItem) return;
+      
+      try {
+        const response = await fetch(`${window.getApiBaseUrl()}/inventory/sell`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            roleId: currentRoleId,
+            itemId: selectedItem.itemId,
+            count: selectedItem.count
+          })
+        });
+        const result = await response.json();
+        
+        if (result.success) {
+          const price = result.price || getPriceByRarity(selectedItem.rarity);
+          showToast(`出售${selectedItem.name}获得${price}灵石`);
+          closeActionBar();
+          await loadInventory();
+        } else {
+          showToast(result.message || '出售失败');
+        }
+      } catch (error) {
+        console.error('出售物品失败:', error);
+        showToast('操作失败，请重试');
+      }
+    }
+    
+    // 从详情出售
+    function sellItemFromDetail() {
+      closeItemDetail();
+      sellItem();
+    }
+    
+    // 丢弃物品
+    async function discardItem() {
+      if (!selectedItem) return;
+      
+      if (!confirm(`确定要丢弃${selectedItem.name}吗？`)) return;
+      
+      try {
+        const response = await fetch(`${window.getApiBaseUrl()}/inventory/${currentRoleId}/${selectedItem.itemId}`, {
+          method: 'DELETE'
+        });
+        const result = await response.json();
+        
+        if (result.success) {
+          showToast(`已丢弃${selectedItem.name}`);
+          closeActionBar();
+          await loadInventory();
+        } else {
+          showToast(result.message || '丢弃失败');
+        }
+      } catch (error) {
+        console.error('丢弃物品失败:', error);
+        showToast('操作失败，请重试');
+      }
+    }
+    
+    // 更新统计
+    function updateStats() {
+      const totalItems = allItems.reduce((sum, item) => sum + (item.count || 1), 0);
+      const totalValue = allItems.reduce((sum, item) => sum + getPriceByRarity(item.rarity) * (item.count || 1), 0);
+      
+      document.getElementById('totalItems').textContent = totalItems;
+      document.getElementById('totalValue').textContent = totalValue;
+      document.getElementById('gridUsage').textContent = `${allItems.length}/100`;
+    }
+    
+    // 辅助函数
+    function getPriceByRarity(rarity) {
+      switch (rarity) {
+        case 'common': return 10;
+        case 'uncommon': return 50;
+        case 'rare': return 200;
+        case 'epic': return 1000;
+        case 'legendary': return 5000;
+        default: return 10;
+      }
+    }
+    
+    // 显示提示
+    function showToast(message) {
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.remove();
+      }, 3000);
+    }
+    
+    // 页面加载时初始化
+    init();
+  </script>
+</body>
+</html>

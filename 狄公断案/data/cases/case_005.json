@@ -1,0 +1,72 @@
+{
+  "id": "case_005",
+  "title": "夜雨杀机",
+  "subtitle": "第五案",
+  "difficulty": 2,
+  "description": "暴雨之夜，客栈老板被发现死在密室之中。狄仁杰冒雨赶赴，揭开雨夜杀人的真相……",
+  "background": "唐武则天时期，洛阳城外悦来客栈，暴雨之夜老板张掌柜被发现死于上锁的客房中。门窗从内锁死，房中只有一盏油灯和一地水渍。狄仁杰冒雨赶到，发现这密室杀人案另有玄机。",
+  "stages": {
+    "report": {
+      "id": "report",
+      "name": "报案",
+      "dialogues": [
+        { "speaker": "系统", "speakerTitle": "旁白", "content": "暴雨如注的夜晚，洛阳城外悦来客栈传来惊叫——老板张掌柜死在了上锁的客房中！", "emotion": "narrator" },
+        { "speaker": "狄仁杰", "speakerTitle": "同平章事", "content": "密室杀人？冒雨前行，本官即刻赶赴现场！", "emotion": "serious" },
+        { "speaker": "系统", "speakerTitle": "旁白", "content": "狄仁杰赶到客栈，只见张掌柜倒在客房中央，门窗从内锁死，地上满是水渍，油灯已熄。", "emotion": "narrator" },
+        { "speaker": "狄仁杰", "speakerTitle": "同平章事", "content": "这水渍……不是雨水。门窗虽锁，但凶手另有出入之法。来人，搜查客栈！", "emotion": "serious" }
+      ]
+    },
+    "investigation": {
+      "id": "investigation",
+      "name": "取证",
+      "scenes": [
+        { "id": "room", "name": "案发客房", "description": "张掌柜遇害的客房，门窗从内锁死，地上有大量水渍，屋顶瓦片有松动痕迹。", "searchHints": ["检查屋顶瓦片", "查看水渍来源", "注意窗栓的痕迹"] },
+        { "id": "inn", "name": "客栈大堂", "description": "客栈大堂，住客们聚集在此议论纷纷，掌柜的账房就在旁边。", "searchHints": ["查看住客登记簿", "检查账房记录", "询问住客"] }
+      ],
+      "evidences": [
+        { "id": "ev_001", "name": "屋顶松动的瓦片", "icon": "seal", "description": "客房屋顶有几片瓦片被人为松动，可以从屋顶翻入房间。", "sceneId": "room", "isKey": true, "clue": "凶手是从屋顶翻入的！松动的瓦片就是密室的破绽！" },
+        { "id": "ev_002", "name": "窗栓上的丝线", "icon": "cloth", "description": "窗户内侧的窗栓上缠着一根极细的丝线，可以从窗外拉动窗栓上锁。", "sceneId": "room", "isKey": true, "clue": "凶手用丝线从窗外将窗栓拉上，制造了密室假象！" },
+        { "id": "ev_003", "name": "地上的冰块残渣", "icon": "witness", "description": "地上的水渍并非雨水，而是冰块融化后的痕迹。冰块曾用来垫脚从屋顶出入。", "sceneId": "room", "isKey": true, "clue": "冰块是凶手用来垫脚的工具，融化后成了水渍，巧妙地掩盖了痕迹！" },
+        { "id": "ev_004", "name": "住客登记簿", "icon": "book", "description": "住客登记簿显示，案发当日有一名自称'李客商'的人入住，次日清晨便退房离去。", "sceneId": "inn", "isKey": true, "clue": "'李客商'入住和退房时间与案发时间吻合，此人嫌疑最大！" },
+        { "id": "ev_005", "name": "账房的借贷记录", "icon": "note", "description": "账房记录显示，张掌柜近期与'李客商'有一笔五百两的借贷纠纷。", "sceneId": "inn", "isKey": false, "clue": "借贷纠纷是杀人动机！'李客商'欠债不还反杀债主！" },
+        { "id": "ev_006", "name": "伙计的证词", "icon": "witness", "description": "客栈伙计称，那名'李客商'身材高大，随身带着一个大包袱。", "sceneId": "inn", "isKey": false, "clue": "大包袱里可能装的就是冰块和作案工具。" }
+      ]
+    },
+    "interrogation": {
+      "id": "interrogation",
+      "name": "审讯",
+      "suspects": [
+        { "id": "sus_001", "name": "李客商", "role": "行商", "description": "案发当日入住的行商，与张掌柜有借贷纠纷，次日清晨匆忙离去。", "dialogues": [
+          { "speaker": "李客商", "speakerTitle": "嫌疑人", "content": "大人！小人只是路过借宿，与张掌柜之死毫无关系！", "emotion": "fear" },
+          { "speaker": "狄仁杰", "speakerTitle": "同平章事", "content": "你欠张掌柜五百两白银，可是事实？", "emotion": "serious" },
+          { "speaker": "李客商", "speakerTitle": "嫌疑人", "content": "那是……那是生意上的周转，小人会还的！", "emotion": "panic" },
+          { "speaker": "狄仁杰", "speakerTitle": "同平章事", "content": "你那大包袱里装的是什么？屋顶松动的瓦片、窗栓上的丝线，可都是你的杰作？", "emotion": "angry" },
+          { "speaker": "李客商", "speakerTitle": "嫌疑人", "content": "大人饶命！小人……小人只是一时糊涂！", "emotion": "surrender" }
+        ], "isGuilty": true },
+        { "id": "sus_002", "name": "王伙计", "role": "客栈伙计", "description": "客栈老伙计，在客栈工作多年，对客栈布局了如指掌。", "dialogues": [
+          { "speaker": "王伙计", "speakerTitle": "嫌疑人", "content": "大人，小人当夜在大堂值守，什么也没听到。", "emotion": "nervous" },
+          { "speaker": "狄仁杰", "speakerTitle": "同平章事", "content": "你在此客栈多年，可知客房屋顶的瓦片可以松动？", "emotion": "serious" },
+          { "speaker": "王伙计", "speakerTitle": "嫌疑人", "content": "小人……小人知道，但那只有老板和小人知道，小人绝不会告诉外人！", "emotion": "nervous" },
+          { "speaker": "狄仁杰", "speakerTitle": "同平章事", "content": "你不会告诉外人？那李客商如何知道屋顶的秘密？", "emotion": "angry" },
+          { "speaker": "王伙计", "speakerTitle": "嫌疑人", "content": "小人……小人只是随口提了一句，不知他竟用来杀人！", "emotion": "surrender" }
+        ], "isGuilty": false, "hint": "王伙计虽泄露了客栈秘密，但并非凶手" }
+      ]
+    },
+    "judgment": {
+      "id": "judgment",
+      "name": "断案",
+      "correctSuspectId": "sus_001",
+      "requiredEvidenceIds": ["ev_001", "ev_002", "ev_003", "ev_004"],
+      "judgmentText": {
+        "correct": "经查明，行商李客商欠张掌柜五百两白银不还，反起杀心。当夜李客商用冰块垫脚从屋顶翻入客房，杀害张掌柜后，用丝线从窗外将窗栓拉上制造密室假象，再从屋顶原路返回。冰块融化成水渍，恰好掩盖了痕迹。判李客商斩立决！王伙计泄露客栈秘密，杖责二十。此案彰显狄公破解密室之智！",
+        "wrong": "本案证据尚不充分，大人还需仔细查证，切莫冤枉了好人。",
+        "partial": "大人所断有部分道理，但仍有关键证据未纳入考量，请重新审视所有证据。"
+      }
+    }
+  },
+  "hints": [
+    { "id": "hint_1", "content": "密室的关键在于——凶手是如何出入的？检查屋顶和窗户。", "cost": 1 },
+    { "id": "hint_2", "content": "地上的水渍不是雨水，想想还有什么东西会变成水。", "cost": 1 },
+    { "id": "hint_3", "content": "住客登记簿上的'李客商'是关键人物，他来去的时间很可疑。", "cost": 1 }
+  ]
+}

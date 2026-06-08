@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="css/mobile-adapt.css">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>灵月仙途 - 注册</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Microsoft YaHei', sans-serif;
+      background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+    }
+    
+    .register-container {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      padding: 40px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+    
+    .logo {
+      font-size: 2.5rem;
+      margin-bottom: 30px;
+      color: #f4d03f;
+      text-shadow: 0 0 20px rgba(244, 208, 63, 0.5);
+    }
+    
+    .title {
+      font-size: 1.8rem;
+      margin-bottom: 30px;
+      color: #fff;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #ddd;
+      font-size: 0.9rem;
+    }
+    
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+    
+    .form-group input:focus {
+      outline: none;
+      border-color: #f4d03f;
+      box-shadow: 0 0 10px rgba(244, 208, 63, 0.3);
+    }
+    
+    .form-group input::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .code-group {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .code-group input {
+      flex: 1;
+    }
+    
+    .btn-code {
+      padding: 12px 15px;
+      background: rgba(244, 208, 63, 0.2);
+      border: 1px solid #f4d03f;
+      border-radius: 8px;
+      color: #f4d03f;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+    }
+    
+    .btn-code:hover {
+      background: rgba(244, 208, 63, 0.3);
+    }
+    
+    .btn-code:disabled {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.3);
+      color: rgba(255, 255, 255, 0.5);
+      cursor: not-allowed;
+    }
+    
+    .btn {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(90deg, #f4d03f, #f1c40f);
+      border: none;
+      border-radius: 8px;
+      color: #333;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 10px;
+    }
+    
+    .btn:hover {
+      background: linear-gradient(90deg, #f1c40f, #f4d03f);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(244, 208, 63, 0.4);
+    }
+    
+    .btn:active {
+      transform: translateY(0);
+    }
+    
+    .login-link {
+      margin-top: 20px;
+      font-size: 0.9rem;
+      color: #ddd;
+    }
+    
+    .login-link a {
+      color: #f4d03f;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    
+    .login-link a:hover {
+      color: #f1c40f;
+      text-decoration: underline;
+    }
+    
+    .error-message {
+      background: rgba(255, 99, 71, 0.2);
+      border: 1px solid rgba(255, 99, 71, 0.5);
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 20px;
+      color: #ff6347;
+      font-size: 0.9rem;
+      display: none;
+    }
+    
+    .success-message {
+      background: rgba(144, 238, 144, 0.2);
+      border: 1px solid rgba(144, 238, 144, 0.5);
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 20px;
+      color: #90ee90;
+      font-size: 0.9rem;
+      display: none;
+    }
+    
+    @media (max-width: 480px) {
+      .register-container {
+        padding: 30px 20px;
+        margin: 0 20px;
+      }
+      
+      .logo {
+        font-size: 2rem;
+      }
+      
+      .title {
+        font-size: 1.5rem;
+      }
+      
+      .code-group {
+        flex-direction: column;
+      }
+      
+      .btn-code {
+        width: 100%;
+        margin-top: 10px;
+      }
+    }
+  </style>
+
+  </head>
+<body>
+  <div class="register-container">
+    <div class="logo">🧙‍♂️</div>
+    <h1 class="title">灵月仙途</h1>
+    
+    <div class="error-message" id="errorMessage"></div>
+    <div class="success-message" id="successMessage"></div>
+    
+    <form id="registerForm" autocomplete="off">
+      <!-- 隐藏的虚假输入框，用于欺骗浏览器自动填充 -->
+      <input type="text" style="display:none;" tabindex="-1">
+      <input type="password" style="display:none;" tabindex="-1">
+      
+      <div class="form-group">
+        <label for="phone">手机号</label>
+        <input type="tel" id="phone" name="phone_new" placeholder="请输入手机号" required autocomplete="new-password">
+      </div>
+      
+      <div class="form-group code-group">
+        <div style="flex: 1;">
+          <label for="code">验证码</label>
+          <input type="text" id="code" name="code_new" placeholder="请输入验证码" required autocomplete="new-password">
+        </div>
+        <button type="button" class="btn-code" id="btnSendCode">发送验证码</button>
+      </div>
+      
+      <div class="form-group">
+        <label for="password">密码</label>
+        <input type="password" id="password" name="password_new" placeholder="请设置密码" required autocomplete="new-password">
+      </div>
+      
+      <div class="form-group">
+        <label for="nickname">昵称</label>
+        <input type="text" id="nickname" name="nickname_new" placeholder="请输入昵称" required autocomplete="new-password">
+      </div>
+      
+      <button type="submit" class="btn">注册</button>
+    </form>
+    
+    <div class="login-link">
+      已有账号？ <a href="login.html">立即登录</a>
+    </div>
+  </div>
+  
+  <script>
+    // 页面加载时清空输入框
+    window.addEventListener('load', function() {
+      setTimeout(function() {
+        document.getElementById('phone').value = '';
+        document.getElementById('code').value = '';
+        document.getElementById('password').value = '';
+        document.getElementById('nickname').value = '';
+      }, 100);
+    });
+    
+    // 输入框聚焦时的处理
+    document.getElementById('phone').addEventListener('focus', function() {
+      this.value = '';
+    });
+    
+    document.getElementById('code').addEventListener('focus', function() {
+      this.value = '';
+    });
+    
+    document.getElementById('password').addEventListener('focus', function() {
+      this.value = '';
+    });
+    
+    document.getElementById('nickname').addEventListener('focus', function() {
+      this.value = '';
+    });
+    
+    let countdown = 0;
+    let timer = null;
+    
+    // 发送验证码
+    document.getElementById('btnSendCode').addEventListener('click', async function() {
+      const phone = document.getElementById('phone').value;
+      
+      if (!phone) {
+        document.getElementById('errorMessage').textContent = '请输入手机号';
+        document.getElementById('errorMessage').style.display = 'block';
+        return;
+      }
+      
+      if (!/^1[3-9]\d{9}$/.test(phone)) {
+        document.getElementById('errorMessage').textContent = '请输入正确的手机号';
+        document.getElementById('errorMessage').style.display = 'block';
+        return;
+      }
+      
+      try {
+        const response = await fetch((window.APP_CONFIG?.API_BASE_URL || 'http://localhost:8088/api') + '/auth/send-code', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: `phone=${phone}`
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.code === 200) {
+          document.getElementById('successMessage').textContent = data.data?.message || data.message || '验证码发送成功';
+          document.getElementById('successMessage').style.display = 'block';
+          
+          // 开始倒计时
+          startCountdown();
+        } else {
+          document.getElementById('errorMessage').textContent = data.message || data.error || '发送验证码失败，请稍后重试';
+          document.getElementById('errorMessage').style.display = 'block';
+        }
+      } catch (error) {
+        document.getElementById('errorMessage').textContent = '发送验证码失败，请稍后重试';
+        document.getElementById('errorMessage').style.display = 'block';
+        console.error('发送验证码错误:', error);
+      }
+    });
+    
+    // 注册表单提交
+    document.getElementById('registerForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const phone = document.getElementById('phone').value;
+      const code = document.getElementById('code').value;
+      const password = document.getElementById('password').value;
+      const nickname = document.getElementById('nickname').value;
+      
+      // 清空消息
+      document.getElementById('errorMessage').style.display = 'none';
+      document.getElementById('successMessage').style.display = 'none';
+      
+      // 验证参数
+      if (!phone || !code || !password || !nickname) {
+        document.getElementById('errorMessage').textContent = '请填写所有必填字段';
+        document.getElementById('errorMessage').style.display = 'block';
+        return;
+      }
+      
+      if (!/^1[3-9]\d{9}$/.test(phone)) {
+        document.getElementById('errorMessage').textContent = '请输入正确的手机号';
+        document.getElementById('errorMessage').style.display = 'block';
+        return;
+      }
+      
+      if (password.length < 6) {
+        document.getElementById('errorMessage').textContent = '密码长度至少6位';
+        document.getElementById('errorMessage').style.display = 'block';
+        return;
+      }
+      
+      try {
+        const response = await fetch((window.APP_CONFIG?.API_BASE_URL || 'http://localhost:8088/api') + '/auth/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ phone, code, password, nickname })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.code === 200) {
+          // 注册成功 - 使用固定中文提示
+          document.getElementById('successMessage').textContent = '注册成功，即将跳转到登录页面';
+          document.getElementById('successMessage').style.display = 'block';
+          
+          // 跳转到登录页面
+          setTimeout(() => {
+            window.location.href = 'login.html';
+          }, 1500);
+        } else {
+          // 注册失败 - 根据错误码显示中文提示
+          let errorMsg = '注册失败';
+          if (data.code === 400 || data.message?.includes('参数')) {
+            errorMsg = data.message || '参数不完整';
+          } else if (data.message?.includes('验证码')) {
+            errorMsg = '验证码错误或已过期';
+          } else if (data.message?.includes('已注册')) {
+            errorMsg = '手机号已注册';
+          } else if (data.message != null && data.message !== 'success') {
+            errorMsg = data.message;
+          }
+          document.getElementById('errorMessage').textContent = errorMsg;
+          document.getElementById('errorMessage').style.display = 'block';
+        }
+      } catch (error) {
+        document.getElementById('errorMessage').textContent = '注册失败，请稍后重试';
+        document.getElementById('errorMessage').style.display = 'block';
+        console.error('注册错误:', error);
+      }
+    });
+    
+    // 倒计时函数
+    function startCountdown() {
+      const btn = document.getElementById('btnSendCode');
+      countdown = 60;
+      btn.disabled = true;
+      btn.textContent = `${countdown}秒后重发`;
+      
+      if (timer) {
+        clearInterval(timer);
+      }
+      
+      timer = setInterval(() => {
+        countdown--;
+        btn.textContent = `${countdown}秒后重发`;
+        
+        if (countdown <= 0) {
+          clearInterval(timer);
+          btn.disabled = false;
+          btn.textContent = '发送验证码';
+        }
+      }, 1000);
+    }
+  </script>
+  <script src="js/ui-components.js"></script>
+</body>
+</html>

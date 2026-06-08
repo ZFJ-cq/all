@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>心情日记</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding-bottom: 30px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 40px 20px 20px;
+            text-align: center;
+            color: white;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .export-btn {
+            position: absolute;
+            right: 15px;
+            top: 45px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .export-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .calendar-container {
+            margin: 20px;
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .calendar-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .calendar-nav {
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #f0f0f0;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            color: #666;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .calendar-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+
+        .weekday {
+            text-align: center;
+            font-size: 12px;
+            color: #999;
+            padding: 10px 0;
+            font-weight: 500;
+        }
+
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            background: #f8f9fa;
+        }
+
+        .calendar-day:hover {
+            background: #e9ecef;
+            transform: scale(1.05);
+        }
+
+        .calendar-day.other-month {
+            opacity: 0.3;
+        }
+
+        .calendar-day.today {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .calendar-day.today:hover {
+            background: linear-gradient(135deg, #5a6fd6 0%, #6a4196 100%);
+        }
+
+        .day-number {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+
+        .day-mood {
+            font-size: 18px;
+        }
+
+        .diary-count {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #ff6b6b;
+            color: white;
+            font-size: 10px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: flex-end;
+            z-index: 200;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            width: 100%;
+            max-height: 85vh;
+            border-radius: 20px 20px 0 0;
+            padding: 25px;
+            padding-bottom: calc(25px + env(safe-area-inset-bottom));
+            animation: slideUp 0.3s ease;
+            overflow-y: auto;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+            }
+            to {
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            font-size: 20px;
+            color: #333;
+        }
+
+        .close-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #666;
+            cursor: pointer;
+            border: none;
+        }
+
+        .mood-selector {
+            margin-bottom: 20px;
+        }
+
+        .mood-selector p {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 12px;
+        }
+
+        .mood-options {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .mood-option {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .mood-option:hover {
+            transform: scale(1.1);
+        }
+
+        .mood-option.selected {
+            border-color: #667eea;
+            transform: scale(1.1);
+        }
+
+        .mood-happy { background: #ffeaa7; }
+        .mood-love { background: #fd79a8; }
+        .mood-neutral { background: #a29bfe; }
+        .mood-sad { background: #74b9ff; }
+        .mood-angry { background: #fdcb6e; }
+
+        .textarea-wrapper {
+            margin-bottom: 20px;
+        }
+
+        .textarea-wrapper textarea {
+            width: 100%;
+            height: 120px;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 15px;
+            resize: none;
+            font-family: inherit;
+        }
+
+        .textarea-wrapper textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .tag-input-wrapper {
+            margin-bottom: 20px;
+        }
+
+        .tag-input-wrapper input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 15px;
+        }
+
+        .tag-input-wrapper input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .tag-input-wrapper p {
+            font-size: 12px;
+            color: #999;
+            margin-top: 8px;
+        }
+
+        .save-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .save-btn:hover {
+            opacity: 0.9;
+        }
+
+        .day-diaries {
+            margin-top: 20px;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+
+        .day-diaries h3 {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .diary-item {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+
+        .diary-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .diary-time {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .diary-mood-display {
+            font-size: 20px;
+        }
+
+        .diary-text {
+            font-size: 14px;
+            color: #333;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .diary-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .tag {
+            background: #e9ecef;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            color: #666;
+        }
+
+        .delete-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .delete-btn:hover {
+            opacity: 0.8;
+        }
+
+        .no-diary {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+            font-size: 14px;
+        }
+
+        .stats-container {
+            margin: 0 20px 20px;
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .stats-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-mood {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .stat-count {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>心情日记</h1>
+        <p>记录每一天的心情故事</p>
+        <button class="export-btn" onclick="exportDiaries()">导出</button>
+    </div>
+
+    <div class="calendar-container">
+        <div class="calendar-header">
+            <div class="calendar-title" id="calendarTitle">2024年1月</div>
+            <div class="calendar-nav">
+                <button class="nav-btn" onclick="prevMonth()">‹</button>
+                <button class="nav-btn" onclick="nextMonth()">›</button>
+            </div>
+        </div>
+        <div class="calendar-weekdays">
+            <div class="weekday">日</div>
+            <div class="weekday">一</div>
+            <div class="weekday">二</div>
+            <div class="weekday">三</div>
+            <div class="weekday">四</div>
+            <div class="weekday">五</div>
+            <div class="weekday">六</div>
+        </div>
+        <div class="calendar-days" id="calendarDays"></div>
+    </div>
+
+    <div class="stats-container">
+        <div class="stats-title">本月心情统计</div>
+        <div class="stats-grid" id="statsGrid"></div>
+    </div>
+
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modalTitle">写日记</h2>
+                <button class="close-btn" id="closeBtn">×</button>
+            </div>
+            
+            <div class="mood-selector">
+                <p>今天的心情</p>
+                <div class="mood-options">
+                    <div class="mood-option mood-happy" data-mood="😊">😊</div>
+                    <div class="mood-option mood-love" data-mood="😍">😍</div>
+                    <div class="mood-option mood-neutral" data-mood="😐">😐</div>
+                    <div class="mood-option mood-sad" data-mood="😢">😢</div>
+                    <div class="mood-option mood-angry" data-mood="😤">😤</div>
+                </div>
+            </div>
+
+            <div class="textarea-wrapper">
+                <textarea id="contentInput" placeholder="写下今天的心情故事..."></textarea>
+            </div>
+
+            <div class="tag-input-wrapper">
+                <input type="text" id="tagInput" placeholder="添加标签（用逗号分隔）">
+                <p>例如：开心,工作,旅行</p>
+            </div>
+
+            <button class="save-btn" id="saveBtn">保存日记</button>
+
+            <div class="day-diaries" id="dayDiaries"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentDate = new Date();
+        let selectedDate = null;
+        let selectedMood = '😊';
+
+        const modalOverlay = document.getElementById('modalOverlay');
+        const closeBtn = document.getElementById('closeBtn');
+        const moodOptions = document.querySelectorAll('.mood-option');
+        const contentInput = document.getElementById('contentInput');
+        const tagInput = document.getElementById('tagInput');
+        const saveBtn = document.getElementById('saveBtn');
+
+        moodOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                moodOptions.forEach(opt => opt.classList.remove('selected'));
+                option.classList.add('selected');
+                selectedMood = option.dataset.mood;
+            });
+        });
+
+        closeBtn.addEventListener('click', () => {
+            modalOverlay.classList.remove('show');
+        });
+
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) {
+                modalOverlay.classList.remove('show');
+            }
+        });
+
+        function getDiaries() {
+            const data = localStorage.getItem('diaries');
+            return data ? JSON.parse(data) : [];
+        }
+
+        function getDiariesByDate(dateStr) {
+            const diaries = getDiaries();
+            return diaries.filter(d => d.dateStr === dateStr);
+        }
+
+        function formatDateKey(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function renderCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            
+            document.getElementById('calendarTitle').textContent = `${year}年${month + 1}月`;
+            
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const startDay = firstDay.getDay();
+            const daysInMonth = lastDay.getDate();
+            
+            const prevMonthLastDay = new Date(year, month, 0).getDate();
+            
+            const calendarDays = document.getElementById('calendarDays');
+            calendarDays.innerHTML = '';
+            
+            const today = new Date();
+            const todayStr = formatDateKey(today);
+            
+            const diaries = getDiaries();
+            
+            for (let i = startDay - 1; i >= 0; i--) {
+                const day = prevMonthLastDay - i;
+                const div = document.createElement('div');
+                div.className = 'calendar-day other-month';
+                div.innerHTML = `<span class="day-number">${day}</span>`;
+                calendarDays.appendChild(div);
+            }
+            
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(year, month, day);
+                const dateStr = formatDateKey(date);
+                const dayDiaries = diaries.filter(d => d.dateStr === dateStr);
+                const isToday = dateStr === todayStr;
+                
+                const div = document.createElement('div');
+                div.className = `calendar-day ${isToday ? 'today' : ''}`;
+                
+                let html = `<span class="day-number">${day}</span>`;
+                
+                if (dayDiaries.length > 0) {
+                    html += `<span class="day-mood">${dayDiaries[0].mood}</span>`;
+                    if (dayDiaries.length > 1) {
+                        html += `<span class="diary-count">${dayDiaries.length}</span>`;
+                    }
+                }
+                
+                div.innerHTML = html;
+                div.addEventListener('click', () => openDayModal(date));
+                calendarDays.appendChild(div);
+            }
+            
+            const totalCells = startDay + daysInMonth;
+            const remainingCells = (7 - (totalCells % 7)) % 7;
+            
+            for (let i = 1; i <= remainingCells; i++) {
+                const div = document.createElement('div');
+                div.className = 'calendar-day other-month';
+                div.innerHTML = `<span class="day-number">${i}</span>`;
+                calendarDays.appendChild(div);
+            }
+            
+            renderStats();
+        }
+
+        function renderStats() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const diaries = getDiaries();
+            
+            const monthDiaries = diaries.filter(d => {
+                const date = new Date(d.dateStr);
+                return date.getFullYear() === year && date.getMonth() === month;
+            });
+            
+            const moodCounts = {
+                '😊': 0,
+                '😍': 0,
+                '😐': 0,
+                '😢': 0,
+                '😤': 0
+            };
+            
+            monthDiaries.forEach(d => {
+                if (moodCounts.hasOwnProperty(d.mood)) {
+                    moodCounts[d.mood]++;
+                }
+            });
+            
+            const statsGrid = document.getElementById('statsGrid');
+            statsGrid.innerHTML = Object.entries(moodCounts).map(([mood, count]) => `
+                <div class="stat-item">
+                    <div class="stat-mood">${mood}</div>
+                    <div class="stat-count">${count}</div>
+                </div>
+            `).join('');
+        }
+
+        function openDayModal(date) {
+            selectedDate = date;
+            const dateStr = formatDateKey(date);
+            const dateDisplay = `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+            
+            document.getElementById('modalTitle').textContent = `${dateDisplay} 日记`;
+            
+            selectedMood = '😊';
+            moodOptions.forEach(opt => opt.classList.remove('selected'));
+            moodOptions[0].classList.add('selected');
+            contentInput.value = '';
+            tagInput.value = '';
+            
+            renderDayDiaries(dateStr);
+            
+            modalOverlay.classList.add('show');
+        }
+
+        function renderDayDiaries(dateStr) {
+            const dayDiaries = getDiariesByDate(dateStr);
+            const container = document.getElementById('dayDiaries');
+            
+            if (dayDiaries.length === 0) {
+                container.innerHTML = `
+                    <h3>当日日记</h3>
+                    <div class="no-diary">暂无日记记录</div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = `
+                <h3>当日日记 (${dayDiaries.length}条)</h3>
+                ${dayDiaries.map(diary => `
+                    <div class="diary-item">
+                        <div class="diary-item-header">
+                            <span class="diary-time">${diary.time}</span>
+                            <span class="diary-mood-display">${diary.mood}</span>
+                        </div>
+                        <div class="diary-text">${diary.content}</div>
+                        ${diary.tags.length > 0 ? `
+                            <div class="diary-tags">
+                                ${diary.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                            </div>
+                        ` : ''}
+                        <button class="delete-btn" onclick="deleteDiary('${diary.id}')">删除</button>
+                    </div>
+                `).join('')}
+            `;
+        }
+
+        function saveDiary() {
+            const content = contentInput.value.trim();
+            if (!content || !selectedDate) return;
+
+            const tags = tagInput.value.split(',').map(tag => tag.trim()).filter(tag => tag);
+            const now = new Date();
+            const dateStr = formatDateKey(selectedDate);
+            
+            const diary = {
+                id: Date.now().toString(),
+                dateStr: dateStr,
+                time: `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`,
+                mood: selectedMood,
+                content: content,
+                tags: tags
+            };
+
+            const diaries = getDiaries();
+            diaries.push(diary);
+            localStorage.setItem('diaries', JSON.stringify(diaries));
+            
+            renderCalendar();
+            renderDayDiaries(dateStr);
+            
+            contentInput.value = '';
+            tagInput.value = '';
+        }
+
+        saveBtn.addEventListener('click', saveDiary);
+
+        function deleteDiary(id) {
+            const diaries = getDiaries();
+            const filtered = diaries.filter(d => d.id !== id);
+            localStorage.setItem('diaries', JSON.stringify(filtered));
+            
+            renderCalendar();
+            if (selectedDate) {
+                renderDayDiaries(formatDateKey(selectedDate));
+            }
+        }
+
+        function prevMonth() {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            renderCalendar();
+        }
+
+        function nextMonth() {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            renderCalendar();
+        }
+
+        function exportDiaries() {
+            const diaries = getDiaries();
+            
+            if (diaries.length === 0) {
+                alert('暂无日记可导出');
+                return;
+            }
+            
+            const sortedDiaries = [...diaries].sort((a, b) => a.dateStr.localeCompare(b.dateStr));
+            
+            let csvContent = '\uFEFF日期,时间,心情,内容,标签\n';
+            
+            sortedDiaries.forEach(diary => {
+                const content = diary.content.replace(/"/g, '""');
+                const tags = diary.tags.join('、');
+                csvContent += `${diary.dateStr},${diary.time},${diary.mood},"${content}","${tags}"\n`;
+            });
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `心情日记_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        renderCalendar();
+    </script>
+</body>
+</html>

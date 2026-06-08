@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="../js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="../css/mobile-adapt.css">
+    <title>灵月仙途 - 公会大厅</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary-color: #2a4a6c;
+            --secondary-color: #4a7a9c;
+            --accent-color: #d4af37;
+            --dark-bg: #0a1628;
+            --light-text: #e6e6e6;
+            --card-bg: rgba(20, 30, 48, 0.9);
+            --border-color: rgba(120, 150, 200, 0.3);
+            --highlight: #ffcc00;
+        }
+        
+        body {
+            font-family: 'Arial', 'Microsoft YaHei', sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--light-text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding-bottom: 70px; /* 为底部导航留出空间 */
+            position: relative;
+        }
+        
+        /* 水墨山水背景 */
+        .mountain-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        .mountain {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 60%;
+            background: linear-gradient(to top, #1a2a4a, transparent);
+            clip-path: polygon(0% 100%, 10% 70%, 20% 80%, 30% 60%, 40% 75%, 50% 50%, 60% 65%, 70% 45%, 80% 55%, 90% 35%, 100% 50%, 100% 100%);
+        }
+        
+        .mountain-1 {
+            position: absolute;
+            bottom: 0;
+            left: 10%;
+            width: 80%;
+            height: 50%;
+            background: linear-gradient(to top, #2a3a5a, transparent);
+            clip-path: polygon(0% 100%, 5% 60%, 15% 75%, 25% 50%, 35% 65%, 45% 40%, 55% 55%, 65% 35%, 75% 50%, 85% 30%, 95% 45%, 100% 100%);
+            opacity: 0.7;
+        }
+        
+        .mountain-2 {
+            position: absolute;
+            bottom: 0;
+            left: 20%;
+            width: 60%;
+            height: 40%;
+            background: linear-gradient(to top, #3a4a6a, transparent);
+            clip-path: polygon(0% 100%, 10% 55%, 20% 65%, 30% 45%, 40% 60%, 50% 35%, 60% 50%, 70% 30%, 80% 45%, 90% 25%, 100% 100%);
+            opacity: 0.5;
+        }
+        
+        .cloud {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            filter: blur(10px);
+            animation: float 20s infinite ease-in-out;
+        }
+        
+        .cloud-1 {
+            width: 120px;
+            height: 60px;
+            top: 20%;
+            left: -20px;
+            animation-delay: 0s;
+        }
+        
+        .cloud-2 {
+            width: 150px;
+            height: 80px;
+            top: 40%;
+            right: -30px;
+            animation-delay: 5s;
+        }
+        
+        .cloud-3 {
+            width: 100px;
+            height: 50px;
+            top: 10%;
+            left: 30%;
+            animation-delay: 10s;
+        }
+        
+        .crane {
+            position: absolute;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 24px;
+            animation: fly 30s infinite linear;
+        }
+        
+        .crane-1 {
+            top: 15%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+        
+        .crane-2 {
+            top: 25%;
+            right: 15%;
+            animation-delay: 15s;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); }
+            50% { transform: translateY(-10px) translateX(10px); }
+        }
+        
+        @keyframes fly {
+            0% { transform: translateX(-50px) translateY(0); }
+            50% { transform: translateX(calc(100vw + 50px)) translateY(-20px); }
+            100% { transform: translateX(calc(100vw + 50px)) translateY(-20px); }
+        }
+        
+        /* 主容器 */
+        .container {
+            padding: 15px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        /* 顶部公会大厅信息栏 */
+        .top-info {
+            background: linear-gradient(135deg, rgba(30, 50, 80, 0.9), rgba(20, 30, 50, 0.9));
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(5px);
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+        }
+        
+        .top-info::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-color), var(--secondary-color));
+        }
+        
+        .guild-hall-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--accent-color);
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+        }
+        
+        .guild-hall-desc {
+            font-size: 14px;
+            color: var(--light-text);
+            margin-bottom: 15px;
+        }
+        
+        .guild-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: var(--light-text);
+            opacity: 0.8;
+        }
+        
+        /* 公会网格 */
+        .guild-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        /* 公会卡片 */
+        .guild-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .guild-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--accent-color);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+        
+        .guild-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            border-color: var(--accent-color);
+        }
+        
+        .guild-card:hover::before {
+            transform: scaleX(1);
+        }
+        
+        .guild-icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+            color: var(--accent-color);
+            text-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+        }
+        
+        .guild-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--light-text);
+        }
+        
+        .guild-level {
+            font-size: 14px;
+            color: var(--accent-color);
+            margin-bottom: 10px;
+        }
+        
+        .guild-desc {
+            font-size: 12px;
+            color: var(--light-text);
+            opacity: 0.8;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+        
+        .guild-stats-small {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 15px;
+            font-size: 12px;
+        }
+        
+        .guild-stat {
+            text-align: center;
+        }
+        
+        .guild-stat-value {
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+        
+        .guild-stat-label {
+            color: var(--light-text);
+            opacity: 0.7;
+        }
+        
+        .guild-button {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(212, 175, 55, 0.1));
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: bold;
+            width: 100%;
+        }
+        
+        .guild-button:hover {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.3), rgba(212, 175, 55, 0.2));
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+        }
+        
+        /* 底部导航栏 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: var(--card-bg);
+            border-top: 1px solid var(--border-color);
+            padding: 8px 0;
+            display: flex;
+            justify-content: space-around;
+            z-index: 100;
+            backdrop-filter: blur(5px);
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 5px;
+            text-decoration: none;
+            color: #aaa;
+            transition: all 0.2s ease;
+            width: 20%;
+        }
+        
+        .nav-item.active {
+            color: var(--accent-color);
+        }
+        
+        .nav-icon {
+            font-size: 22px;
+            margin-bottom: 3px;
+        }
+        
+        .nav-text {
+            font-size: 12px;
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .top-info {
+                padding: 15px;
+            }
+            
+            .guild-hall-title {
+                font-size: 20px;
+            }
+            
+            .guild-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .guild-card {
+                padding: 15px;
+            }
+            
+            .guild-icon {
+                font-size: 35px;
+            }
+            
+            .guild-name {
+                font-size: 16px;
+            }
+        }
+        
+        /* 修仙元素装饰 */
+        .cultivation-element {
+            position: absolute;
+            z-index: -1;
+            opacity: 0.1;
+        }
+        
+        .floating-text {
+            position: absolute;
+            font-family: 'Ma Shan Zheng', cursive;
+            color: rgba(255, 255, 255, 0.05);
+            font-size: 40px;
+            z-index: -1;
+            animation: floatText 30s infinite linear;
+        }
+        
+        @keyframes floatText {
+            0% { transform: translateX(-100px) translateY(0); }
+            50% { transform: translateX(calc(100vw + 100px)) translateY(-20px); }
+            100% { transform: translateX(calc(100vw + 100px)) translateY(-20px); }
+        }
+        
+        /* 模态弹窗样式 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 25px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            transform: translateY(30px) scale(0.95);
+            transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border-top: 3px solid var(--accent-color);
+        }
+        
+        .modal-overlay.active .modal-content {
+            transform: translateY(0) scale(1);
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #aaa;
+            font-size: 20px;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .close-modal:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--accent-color);
+            transform: rotate(90deg);
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: var(--accent-color);
+            text-align: center;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+            position: relative;
+        }
+        
+        .modal-title::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: var(--accent-color);
+            border-radius: 2px;
+        }
+        
+        .modal-body {
+            margin-bottom: 20px;
+        }
+        
+        .modal-section {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 3px solid var(--accent-color);
+        }
+        
+        .modal-section-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--accent-color);
+            font-size: 16px;
+        }
+        
+        .modal-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .modal-list li {
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .modal-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .modal-footer {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .modal-button {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(212, 175, 55, 0.1));
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: bold;
+            width: 100%;
+        }
+        
+        .modal-button:hover {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.3), rgba(212, 175, 55, 0.2));
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+        }
+        
+        /* 响应式弹窗样式 */
+        @media (max-width: 480px) {
+            .modal-content {
+                width: 95%;
+                padding: 20px;
+                max-height: 85vh;
+            }
+            
+            .modal-title {
+                font-size: 18px;
+                margin-bottom: 15px;
+            }
+            
+            .modal-section {
+                padding: 12px;
+            }
+        }
+    </style>
+
+  </head>
+<body>
+    <!-- 水墨山水背景 -->
+    <div class="mountain-bg">
+        <div class="mountain"></div>
+        <div class="mountain-1"></div>
+        <div class="mountain-2"></div>
+        <div class="cloud cloud-1"></div>
+        <div class="cloud cloud-2"></div>
+        <div class="cloud cloud-3"></div>
+        <div class="crane crane-1"><i class="fas fa-dove"></i></div>
+        <div class="crane crane-2"><i class="fas fa-dove"></i></div>
+        
+        <!-- 修仙元素装饰 -->
+        <div class="floating-text" style="top: 15%; left: 0;">道法自然</div>
+        <div class="floating-text" style="top: 40%; left: 0; animation-delay: 10s;">修真问道</div>
+        <div class="floating-text" style="top: 65%; left: 0; animation-delay: 20s;">天人合一</div>
+        
+        <div class="cultivation-element" style="top: 20%; right: 10%; font-size: 60px; transform: rotate(15deg);">☯</div>
+        <div class="cultivation-element" style="top: 50%; left: 5%; font-size: 80px; transform: rotate(-10deg);">☯</div>
+        <div class="cultivation-element" style="bottom: 20%; right: 15%; font-size: 50px; transform: rotate(5deg);">✨</div>
+    </div>
+    
+    <!-- 主容器 -->
+    <div class="container">
+        <!-- 顶部公会大厅信息栏 -->
+        <div class="top-info">
+            <div class="guild-hall-title">公会大厅</div>
+            <div class="guild-hall-desc">汇聚各领域精英，共同追求仙道巅峰</div>
+            <div class="guild-stats">
+                <div class="stat-item">
+                    <div class="stat-value">4</div>
+                    <div class="stat-label">公会数量</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">1,258</div>
+                    <div class="stat-label">总成员</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">89</div>
+                    <div class="stat-label">今日活跃</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 公会网格 -->
+        <div class="guild-grid">
+            <!-- 炼丹工会 -->
+            <div class="guild-card" onclick="showGuildDetails('alchemy')">
+                <div class="guild-icon">
+                    <i class="fas fa-flask"></i>
+                </div>
+                <div class="guild-name">炼丹工会</div>
+                <div class="guild-level">三级公会</div>
+                <div class="guild-desc">专注于丹药炼制，提升修为速度，突破瓶颈的关键</div>
+                <div class="guild-stats-small">
+                    <div class="guild-stat">
+                        <div class="guild-stat-value">328</div>
+                        <div class="guild-stat-label">成员</div>
+                    </div>
+                    <div class="guild-stat">
+                        <div class="guild-stat-value">85</div>
+                        <div class="guild-stat-label">在线</div>
+                    </div>
+                </div>
+                <button class="guild-button">加入公会</button>
+            </div>
+            
+            <!-- 炼器工会 -->
+            <div class="guild-card" onclick="showGuildDetails('crafting')">
+                <div class="guild-icon">
+                    <i class="fas fa-hammer"></i>
+                </div>
+                <div class="guild-name">炼器工会</div>
+                <div class="guild-level">四级公会</div>
+                <div class="guild-desc">打造强大法器，提升战斗力，成为战斗中的佼佼者</div>
+                <div class="guild-stats-small">
+                    <div class="guild-stat">
+                        <div class="guild-stat-value">412</div>
+                        <div class="guild-stat-label">成员</div>
+                    </div>
+                    <div class="guild-stat">
+                        <div class="guild-stat-value">102</div>
+                        <div class="guild-stat-label">在线</div>
+                    </div>
+                </div>
+                <button class="guild-button">加入公会</button>
+            </div>
+            
+            <!-- 阵法工会 -->
+            <div class="guild-card" onclick="showGuildDetails('array')">
+                <div class="guild-icon">
+                    <i class="fas fa-draw-polygon"></i>
+                </div>
+                <div class="guild-name">阵法工会</div>
+                <div class="guild-level">二级公会</div>
+                <div class="guild-desc">研究各种阵法，提供强大的防御和攻击能力</div>
+                <div class="guild-stats-small">
+                    <div class="guild-stat">
+                        <div class="guild-stat-value">256</div>
+                        <div class="guild-stat-label">成员</div>
+                    </div>
+                    <div class="guild-stat">
+                        <div class="guild-stat-value">67</div>
+                        <div class="guild-stat-label">在线</div>
+                    </div>
+                </div>
+                <button class="guild-button">加入公会</button>
+            </div>
+            
+            <!-- 符箓工会 -->
+            <div class="guild-card" onclick="showGuildDetails('talisman')">
+                <div class="guild-icon">
+                    <i class="fas fa-scroll"></i>
+                </div>
+                <div class="guild-name">符箓工会</div>
+                <div class="guild-level">三级公会</div>
+                <div class="guild-desc">制作各种符箓，提供特殊能力和辅助效果</div>
+                <div class="guild-stats-small">
+                    <div class="guild-stat">
+                        <div class="guild-stat-value">262</div>
+                        <div class="guild-stat-label">成员</div>
+                    </div>
+                    <div class="guild-stat">
+                        <div class="guild-stat-value">78</div>
+                        <div class="guild-stat-label">在线</div>
+                    </div>
+                </div>
+                <button class="guild-button">加入公会</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 模态弹窗 -->
+    <div class="modal-overlay" id="guildModal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal()">&times;</button>
+            <h2 class="modal-title" id="modalTitle"></h2>
+            <div class="modal-body" id="modalBody">
+                <!-- 动态内容将通过 JavaScript 插入 -->
+            </div>
+            <div class="modal-footer">
+                <button class="modal-button" onclick="closeModal()">关闭</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 底部导航栏 -->
+    <div class="bottom-nav">
+        <a href="../index.html" class="nav-item">
+            <div class="nav-icon">🏠</div>
+            <div class="nav-text">洞府</div>
+        </a>
+        <a href="../inventory/inventory.html" class="nav-item">
+            <div class="nav-icon">🎒</div>
+            <div class="nav-text">背包</div>
+        </a>
+        <a href="../character/character.html" class="nav-item">
+            <div class="nav-icon">👤</div>
+            <div class="nav-text">角色</div>
+        </a>
+        <a href="../clan/index.html" class="nav-item">
+            <div class="nav-icon">🏯</div>
+            <div class="nav-text">宗门</div>
+        </a>
+        <a href="index.html" class="nav-item active">
+            <div class="nav-icon">👥</div>
+            <div class="nav-text">公会</div>
+        </a>
+    </div>
+    
+    <script>
+        // 公会数据
+        const guilds = {
+            alchemy: {
+                name: '炼丹工会',
+                level: 3,
+                members: 328,
+                online: 85,
+                description: '炼丹工会专注于丹药炼制，提升修为速度，突破瓶颈的关键。在这里，你可以学习各种丹方，炼制高品质丹药，与其他炼丹师交流心得。',
+                benefits: [
+                    '学习高级丹方',
+                    '获得炼丹材料',
+                    '提升炼丹成功率',
+                    '参与炼丹大赛'
+                ],
+                requirements: '修为达到筑基期，拥有至少一种炼丹技能'
+            },
+            crafting: {
+                name: '炼器工会',
+                level: 4,
+                members: 412,
+                online: 102,
+                description: '炼器工会致力于打造强大法器，提升战斗力，成为战斗中的佼佼者。在这里，你可以学习各种炼器技巧，打造高品质法器。',
+                benefits: [
+                    '学习高级炼器图谱',
+                    '获得炼器材料',
+                    '提升炼器成功率',
+                    '参与炼器大赛'
+                ],
+                requirements: '修为达到金丹期，拥有至少一种炼器技能'
+            },
+            array: {
+                name: '阵法工会',
+                level: 2,
+                members: 256,
+                online: 67,
+                description: '阵法工会研究各种阵法，提供强大的防御和攻击能力。在这里，你可以学习各种阵法知识，布置强大的阵法。',
+                benefits: [
+                    '学习高级阵法',
+                    '获得阵法材料',
+                    '提升阵法威力',
+                    '参与阵法大赛'
+                ],
+                requirements: '修为达到练气期，拥有至少一种阵法技能'
+            },
+            talisman: {
+                name: '符箓工会',
+                level: 3,
+                members: 262,
+                online: 78,
+                description: '符箓工会制作各种符箓，提供特殊能力和辅助效果。在这里，你可以学习各种符箓制作方法，制作强大的符箓。',
+                benefits: [
+                    '学习高级符箓制作',
+                    '获得符箓材料',
+                    '提升符箓威力',
+                    '参与符箓大赛'
+                ],
+                requirements: '修为达到练气期，拥有至少一种符箓技能'
+            }
+        };
+        
+        // 显示公会详情
+        function showGuildDetails(guildType) {
+            const guild = guilds[guildType];
+            if (!guild) return;
+            
+            let benefitsList = guild.benefits.map(benefit => `<li>${benefit}</li>`).join('');
+            
+            // 填充模态弹窗内容
+            document.getElementById('modalTitle').textContent = guild.name;
+            document.getElementById('modalBody').innerHTML = `
+                <div class="modal-section">
+                    <div class="modal-section-title">基本信息</div>
+                    <div>等级: ${guild.level}级公会</div>
+                    <div>成员: ${guild.members}人 (在线: ${guild.online}人)</div>
+                </div>
+                <div class="modal-section">
+                    <div class="modal-section-title">公会介绍</div>
+                    <div>${guild.description}</div>
+                </div>
+                <div class="modal-section">
+                    <div class="modal-section-title">公会福利</div>
+                    <ul class="modal-list">
+                        ${benefitsList}
+                    </ul>
+                </div>
+                <div class="modal-section">
+                    <div class="modal-section-title">加入要求</div>
+                    <div>${guild.requirements}</div>
+                </div>
+            `;
+            
+            // 显示模态弹窗
+            document.getElementById('guildModal').classList.add('active');
+        }
+        
+        // 关闭模态弹窗
+        function closeModal() {
+            document.getElementById('guildModal').classList.remove('active');
+        }
+        
+        // 为所有公会卡片添加点击反馈
+        document.querySelectorAll('.guild-card').forEach(card => {
+            card.addEventListener('click', function() {
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 150);
+            });
+        });
+        
+        // 为所有按钮添加点击反馈
+        document.querySelectorAll('.guild-button').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.stopPropagation(); // 阻止事件冒泡
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 150);
+                
+                // 模拟加入公会
+                setTimeout(() => {
+                    // 填充模态弹窗内容
+                    document.getElementById('modalTitle').textContent = '加入成功';
+                    document.getElementById('modalBody').innerHTML = `
+                        <div class="modal-section">
+                            <div style="text-align: center; padding: 20px;">
+                                <div style="font-size: 48px; margin-bottom: 20px;">🎉</div>
+                                <div style="margin-bottom: 15px;">恭喜你成功加入公会！</div>
+                                <div>你现在可以享受公会提供的各种福利了。</div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // 显示模态弹窗
+                    document.getElementById('guildModal').classList.add('active');
+                }, 500);
+            });
+        });
+        
+        // 添加触觉反馈（移动端）
+        if ('vibrate' in navigator) {
+            document.querySelectorAll('.guild-card, .guild-button').forEach(element => {
+                element.addEventListener('touchstart', function() {
+                    navigator.vibrate(10);
+                });
+            });
+        }
+        
+        // 预加载动画
+        window.addEventListener('load', function() {
+            document.body.style.opacity = '0';
+            document.body.style.transition = 'opacity 0.3s ease';
+            
+            setTimeout(function() {
+                document.body.style.opacity = '1';
+            }, 50);
+        });
+    </script>
+  <script src="js/ui-components.js"></script>
+  <script src="../js/auth-service.js"></script>
+</body>
+</html>

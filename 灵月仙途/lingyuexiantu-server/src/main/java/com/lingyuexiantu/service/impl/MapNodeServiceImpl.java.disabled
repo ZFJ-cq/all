@@ -1,0 +1,187 @@
+package com.lingyuexiantu.service.impl;
+
+import com.lingyuexiantu.entity.MapNode;
+import com.lingyue.entity.GameRole;
+import com.lingyuexiantu.repository.MapNodeRepository;
+import com.lingyue.service.GameRoleService;
+import com.lingyuexiantu.service.MapNodeService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Service
+public class MapNodeServiceImpl implements MapNodeService {
+
+    @Autowired
+    private MapNodeRepository mapNodeRepository;
+
+    @Autowired
+    private GameRoleService gameRoleService;
+
+    @Override
+    public List<MapNode> getMapNodesByRoleId(Long roleId) {
+        List<MapNode> allNodes = mapNodeRepository.findAll();
+        List<MapNode> accessibleNodes = new ArrayList<>();
+
+        GameRole role = gameRoleService.getById(roleId);
+        if (role == null) {
+            return accessibleNodes;
+        }
+
+        // 简化逻辑：根据角色等级判断是否可访问
+        int roleLevel = 1; // 假设角色等级为1，实际项目中应该从角色数据中获取
+
+        for (MapNode node : allNodes) {
+            if (node.getRequiredLevel() <= roleLevel) {
+                accessibleNodes.add(node);
+            }
+        }
+
+        // 如果没有地图节点数据，返回默认节点
+        if (accessibleNodes.isEmpty()) {
+            accessibleNodes = getDefaultMapNodes();
+        }
+
+        return accessibleNodes;
+    }
+
+    @Override
+    public MapNode getById(Long id) {
+        return mapNodeRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    public List<MapNode> list() {
+        List<MapNode> nodes = mapNodeRepository.findAll();
+        if (nodes.isEmpty()) {
+            return getDefaultMapNodes();
+        }
+        return nodes;
+    }
+
+    @Override
+    public boolean isMapNodeUnlocked(Long roleId, Long mapNodeId) {
+        MapNode node = getById(mapNodeId);
+        if (node == null) {
+            return false;
+        }
+
+        GameRole role = gameRoleService.getById(roleId);
+        if (role == null) {
+            return false;
+        }
+
+        // 简化逻辑：根据角色等级判断是否解锁
+        int roleLevel = 1; // 假设角色等级为1，实际项目中应该从角色数据中获取
+        return node.getRequiredLevel() <= roleLevel;
+    }
+
+    // 默认地图节点数据
+    private List<MapNode> getDefaultMapNodes() {
+        List<MapNode> nodes = new ArrayList<>();
+
+        MapNode node1 = new MapNode();
+        node1.setId(1L);
+        node1.setName("灵草园");
+        node1.setType("RESOURCE");
+        node1.setDescription("采集灵草的地方");
+        node1.setRequiredLevel(1);
+        node1.setCost(0);
+        node1.setStatus("ACTIVE");
+        nodes.add(node1);
+
+        MapNode node2 = new MapNode();
+        node2.setId(2L);
+        node2.setName("青云镇");
+        node2.setType("TOWN");
+        node2.setDescription("新手城镇");
+        node2.setRequiredLevel(1);
+        node2.setCost(0);
+        node2.setStatus("ACTIVE");
+        nodes.add(node2);
+
+        MapNode node3 = new MapNode();
+        node3.setId(3L);
+        node3.setName("青石山");
+        node3.setType("TRAINING");
+        node3.setDescription("练级的地方");
+        node3.setRequiredLevel(1);
+        node3.setCost(0);
+        node3.setStatus("ACTIVE");
+        nodes.add(node3);
+
+        MapNode node4 = new MapNode();
+        node4.setId(4L);
+        node4.setName("迷雾谷");
+        node4.setType("DUNGEON");
+        node4.setDescription("探索副本");
+        node4.setRequiredLevel(2);
+        node4.setCost(10);
+        node4.setStatus("ACTIVE");
+        nodes.add(node4);
+
+        MapNode node5 = new MapNode();
+        node5.setId(5L);
+        node5.setName("青云门");
+        node5.setType("CLAN");
+        node5.setDescription("宗门所在地");
+        node5.setRequiredLevel(1);
+        node5.setCost(0);
+        node5.setStatus("ACTIVE");
+        nodes.add(node5);
+
+        MapNode node6 = new MapNode();
+        node6.setId(6L);
+        node6.setName("炼丹房");
+        node6.setType("SHOP");
+        node6.setDescription("炼制丹药的地方");
+        node6.setRequiredLevel(1);
+        node6.setCost(0);
+        node6.setStatus("ACTIVE");
+        nodes.add(node6);
+
+        MapNode node7 = new MapNode();
+        node7.setId(7L);
+        node7.setName("废弃矿洞");
+        node7.setType("DUNGEON");
+        node7.setDescription("任务副本");
+        node7.setRequiredLevel(1);
+        node7.setCost(5);
+        node7.setStatus("ACTIVE");
+        nodes.add(node7);
+
+        MapNode node8 = new MapNode();
+        node8.setId(8L);
+        node8.setName("妖兽森林");
+        node8.setType("TRAINING");
+        node8.setDescription("高级练级区");
+        node8.setRequiredLevel(5);
+        node8.setCost(20);
+        node8.setStatus("ACTIVE");
+        nodes.add(node8);
+
+        MapNode node9 = new MapNode();
+        node9.setId(9L);
+        node9.setName("传送阵");
+        node9.setType("TELEPORT");
+        node9.setDescription("快速旅行");
+        node9.setRequiredLevel(1);
+        node9.setCost(0);
+        node9.setStatus("ACTIVE");
+        nodes.add(node9);
+
+        MapNode node10 = new MapNode();
+        node10.setId(10L);
+        node10.setName("城镇传送");
+        node10.setType("TELEPORT");
+        node10.setDescription("传送到其他城镇");
+        node10.setRequiredLevel(3);
+        node10.setCost(50);
+        node10.setStatus("ACTIVE");
+        nodes.add(node10);
+
+        return nodes;
+    }
+}

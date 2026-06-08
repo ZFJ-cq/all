@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="css/mobile-adapt.css">
+  <title>API 数据调试工具</title>
+  <style>
+    body {
+      font-family: 'Microsoft YaHei', sans-serif;
+      background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+      min-height: 100vh;
+      padding: 20px;
+      color: #fff;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      padding: 30px;
+    }
+    h1 {
+      color: #f4d03f;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .section {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .section-title {
+      color: #f4d03f;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+    .btn {
+      padding: 12px 24px;
+      background: linear-gradient(90deg, #f4d03f, #f1c40f);
+      border: none;
+      border-radius: 8px;
+      color: #333;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      margin: 5px;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(244, 208, 63, 0.4);
+    }
+    .log-container {
+      background: #000;
+      border-radius: 8px;
+      padding: 15px;
+      max-height: 500px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 0.85rem;
+      color: #0f0;
+      margin-top: 20px;
+    }
+    .log-entry { margin-bottom: 5px; white-space: pre-wrap; word-wrap: break-word; }
+    .log-info { color: #0f0; }
+    .log-warn { color: #ff0; }
+    .log-error { color: #f44; }
+    .log-data { color: #4FC3F7; }
+    pre {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 10px;
+      border-radius: 5px;
+      overflow-x: auto;
+    }
+  </style>
+
+  </head>
+<body>
+  <div class="container">
+    <h1>🔧 API 数据调试工具</h1>
+    
+    <div class="section">
+      <div class="section-title">📊 当前状态</div>
+      <div>
+        <strong>Token:</strong> <span id="tokenStatus">检查中...</span><br>
+        <strong>Role ID:</strong> <span id="roleIdStatus">检查中...</span>
+      </div>
+    </div>
+    
+    <div class="section">
+      <div class="section-title">🧪 测试接口</div>
+      <button class="btn" onclick="testGetUserProfile()">测试 getUserProfile</button>
+      <button class="btn" onclick="testGetAllSkills()">测试 getAllSkills</button>
+      <button class="btn" onclick="testGetRoleSkills()">测试 getRoleSkills</button>
+      <button class="btn" onclick="clearLog()">清空日志</button>
+    </div>
+    
+    <div class="log-container" id="logContainer">
+      <div class="log-entry log-info">API 调试工具已启动...</div>
+    </div>
+  </div>
+  
+  <script src="js/token-manager.js"></script>
+  <script src="js/role-sync.js"></script>
+  <script src="js/api-service.js"></script>
+  <script>
+    const logContainer = document.getElementById('logContainer');
+    
+    function log(message, type = 'info', data = null) {
+      const entry = document.createElement('div');
+      entry.className = 'log-entry log-' + type;
+      
+      let text = `[${new Date().toLocaleTimeString()}] ${message}`;
+      if (data !== null) {
+        text += '\n' + JSON.stringify(data, null, 2);
+      }
+      
+      entry.textContent = text;
+      logContainer.appendChild(entry);
+      logContainer.scrollTop = logContainer.scrollHeight;
+      console.log(message, data);
+    }
+    
+    function checkStatus() {
+      const token = localStorage.getItem('token');
+      const roleId = localStorage.getItem('roleId') || localStorage.getItem('currentRoleId');
+      
+      document.getElementById('tokenStatus').innerHTML = token ? 
+        '<span style="color: #4CAF50;">✓ 存在</span>' : 
+        '<span style="color: #f44336;">✗ 不存在</span>';
+      
+      document.getElementById('roleIdStatus').innerHTML = roleId ? 
+        '<span style="color: #4CAF50;">' + roleId + '</span>' : 
+        '<span style="color: #f44336;">✗ 不存在</span>';
+      
+      return { token, roleId };
+    }
+    
+    async function testGetUserProfile() {
+      log('=== 测试 getUserProfile ===', 'info');
+      const { token, roleId } = checkStatus();
+      
+      if (!roleId) {
+        log('错误：没有角色 ID', 'error');
+        return;
+      }
+      
+      log(`使用角色 ID: ${roleId}`, 'info');
+      
+      try {
+        const url = `http://localhost:8088/api/role/${roleId}`;
+        log(`请求 URL: ${url}`, 'info');
+        
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        log(`响应状态码：${response.status} ${response.statusText}`, response.ok ? 'info' : 'error');
+        
+        const responseText = await response.text();
+        log('原始响应:\n' + responseText, 'data');
+        
+        try {
+          const data = JSON.parse(responseText);
+          log('解析后的数据:', 'data', data);
+          
+          if (data.code === 200 && data.data) {
+            log('✅ 获取角色信息成功！', 'info');
+            log('角色详情:', 'data', data.data);
+            
+            // 检查关键字段
+            const role = data.data;
+            log('=== 关键字段检查 ===', 'info');
+            log(`roleName: ${role.roleName || '❌ 不存在'}`, role.roleName ? 'info' : 'error');
+            log(`realm: ${role.realm || '❌ 不存在'}`, role.realm ? 'info' : 'error');
+            log(`hp: ${role.hp || '❌ 不存在'}`, role.hp ? 'info' : 'error');
+            log(`mp: ${role.mp || '❌ 不存在'}`, role.mp ? 'info' : 'error');
+            log(`spiritRoot: ${role.spiritRoot || '❌ 不存在'}`, role.spiritRoot ? 'info' : 'error');
+          } else {
+            log('❌ 获取角色信息失败', 'error');
+            log('错误信息：' + (data.message || '未知错误'), 'error');
+          }
+        } catch (e) {
+          log('JSON 解析失败：' + e.message, 'error');
+        }
+      } catch (error) {
+        log('请求异常：' + error.message, 'error');
+        log('Stack: ' + error.stack, 'error');
+      }
+    }
+    
+    async function testGetAllSkills() {
+      log('=== 测试 getAllSkills ===', 'info');
+      const { token } = checkStatus();
+      
+      try {
+        const url = 'http://localhost:8088/api/skill';
+        log(`请求 URL: ${url}`, 'info');
+        
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        log(`响应状态码：${response.status} ${response.statusText}`, response.ok ? 'info' : 'error');
+        
+        const responseText = await response.text();
+        log('原始响应:\n' + responseText, 'data');
+        
+        try {
+          const data = JSON.parse(responseText);
+          log('解析后的数据:', 'data', data);
+          
+          if (data.code === 200) {
+            const skills = data.data || [];
+            log(`✅ 获取技能列表成功！共 ${skills.length} 个技能`, 'info');
+            
+            if (skills.length > 0) {
+              log('前 3 个技能:', 'data', skills.slice(0, 3));
+            } else {
+              log('⚠️ 技能列表为空', 'warn');
+            }
+          } else {
+            log('❌ 获取技能列表失败', 'error');
+          }
+        } catch (e) {
+          log('JSON 解析失败：' + e.message, 'error');
+        }
+      } catch (error) {
+        log('请求异常：' + error.message, 'error');
+      }
+    }
+    
+    async function testGetRoleSkills() {
+      log('=== 测试 getRoleSkills ===', 'info');
+      const { token, roleId } = checkStatus();
+      
+      if (!roleId) {
+        log('错误：没有角色 ID', 'error');
+        return;
+      }
+      
+      try {
+        const url = `http://localhost:8088/api/role-skill/role/${roleId}`;
+        log(`请求 URL: ${url}`, 'info');
+        
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        log(`响应状态码：${response.status} ${response.statusText}`, response.ok ? 'info' : 'error');
+        
+        const responseText = await response.text();
+        log('原始响应:\n' + responseText, 'data');
+        
+        try {
+          const data = JSON.parse(responseText);
+          log('解析后的数据:', 'data', data);
+          
+          if (data.code === 200) {
+            const skills = data.data || [];
+            log(`✅ 获取角色技能成功！共 ${skills.length} 个技能`, 'info');
+            
+            if (skills.length > 0) {
+              log('技能详情:', 'data', skills);
+            } else {
+              log('⚠️ 角色技能列表为空', 'warn');
+            }
+          } else {
+            log('❌ 获取角色技能失败', 'error');
+          }
+        } catch (e) {
+          log('JSON 解析失败：' + e.message, 'error');
+        }
+      } catch (error) {
+        log('请求异常：' + error.message, 'error');
+      }
+    }
+    
+    function clearLog() {
+      logContainer.innerHTML = '';
+      log('日志已清空', 'info');
+    }
+    
+    // 页面加载时检查状态
+    window.addEventListener('DOMContentLoaded', () => {
+      log('=== API 调试工具 ===', 'info');
+      checkStatus();
+    });
+  </script>
+</body>
+</html>

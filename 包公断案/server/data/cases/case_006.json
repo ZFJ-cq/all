@@ -1,0 +1,203 @@
+{
+  "id": "case_006",
+  "title": "打龙袍",
+  "subtitle": "第六案",
+  "difficulty": 3,
+  "description": "宋仁宗不认生母李太后，包拯借元宵灯会揭露真相，以打龙袍代罚皇帝！",
+  "background": "李宸妃当年被刘太后陷害，流落民间。包拯查明真相，设计让宋仁宗与李太后相认，并以打龙袍象征性惩罚皇帝。",
+  "stages": {
+    "report": {
+      "id": "report",
+      "name": "报案",
+      "dialogues": [
+        {
+          "speaker": "系统",
+          "speakerTitle": "旁白",
+          "content": "元宵佳节，开封府张灯结彩，热闹非凡。一位衣衫褴褛的老妇人在宫门前哭诉，自称是当今圣上的生母。",
+          "emotion": "narrator"
+        },
+        {
+          "speaker": "老妇人",
+          "speakerTitle": "告状人",
+          "content": "皇儿啊……为娘找了你二十年……你为何不认我……",
+          "emotion": "cry"
+        },
+        {
+          "speaker": "侍卫",
+          "speakerTitle": "官兵",
+          "content": "大胆疯妇！竟敢在宫门前胡言乱语！来人，把她赶走！",
+          "emotion": "angry"
+        },
+        {
+          "speaker": "包拯",
+          "speakerTitle": "包青天",
+          "content": "且慢！这位老妇人有冤情，带她来见本官！",
+          "emotion": "serious"
+        },
+        {
+          "speaker": "老妇人",
+          "speakerTitle": "告状人",
+          "content": "包大人……民妇姓李，原是宫中嫔妃……当年生下皇子，却被刘妃用狸猫换走……",
+          "emotion": "cry"
+        },
+        {
+          "speaker": "包拯",
+          "speakerTitle": "包青天",
+          "content": "太后？！此事事关重大，本官定会查明真相！",
+          "emotion": "serious"
+        }
+      ]
+    },
+    "investigation": {
+      "id": "investigation",
+      "name": "取证",
+      "scenes": [
+        {
+          "id": "palace",
+          "name": "宫中",
+          "description": "深宫大内，记载着二十年前那段尘封的往事。",
+          "searchHints": ["查找宫廷档案", "询问老太监", "寻找信物"]
+        },
+        {
+          "id": "lanxi",
+          "name": "兰溪庵",
+          "description": "李太后曾在此出家为尼，留下不少遗物。",
+          "searchHints": ["查找李太后遗物", "询问尼姑", "寻找证据"]
+        },
+        {
+          "id": "chenlin",
+          "name": "陈琳府邸",
+          "description": "老太监陈琳，当年是见证者之一。",
+          "searchHints": ["询问陈琳", "查找密信", "寻找玉佩"]
+        }
+      ],
+      "evidences": [
+        {
+          "id": "ev_501",
+          "name": "宫廷档案",
+          "icon": "book",
+          "description": "档案记载李宸妃确实在二十年前诞下皇子，但记录模糊不清。",
+          "sceneId": "palace",
+          "isKey": true,
+          "clue": "档案有涂改痕迹，说明有人故意掩盖真相。"
+        },
+        {
+          "id": "ev_502",
+          "name": "半块玉佩",
+          "icon": "package",
+          "description": "李太后随身携带的半块龙凤玉佩，据说另一半在皇帝手中。",
+          "sceneId": "lanxi",
+          "isKey": true,
+          "clue": "玉佩是皇家信物，可与皇帝手中的玉佩配对。"
+        },
+        {
+          "id": "ev_503",
+          "name": "陈琳证词",
+          "icon": "witness",
+          "description": "陈琳承认当年确实将太子送出宫，交给八王爷抚养。",
+          "sceneId": "chenlin",
+          "isKey": true,
+          "clue": "陈琳的证词证实了换婴之事确有发生。"
+        },
+        {
+          "id": "ev_504",
+          "name": "刘太后遗诏",
+          "icon": "seal",
+          "description": "刘太后临终前留下的遗诏，承认了当年的所作所为。",
+          "sceneId": "palace",
+          "isKey": true,
+          "clue": "遗诏是最有力的证据，证明李太后所言属实。"
+        }
+      ]
+    },
+    "interrogation": {
+      "id": "interrogation",
+      "name": "审讯",
+      "suspects": [
+        {
+          "id": "sus_501",
+          "name": "宋仁宗",
+          "role": "皇帝",
+          "description": "当朝天子，对生母之事毫不知情，被蒙在鼓里二十年。",
+          "dialogues": [
+            {
+              "speaker": "宋仁宗",
+              "speakerTitle": "嫌疑人",
+              "content": "包拯！你竟敢调查朕的身世？！",
+              "emotion": "angry"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "陛下息怒，臣只是想查明真相，还太后一个公道！",
+              "emotion": "serious"
+            },
+            {
+              "speaker": "宋仁宗",
+              "speakerTitle": "嫌疑人",
+              "content": "朕的母亲是刘太后！那个老妇人是谁？",
+              "emotion": "confused"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "陛下，请看看这块玉佩，再听听陈琳的证词！",
+              "emotion": "serious"
+            },
+            {
+              "speaker": "宋仁宗",
+              "speakerTitle": "嫌疑人",
+              "content": "这……这玉佩……确实与朕的那块一模一样……",
+              "emotion": "shocked"
+            }
+          ],
+          "isGuilty": false,
+          "hint": "皇帝并非有意不认生母，而是被蒙蔽二十年"
+        },
+        {
+          "id": "sus_502",
+          "name": "郭槐",
+          "role": "总管太监",
+          "description": "刘太后的心腹，当年换婴案的执行者。",
+          "dialogues": [
+            {
+              "speaker": "郭槐",
+              "speakerTitle": "嫌疑人",
+              "content": "包大人，老奴不知道什么换婴之事……",
+              "emotion": "fear"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "郭槐！事到如今还敢狡辩？陈琳已经全部招供了！",
+              "emotion": "angry"
+            },
+            {
+              "speaker": "郭槐",
+              "speakerTitle": "嫌疑人",
+              "content": "是……是太后娘娘的意思……老奴只是奉命行事……",
+              "emotion": "panic"
+            }
+          ],
+          "isGuilty": true
+        }
+      ]
+    },
+    "judgment": {
+      "id": "judgment",
+      "name": "断案",
+      "correctSuspectId": "sus_502",
+      "requiredEvidenceIds": ["ev_501", "ev_502", "ev_503", "ev_504"],
+      "judgmentText": {
+        "correct": "经查明，当年刘太后为夺后位，与郭槐合谋，用狸猫替换李宸妃所生太子。李宸妃被打入冷宫，后流落民间，苦熬二十年。郭槐作为帮凶，罪不可赦！判郭槐凌迟处死！皇帝虽不知情，但身为天子，未能尽孝，罚打龙袍以代责罚。李太后迎回宫中，尊为皇太后。陈琳护主有功，赏黄金百两。",
+        "wrong": "案情复杂，请重新梳理证据。",
+        "partial": "已查明部分真相，但还需完整证据链。"
+      }
+    }
+  },
+  "hints": [
+    { "id": "hint_6_1", "content": "玉佩是关键，找到另一半就能证明李太后身份。", "cost": 1 },
+    { "id": "hint_6_2", "content": "陈琳是重要证人，他知道当年的全部真相。", "cost": 1 },
+    { "id": "hint_6_3", "content": "刘太后的遗诏可能藏着最终答案。", "cost": 1 }
+  ]
+}

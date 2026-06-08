@@ -1,0 +1,16 @@
+{
+  "name": "digong-game",
+  "version": "1.0.0",
+  "description": "狄公断案 - HTML + JavaScript 无数据库版本",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "keywords": ["game", "detective", "html", "javascript"],
+  "author": "",
+  "license": "MIT"
+}

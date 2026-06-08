@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>你画我猜</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        h1 {
+            color: white;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            max-width: 900px;
+            width: 100%;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .word-display {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 24px;
+            font-weight: bold;
+            min-width: 200px;
+            text-align: center;
+        }
+
+        .timer {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .score {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        #drawCanvas {
+            border: 3px solid #ddd;
+            border-radius: 10px;
+            cursor: crosshair;
+            background: white;
+            display: block;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-group label {
+            color: #666;
+            font-size: 14px;
+        }
+
+        input[type="color"] {
+            width: 50px;
+            height: 40px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        input[type="range"] {
+            width: 100px;
+            cursor: pointer;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+            color: white;
+        }
+
+        .guessing-area {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        #guessInput {
+            padding: 12px 20px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 18px;
+            width: 300px;
+        }
+
+        #guessInput:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .game-status {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .hint-text {
+            color: #888;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .result-message {
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .result-message.success {
+            background: #d4edda;
+            color: #155724;
+            display: block;
+        }
+
+        .result-message.fail {
+            background: #f8d7da;
+            color: #721c24;
+            display: block;
+        }
+
+        .round-info {
+            text-align: center;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .words-library {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px dashed #eee;
+        }
+
+        .words-library h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .word-categories {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .word-category {
+            padding: 8px 16px;
+            background: #f0f0f0;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .word-category.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .word-pool {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            min-height: 50px;
+        }
+
+        .word-pool span {
+            padding: 6px 12px;
+            background: #e8e8e8;
+            border-radius: 15px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .word-pool span:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .word-pool span.used {
+            background: #ccc;
+            color: #888;
+            cursor: not-allowed;
+        }
+
+        @media screen and (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 24px;
+                margin-bottom: 15px;
+            }
+
+            .game-container {
+                padding: 15px;
+                border-radius: 15px;
+            }
+
+            .game-header {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .word-display {
+                font-size: 18px;
+                padding: 10px 20px;
+                min-width: auto;
+                width: 100%;
+            }
+
+            .timer {
+                font-size: 20px;
+                padding: 10px 20px;
+            }
+
+            .score {
+                font-size: 16px;
+                padding: 10px 20px;
+            }
+
+            .canvas-container {
+                margin-bottom: 15px;
+            }
+
+            #drawCanvas {
+                height: auto;
+                aspect-ratio: 4 / 3;
+            }
+
+            .controls {
+                gap: 10px;
+                margin-bottom: 15px;
+            }
+
+            .control-group {
+                gap: 5px;
+            }
+
+            .control-group label {
+                font-size: 12px;
+            }
+
+            input[type="range"] {
+                width: 60px;
+            }
+
+            button {
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+
+            .guessing-area {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            #guessInput {
+                width: 100%;
+                font-size: 16px;
+                padding: 10px 15px;
+            }
+
+            .hint-text {
+                font-size: 12px;
+            }
+
+            .result-message {
+                font-size: 16px;
+                padding: 12px;
+            }
+
+            .round-info {
+                font-size: 14px;
+            }
+
+            .words-library h3 {
+                font-size: 16px;
+            }
+
+            .word-categories {
+                gap: 5px;
+            }
+
+            .word-category {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+
+            .word-pool span {
+                padding: 5px 10px;
+                font-size: 12px;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            body {
+                padding: 5px;
+            }
+
+            h1 {
+                font-size: 20px;
+            }
+
+            .game-container {
+                padding: 10px;
+                border-radius: 10px;
+            }
+
+            .word-display {
+                font-size: 16px;
+                padding: 8px 15px;
+            }
+
+            .timer {
+                font-size: 18px;
+                padding: 8px 15px;
+            }
+
+            .score {
+                font-size: 14px;
+                padding: 8px 15px;
+            }
+
+            .controls {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .control-group {
+                width: 100%;
+                justify-content: center;
+            }
+
+            input[type="range"] {
+                flex: 1;
+                max-width: 120px;
+            }
+
+            button {
+                width: 100%;
+                padding: 12px;
+            }
+
+            #guessInput {
+                font-size: 16px;
+            }
+
+            .word-category {
+                padding: 5px 10px;
+                font-size: 11px;
+            }
+
+            .word-pool span {
+                padding: 4px 8px;
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>🎨 你画我猜</h1>
+
+    <div class="game-container">
+        <div class="round-info">第 <span id="roundNum">1</span> 轮</div>
+
+        <div class="game-header">
+            <div class="word-display">
+                词语: <span id="currentWord">点击开始</span>
+            </div>
+            <div class="timer" id="timer">60s</div>
+            <div class="score">得分: <span id="score">0</span></div>
+        </div>
+
+        <div class="canvas-container">
+            <canvas id="drawCanvas" width="800" height="500"></canvas>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label>颜色:</label>
+                <input type="color" id="colorPicker" value="#000000">
+            </div>
+            <div class="control-group">
+                <label>粗细:</label>
+                <input type="range" id="brushSize" min="2" max="20" value="5">
+                <span id="brushSizeValue">5</span>
+            </div>
+            <button class="btn-warning" onclick="clearCanvas()">🗑️ 清空画布</button>
+            <button class="btn-danger" onclick="eraserMode()">⚪ 橡皮擦</button>
+            <button class="btn-success" onclick="startGame()">🎮 开始游戏</button>
+        </div>
+
+        <div class="guessing-area">
+            <input type="text" id="guessInput" placeholder="输入你的答案..." onkeypress="checkGuess(event)">
+            <button class="btn-primary" onclick="submitGuess()">提交答案</button>
+        </div>
+
+        <div class="hint-text">💡 提示: 画画的人看不到输入框，猜词的人根据图画输入答案</div>
+
+        <div class="result-message" id="resultMessage"></div>
+
+        <div class="words-library">
+            <h3>📚 词库管理</h3>
+            <div class="word-categories">
+                <span class="word-category active" onclick="selectCategory('animal')">🐾 动物</span>
+                <span class="word-category" onclick="selectCategory('food')">🍕 食物</span>
+                <span class="word-category" onclick="selectCategory('sport')">⚽ 运动</span>
+                <span class="word-category" onclick="selectCategory('object')">📱 物品</span>
+                <span class="word-category" onclick="selectCategory('nature')">🌿 自然</span>
+                <span class="word-category" onclick="selectCategory('job')">👨‍⚕️ 职业</span>
+            </div>
+            <div class="word-pool" id="wordPool"></div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('drawCanvas');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+        let lastX = 0;
+        let lastY = 0;
+        let currentColor = '#000000';
+        let brushSize = 5;
+        let isEraser = false;
+        let timerInterval = null;
+        let timeLeft = 60;
+        let score = 0;
+        let round = 1;
+        let currentWord = '';
+        let gameStarted = false;
+        let usedWords = [];
+
+        const wordCategories = {
+            animal: ['猫', '狗', '大象', '老虎', '熊猫', '兔子', '狐狸', '猴子', '马', '牛', '猪', '羊', '鸟', '鱼', '蝴蝶', '蜜蜂', '蛇', '青蛙', '乌龟', '螃蟹', '龙虾', '章鱼', '海豚', '鲸鱼', '鲨鱼', '狮子', '狼', '豹', '熊', '鹿'],
+            food: ['苹果', '香蕉', '西瓜', '葡萄', '草莓', '橙子', '柠檬', '菠萝', '芒果', '樱桃', '桃子', '梨', '胡萝卜', '白菜', '番茄', '土豆', '洋葱', '玉米', '面包', '蛋糕', '饼干', '巧克力', '冰淇淋', '咖啡', '茶', '牛奶', '可乐', '披萨', '汉堡', '薯条'],
+            sport: ['足球', '篮球', '排球', '网球', '羽毛球', '乒乓球', '高尔夫', '保龄球', '游泳', '跳水', '跑步', '跳远', '拳击', '摔跤', '瑜伽', '滑雪', '滑冰', '冲浪', '攀岩', '自行车', '摩托车', '汽车', '马术', '射箭', '射击', '帆船', '帆板', '健身', '跳舞'],
+            object: ['手机', '电脑', '电视', '冰箱', '洗衣机', '空调', '风扇', '台灯', '椅子', '桌子', '床', '沙发', '衣柜', '书柜', '眼镜', '手表', '相机', '电话', '收音机', '录音机', '打印机', '扫描仪', '鼠标', '键盘', '耳机', '音箱', '麦克风', '雨伞', '帽子', '鞋子'],
+            nature: ['太阳', '月亮', '星星', '云', '雨', '雪', '风', '彩虹', '闪电', '山峰', '河流', '湖泊', '海洋', '森林', '沙漠', '草原', '岛屿', '火山', '瀑布', '岩石', '树木', '花朵', '草地', '天空', '大地', '石头', '沙粒', '树叶', '树枝', '树根'],
+            job: ['医生', '护士', '老师', '警察', '消防员', '厨师', '司机', '农民', '工人', '律师', '法官', '记者', '摄影师', '画家', '歌手', '演员', '运动员', '科学家', '工程师', '会计', '服务员', '售货员', '保安', '清洁工', '快递员', '飞行员', '船长', '船长', '园丁', '木匠']
+        };
+
+        let currentCategory = 'animal';
+
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            const containerWidth = container.offsetWidth;
+            const aspectRatio = 800 / 500;
+            const newHeight = containerWidth / aspectRatio;
+
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+            canvas.style.width = containerWidth + 'px';
+            canvas.style.height = newHeight + 'px';
+
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.putImageData(imageData, 0, 0);
+        }
+
+        function initCanvas() {
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            if (window.innerWidth <= 768) {
+                resizeCanvas();
+            }
+        }
+
+        window.addEventListener('resize', () => {
+            if (window.innerWidth <= 768) {
+                resizeCanvas();
+            }
+        });
+
+        function getMousePos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+
+            if (e.touches) {
+                return {
+                    x: (e.touches[0].clientX - rect.left) * scaleX,
+                    y: (e.touches[0].clientY - rect.top) * scaleY
+                };
+            }
+            return {
+                x: (e.clientX - rect.left) * scaleX,
+                y: (e.clientY - rect.top) * scaleY
+            };
+        }
+
+        function startDrawing(e) {
+            if (!gameStarted) {
+                alert('请先点击"开始游戏"按钮！');
+                return;
+            }
+            isDrawing = true;
+            const pos = getMousePos(e);
+            lastX = pos.x;
+            lastY = pos.y;
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            e.preventDefault();
+
+            const pos = getMousePos(e);
+
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(pos.x, pos.y);
+
+            if (isEraser) {
+                ctx.strokeStyle = 'white';
+                ctx.lineWidth = brushSize * 3;
+            } else {
+                ctx.strokeStyle = currentColor;
+                ctx.lineWidth = brushSize;
+            }
+
+            ctx.stroke();
+
+            lastX = pos.x;
+            lastY = pos.y;
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+        }
+
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+
+        canvas.addEventListener('touchstart', startDrawing, { passive: false });
+        canvas.addEventListener('touchmove', draw, { passive: false });
+        canvas.addEventListener('touchend', stopDrawing);
+
+        document.getElementById('colorPicker').addEventListener('change', (e) => {
+            currentColor = e.target.value;
+            isEraser = false;
+        });
+
+        document.getElementById('brushSize').addEventListener('input', (e) => {
+            brushSize = e.target.value;
+            document.getElementById('brushSizeValue').textContent = brushSize;
+        });
+
+        function clearCanvas() {
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            if (window.innerWidth <= 768) {
+                canvas.style.height = canvas.offsetWidth / (800 / 500) + 'px';
+            }
+        }
+
+        function eraserMode() {
+            isEraser = true;
+        }
+
+        function selectCategory(category) {
+            currentCategory = category;
+            document.querySelectorAll('.word-category').forEach(el => {
+                el.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            loadWordPool();
+        }
+
+        function loadWordPool() {
+            const pool = document.getElementById('wordPool');
+            const words = wordCategories[currentCategory].filter(w => !usedWords.includes(w));
+            pool.innerHTML = words.map(w => `<span onclick="selectWord('${w}')">${w}</span>`).join('');
+        }
+
+        function selectWord(word) {
+            if (usedWords.includes(word)) {
+                return;
+            }
+            document.getElementById('currentWord').textContent = word;
+            currentWord = word;
+            startGameWithWord(word);
+        }
+
+        function startGameWithWord(word) {
+            if (usedWords.length >= 150) {
+                usedWords = [];
+            }
+
+            if (usedWords.includes(word)) {
+                return;
+            }
+
+            currentWord = word;
+            usedWords.push(word);
+
+            document.getElementById('currentWord').textContent = currentWord;
+            document.getElementById('roundNum').textContent = round;
+
+            clearCanvas();
+            startTimer();
+
+            gameStarted = true;
+            document.getElementById('guessInput').focus();
+
+            loadWordPool();
+        }
+
+        function startGame() {
+            if (usedWords.length >= 150) {
+                usedWords = [];
+            }
+
+            const availableWords = wordCategories[currentCategory].filter(w => !usedWords.includes(w));
+            if (availableWords.length === 0) {
+                usedWords = [];
+                loadWordPool();
+                return startGame();
+            }
+
+            const randomIndex = Math.floor(Math.random() * availableWords.length);
+            currentWord = availableWords[randomIndex];
+            usedWords.push(currentWord);
+
+            document.getElementById('currentWord').textContent = currentWord;
+            document.getElementById('roundNum').textContent = round;
+
+            clearCanvas();
+            startTimer();
+
+            gameStarted = true;
+            document.getElementById('guessInput').focus();
+
+            loadWordPool();
+        }
+
+        function startTimer() {
+            timeLeft = 60;
+            updateTimerDisplay();
+
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    timeUp();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const timerEl = document.getElementById('timer');
+            timerEl.textContent = timeLeft + 's';
+
+            if (timeLeft <= 10) {
+                timerEl.style.background = 'linear-gradient(135deg, #f5576c 0%, #f093fb 100%)';
+            } else {
+                timerEl.style.background = 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)';
+            }
+        }
+
+        function timeUp() {
+            gameStarted = false;
+            showResult('时间到！答案是: ' + currentWord, false);
+            round++;
+            setTimeout(() => {
+                document.getElementById('currentWord').textContent = '点击开始';
+                document.getElementById('resultMessage').className = 'result-message';
+            }, 2000);
+        }
+
+        function submitGuess() {
+            if (!gameStarted) {
+                alert('请先点击"开始游戏"按钮！');
+                return;
+            }
+
+            const guess = document.getElementById('guessInput').value.trim();
+
+            if (!guess) {
+                alert('请输入答案！');
+                return;
+            }
+
+            checkGuessResult(guess);
+        }
+
+        function checkGuess(event) {
+            if (event.key === 'Enter') {
+                submitGuess();
+            }
+        }
+
+        function checkGuessResult(guess) {
+            if (guess === currentWord) {
+                score += timeLeft * 10;
+                document.getElementById('score').textContent = score;
+                showResult('🎉 恭喜答对了！', true);
+
+                clearInterval(timerInterval);
+                gameStarted = false;
+
+                setTimeout(() => {
+                    round++;
+                    document.getElementById('currentWord').textContent = '点击开始';
+                    document.getElementById('resultMessage').className = 'result-message';
+                    document.getElementById('guessInput').value = '';
+                }, 2000);
+            } else {
+                showResult('❌ 答错了，再试试吧！', false);
+                document.getElementById('guessInput').value = '';
+                document.getElementById('guessInput').focus();
+            }
+        }
+
+        function showResult(message, isSuccess) {
+            const resultEl = document.getElementById('resultMessage');
+            resultEl.textContent = message;
+            resultEl.className = 'result-message ' + (isSuccess ? 'success' : 'fail');
+        }
+
+        initCanvas();
+        loadWordPool();
+    </script>
+</body>
+</html>

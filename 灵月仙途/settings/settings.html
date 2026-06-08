@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="../js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="../css/mobile-adapt.css">
+  <title>灵月仙途 - 设置</title>
+  <style>
+    :root {
+      --gold-primary: #e6c749;
+      --gold-light: #f4d03f;
+      --gold-dark: #b8860b;
+      --text-main: #fdfbf7;
+      --text-dim: #d4c5a9;
+      --bg-glass: rgba(20, 25, 40, 0.85);
+      --border-glow: 0 0 15px rgba(230, 199, 73, 0.3);
+      --danger-color: #e53e3e;
+      --success-color: #4caf50;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      font-family: 'Microsoft YaHei', 'SimSun', serif;
+      background: linear-gradient(to bottom, #2b3242, #1a1f2e), url('../images/beijing.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* 动态云雾背景 */
+    .fog-container {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: 0;
+      pointer-events: none;
+    }
+    
+    .fog-img {
+      position: absolute;
+      height: 100vh;
+      width: 300vw;
+      background: url('https://raw.githubusercontent.com/danielstuart14/CSS_FOG_ANIMATION/master/fog1.png') repeat-x;
+      background-size: contain;
+      animation: fog 60s linear infinite;
+      opacity: 0.3;
+    }
+
+    @keyframes fog {
+      0% { transform: translate3d(0, 0, 0); }
+      100% { transform: translate3d(-200vw, 0, 0); }
+    }
+
+    /* 顶部状态栏 */
+    .top-status-bar {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 15px 20px;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(230, 199, 73, 0.3);
+    }
+
+    .player-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: 2px solid var(--gold-primary);
+      overflow: hidden;
+      box-shadow: 0 0 10px rgba(230, 199, 73, 0.5);
+      flex-shrink: 0;
+    }
+
+    .player-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .status-info {
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 5px 15px;
+      font-size: 0.85rem;
+    }
+
+    .status-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .status-label {
+      color: var(--text-dim);
+      font-size: 0.8rem;
+    }
+
+    .status-value {
+      color: var(--gold-light);
+      font-weight: bold;
+      text-shadow: 0 0 5px rgba(230, 199, 73, 0.5);
+    }
+
+    /* 主内容区 */
+    .main-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      padding-bottom: 80px; /* 为底部导航留空间 */
+    }
+
+    .settings-section {
+      background: var(--bg-glass);
+      border: 1px solid rgba(230, 199, 73, 0.3);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+      transition: transform 0.3s;
+    }
+
+    .settings-section h3 {
+      color: var(--gold-primary);
+      margin-bottom: 15px;
+      font-size: 1.1rem;
+      border-bottom: 1px solid rgba(230, 199, 73, 0.2);
+      padding-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'SimSun', serif;
+      letter-spacing: 1px;
+    }
+
+    /* 设置项通用样式 */
+    .setting-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .setting-item:last-child {
+      border-bottom: none;
+    }
+
+    .setting-label {
+      font-size: 0.95rem;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .setting-value {
+      color: var(--text-dim);
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* 按钮样式 */
+    .action-btn {
+      padding: 6px 16px;
+      background: rgba(230, 199, 73, 0.1);
+      border: 1px solid var(--gold-primary);
+      color: var(--gold-primary);
+      border-radius: 4px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-family: 'SimSun', serif;
+    }
+
+    .action-btn:hover {
+      background: rgba(230, 199, 73, 0.3);
+      box-shadow: 0 0 10px rgba(230, 199, 73, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .action-btn.danger {
+      border-color: var(--danger-color);
+      color: var(--danger-color);
+      background: rgba(229, 62, 62, 0.1);
+    }
+
+    .action-btn.danger:hover {
+      background: rgba(229, 62, 62, 0.3);
+      box-shadow: 0 0 10px rgba(229, 62, 62, 0.4);
+    }
+
+    /* 开关样式 */
+    .toggle-switch {
+      position: relative;
+      width: 50px;
+      height: 26px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 13px;
+      cursor: pointer;
+      transition: background 0.3s;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .toggle-switch.active {
+      background: rgba(76, 175, 80, 0.3);
+      border-color: var(--success-color);
+    }
+
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 20px;
+      height: 20px;
+      background: var(--text-main);
+      border-radius: 50%;
+      transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .toggle-switch.active::after {
+      transform: translateX(24px);
+      background: var(--success-color);
+    }
+
+    /* 背景设置特有样式 */
+    .background-preview {
+      width: 100%;
+      height: 150px;
+      border: 2px solid var(--gold-primary);
+      border-radius: 8px;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      margin-bottom: 15px;
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+    }
+
+    .file-input-wrapper {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+      width: 100%;
+    }
+
+    .file-input {
+      position: absolute;
+      left: 0;
+      top: 0;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+
+    .file-btn {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      background: rgba(30, 35, 50, 0.8);
+      border: 1px dashed var(--gold-primary);
+      border-radius: 8px;
+      color: var(--text-dim);
+      text-align: center;
+      font-size: 0.9rem;
+      transition: all 0.3s;
+    }
+
+    .file-btn:hover {
+      background: rgba(230, 199, 73, 0.1);
+      color: var(--gold-primary);
+    }
+
+    .status-message {
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      margin-top: 10px;
+      display: none;
+      text-align: center;
+    }
+
+    .status-message.success {
+      background: rgba(76, 175, 80, 0.2);
+      border: 1px solid var(--success-color);
+      color: var(--success-color);
+      display: block;
+    }
+
+    .status-message.error {
+      background: rgba(229, 62, 62, 0.2);
+      border: 1px solid var(--danger-color);
+      color: var(--danger-color);
+      display: block;
+    }
+
+    /* 底部导航栏 */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 60px;
+      background: rgba(20, 25, 40, 0.95);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(230, 199, 73, 0.3);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 100;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 0.75rem;
+      transition: all 0.3s;
+      padding: 5px 10px;
+    }
+
+    .nav-item:hover, .nav-item.active {
+      color: var(--gold-primary);
+      transform: translateY(-2px);
+    }
+
+    .nav-icon {
+      font-size: 1.2rem;
+      filter: drop-shadow(0 0 5px rgba(230, 199, 73, 0.3));
+    }
+
+    /* 弹窗样式 */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(5px);
+      z-index: 1000;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+      opacity: 1;
+    }
+
+    .modal-content {
+      background: #1a202c;
+      border: 2px solid var(--gold-primary);
+      border-radius: 12px;
+      width: 90%;
+      max-width: 350px;
+      box-shadow: 0 0 30px rgba(230, 199, 73, 0.3);
+      overflow: hidden;
+      transform: scale(0.9);
+      transition: transform 0.3s;
+    }
+
+    .modal-overlay.active .modal-content {
+      transform: scale(1);
+    }
+
+    .modal-header {
+      padding: 20px;
+      background: linear-gradient(to right, rgba(230, 199, 73, 0.15), rgba(230, 199, 73, 0.05));
+      border-bottom: 1px solid rgba(230, 199, 73, 0.3);
+      text-align: center;
+      font-family: 'SimSun', serif;
+      color: var(--gold-primary);
+      font-size: 1.2rem;
+      letter-spacing: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .modal-header.danger {
+      background: linear-gradient(to right, rgba(229, 62, 62, 0.15), rgba(229, 62, 62, 0.05));
+      border-bottom-color: rgba(229, 62, 62, 0.3);
+      color: var(--danger-color);
+    }
+
+    .modal-icon {
+      font-size: 1.5rem;
+      filter: drop-shadow(0 0 5px currentColor);
+    }
+
+    .modal-body {
+      padding: 25px 20px;
+      max-height: 400px;
+      overflow-y: auto;
+      color: var(--text-main);
+    }
+
+    .modal-message {
+      text-align: center;
+      color: var(--text-main);
+    }
+
+    .modal-message p {
+      font-size: 1rem;
+      line-height: 1.8;
+      margin-bottom: 10px;
+    }
+
+    .modal-message p:last-child {
+      margin-bottom: 0;
+    }
+
+    .modal-hint {
+      font-size: 0.85rem !important;
+      color: var(--text-dim);
+      line-height: 1.6 !important;
+    }
+
+    /* Toast 弹窗样式 */
+    .toast-content {
+      background: rgba(30, 35, 50, 0.95);
+      border: 1px solid var(--gold-primary);
+      padding: 20px 40px;
+      border-radius: 50px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+      transform: scale(0.9);
+      transition: all 0.3s;
+    }
+
+    .modal-overlay.active .toast-content {
+      transform: scale(1);
+    }
+
+    .toast-message {
+      color: var(--gold-primary);
+      font-size: 1rem;
+      font-weight: bold;
+      text-align: center;
+      letter-spacing: 1px;
+    }
+
+    .server-option {
+      padding: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.2s;
+      color: var(--text-dim);
+    }
+
+    .server-option:hover {
+      background: rgba(230, 199, 73, 0.1);
+      color: var(--gold-primary);
+    }
+
+    .server-option.selected {
+      background: rgba(230, 199, 73, 0.2);
+      color: var(--gold-primary);
+      font-weight: bold;
+    }
+
+    .server-status {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #4caf50;
+      box-shadow: 0 0 5px #4caf50;
+    }
+
+    .modal-footer {
+      padding: 15px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .modal-btn {
+      padding: 8px 20px;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-family: 'SimSun', serif;
+      transition: all 0.3s;
+    }
+
+    .modal-btn.cancel {
+      background: transparent;
+      border: 1px solid var(--text-dim);
+      color: var(--text-dim);
+    }
+
+    .modal-btn.confirm {
+      background: var(--gold-primary);
+      color: #1a202c;
+      font-weight: bold;
+    }
+
+    .modal-btn.confirm:hover {
+      background: var(--gold-light);
+      box-shadow: 0 0 10px rgba(230, 199, 73, 0.5);
+    }
+
+    /* 滚动条美化 */
+    ::-webkit-scrollbar {
+      width: 4px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(230, 199, 73, 0.3);
+      border-radius: 2px;
+    }
+
+    @media (max-width: 480px) {
+      .status-info {
+        grid-template-columns: 1fr 1fr;
+        gap: 4px 10px;
+        font-size: 0.75rem;
+      }
+      .settings-section {
+        padding: 15px;
+      }
+      .background-preview {
+        height: 120px;
+      }
+    }
+  </style>
+
+  </head>
+<body>
+
+  <!-- 动态云雾背景 -->
+  <div class="fog-container">
+    <div class="fog-img"></div>
+  </div>
+
+  <!-- 顶部状态栏 -->
+  <div class="top-status-bar">
+    <div class="player-avatar">
+      <img src="../images/player.png" alt="角色头像" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2250%22 height=%2250%22 viewBox=%220 0 50 50%22><circle cx=%2225%22 cy=%2225%22 r=%2220%22 fill=%22%23f5deb3%22 stroke=%22%23d4af37%22 stroke-width=%222%22/></svg>'" />
+    </div>
+    <div class="status-info">
+      <div class="status-item">
+        <span class="status-label">境界：</span>
+        <span class="status-value">炼气一层</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">气血：</span>
+        <span class="status-value">150/150</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">灵力：</span>
+        <span class="status-value">100/100</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">灵石：</span>
+        <span class="status-value">1,250</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 主内容区 -->
+  <div class="main-content">
+    
+    <!-- 1. 账号管理 -->
+    <div class="settings-section">
+      <h3>🔐 账号安全</h3>
+      <div class="setting-item">
+        <div class="setting-label">
+          <span>👤</span> 当前账号
+        </div>
+        <div class="setting-value">
+          <span id="currentAccount" style="color: var(--gold-light);">加载中...</span>
+        </div>
+      </div>
+      <div class="setting-item">
+        <div class="setting-label">
+          <span>👤</span> 绑定账号
+        </div>
+        <div class="setting-value">
+          <span id="boundAccount">手机：138****8888</span>
+        </div>
+      </div>
+      <div class="setting-item">
+        <div class="setting-label">
+          <span>🔄</span> 切换账号
+        </div>
+        <button class="action-btn" onclick="openSwitchAccountModal()">切换账号</button>
+      </div>
+      <div class="setting-item">
+        <div class="setting-label">
+          <span>🚪</span> 退出登录
+        </div>
+        <button class="action-btn danger" onclick="openLogoutModal()">退出登录</button>
+      </div>
+    </div>
+
+    <!-- 2. 服务器设置 -->
+    <div class="settings-section">
+      <h3>🌍 服务器设置</h3>
+      <div class="setting-item">
+        <div class="setting-label">
+          <span>🏯</span> 当前服务器
+        </div>
+        <div class="setting-value">
+          <span id="currentServer" style="color: var(--gold-light);">万夫之勇</span>
+          <span class="server-status"></span>
+        </div>
+      </div>
+      <div class="setting-item">
+        <div class="setting-label">
+          <span>🔀</span> 切换服务器
+        </div>
+        <button class="action-btn" onclick="openServerModal()">选择服务器</button>
+      </div>
+    </div>
+
+    <!-- 3. 语言与音效 -->
+    <div class="settings-section">
+      <h3>🎮 游戏设置</h3>
+      <div class="setting-item">
+        <div class="setting-label">
+          <span>🌐</span> 当前语言
+        </div>
+        <div class="setting-value">
+          <span id="currentLang">简体中文</span>
+          <button class="action-btn" onclick="toggleLanguage()">切换语言</button>
+        </div>
+      </div>
+      <div class="setting-item">
+        <div class="setting-label">
+          <span>🎵</span> 背景音乐
+        </div>
+        <div class="setting-value">
+          <span id="bgmStatus" style="margin-right: 10px; font-size: 0.85rem; color: var(--success-color);">已开启</span>
+          <div class="toggle-switch active" id="bgmToggle" onclick="toggleBGM()"></div>
+        </div>
+      </div>
+      <div class="setting-item">
+        <div class="setting-label">
+          <span>🔊</span> 音效音量
+        </div>
+        <div class="setting-value">
+          <input type="range" min="0" max="100" value="80" style="accent-color: var(--gold-primary); width: 100px;">
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. 背景自定义 (原有功能) -->
+    <div class="settings-section">
+      <h3>🖼️ 界面定制</h3>
+      <div class="background-setting">
+        <div class="current-background">
+          <div style="font-size: 0.9rem; color: var(--text-dim); margin-bottom: 5px;">当前背景预览：</div>
+          <div class="background-preview" id="backgroundPreview"></div>
+          <div id="currentBackgroundName" style="text-align: center; color: var(--text-dim); font-size: 0.85rem;">默认背景</div>
+        </div>
+        
+        <div class="upload-section" style="margin-top: 15px;">
+          <div class="file-input-wrapper">
+            <input type="file" id="backgroundFile" class="file-input" accept="image/*" onchange="handleFileSelect(this)">
+            <div class="file-btn">点击上传自定义背景 (建议 1080x1920)</div>
+          </div>
+          <button class="action-btn" style="width: 100%; margin-top: 10px;" onclick="saveBackground()">保存设置</button>
+          <button class="action-btn" style="width: 100%; margin-top: 5px; border-color: var(--text-dim); color: var(--text-dim);" onclick="resetBackground()">恢复默认</button>
+        </div>
+        
+        <div id="statusMessage" class="status-message"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 底部导航栏 -->
+  <div class="bottom-nav">
+    <a href="index.html" class="nav-item">
+      <div class="nav-icon">🏠</div>
+      <div class="nav-text">洞府</div>
+    </a>
+    <a href="inventory.html" class="nav-item">
+      <div class="nav-icon">🎒</div>
+      <div class="nav-text">背包</div>
+    </a>
+    <a href="character.html" class="nav-item">
+      <div class="nav-icon">👤</div>
+      <div class="nav-text">角色</div>
+    </a>
+    <a href="social.html" class="nav-item">
+      <div class="nav-icon">🏯</div>
+      <div class="nav-text">宗门</div>
+    </a>
+    <a href="settings.html" class="nav-item active">
+      <div class="nav-icon">⚙️</div>
+      <div class="nav-text">设置</div>
+    </a>
+  </div>
+
+  <!-- 弹窗：切换服务器 -->
+  <div class="modal-overlay" id="serverModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="modal-icon">🌍</span>
+        选择服务器
+      </div>
+      <div class="modal-body" id="serverList">
+        <!-- JS 生成服务器列表 -->
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn cancel" onclick="closeModal('serverModal')">取消</button>
+        <button class="modal-btn confirm" onclick="confirmServerSelect()">确认</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 弹窗：切换账号 -->
+  <div class="modal-overlay" id="switchAccountModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="modal-icon">🔄</span>
+        切换账号
+      </div>
+      <div class="modal-body">
+        <div class="modal-message">
+          <p>确定要切换账号吗？</p>
+          <p class="modal-hint">当前角色将自动下线，未保存的数据可能会丢失。</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn cancel" onclick="closeModal('switchAccountModal')">取消</button>
+        <button class="modal-btn confirm" onclick="confirmSwitchAccount()">确认切换</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 弹窗：退出登录 -->
+  <div class="modal-overlay" id="logoutModal">
+    <div class="modal-content">
+      <div class="modal-header danger">
+        <span class="modal-icon">🚪</span>
+        退出登录
+      </div>
+      <div class="modal-body">
+        <div class="modal-message">
+          <p>确定要退出当前账号吗？</p>
+          <p class="modal-hint">退出后需要重新登录才能继续游戏。</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn cancel" onclick="closeModal('logoutModal')">取消</button>
+        <button class="modal-btn danger" onclick="confirmLogout()">确认退出</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 弹窗：通用提示 -->
+  <div class="modal-overlay" id="toastModal">
+    <div class="modal-content toast-content">
+      <div class="toast-message" id="toastMessage">操作成功</div>
+    </div>
+  </div>
+
+  <script>
+    // --- 初始化 ---
+    window.addEventListener('DOMContentLoaded', function() {
+      loadCurrentBackground();
+      renderServerList();
+      loadSettings();
+      loadCurrentAccount();
+    });
+
+    // --- 账号管理逻辑 ---
+    function loadCurrentAccount() {
+      const username = localStorage.getItem('username');
+      const phone = localStorage.getItem('phone');
+      const nickname = localStorage.getItem('nickname');
+      
+      let accountText = '未登录';
+      if (nickname) {
+        accountText = nickname;
+      } else if (username) {
+        accountText = username;
+      } else if (phone) {
+        accountText = phone;
+      }
+      
+      document.getElementById('currentAccount').textContent = accountText;
+      
+      // 加载绑定的手机号
+      if (phone) {
+        const maskedPhone = phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2');
+        document.getElementById('boundAccount').textContent = `手机：${maskedPhone}`;
+      }
+    }
+
+    function openSwitchAccountModal() {
+      document.getElementById('switchAccountModal').classList.add('active');
+    }
+
+    function confirmSwitchAccount() {
+      closeModal('switchAccountModal');
+      showToast('正在退出当前账号...');
+      
+      // 清除角色相关数据，但保留用户登录信息
+      localStorage.removeItem('currentRoleId');
+      localStorage.removeItem('selectedCharacterId');
+      localStorage.removeItem('character');
+      
+      setTimeout(() => {
+        showToast('已切换账号，即将跳转至登录页');
+        setTimeout(() => {
+          window.location.href = '../login.html';
+        }, 1500);
+      }, 1000);
+    }
+
+    // --- 退出登录逻辑 ---
+    function openLogoutModal() {
+      document.getElementById('logoutModal').classList.add('active');
+    }
+
+    function confirmLogout() {
+      closeModal('logoutModal');
+      showToast('正在退出登录...');
+      
+      // 清除所有用户数据
+      localStorage.removeItem('userId');
+      localStorage.removeItem('username');
+      localStorage.removeItem('nickname');
+      localStorage.removeItem('phone');
+      localStorage.removeItem('currentRoleId');
+      localStorage.removeItem('selectedCharacterId');
+      localStorage.removeItem('character');
+      
+      setTimeout(() => {
+        showToast('已退出登录，即将跳转至登录页');
+        setTimeout(() => {
+          window.location.href = '../login.html';
+        }, 1500);
+      }, 1000);
+    }
+
+    // --- 服务器管理逻辑 ---
+    const servers = [
+      { id: 1, name: '万夫之勇', status: '推荐' },
+      { id: 2, name: '纵横天下', status: '人多' },
+      { id: 3, name: '傲视群雄', status: '新区' },
+      { id: 4, name: '独步武林', status: '火爆' },
+      { id: 5, name: '剑气长城', status: '稳定' }
+    ];
+
+    let currentServerId = 1;
+
+    function renderServerList() {
+      const list = document.getElementById('serverList');
+      list.innerHTML = '';
+      
+      servers.forEach(server => {
+        const div = document.createElement('div');
+        div.className = `server-option ${server.id === currentServerId ? 'selected' : ''}`;
+        div.onclick = () => selectServer(server.id);
+        div.innerHTML = `
+          <span>${server.name}</span>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:0.8rem; color:${server.status==='新区'?'#f4d03f':'#4caf50'}">${server.status}</span>
+            ${server.id === currentServerId ? '<span class="server-status"></span>' : ''}
+          </div>
+        `;
+        list.appendChild(div);
+      });
+    }
+
+    function openServerModal() {
+      renderServerList();
+      document.getElementById('serverModal').classList.add('active');
+    }
+
+    function selectServer(id) {
+      currentServerId = id;
+      const server = servers.find(s => s.id === id);
+      document.getElementById('currentServer').textContent = server.name;
+      // 不立即关闭，让用户点击确认按钮
+      renderServerList();
+    }
+
+    function confirmServerSelect() {
+      const server = servers.find(s => s.id === currentServerId);
+      closeModal('serverModal');
+      showToast(`已切换至服务器：${server.name}`);
+      localStorage.setItem('currentServerId', currentServerId);
+      // 这里可以添加实际的重连逻辑
+    }
+
+    // --- 语言设置逻辑 ---
+    let isChinese = true;
+    function toggleLanguage() {
+      isChinese = !isChinese;
+      const langText = isChinese ? '简体中文' : 'English';
+      document.getElementById('currentLang').textContent = langText;
+      showToast(`语言已切换为：${langText}`);
+      localStorage.setItem('gameLanguage', isChinese ? 'zh' : 'en');
+      // 实际项目中应触发全局语言包切换
+    }
+
+    // --- 背景音乐逻辑 ---
+    let bgmEnabled = true;
+    function toggleBGM() {
+      bgmEnabled = !bgmEnabled;
+      const toggle = document.getElementById('bgmToggle');
+      const statusText = document.getElementById('bgmStatus');
+      
+      if (bgmEnabled) {
+        toggle.classList.add('active');
+        statusText.textContent = '已开启';
+        statusText.style.color = 'var(--success-color)';
+        showToast('背景音乐已开启');
+        localStorage.setItem('bgmEnabled', 'true');
+        // 播放音乐逻辑: audio.play()
+      } else {
+        toggle.classList.remove('active');
+        statusText.textContent = '已关闭';
+        statusText.style.color = 'var(--text-dim)';
+        showToast('背景音乐已关闭');
+        localStorage.setItem('bgmEnabled', 'false');
+        // 暂停音乐逻辑: audio.pause()
+      }
+    }
+
+    // --- 背景设置逻辑 (原有功能增强) ---
+    function loadCurrentBackground() {
+      const backgroundPreview = document.getElementById('backgroundPreview');
+      const currentBackgroundName = document.getElementById('currentBackgroundName');
+      
+      const savedBackground = localStorage.getItem('loadingBackground');
+      if (savedBackground) {
+        backgroundPreview.style.backgroundImage = `url(${savedBackground})`;
+        currentBackgroundName.textContent = '自定义背景';
+      } else {
+        backgroundPreview.style.backgroundImage = `url('../images/beijing.png')`;
+        currentBackgroundName.textContent = '默认背景';
+      }
+    }
+
+    let selectedFile = null;
+
+    function handleFileSelect(input) {
+      if (input.files && input.files[0]) {
+        const file = input.files[0];
+        if (!file.type.startsWith('image/')) {
+          showToast('请上传图片文件');
+          input.value = '';
+          return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+          showToast('图片大小不能超过 5MB');
+          input.value = '';
+          return;
+        }
+        selectedFile = file;
+        // 预览
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          document.getElementById('backgroundPreview').style.backgroundImage = `url(${e.target.result})`;
+          document.getElementById('currentBackgroundName').textContent = '待保存的新背景';
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function saveBackground() {
+      if (!selectedFile) {
+        showToast('请先选择图片');
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        localStorage.setItem('loadingBackground', e.target.result);
+        showToast('背景设置保存成功');
+        loadCurrentBackground();
+        selectedFile = null;
+        document.getElementById('backgroundFile').value = '';
+      };
+      reader.onerror = function() {
+        showToast('文件读取失败');
+      };
+      reader.readAsDataURL(selectedFile);
+    }
+
+    function resetBackground() {
+      localStorage.removeItem('loadingBackground');
+      showToast('已恢复默认背景');
+      loadCurrentBackground();
+    }
+
+    // --- 通用工具函数 ---
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('active');
+    }
+
+    // 优化后的 Toast 提示函数
+    function showToast(message, duration = 2000) {
+      const toastModal = document.getElementById('toastModal');
+      const toastMessage = document.getElementById('toastMessage');
+      
+      toastMessage.textContent = message;
+      toastModal.classList.add('active');
+      
+      setTimeout(() => {
+        toastModal.classList.remove('active');
+      }, duration);
+    }
+
+    // 保留旧的 showStatus 函数用于背景设置的状态显示
+    function showStatus(message, type) {
+      const statusMessage = document.getElementById('statusMessage');
+      statusMessage.textContent = message;
+      statusMessage.className = `status-message ${type}`;
+      
+      setTimeout(() => {
+        statusMessage.style.display = 'none';
+      }, 3000);
+    }
+
+    function loadSettings() {
+      // 从 localStorage 加载用户偏好设置
+      const savedLang = localStorage.getItem('gameLanguage');
+      if (savedLang) {
+        isChinese = savedLang === 'zh';
+        document.getElementById('currentLang').textContent = isChinese ? '简体中文' : 'English';
+      }
+
+      const savedBGM = localStorage.getItem('bgmEnabled');
+      if (savedBGM !== null) {
+        bgmEnabled = savedBGM === 'true';
+        toggleBGM(); // 更新 UI
+        // 纠正 toggleBGM 内部逻辑导致的重复切换，这里直接设置状态
+        const toggle = document.getElementById('bgmToggle');
+        const statusText = document.getElementById('bgmStatus');
+        if(bgmEnabled) {
+            toggle.classList.add('active');
+            statusText.textContent = '已开启';
+            statusText.style.color = 'var(--success-color)';
+        } else {
+            toggle.classList.remove('active');
+            statusText.textContent = '已关闭';
+            statusText.style.color = 'var(--text-dim)';
+        }
+      }
+      
+      const savedServer = localStorage.getItem('currentServerId');
+      if (savedServer) {
+        currentServerId = parseInt(savedServer);
+        const server = servers.find(s => s.id === currentServerId);
+        if(server) document.getElementById('currentServer').textContent = server.name;
+      }
+    }
+
+    // 点击模态框外部关闭
+    document.querySelectorAll('.modal-overlay').forEach(modal => {
+      modal.addEventListener('click', function(e) {
+        if (e.target === this) {
+          this.classList.remove('active');
+        }
+      });
+    });
+  </script>
+  <script src="js/ui-components.js"></script>
+  <script src="../js/auth-service.js"></script>
+</body>
+</html>

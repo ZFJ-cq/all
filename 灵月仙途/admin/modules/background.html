@@ -1,0 +1,59 @@
+<div class="section active">
+  <h2 class="section-title">加载页背景设置</h2>
+  <div class="form-group">
+    <label>当前生效背景：</label>
+    <div class="background-preview" id="backgroundPreview"></div>
+    <div id="currentBackgroundName" style="text-align: center; color: #666; margin-bottom: 15px;">默认背景</div>
+    
+    <label>上传新背景图 (建议尺寸 1080x1920)：</label>
+    <input type="file" class="form-control" id="backgroundFile" accept="image/*" style="margin-bottom: 15px;">
+    
+    <div style="display: flex; gap: 10px;">
+      <button class="btn btn-primary" onclick="saveBackground()">保存设置</button>
+      <button class="btn btn-secondary" onclick="resetBackground()">恢复默认</button>
+    </div>
+    <div class="status-message" id="bgStatusMessage"></div>
+  </div>
+</div>
+
+<script>
+  // 初始化背景设置
+  function initBackground() {
+    loadCurrentBackground();
+  }
+
+  // 加载当前背景
+  function loadCurrentBackground() {
+    // 模拟加载当前背景
+    const preview = document.getElementById('backgroundPreview');
+    const name = document.getElementById('currentBackgroundName');
+    
+    // 模拟背景数据
+    preview.style.backgroundImage = 'url(https://neeko-copilot.bytedance.net/api/text2image?prompt=fantasy%20cultivation%20background%20with%20moon%20and%20mountains&size=1080x1920)';
+    name.textContent = '默认背景';
+  }
+
+  // 保存背景设置
+  function saveBackground() {
+    const fileInput = document.getElementById('backgroundFile');
+    if (fileInput.files.length > 0) {
+      const file = fileInput.files[0];
+      console.log('保存背景:', file.name);
+      showMessage('bgStatusMessage', '背景设置保存成功', 'success');
+    } else {
+      showMessage('bgStatusMessage', '请选择要上传的背景图', 'error');
+    }
+  }
+
+  // 恢复默认背景
+  function resetBackground() {
+    console.log('恢复默认背景');
+    loadCurrentBackground();
+    showMessage('bgStatusMessage', '已恢复默认背景', 'success');
+  }
+
+  // 页面加载完成后初始化
+  if (typeof window.initBackground === 'undefined') {
+    window.initBackground = initBackground;
+  }
+</script>

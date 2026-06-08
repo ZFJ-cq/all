@@ -1,0 +1,521 @@
+<div class="section active">
+  <div class="status-message" id="userMessage"></div>
+  <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+    <h2 class="section-title">玩家列表</h2>
+    <div style="display: flex; gap: 10px;">
+      <input type="text" id="userPhoneSearch" placeholder="手机号筛选" onkeyup="window.handleUserSearch()" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+      <input type="text" id="userNameSearch" placeholder="姓名筛选" onkeyup="window.handleUserSearch()" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+      <select id="userSelect" onchange="window.loadUserRoles(this.value)" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+        <option value="">选择用户查看角色</option>
+      </select>
+      <button class="btn btn-primary" onclick="window.openAddUserModal()">新增玩家</button>
+    </div>
+  </div>
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>用户名</th>
+        <th>昵称</th>
+        <th>手机号</th>
+        <th>状态</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody id="userTableBody">
+      <!-- JS 生成 -->
+    </tbody>
+  </table>
+  <div id="userPagination"></div>
+  <div style="margin-top: 20px; display: none;" id="rolesContainer">
+    <h3>用户角色列表</h3>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>角色ID</th>
+          <th>角色名称</th>
+          <th>性别</th>
+          <th>境界</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody id="rolesTableBody">
+        <!-- JS 生成 -->
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 编辑玩家模态框 -->
+<div id="editModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="editModalTitle">编辑玩家信息</h3>
+      <span class="close" onclick="window.closeModal()">&times;</span>
+    </div>
+    <form id="editForm">
+      <input type="hidden" id="editUserId">
+      <div class="form-group">
+        <label>用户名</label>
+        <input type="text" id="editName" required>
+      </div>
+      <div class="form-group">
+        <label>出身</label>
+        <select id="editOrigin">
+          <option value="凡人">凡人</option>
+          <option value="修士">修士</option>
+          <option value="仙族">仙族</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>境界</label>
+        <select id="editRealm">
+          <option value="练气">练气</option>
+          <option value="筑基">筑基</option>
+          <option value="金丹">金丹</option>
+          <option value="元婴">元婴</option>
+          <option value="化神">化神</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>灵石数量</label>
+        <input type="number" id="editSpiritStones" min="0">
+      </div>
+      <div style="text-align: right; margin-top: 20px;">
+        <button type="button" class="btn btn-secondary" onclick="window.closeModal()">取消</button>
+        <button type="submit" class="btn btn-primary">保存修改</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- 新增玩家模态框 -->
+<div id="addUserModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>新增玩家</h3>
+      <span class="close" onclick="window.closeModal()">&times;</span>
+    </div>
+    <form id="addUserForm">
+      <div class="form-group">
+        <label>用户名</label>
+        <input type="text" id="addName" required>
+      </div>
+      <div class="form-group">
+        <label>出身</label>
+        <select id="addOrigin" required>
+          <option value="凡人">凡人</option>
+          <option value="修士">修士</option>
+          <option value="仙族">仙族</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>初始境界</label>
+        <select id="addRealm" required>
+          <option value="练气">练气</option>
+          <option value="筑基">筑基</option>
+          <option value="金丹">金丹</option>
+          <option value="元婴">元婴</option>
+          <option value="化神">化神</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>初始灵石</label>
+        <input type="number" id="addSpiritStones" min="0" value="100">
+      </div>
+      <div style="text-align: right; margin-top: 20px;">
+        <button type="button" class="btn btn-secondary" onclick="window.closeModal()">取消</button>
+        <button type="submit" class="btn btn-primary">创建玩家</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  (function() {
+    const API_BASE_URL = 'http://localhost:8088';
+
+    function initUsers() {
+      loadUsers();
+      bindFormEvents();
+    }
+
+    async function loadUsers() {
+      const tableBody = document.getElementById('userTableBody');
+      tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999;">加载中...</td></tr>';
+      
+      try {
+        const users = await apiService.get(`/game/user`);
+        
+        tableBody.innerHTML = '';
+        if (users && users.length > 0) {
+          users.forEach(user => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${user.id}</td>
+              <td>${user.username || '-'}</td>
+              <td>${user.nickname || '-'}</td>
+              <td>${user.phone || '-'}</td>
+              <td>${user.status === 1 ? '<span style="color: green;">正常</span>' : '<span style="color: red;">禁用</span>'}</td>
+              <td>
+                <button class="btn btn-primary" onclick="window.editUser(${user.id})">编辑</button>
+                <button class="btn btn-danger" onclick="window.deleteUser(${user.id})">删除</button>
+              </td>
+            `;
+            tableBody.appendChild(row);
+          });
+          
+          // 填充用户选择框
+          const userSelect = document.getElementById('userSelect');
+          userSelect.innerHTML = '<option value="">选择用户查看角色</option>';
+          users.forEach(user => {
+            const option = document.createElement('option');
+            option.value = user.id;
+            option.textContent = `${user.username} (${user.nickname})`;
+            userSelect.appendChild(option);
+          });
+        } else {
+          tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999;">暂无数据</td></tr>';
+        }
+      } catch (error) {
+        console.error('加载用户列表失败:', error);
+        tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#e74c3c;">加载失败</td></tr>';
+      }
+    }
+
+    async function loadUserRoles(userId) {
+      if (!userId) {
+        document.getElementById('rolesContainer').style.display = 'none';
+        return;
+      }
+      
+      const tableBody = document.getElementById('rolesTableBody');
+      tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999;">加载中...</td></tr>';
+      
+      try {
+        const roles = await apiService.get(`/role/user/${userId}`);
+        
+        tableBody.innerHTML = '';
+        if (roles && roles.length > 0) {
+          roles.forEach(role => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${role.id}</td>
+              <td>${role.roleName || '-'}</td>
+              <td>${role.gender || '-'}</td>
+              <td>${role.realm || '-'}</td>
+              <td>
+                <button class="btn btn-primary" onclick="window.editRole(${role.id})">编辑</button>
+                <button class="btn btn-danger" onclick="window.deleteRole(${role.id})">删除</button>
+              </td>
+            `;
+            tableBody.appendChild(row);
+          });
+        } else {
+          tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999;">暂无角色</td></tr>';
+        }
+        
+        document.getElementById('rolesContainer').style.display = 'block';
+      } catch (error) {
+        console.error('加载角色列表失败:', error);
+        tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#e74c3c;">加载失败</td></tr>';
+      }
+    }
+
+    function handleUserSearch() {
+      const phoneSearch = document.getElementById('userPhoneSearch').value.toLowerCase();
+      const nameSearch = document.getElementById('userNameSearch').value.toLowerCase();
+      console.log('搜索:', phoneSearch, nameSearch);
+    }
+
+    function editUser(id) {
+      console.log('编辑用户:', id);
+      document.getElementById('editUserId').value = id;
+      document.getElementById('editName').value = '测试用户';
+      document.getElementById('editOrigin').value = '凡人';
+      document.getElementById('editRealm').value = '练气';
+      document.getElementById('editSpiritStones').value = 1000;
+      window.openModal('editModal');
+    }
+
+    async function deleteUser(id) {
+      showDeleteConfirm(
+        '确定要删除这个用户吗？此操作不可恢复。',
+        async function() {
+          try {
+            await apiService.delete(`/game/user/${id}`);
+            showMessage('userMessage', '删除成功', 'success');
+            loadUsers();
+          } catch (error) {
+            console.error('删除失败:', error);
+            showMessage('userMessage', '删除失败: ' + error.message, 'error');
+          }
+        }
+      );
+    }
+
+    function openAddUserModal() {
+      document.getElementById('addUserForm').reset();
+      window.openModal('addUserModal');
+    }
+
+    function bindFormEvents() {
+      document.getElementById('editForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const id = document.getElementById('editUserId').value;
+        console.log('保存用户:', id);
+        window.closeModal();
+        showMessage('userMessage', '修改成功', 'success');
+        loadUsers();
+      });
+      
+      document.getElementById('addUserForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        console.log('新增用户');
+        window.closeModal();
+        showMessage('userMessage', '创建成功', 'success');
+        loadUsers();
+      });
+    }
+
+    function editRole(id) {
+      console.log('编辑角色:', id);
+    }
+
+    function showDeleteConfirm(message, onConfirm, onCancel) {
+      // 创建确认对话框
+      const dialog = document.createElement('div');
+      dialog.className = 'confirm-dialog';
+      dialog.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        animation: fadeIn 0.3s ease;
+        backdrop-filter: blur(3px);
+      `;
+
+      const dialogContent = document.createElement('div');
+      dialogContent.className = 'confirm-dialog-content';
+      dialogContent.style.cssText = `
+        background: #fff;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        max-width: 420px;
+        width: 90%;
+        animation: slideIn 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      `;
+
+      // 添加装饰性背景
+      const dialogBackground = document.createElement('div');
+      dialogBackground.style.cssText = `
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(45deg, transparent, rgba(220, 53, 69, 0.05), transparent);
+        transform: rotate(45deg);
+        pointer-events: none;
+      `;
+      dialogContent.appendChild(dialogBackground);
+
+      const dialogTitle = document.createElement('h3');
+      dialogTitle.textContent = '确认删除';
+      dialogTitle.style.cssText = `
+        margin: 0 0 20px 0;
+        color: #333;
+        font-size: 20px;
+        font-weight: 600;
+        position: relative;
+        z-index: 1;
+      `;
+
+      const dialogMessage = document.createElement('p');
+      dialogMessage.textContent = message;
+      dialogMessage.style.cssText = `
+        margin: 0 0 30px 0;
+        color: #666;
+        line-height: 1.6;
+        font-size: 14px;
+        position: relative;
+        z-index: 1;
+      `;
+
+      const dialogButtons = document.createElement('div');
+      dialogButtons.style.cssText = `
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        position: relative;
+        z-index: 1;
+      `;
+
+      const cancelButton = document.createElement('button');
+      cancelButton.textContent = '取消';
+      cancelButton.className = 'btn btn-secondary';
+      cancelButton.style.cssText = `
+        padding: 10px 24px;
+        border: 1px solid #ddd;
+        background: #f8f9fa;
+        color: #333;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        min-width: 80px;
+      `;
+      cancelButton.onmouseover = function() {
+        this.style.background = '#e9ecef';
+        this.style.borderColor = '#adb5bd';
+        this.style.transform = 'translateY(-1px)';
+        this.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)';
+      };
+      cancelButton.onmouseout = function() {
+        this.style.background = '#f8f9fa';
+        this.style.borderColor = '#ddd';
+        this.style.transform = 'translateY(0)';
+        this.style.boxShadow = 'none';
+      };
+      cancelButton.onclick = function() {
+        document.body.removeChild(dialog);
+        if (onCancel) onCancel();
+      };
+
+      const confirmButton = document.createElement('button');
+      confirmButton.textContent = '确认删除';
+      confirmButton.className = 'btn btn-danger';
+      confirmButton.style.cssText = `
+        padding: 10px 24px;
+        border: 1px solid #dc3545;
+        background: #dc3545;
+        color: white;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        min-width: 100px;
+      `;
+      confirmButton.onmouseover = function() {
+        this.style.background = '#c82333';
+        this.style.borderColor = '#bd2130';
+        this.style.transform = 'translateY(-1px)';
+        this.style.boxShadow = '0 4px 12px rgba(220, 53, 69, 0.4)';
+      };
+      confirmButton.onmouseout = function() {
+        this.style.background = '#dc3545';
+        this.style.borderColor = '#dc3545';
+        this.style.transform = 'translateY(0)';
+        this.style.boxShadow = 'none';
+      };
+      confirmButton.onclick = function() {
+        document.body.removeChild(dialog);
+        if (onConfirm) onConfirm();
+      };
+
+      // 添加动画样式
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes slideIn {
+          from { transform: translateY(-30px); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
+        }
+      `;
+      document.head.appendChild(style);
+
+      dialogButtons.appendChild(cancelButton);
+      dialogButtons.appendChild(confirmButton);
+      dialogContent.appendChild(dialogTitle);
+      dialogContent.appendChild(dialogMessage);
+      dialogContent.appendChild(dialogButtons);
+      dialog.appendChild(dialogContent);
+      document.body.appendChild(dialog);
+
+      // 点击背景关闭
+      dialog.onclick = function(e) {
+        if (e.target === dialog) {
+          document.body.removeChild(dialog);
+          if (onCancel) onCancel();
+        }
+      };
+
+      // 按ESC键关闭
+      function handleEscKey(e) {
+        if (e.key === 'Escape') {
+          document.body.removeChild(dialog);
+          if (onCancel) onCancel();
+          document.removeEventListener('keydown', handleEscKey);
+        }
+      }
+      document.addEventListener('keydown', handleEscKey);
+    }
+
+    async function deleteRole(id) {
+      showDeleteConfirm(
+        '确定要删除这个角色吗？\n\n此操作不可恢复，会同时删除角色相关的背包和任务数据。',
+        async function() {
+          try {
+            // 显示加载状态
+            const userId = document.getElementById('userSelect').value;
+            const tableBody = document.getElementById('rolesTableBody');
+            const originalContent = tableBody.innerHTML;
+            tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999;">删除中...</td></tr>';
+            
+            await apiService.delete(`/role/${id}`);
+            
+            showMessage('userMessage', '删除成功', 'success');
+            if (userId) {
+              await loadUserRoles(userId);
+            }
+          } catch (error) {
+            console.error('删除角色失败:', error);
+            showMessage('userMessage', '删除失败: ' + error.message, 'error');
+            // 重新加载角色列表
+            const userId = document.getElementById('userSelect').value;
+            if (userId) {
+              loadUserRoles(userId);
+            }
+          }
+        }
+      );
+    }
+
+    function showMessage(elementId, message, type) {
+      const statusEl = document.getElementById(elementId);
+      if (statusEl) {
+        statusEl.textContent = message;
+        statusEl.className = `status-message ${type}`;
+        statusEl.style.display = 'block';
+        
+        setTimeout(() => {
+          statusEl.style.display = 'none';
+        }, 3000);
+      }
+    }
+
+    window.initUsers = initUsers;
+    window.loadUsers = loadUsers;
+    window.loadUserRoles = loadUserRoles;
+    window.handleUserSearch = handleUserSearch;
+    window.editUser = editUser;
+    window.deleteUser = deleteUser;
+    window.openAddUserModal = openAddUserModal;
+    window.editRole = editRole;
+    window.deleteRole = deleteRole;
+  })();
+</script>

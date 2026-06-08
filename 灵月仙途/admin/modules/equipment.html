@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>装备管理</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <div class="module-content">
+        <h2>装备管理</h2>
+        <div class="module-description">
+            管理游戏中的装备数据
+        </div>
+        
+        <div class="search-bar">
+            <input type="text" id="searchKeyword" placeholder="搜索装备...">
+            <button onclick="searchEquipments()">搜索</button>
+        </div>
+        
+        <div class="filter-bar">
+            <select id="equipmentType">
+                <option value="">所有类型</option>
+                <option value="weapon">武器</option>
+                <option value="armor">防具</option>
+                <option value="accessory">饰品</option>
+            </select>
+            <select id="equipmentRarity">
+                <option value="">所有品质</option>
+                <option value="common">普通</option>
+                <option value="rare">稀有</option>
+                <option value="epic">史诗</option>
+                <option value="legendary">传说</option>
+            </select>
+            <button onclick="filterEquipments()">筛选</button>
+        </div>
+        
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>装备名称</th>
+                        <th>类型</th>
+                        <th>品质</th>
+                        <th>等级要求</th>
+                        <th>攻击力</th>
+                        <th>防御力</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="equipmentTableBody">
+                    <!-- 数据将通过JS动态加载 -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="pagination" id="pagination">
+            <!-- 分页将通过JS动态生成 -->
+        </div>
+    </div>
+    
+    <script>
+        function initEquipment() {
+            console.log('初始化装备管理模块');
+            loadEquipmentData();
+        }
+        
+        function loadEquipmentData(page = 1) {
+            const tableBody = document.getElementById('equipmentTableBody');
+            tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px;">加载中...</td></tr>';
+            
+            // 模拟数据加载
+            setTimeout(() => {
+                tableBody.innerHTML = '';
+                for (let i = 1; i <= 10; i++) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${(page - 1) * 10 + i}</td>
+                        <td>装备${i}</td>
+                        <td>${['武器', '防具', '饰品'][Math.floor(Math.random() * 3)]}</td>
+                        <td>${['普通', '稀有', '史诗', '传说'][Math.floor(Math.random() * 4)]}</td>
+                        <td>${Math.floor(Math.random() * 50) + 1}</td>
+                        <td>${Math.floor(Math.random() * 100) + 10}</td>
+                        <td>${Math.floor(Math.random() * 50) + 5}</td>
+                        <td>
+                            <button onclick="editEquipment(${i})">编辑</button>
+                            <button onclick="deleteEquipment(${i})">删除</button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                }
+                
+                // 生成分页
+                generatePagination(page, 5);
+            }, 1000);
+        }
+        
+        function searchEquipments() {
+            const keyword = document.getElementById('searchKeyword').value;
+            console.log('搜索装备:', keyword);
+            loadEquipmentData();
+        }
+        
+        function filterEquipments() {
+            const type = document.getElementById('equipmentType').value;
+            const rarity = document.getElementById('equipmentRarity').value;
+            console.log('筛选装备:', type, rarity);
+            loadEquipmentData();
+        }
+        
+        function editEquipment(id) {
+            console.log('编辑装备:', id);
+            alert('编辑装备功能开发中');
+        }
+        
+        function deleteEquipment(id) {
+            if (confirm('确定要删除装备吗？')) {
+                console.log('删除装备:', id);
+                alert('删除成功');
+            }
+        }
+        
+        function generatePagination(currentPage, totalPages) {
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+            
+            for (let i = 1; i <= totalPages; i++) {
+                const button = document.createElement('button');
+                button.textContent = i;
+                button.className = i === currentPage ? 'active' : '';
+                button.onclick = () => loadEquipmentData(i);
+                pagination.appendChild(button);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+{
+  "id": "case_006",
+  "title": "佛寺迷香",
+  "subtitle": "第六案",
+  "difficulty": 3,
+  "description": "名寺方丈在禅房中离奇圆寂，香炉中的迷香暗藏杀机。狄仁杰入寺查案，揭开佛门清净地中的罪恶……",
+  "background": "唐武则天时期，洛阳白马寺方丈慧明大师在禅房中打坐时离奇圆寂。寺中弟子称方丈是在入定中安然离世，但狄仁杰发现方丈面色异常，禅房香炉中的檀香混有剧毒。佛门清净之地，竟暗藏杀机。",
+  "stages": {
+    "report": {
+      "id": "report",
+      "name": "报案",
+      "dialogues": [
+        { "speaker": "系统", "speakerTitle": "旁白", "content": "洛阳白马寺，方丈慧明大师在禅房中圆寂。弟子们悲痛不已，但有人注意到方丈面色异常。", "emotion": "narrator" },
+        { "speaker": "狄仁杰", "speakerTitle": "同平章事", "content": "慧明大师年高德劭，怎会突然圆寂？面色青紫，绝非善终。本官要亲自查看！", "emotion": "serious" },
+        { "speaker": "系统", "speakerTitle": "旁白", "content": "狄仁杰步入禅房，一股异香扑鼻而来。他仔细端详香炉中的檀香，面色一变。", "emotion": "narrator" },
+        { "speaker": "狄仁杰", "speakerTitle": "同平章事", "content": "这檀香中混有乌头碱！方丈是在打坐时吸入毒香而亡！这是谋杀！", "emotion": "angry" }
+      ]
+    },
+    "investigation": {
+      "id": "investigation",
+      "name": "取证",
+      "scenes": [
+        { "id": "zen_room", "name": "方丈禅房", "description": "慧明大师的禅房，简朴清幽，香炉中仍散发着淡淡的檀香，经书整齐排列。", "searchHints": ["检查香炉中的檀香", "查看方丈的经书", "注意禅房的暗格"] },
+        { "id": "temple", "name": "白马寺", "description": "千年古刹白马寺，香火鼎盛，寺中僧人众多，藏经阁中珍藏着大量佛经。", "searchHints": ["查看香料的采购记录", "检查藏经阁", "询问寺中僧人"] }
+      ],
+      "evidences": [
+        { "id": "ev_001", "name": "香炉中的毒檀香", "icon": "candle", "description": "香炉中的檀香被掺入了乌头碱粉末，燃烧后释放剧毒气体，吸入者会心脏骤停。", "sceneId": "zen_room", "isKey": true, "clue": "檀香中的乌头碱就是杀人凶器！方丈在不知情中吸入了毒气！" },
+        { "id": "ev_002", "name": "方丈的密信", "icon": "letter", "description": "禅房暗格中发现方丈写给朝廷的密信，信中揭露寺中有人私吞香火钱，并勾结外贼盗窃藏经阁珍本。", "sceneId": "zen_room", "isKey": true, "clue": "方丈发现了寺中贪腐之事，正准备上报，因此被灭口！" },
+        { "id": "ev_003", "name": "香料采购记录", "icon": "book", "description": "寺中香料采购记录显示，近期有一批檀香从非正常渠道购入，经手人是知客僧法清。", "sceneId": "temple", "isKey": true, "clue": "毒檀香是知客僧法清采购的，他就是下毒之人！" },
+        { "id": "ev_004", "name": "藏经阁失窃记录", "icon": "book", "description": "藏经阁近期有多本珍贵佛经失踪，值班僧人称曾看到法清深夜出入藏经阁。", "sceneId": "temple", "isKey": true, "clue": "法清不仅私吞香火钱，还盗窃藏经阁珍本，方丈因此要揭发他！" },
+        { "id": "ev_005", "name": "法清的账册", "icon": "money", "description": "在法清住处发现一本账册，记录着他历年私吞的香火钱和出售佛经的赃款，总额惊人。", "sceneId": "temple", "isKey": false, "clue": "法清贪墨多年，数额巨大，杀人灭口是为了保住自己的秘密。" },
+        { "id": "ev_006", "name": "小沙弥的证词", "icon": "witness", "description": "小沙弥称，案发前夜看到法清偷偷进入方丈禅房，往香炉中添加了什么。", "sceneId": "temple", "isKey": false, "clue": "小沙弥亲眼看到法清往香炉中加东西，那就是毒檀香！" }
+      ]
+    },
+    "interrogation": {
+      "id": "interrogation",
+      "name": "审讯",
+      "suspects": [
+        { "id": "sus_001", "name": "法清", "role": "知客僧", "description": "白马寺知客僧，负责接待香客和采购寺中物资，深得方丈信任。", "dialogues": [
+          { "speaker": "法清", "speakerTitle": "嫌疑人", "content": "阿弥陀佛，方丈圆寂，贫僧悲痛不已。大人为何要怀疑贫僧？", "emotion": "fear" },
+          { "speaker": "狄仁杰", "speakerTitle": "同平章事", "content": "那香炉中的毒檀香，可是你采购的？采购记录上白纸黑字！", "emotion": "serious" },
+          { "speaker": "法清", "speakerTitle": "嫌疑人", "content": "那……那只是普通檀香！贫僧不知何人做了手脚！", "emotion": "panic" },
+          { "speaker": "狄仁杰", "speakerTitle": "同平章事", "content": "藏经阁失窃的佛经、你住处的贪墨账册、小沙弥看到你深夜往香炉加东西……你还有何话可说？", "emotion": "angry" },
+          { "speaker": "法清", "speakerTitle": "嫌疑人", "content": "阿弥陀佛……贫僧……贫僧知罪……", "emotion": "surrender" }
+        ], "isGuilty": true },
+        { "id": "sus_002", "name": "法明", "role": "监寺僧", "description": "白马寺监寺僧，协助方丈管理寺务，与法清素有嫌隙。", "dialogues": [
+          { "speaker": "法明", "speakerTitle": "嫌疑人", "content": "大人，贫僧早觉法清行为不端，多次向方丈禀报，但方丈念在同门之情未予追究。", "emotion": "serious" },
+          { "speaker": "狄仁杰", "speakerTitle": "同平章事", "content": "你与法清有嫌隙，可有人能为你作证案发时你在何处？", "emotion": "serious" },
+          { "speaker": "法明", "speakerTitle": "嫌疑人", "content": "贫僧当夜在藏经阁值守，有多名僧人可以作证。", "emotion": "serious" },
+          { "speaker": "狄仁杰", "speakerTitle": "同平章事", "content": "你倒是坦荡。本官自会查证。", "emotion": "serious" }
+        ], "isGuilty": false, "hint": "法明虽与法清有嫌隙，但案发时有不在场证明，并非凶手" }
+      ]
+    },
+    "judgment": {
+      "id": "judgment",
+      "name": "断案",
+      "correctSuspectId": "sus_001",
+      "requiredEvidenceIds": ["ev_001", "ev_002", "ev_003", "ev_004"],
+      "judgmentText": {
+        "correct": "经查明，白马寺知客僧法清贪墨香火钱、盗窃藏经阁珍本佛经多年，方丈慧明大师发现其罪行后准备上报朝廷。法清得知消息后，在方丈禅房香炉中掺入乌头碱毒粉，致使方丈在打坐时吸入毒气心脏骤停，伪装成圆寂假象。判法清还俗后斩立决，追回所有赃款赃物！此案彰显狄公明察暗访之智！",
+        "wrong": "本案证据尚不充分，大人还需仔细查证，切莫冤枉了好人。",
+        "partial": "大人所断有部分道理，但仍有关键证据未纳入考量，请重新审视所有证据。"
+      }
+    }
+  },
+  "hints": [
+    { "id": "hint_1", "content": "方丈的死因藏在香炉中——检查那檀香。", "cost": 1 },
+    { "id": "hint_2", "content": "方丈禅房的暗格中藏着什么？他为什么要写密信？", "cost": 1 },
+    { "id": "hint_3", "content": "谁负责采购香料？藏经阁的佛经为何失踪？两条线索指向同一个人。", "cost": 1 }
+  ]
+}

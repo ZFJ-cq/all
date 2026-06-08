@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="../js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="../css/mobile-adapt.css">
+  <title>棋盘地图</title>
+  <style>
+    /* 全局样式重置 */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      overflow: hidden;
+      font-family: "STKaiti", "KaiTi", "Microsoft Yahei", sans-serif;
+      background-color: #0a0a0a;
+    }
+    
+    /* 地图容器 - 背景图放大 */
+    .map-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background: url("map3.jpg") no-repeat center center;
+      background-size: cover; /* 改为cover，让背景图放大填满容器 */
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+      background-color: #f5f1e8;
+    }
+    
+    /* 建筑容器 - 包含图片和竖排文字 */
+    .building-container {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      z-index: 20;
+    }
+    
+    /* 小图片样式 - 移除边框，增大尺寸 */
+    .building-icon {
+      width: 80px; /* 增大到80px */
+      height: 80px; /* 增大到80px */
+      border-radius: 8px;
+      cursor: pointer;
+      z-index: 15;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4); /* 增加阴影 */
+      transition: all 0.3s ease;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      border: none; /* 移除边框 */
+    }
+    
+    /* 小图片悬停效果 */
+    .building-icon:hover {
+      transform: scale(1.15); /* 增加悬停放大效果 */
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6);
+    }
+    
+    /* 竖排文字标签 */
+    .text-label {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      z-index: 20;
+      font-size: 20px; /* 增大字体 */
+      font-weight: bold;
+      color: #8b4513; /* 深棕色文字 */
+      text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.7);
+      transition: all 0.3s ease;
+      writing-mode: vertical-lr; /* 竖排文字 */
+      text-orientation: upright; /* 文字方向 */
+      letter-spacing: 8px; /* 增加字间距 */
+      font-style: italic; /* 斜体字模仿水墨风格 */
+      margin-top: 8px; /* 增加文字与图片间距 */
+      height: auto;
+      line-height: 1.5;
+      padding: 5px 0;
+    }
+    
+    /* 按钮悬停效果 */
+    .text-label:hover {
+      color: #a0522d; /* 悬停时变为更深的棕色 */
+      text-shadow: 1px 1px 3px rgba(255, 255, 255, 0.9);
+      transform: scale(1.08);
+    }
+    
+    /* 不同建筑的小图片背景图 */
+    .qinglong-icon { background-image: url('https://images.unsplash.com/photo-1513584684374-8bab748fbf90?w=150&h=150&fit=crop'); } /* 青龙阁 */
+    .tianshan-icon { background-image: url('https://images.unsplash.com/photo-1528164344705-47542687000d?w=150&h=150&fit=crop'); } /* 天台山 */
+    .hudian-icon { background-image: url('https://images.unsplash.com/photo-1513584684374-8bab748fbf90?w=150&h=150&fit=crop&brightness=0.8'); } /* 虎殿 */
+    .xianju-icon { background-image: url('https://images.unsplash.com/photo-1528164344705-47542687000d?w=150&h=150&fit=crop&brightness=0.9'); } /* 仙居 */
+    .xuanwu-icon { background-image: url('https://images.unsplash.com/photo-1528164344705-47542687000d?w=150&h=150&fit=crop&sepia=0.3'); } /* 玄武湖 */
+    .mushilu-icon { background-image: url('https://images.unsplash.com/photo-1513584684374-8bab748fbf90?w=150&h=150&fit=crop&sepia=0.4'); } /* 木石路 */
+    .tianxiandong-icon { background-image: url('https://images.unsplash.com/photo-1528164344705-47542687000d?w=150&h=150&fit=crop&contrast=1.2'); } /* 天仙洞 */
+    .wenchang-icon { background-image: url('https://images.unsplash.com/photo-1513584684374-8bab748fbf90?w=150&h=150&fit=crop&contrast=1.1'); } /* 文昌阁 */
+    
+    /* 根据图片文字位置精确放置建筑容器 - 进一步居中调整 */
+    /* 标题 - 棋盘地图 */
+    .map-title-text {
+      position: absolute;
+      top: 8%;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 36px; /* 增大标题字体 */
+      color: #8b4513;
+      z-index: 30;
+      text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.7);
+      writing-mode: horizontal-tb; /* 标题保持横排 */
+    }
+    
+    /* 青龙阁 - 左上方 */
+    .qinglong-container {
+      top: 24%; /* 向下微调 */
+      left: 22%; /* 向右微调，更居中 */
+    }
+    
+    /* 天台山 - 中上方 */
+    .tianshan-container {
+      top: 20%; /* 向下微调 */
+      left: 50%; /* 更居中 */
+      transform: translateX(-50%);
+    }
+    
+    /* 虎殿 - 右上方 */
+    .hudian-container {
+      top: 30%; /* 向下微调 */
+      left: 78%; /* 向左微调，更居中 */
+    }
+    
+    /* 1000米 - 距离信息 */
+    .distance-label {
+      position: absolute;
+      top: 34%; /* 向下微调 */
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 16px; /* 增大字体 */
+      color: #696969; /* 灰色文字 */
+      font-style: normal;
+      cursor: default; /* 距离信息不可点击 */
+      writing-mode: horizontal-tb; /* 横排 */
+    }
+    
+    /* 仙居 - 左中 */
+    .xianju-container {
+      top: 50%; /* 居中 */
+      left: 22%; /* 向右微调，更居中 */
+    }
+    
+    /* 玄武湖 - 中中 */
+    .xuanwu-container {
+      top: 52%; /* 居中 */
+      left: 50%; /* 更居中 */
+      transform: translateX(-50%);
+    }
+    
+    /* 木石路 - 右中 */
+    .mushilu-container {
+      top: 54%; /* 居中 */
+      left: 78%; /* 向左微调，更居中 */
+    }
+    
+    /* 天仙洞 - 左下方 */
+    .tianxiandong-container {
+      top: 76%; /* 向上微调 */
+      left: 26%; /* 向右微调，更居中 */
+    }
+    
+    /* 文昌阁 - 中下方 */
+    .wenchang-container {
+      top: 78%; /* 向上微调 */
+      left: 50%; /* 更居中 */
+      transform: translateX(-50%);
+    }
+    
+    /* 底部操作提示 */
+    .controls-hint {
+      position: absolute;
+      bottom: 8%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(128, 128, 128, 0.7); /* 灰色背景，模仿图片中的提示框 */
+      color: #f0e6d2;
+      font-size: 16px; /* 增大字体 */
+      padding: 12px 24px; /* 增加内边距 */
+      border-radius: 8px;
+      text-align: center;
+      line-height: 1.5;
+      z-index: 30;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(150, 150, 150, 0.5);
+      font-style: normal;
+      writing-mode: horizontal-tb; /* 横排 */
+    }
+    
+    /* 建筑详情弹窗 */
+    .building-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.85);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      backdrop-filter: blur(3px);
+    }
+    
+    .modal-content {
+      background: linear-gradient(to bottom, #2c1810, #1a0f0a);
+      padding: 30px;
+      border-radius: 15px;
+      max-width: 90%;
+      max-height: 80%;
+      overflow-y: auto;
+      position: relative;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+      border: 2px solid #8b4513;
+      color: #f0e6d2;
+      width: 400px;
+    }
+    
+    .modal-content h2 {
+      color: #d4af37;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #8b4513;
+      padding-bottom: 10px;
+      text-align: center;
+      font-size: 28px;
+    }
+    
+    .modal-content p {
+      line-height: 1.8;
+      margin-bottom: 25px;
+      text-indent: 2em;
+      font-size: 16px;
+    }
+    
+    /* 弹窗中的小图片 */
+    .modal-icon {
+      width: 100px; /* 增大弹窗图标 */
+      height: 100px; /* 增大弹窗图标 */
+      border-radius: 10px;
+      margin: 0 auto 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      font-weight: bold;
+      color: white;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      border: 2px solid #8b4513;
+    }
+    
+    .close-modal {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background-color: #8b0000;
+      color: #f0e6d2;
+      border: 1px solid #d4af37;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+    }
+    
+    .close-modal:hover {
+      background-color: #b22222;
+      transform: scale(1.1);
+    }
+    
+    .modal-actions {
+      display: flex;
+      gap: 15px;
+      margin-top: 20px;
+      justify-content: center;
+    }
+    
+    .modal-btn {
+      padding: 12px 25px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s;
+      font-size: 16px;
+      min-width: 120px;
+    }
+    
+    .modal-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    .btn-visit {
+      background: linear-gradient(to bottom, #27ae60, #1e8449);
+      color: white;
+      border: 1px solid #145a32;
+    }
+    
+    .btn-close {
+      background: linear-gradient(to bottom, #7f8c8d, #616a6b);
+      color: white;
+      border: 1px solid #515a5a;
+    }
+    
+    /* 触摸设备适配 */
+    @media (hover: none) {
+      .text-label:hover,
+      .building-icon:hover {
+        transform: scale(1);
+      }
+    }
+    
+    /* 屏幕方向适配 */
+    @media (orientation: portrait) {
+      .map-container {
+        background-position: center top;
+      }
+      
+      .text-label {
+        font-size: 18px;
+      }
+      
+      .building-icon {
+        width: 70px;
+        height: 70px;
+      }
+      
+      .map-title-text {
+        font-size: 30px;
+      }
+      
+      .controls-hint {
+        font-size: 14px;
+        bottom: 6%;
+      }
+    }
+    
+    @media (orientation: landscape) {
+      .map-container {
+        background-position: center center;
+      }
+      
+      .modal-content {
+        width: 350px;
+      }
+    }
+    
+    /* 屏幕尺寸适配 */
+    @media (max-width: 768px) {
+      .text-label {
+        font-size: 16px;
+        letter-spacing: 6px;
+      }
+      
+      .building-icon {
+        width: 60px;
+        height: 60px;
+      }
+      
+      .map-title-text {
+        font-size: 28px;
+      }
+      
+      .controls-hint {
+        font-size: 12px;
+        bottom: 15%;
+        padding: 10px 20px;
+      }
+      
+      .modal-content {
+        padding: 20px;
+        width: 90%;
+      }
+    }
+    
+    /* 底部导航栏 */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 70px;
+      background: linear-gradient(to top, rgba(15, 20, 35, 0.98), rgba(15, 20, 35, 0.8));
+      border-top: 2px solid #d4af37;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 100;
+      box-shadow: 0 -5px 30px rgba(212, 175, 55, 0.4);
+      backdrop-filter: blur(15px);
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      color: #d4c5a9;
+      text-decoration: none;
+      padding: 8px 20px;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      position: relative;
+      min-width: 70px;
+    }
+
+    .nav-item:hover {
+      color: #d4af37;
+      background: rgba(212, 175, 55, 0.2);
+      transform: translateY(-3px);
+    }
+
+    .nav-item.active {
+      color: #d4af37;
+      background: rgba(212, 175, 55, 0.3);
+      box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+    }
+
+    .nav-item.active::after {
+      content: '';
+      position: absolute;
+      top: -8px;
+      width: 25px;
+      height: 4px;
+      background: #d4af37;
+      border-radius: 0 0 4px 4px;
+      box-shadow: 0 0 15px #d4af37;
+    }
+
+    .nav-icon { 
+      font-size: 1.6rem;
+      text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+    }
+    .nav-text { 
+      font-size: 0.8rem; 
+      font-weight: 600;
+      text-shadow: 0 0 5px rgba(212, 175, 55, 0.3);
+    }
+
+    .nav-item.active .nav-icon {
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+      }
+      50% {
+        text-shadow: 0 0 20px rgba(212, 175, 55, 0.8);
+      }
+      100% {
+        text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+      }
+    }
+  </style>
+
+  </head>
+<body>
+  <!-- 地图容器 -->
+  <div class="map-container" id="mapContainer">
+    <!-- 地图标题 - 棋盘地图 -->
+    <div class="map-title-text">棋盘地图</div>
+    
+    <!-- 青龙阁 -->
+    <div class="building-container qinglong-container">
+      <div class="building-icon qinglong-icon" data-id="1"></div>
+      <button class="text-label" data-id="1">青<br>龙<br>阁</button>
+    </div>
+    
+    <!-- 天台山 -->
+    <div class="building-container tianshan-container">
+      <div class="building-icon tianshan-icon" data-id="2"></div>
+      <button class="text-label" data-id="2">天<br>台<br>山</button>
+    </div>
+    
+    <!-- 虎殿 -->
+    <div class="building-container hudian-container">
+      <div class="building-icon hudian-icon" data-id="3"></div>
+      <button class="text-label" data-id="3">虎<br>殿</button>
+    </div>
+    
+    <!-- 1000米 - 距离信息 -->
+    <div class="distance-label">1000米</div>
+    
+    <!-- 仙居 -->
+    <div class="building-container xianju-container">
+      <div class="building-icon xianju-icon" data-id="4"></div>
+      <button class="text-label" data-id="4">仙<br>居</button>
+    </div>
+    
+    <!-- 玄武湖 -->
+    <div class="building-container xuanwu-container">
+      <div class="building-icon xuanwu-icon" data-id="5"></div>
+      <button class="text-label" data-id="5">玄<br>武<br>湖</button>
+    </div>
+    
+    <!-- 木石路 -->
+    <div class="building-container mushilu-container">
+      <div class="building-icon mushilu-icon" data-id="6"></div>
+      <button class="text-label" data-id="6">木<br>石<br>路</button>
+    </div>
+    
+    <!-- 天仙洞 -->
+    <div class="building-container tianxiandong-container">
+      <div class="building-icon tianxiandong-icon" data-id="7"></div>
+      <button class="text-label" data-id="7">天<br>仙<br>洞</button>
+    </div>
+    
+    <!-- 文昌阁 -->
+    <div class="building-container wenchang-container">
+      <div class="building-icon wenchang-icon" data-id="8"></div>
+      <button class="text-label" data-id="8">文<br>昌<br>阁</button>
+    </div>
+  
+  <!-- 底部导航 -->
+  <div class="bottom-nav">
+    <a href="../index.html" class="nav-item">
+      <div class="nav-icon">🧘</div>
+      <div class="nav-text">修炼</div>
+    </a>
+    <a href="../skills/skills.html" class="nav-item">
+      <div class="nav-icon">📜</div>
+      <div class="nav-text">功法</div>
+    </a>
+    <a href="javascript:void(0)" onclick="window.pageUtils.navigateToGuildPage()" class="nav-item">
+      <div class="nav-icon">🏯</div>
+      <div class="nav-text">宗门</div>
+    </a>
+    <a href="../word/world.html" class="nav-item">
+      <div class="nav-icon">🌌</div>
+      <div class="nav-text">仙途</div>
+    </a>
+    <a href="map3.html" class="nav-item active">
+      <div class="nav-icon">🗺️</div>
+      <div class="nav-text">云游</div>
+    </a>
+  </div>
+  
+  <!-- 建筑详情弹窗 -->
+  <div class="building-modal" id="buildingModal">
+    <div class="modal-content">
+      <button class="close-modal" id="closeModal">×</button>
+      <div class="modal-icon" id="modalIcon"></div>
+      <h2 id="modalTitle">建筑详情</h2>
+      <p id="modalDescription">这里是建筑的详细描述信息...</p>
+      <div class="modal-actions">
+        <button class="modal-btn btn-visit" id="visitBtn">探索此地</button>
+        <button class="modal-btn btn-close" id="modalCloseBtn">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 等待DOM加载完成后执行
+    document.addEventListener('DOMContentLoaded', () => {
+      const mapContainer = document.getElementById('mapContainer');
+      const buildingModal = document.getElementById('buildingModal');
+      const modalIcon = document.getElementById('modalIcon');
+      const modalTitle = document.getElementById('modalTitle');
+      const modalDescription = document.getElementById('modalDescription');
+      const closeModalBtn = document.getElementById('closeModal');
+      const modalCloseBtn = document.getElementById('modalCloseBtn');
+      const visitBtn = document.getElementById('visitBtn');
+      
+      // 建筑详细信息 - 根据图片中的建筑名称
+      const buildingInfo = {
+        1: {
+          name: "青龙阁",
+          description: "青龙阁位于棋盘地图的东北方位，是一座宏伟的传统中式建筑。阁楼共三层，飞檐翘角，气势恢宏。传说青龙神兽曾在此显灵，赋予阁楼神秘的力量。此处灵气充沛，是修炼木属性法术的绝佳场所。",
+          iconImage: "https://images.unsplash.com/photo-1513584684374-8bab748fbf90?w=150&h=150&fit=crop"
+        },
+        2: {
+          name: "天台山",
+          description: "天台山是棋盘地图的中心主峰，海拔1000米，山峰挺拔，云雾缭绕。山中灵气充沛，适合修炼各种法术和心法。登顶天台山可俯瞰整个棋盘地图全景，是观景和修炼的绝佳地点。",
+          iconImage: "https://images.unsplash.com/photo-1528164344705-47542687000d?w=150&h=150&fit=crop"
+        },
+        3: {
+          name: "虎殿",
+          description: "虎殿位于棋盘地图的西北方位，供奉白虎神兽。殿内陈列古代兵器战甲，气势威严。传说白虎星君曾在此显灵，授予弟子白虎战技，使其在战斗中无往不利。殿前有石雕白虎守护，栩栩如生。",
+          iconImage: "https://images.unsplash.com/photo-1513584684374-8bab748fbf90?w=150&h=150&fit=crop&brightness=0.8"
+        },
+        4: {
+          name: "仙居",
+          description: "仙居是隐士修行之地，位于山腰密林之中。屋舍简朴雅致，周围松柏环绕，环境清幽。常有高人隐居于此，远离尘世纷扰，潜心修炼悟道。此处灵气浓郁，适合静心修炼和闭关突破。",
+          iconImage: "https://images.unsplash.com/photo-1528164344705-47542687000d?w=150&h=150&fit=crop&brightness=0.9"
+        },
+        5: {
+          name: "玄武湖",
+          description: "玄武湖是山中灵湖，湖水清澈见底，湖面常有雾气升腾。传说湖底有玄武神兽守护，在此修炼可获得玄武之力，增强防御和恢复能力。湖边常有仙鹤饮水，景色宜人，是修炼水系法术的圣地。",
+          iconImage: "https://images.unsplash.com/photo-1528164344705-47542687000d?w=150&h=150&fit=crop&sepia=0.3"
+        },
+        6: {
+          name: "木石路",
+          description: "木石路是连接棋盘地图各仙境的古道，由天然木石铺就。道路蜿蜒曲折，沿途风景秀丽，灵气充沛。行走其上可感受到大自然的灵气，有助于修行者感悟天地法则，提升修为境界。",
+          iconImage: "https://images.unsplash.com/photo-1513584684374-8bab748fbf90?w=150&h=150&fit=crop&sepia=0.4"
+        },
+        7: {
+          name: "天仙洞",
+          description: "天仙洞是天然洞穴，洞内钟乳石形态各异，灵气浓郁。传说曾有天仙在此修炼成道，留下修炼心得。洞中有阵法守护，只有有缘者才能进入深处，获得天仙传承和宝藏。",
+          iconImage: "https://images.unsplash.com/photo-1528164344705-47542687000d?w=150&h=150&fit=crop&contrast=1.2"
+        },
+        8: {
+          name: "文昌阁",
+          description: "文昌阁供奉文昌帝君，是学子祈求功名之地。阁内珍藏万卷古籍，书香四溢，是修仙者学习知识、提升心境的重要场所。每年科举时节，香火鼎盛。传说在此读书悟道，可获得文曲星加持。",
+          iconImage: "https://images.unsplash.com/photo-1513584684374-8bab748fbf90?w=150&h=150&fit=crop&contrast=1.1"
+        }
+      };
+      
+      // 为图片和文字按钮添加点击事件
+      const addClickEvents = () => {
+        // 图片
+        document.querySelectorAll('.building-icon[data-id]').forEach(icon => {
+          icon.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const buildingId = icon.dataset.id;
+            const building = buildingInfo[buildingId];
+            
+            if (building) {
+              showBuildingModal(building);
+            }
+          });
+        });
+        
+        // 文字按钮
+        document.querySelectorAll('.text-label[data-id]').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const buildingId = btn.dataset.id;
+            const building = buildingInfo[buildingId];
+            
+            if (building) {
+              showBuildingModal(building);
+            }
+          });
+        });
+      };
+      
+      // 显示建筑详情弹窗
+      function showBuildingModal(building) {
+        modalTitle.textContent = building.name;
+        modalDescription.textContent = building.description;
+        
+        // 设置弹窗图标
+        modalIcon.style.backgroundImage = `url(${building.iconImage})`;
+        
+        // 更新探索按钮
+        visitBtn.onclick = () => {
+          showToast(`即将探索 ${building.name}...`);
+          hideBuildingModal();
+        };
+        
+        buildingModal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+      }
+      
+      // 隐藏建筑详情弹窗
+      function hideBuildingModal() {
+        buildingModal.style.display = 'none';
+        document.body.style.overflow = '';
+      }
+      
+      // 关闭弹窗事件
+      closeModalBtn.addEventListener('click', hideBuildingModal);
+      modalCloseBtn.addEventListener('click', hideBuildingModal);
+      buildingModal.addEventListener('click', (e) => {
+        if (e.target === buildingModal) {
+          hideBuildingModal();
+        }
+      });
+      
+      // 键盘ESC关闭弹窗
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && buildingModal.style.display === 'flex') {
+          hideBuildingModal();
+        }
+      });
+      
+      // 地图拖拽/滑动功能
+      let isDragging = false;
+      let startX, startY, scrollLeft, scrollTop;
+      let isTouchDevice = 'ontouchstart' in window;
+      
+      // 鼠标事件
+      mapContainer.addEventListener('mousedown', (e) => {
+        // 如果点击的是按钮或小图片，不触发拖拽
+        if (e.target.classList.contains('text-label') || e.target.classList.contains('building-icon')) return;
+        
+        isDragging = true;
+        startX = e.pageX - mapContainer.offsetLeft;
+        startY = e.pageY - mapContainer.offsetTop;
+        scrollLeft = mapContainer.scrollLeft;
+        scrollTop = mapContainer.scrollTop;
+        mapContainer.style.cursor = 'grabbing';
+      });
+      
+      mapContainer.addEventListener('mouseleave', () => {
+        isDragging = false;
+        mapContainer.style.cursor = 'grab';
+      });
+      
+      mapContainer.addEventListener('mouseup', () => {
+        isDragging = false;
+        mapContainer.style.cursor = 'grab';
+      });
+      
+      mapContainer.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+        const x = e.pageX - mapContainer.offsetLeft;
+        const y = e.pageY - mapContainer.offsetTop;
+        const walkX = (x - startX) * 2;
+        const walkY = (y - startY) * 2;
+        mapContainer.scrollLeft = scrollLeft - walkX;
+        mapContainer.scrollTop = scrollTop - walkY;
+      });
+      
+      // 触摸设备事件
+      if (isTouchDevice) {
+        mapContainer.addEventListener('touchstart', (e) => {
+          // 如果触摸的是按钮或小图片，不触发拖拽
+          if (e.target.classList.contains('text-label') || e.target.classList.contains('building-icon')) return;
+          
+          isDragging = true;
+          startX = e.touches[0].pageX - mapContainer.offsetLeft;
+          startY = e.touches[0].pageY - mapContainer.offsetTop;
+          scrollLeft = mapContainer.scrollLeft;
+          scrollTop = mapContainer.scrollTop;
+        }, { passive: true });
+        
+        mapContainer.addEventListener('touchend', () => {
+          isDragging = false;
+        });
+        
+        mapContainer.addEventListener('touchmove', (e) => {
+          if (!isDragging) return;
+          e.preventDefault();
+          const x = e.touches[0].pageX - mapContainer.offsetLeft;
+          const y = e.touches[0].pageY - mapContainer.offsetTop;
+          const walkX = (x - startX) * 2;
+          const walkY = (y - startY) * 2;
+          mapContainer.scrollLeft = scrollLeft - walkX;
+          mapContainer.scrollTop = scrollTop - walkY;
+        });
+      }
+      
+      // 初始光标样式
+      mapContainer.style.cursor = 'grab';
+      
+      // 图片加载完成后的处理
+      const bgImage = new Image();
+      bgImage.src = "map3.jpg";
+      
+      bgImage.onload = function() {
+        console.log("地图背景图片加载完成，尺寸:", bgImage.width, "x", bgImage.height);
+        
+        // 初始化事件
+        addClickEvents();
+      };
+      
+      bgImage.onerror = function() {
+        console.error("地图背景图片加载失败，请检查文件路径");
+        
+        // 创建备用古风背景
+        mapContainer.style.background = "linear-gradient(135deg, #1a0f0a 0%, #2c1810 100%)";
+        mapContainer.style.display = "flex";
+        mapContainer.style.alignItems = "center";
+        mapContainer.style.justifyContent = "center";
+        mapContainer.style.color = "#f0e6d2";
+        mapContainer.style.fontSize = "20px";
+        mapContainer.innerHTML = "<div style='text-align: center; padding: 20px;'>地图背景图加载失败<br>请确保 map3.jpg 文件存在</div>";
+      };
+      
+      // 初始化事件
+      addClickEvents();
+      
+      // 窗口大小变化时重新计算位置（如果需要）
+      window.addEventListener('resize', () => {
+        console.log("窗口大小变化，当前尺寸:", window.innerWidth, "x", window.innerHeight);
+      });
+      
+      // 屏幕方向变化处理
+      window.addEventListener('orientationchange', () => {
+        setTimeout(() => {
+          console.log("屏幕方向变化，当前方向:", window.innerWidth > window.innerHeight ? "横屏" : "竖屏");
+        }, 300);
+      });
+    });
+  </script>
+  <script src="../js/common.js"></script>
+  <script src="js/ui-components.js"></script>
+</body>
+</html>

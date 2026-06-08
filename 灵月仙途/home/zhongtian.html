@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="../js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="../css/mobile-adapt.css">
+<title>灵田 - 灵月仙途</title>
+<style>
+  :root {
+    --primary-bg: #f8f9fa;
+    --sky-top: #87ceeb;
+    --sky-bottom: #e0f7fa;
+    --grass-top: #a8d5ba;
+    --grass-bottom: #7cb342;
+    --soil-top: #8d6e63;
+    --soil-side: #5d4037;
+    --soil-dark: #4e342e;
+    --ui-card-bg: rgba(255, 255, 255, 0.95);
+    --ui-border: #ffb74d;
+    --ui-shadow: rgba(0, 0, 0, 0.1);
+    --text-primary: #333;
+    --text-secondary: #666;
+    --accent-gold: #ffd54f;
+    --accent-green: #66bb6a;
+    --highlight: #ffeb3b;
+    --cultivation-gold: linear-gradient(135deg, #ffd700, #ffed4e);
+    --spiritual-energy: #00bcd4;
+    --rare-purple: #9c27b0;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+
+  body {
+    font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  .game-container {
+    width: 100%;
+    max-width: 400px;
+    height: 100vh;
+    max-height: 800px;
+    background: linear-gradient(to bottom, #1a2a6c 0%, #2c3e50 50%, #3a5f3a 100%);
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  }
+
+  /* --- 背景装饰 --- */
+  .background-decorations {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .cloud {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    filter: blur(10px);
+    animation: float 30s infinite linear;
+  }
+
+  .cloud:nth-child(1) {
+    width: 120px;
+    height: 60px;
+    top: 8%;
+    left: -120px;
+    animation-delay: 0s;
+  }
+
+  .cloud:nth-child(2) {
+    width: 90px;
+    height: 45px;
+    top: 15%;
+    left: -90px;
+    animation-delay: 12s;
+  }
+
+  .cloud:nth-child(3) {
+    width: 150px;
+    height: 75px;
+    top: 12%;
+    left: -150px;
+    animation-delay: 22s;
+  }
+
+  @keyframes float {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(calc(100vw + 150px)); }
+  }
+
+  .tree {
+    position: absolute;
+    bottom: 32%;
+    right: 8%;
+    font-size: 70px;
+    opacity: 0.6;
+    transform: scale(0.85);
+    filter: drop-shadow(0 5px 10px rgba(0,0,0,0.3));
+  }
+
+  .mountain {
+    position: absolute;
+    bottom: 32%;
+    left: 3%;
+    font-size: 90px;
+    opacity: 0.5;
+    transform: scale(0.65);
+    filter: drop-shadow(0 5px 10px rgba(0,0,0,0.3));
+  }
+
+  /* 灵气粒子 */
+  .spiritual-particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: var(--spiritual-energy);
+    border-radius: 50%;
+    opacity: 0.6;
+    pointer-events: none;
+    animation: particleFloat 8s infinite ease-in-out;
+    box-shadow: 0 0 10px var(--spiritual-energy);
+  }
+
+  @keyframes particleFloat {
+    0%, 100% { opacity: 0; transform: translateY(0) scale(0); }
+    50% { opacity: 0.8; transform: translateY(-100px) scale(1); }
+  }
+
+  /* --- 顶部状态栏 --- */
+  .top-bar {
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    border-bottom: 2px solid rgba(255, 215, 0, 0.3);
+    position: relative;
+    z-index: 10;
+  }
+
+  .player-info {
+    display: flex;
+    align-items: center;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 248, 225, 0.9));
+    padding: 8px 15px;
+    border-radius: 25px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    border: 2px solid rgba(255, 215, 0, 0.5);
+  }
+
+  .avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    margin-right: 12px;
+    border: 3px solid rgba(255, 215, 0, 0.6);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .avatar::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+    animation: avatarShine 3s infinite;
+  }
+
+  @keyframes avatarShine {
+    0% { transform: translateX(-100%) rotate(45deg); }
+    100% { transform: translateX(100%) rotate(45deg); }
+  }
+
+  .player-details h3 {
+    font-size: 15px;
+    color: var(--text-primary);
+    margin-bottom: 3px;
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  }
+
+  .realm-badge {
+    background: linear-gradient(135deg, #ff9800, #f57c00);
+    color: white;
+    padding: 3px 10px;
+    border-radius: 15px;
+    font-size: 11px;
+    font-weight: bold;
+    display: inline-block;
+    box-shadow: 0 2px 8px rgba(255, 152, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .resources {
+    display: flex;
+    gap: 10px;
+  }
+
+  .resource-item {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 248, 225, 0.9));
+    padding: 7px 14px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2);
+    border: 2px solid rgba(255, 215, 0, 0.4);
+    min-width: 80px;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .resource-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: resourceShine 4s infinite;
+  }
+
+  @keyframes resourceShine {
+    0% { left: -100%; }
+    100% { left: 100%; }
+  }
+
+  /* --- 场景区 --- */
+  .scene-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    position: relative;
+    z-index: 5;
+  }
+
+  .farm-title {
+    background: linear-gradient(135deg, #ff9800, #f57c00);
+    color: white;
+    padding: 10px 30px;
+    border-radius: 25px;
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 25px;
+    box-shadow: 0 6px 20px rgba(255, 152, 0, 0.5);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .farm-title::before {
+    content: '✨';
+    position: absolute;
+    right: 10px;
+    top: 5px;
+    animation: twinkle 2s infinite;
+  }
+
+  @keyframes twinkle {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.2); }
+  }
+
+  /* 等距网格容器 */
+  .isometric-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    padding: 40px;
+    transform: rotateX(55deg) rotateZ(-45deg);
+    transform-style: preserve-3d;
+    margin: 20px;
+  }
+
+  /* 单个地块 */
+  .plot {
+    width: 95px;
+    height: 95px;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transform-style: preserve-3d;
+  }
+
+  .plot:hover {
+    transform: translateZ(25px) scale(1.08);
+  }
+
+  .plot.highlight {
+    filter: brightness(1.25);
+    transform: translateZ(20px);
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+  }
+
+  .plot-top {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--soil-top) 0%, #795548 100%);
+    border: 3px solid #6d4c41;
+    transform: translateZ(0px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.4), 0 5px 15px rgba(0,0,0,0.3);
+    border-radius: 12px;
+  }
+
+  .plot-side {
+    position: absolute;
+    width: 100%;
+    height: 30px;
+    background: linear-gradient(to bottom, var(--soil-side), var(--soil-dark));
+    bottom: -30px;
+    left: 0;
+    transform-origin: top;
+    transform: rotateX(-90deg);
+    border-left: 3px solid var(--soil-dark);
+    border-right: 3px solid var(--soil-dark);
+    border-radius: 0 0 12px 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+  }
+
+  .plot.wet .plot-top {
+    background: linear-gradient(135deg, #5d4037 0%, #4e342e 100%);
+    box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.5), 0 5px 15px rgba(0,0,0,0.3);
+  }
+
+  /* 立体的作物容器 */
+  .crop-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) translateZ(40px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    pointer-events: none;
+    z-index: 10;
+    transform-style: preserve-3d;
+  }
+
+  .crop {
+    font-size: 45px;
+    filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.6));
+    animation: cropGrow 3s infinite ease-in-out;
+    transform: rotateX(-55deg) rotateZ(45deg);
+  }
+
+  @keyframes cropGrow {
+    0%, 100% { transform: rotateX(-55deg) rotateZ(45deg) translateY(0) scale(1); }
+    50% { transform: rotateX(-55deg) rotateZ(45deg) translateY(-12px) scale(1.15); }
+  }
+
+  .crop-shadow {
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 35px;
+    height: 12px;
+    background: radial-gradient(ellipse, rgba(0, 0, 0, 0.4) 0%, transparent 70%);
+    border-radius: 50%;
+    filter: blur(4px);
+  }
+
+  .timer-bar {
+    position: absolute;
+    top: -45px;
+    left: 50%;
+    transform: translateX(-50%) translateZ(45px);
+    width: 75px;
+    height: 12px;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 8px;
+    overflow: hidden;
+    display: none;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
+  }
+
+  .timer-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #66bb6a, #43a047, #2e7d32);
+    width: 0%;
+    transition: width 0.4s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .timer-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: timerShine 2s infinite;
+  }
+
+  @keyframes timerShine {
+    0% { left: -100%; }
+    100% { left: 100%; }
+  }
+
+  .timer-text {
+    position: absolute;
+    top: -35px;
+    left: 50%;
+    transform: translateX(-50%) translateZ(50px);
+    font-size: 13px;
+    color: white;
+    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.9);
+    font-weight: 700;
+    white-space: nowrap;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 4px 10px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .ripe-indicator {
+    position: absolute;
+    top: -50px;
+    left: 50%;
+    transform: translateX(-50%) translateZ(55px);
+    font-size: 28px;
+    animation: ripeBounce 1s infinite;
+    filter: drop-shadow(0 3px 8px rgba(0,0,0,0.5));
+  }
+
+  @keyframes ripeBounce {
+    0%, 100% { transform: translateX(-50%) translateZ(55px) translateY(0); }
+    50% { transform: translateX(-50%) translateZ(55px) translateY(-15px); }
+  }
+
+  /* 飘字特效 */
+  .floating-text {
+    position: absolute;
+    font-weight: bold;
+    font-size: 18px;
+    color: white;
+    text-shadow: 0 3px 10px rgba(0, 0, 0, 0.9);
+    animation: floatUp2 1.2s forwards;
+    pointer-events: none;
+    z-index: 100;
+    white-space: nowrap;
+  }
+
+  @keyframes floatUp2 {
+    0% { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); }
+    100% { opacity: 0; transform: translateY(-80px) scale(1.5) rotate(10deg); }
+  }
+
+  /* --- 底部操作区 --- */
+  .bottom-dock {
+    background: linear-gradient(to top, rgba(44, 30, 20, 0.95), rgba(93, 64, 55, 0.85));
+    backdrop-filter: blur(15px);
+    border-top: 2px solid rgba(255, 215, 0, 0.4);
+    padding: 18px;
+    position: relative;
+    z-index: 20;
+    box-shadow: 0 -5px 25px rgba(0,0,0,0.4);
+  }
+
+  .tool-tip {
+    text-align: center;
+    color: white;
+    font-size: 14px;
+    margin-bottom: 18px;
+    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.9);
+    font-weight: 600;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 8px 15px;
+    border-radius: 15px;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+  }
+
+  .selection-area {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding: 8px 5px;
+    scrollbar-width: none;
+  }
+
+  .selection-area::-webkit-scrollbar {
+    display: none;
+  }
+
+  .seed-slot {
+    flex-shrink: 0;
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 248, 225, 0.9));
+    border: 3px solid rgba(255, 255, 255, 0.6);
+    border-radius: 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+  }
+
+  .seed-slot:hover {
+    transform: translateY(-8px) scale(1.05);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    border-color: rgba(255, 215, 0, 0.8);
+  }
+
+  .seed-slot:active {
+    transform: translateY(-4px) scale(1);
+  }
+
+  .seed-slot.selected {
+    border-color: var(--highlight);
+    box-shadow: 0 0 25px rgba(255, 235, 59, 0.8), 0 10px 30px rgba(0, 0, 0, 0.4);
+    transform: translateY(-10px) scale(1.1);
+    background: white;
+  }
+
+  .seed-slot.selected::after {
+    content: '✓';
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 24px;
+    height: 24px;
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: bold;
+    border: 2px solid white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+
+  .seed-icon {
+    font-size: 36px;
+    margin-bottom: 5px;
+    filter: drop-shadow(0 3px 8px rgba(0,0,0,0.3));
+  }
+
+  .seed-count {
+    position: absolute;
+    bottom: 6px;
+    right: 8px;
+    font-size: 12px;
+    font-weight: bold;
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.95);
+    padding: 3px 7px;
+    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  }
+
+  .action-btns {
+    position: absolute;
+    right: 20px;
+    top: -30px;
+    display: flex;
+    gap: 12px;
+  }
+
+  .float-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ffd54f, #ff9800);
+    border: 3px solid white;
+    box-shadow: 0 5px 20px rgba(255, 152, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 22px;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .float-btn::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: btnShine 3s infinite;
+  }
+
+  @keyframes btnShine {
+    0% { transform: translateX(-100%) rotate(45deg); }
+    100% { transform: translateX(100%) rotate(45deg); }
+  }
+
+  .float-btn:hover {
+    transform: translateY(-5px) scale(1.1);
+    box-shadow: 0 8px 25px rgba(255, 152, 0, 0.7);
+  }
+
+  .float-btn:active {
+    transform: translateY(-2px) scale(1.05);
+  }
+
+  /* 阵法特效 */
+  .array-effect {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255, 215, 0, 0.4) 0%, rgba(0, 0, 0, 0) 70%);
+    pointer-events: none;
+    z-index: 15;
+    display: none;
+    animation: pulseArray2 2.5s infinite;
+    border-radius: 15px;
+    box-shadow: 0 0 50px rgba(255, 215, 0, 0.6);
+  }
+
+  @keyframes pulseArray2 {
+    0% { opacity: 0.4; transform: scale(0.9); }
+    50% { opacity: 0.8; transform: scale(1.1); }
+    100% { opacity: 0.4; transform: scale(0.9); }
+  }
+
+  /* 弹窗通用 */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    z-index: 100;
+    display: none;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .modal-overlay.active {
+    display: flex;
+  }
+
+  .modal-content {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(255, 248, 225, 0.95));
+    width: 85%;
+    max-height: 70%;
+    border-radius: 25px;
+    border: 4px solid var(--ui-border);
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.4);
+    animation: popIn2 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  @keyframes popIn2 {
+    from { transform: scale(0.6); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 18px;
+    border-bottom: 3px dashed var(--ui-border);
+  }
+
+  .modal-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: var(--text-primary);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  }
+
+  .close-btn {
+    background: linear-gradient(135deg, #ff5252, #f44336);
+    color: white;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(244, 67, 54, 0.5);
+    transition: all 0.3s ease;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .close-btn:hover {
+    transform: scale(1.15) rotate(90deg);
+    box-shadow: 0 5px 15px rgba(244, 67, 54, 0.7);
+  }
+
+  .close-btn:active {
+    transform: scale(0.95) rotate(90deg);
+  }
+
+  /* 底部导航 */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 400px;
+    height: 75px;
+    background: linear-gradient(to top, rgba(26, 42, 108, 0.98), rgba(44, 62, 80, 0.9));
+    border-top: 2px solid rgba(255, 215, 0, 0.5);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 1000;
+    box-shadow: 0 -5px 25px rgba(0,0,0,0.5);
+    backdrop-filter: blur(10px);
+  }
+
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    color: rgba(255, 255, 255, 0.6);
+    text-decoration: none;
+    padding: 8px 12px;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    min-width: 60px;
+  }
+
+  .nav-item:hover {
+    color: rgba(255, 215, 0, 0.8);
+    background: rgba(255, 215, 0, 0.1);
+  }
+
+  .nav-item.active {
+    color: rgba(255, 215, 0, 1);
+    background: rgba(255, 215, 0, 0.2);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+  }
+
+  .nav-icon {
+    font-size: 24px;
+    filter: drop-shadow(0 2px 5px rgba(0,0,0,0.5));
+  }
+
+  .nav-text {
+    font-size: 11px;
+    font-weight: bold;
+  }
+
+  /* 经验条 */
+  .exp-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: rgba(0,0,0,0.5);
+    overflow: hidden;
+  }
+
+  .exp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4CAF50, #8BC34A);
+    width: 0%;
+    transition: width 0.5s ease;
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.6);
+  }
+</style>
+
+  </head>
+<body>
+
+  <div class="game-container">
+    <!-- 背景装饰 -->
+    <div class="background-decorations">
+      <div class="cloud"></div>
+      <div class="cloud"></div>
+      <div class="cloud"></div>
+      <div class="tree">🌲</div>
+      <div class="mountain">⛰️</div>
+    </div>
+
+    <!-- 顶部 -->
+    <div class="top-bar">
+      <div class="player-info">
+        <div class="avatar">🧚‍♂️</div>
+        <div class="player-details">
+          <h3 id="playerName">李逍遥</h3>
+          <span class="realm-badge" id="realmDisplay">筑基初期</span>
+        </div>
+      </div>
+      <div class="resources">
+        <div class="resource-item">
+          <span>💰</span>
+          <span id="gold-display">1240</span>
+        </div>
+        <div class="resource-item">
+          <span>💎</span>
+          <span id="jade-display">56</span>
+        </div>
+      </div>
+      <div class="exp-bar">
+        <div class="exp-fill" id="expFill"></div>
+      </div>
+    </div>
+
+    <!-- 中部场景 -->
+    <div class="scene-area">
+      <div class="farm-title">灵田</div>
+      
+      <div class="isometric-grid" id="farmGrid">
+        <div class="array-effect" id="arrayEffect"></div>
+      </div>
+    </div>
+
+    <!-- 底部操作区 -->
+    <div class="bottom-dock">
+      <!-- 功能浮钮 -->
+      <div class="action-btns">
+        <div class="float-btn" onclick="activateArray()" title="聚灵阵">☯️</div>
+        <div class="float-btn" onclick="openBackpack()" title="背包">🎒</div>
+      </div>
+
+      <!-- 提示 -->
+      <div class="tool-tip" id="toolTip">请选择一种灵植种子进行播种</div>
+
+      <!-- 种子选择栏 -->
+      <div class="selection-area" id="seedSelection">
+        <!-- 种子槽位由 JS 生成 -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 底部导航 -->
+  <nav class="bottom-nav">
+    <a href="zhongtian.html" class="nav-item active">
+      <div class="nav-icon">🌾</div>
+      <div class="nav-text">灵田</div>
+    </a>
+    <a href="../home/zhongtian.html" class="nav-item">
+      <div class="nav-icon">🧘</div>
+      <div class="nav-text">修炼</div>
+    </a>
+    <a href="../skills/skills.html" class="nav-item">
+      <div class="nav-icon">📜</div>
+      <div class="nav-text">功法</div>
+    </a>
+    <a href="javascript:void(0)" onclick="window.pageUtils.navigateToGuildPage()" class="nav-item">
+      <div class="nav-icon">🏯</div>
+      <div class="nav-text">宗门</div>
+    </a>
+    <a href="../assets/assets.html" class="nav-item">
+      <div class="nav-icon">🎒</div>
+      <div class="nav-text">资产</div>
+    </a>
+    <a href="../map/map.html" class="nav-item">
+      <div class="nav-icon">🗺️</div>
+      <div class="nav-text">云游</div>
+    </a>
+  </nav>
+
+  <!-- 背包弹窗 -->
+  <div class="modal-overlay" id="backpackModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="modal-title">乾坤袋</span>
+        <button class="close-btn" onclick="closeModal('backpackModal')">×</button>
+      </div>
+      <div style="text-align:center; color:#666; padding:30px;">
+        <div style="font-size: 48px; margin-bottom: 15px;">🎒</div>
+        <p style="font-size: 16px; margin-bottom: 10px;">种子已在下方栏中显示</p>
+        <p style="font-size: 14px; color: #999;">点击底部种子即可选中</p>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // --- 游戏数据 ---
+  const gameState = {
+    gold: 1240,
+    jade: 56,
+    exp: 0,
+    maxExp: 100,
+    selectedSeedId: null,
+    plots: [],
+    seeds: {
+      'rice': { id: 'rice', name: '灵稻', icon: '🌾', growTime: 10, stages: ['🌱', '', '🌾'], count: 20, exp: 5 },
+      'herb': { id: 'herb', name: '灵草', icon: '🌿', growTime: 15, stages: ['🌰', '', '🌿'], count: 15, exp: 8 },
+      'flower': { id: 'flower', name: '幻花', icon: '🌸', growTime: 20, stages: ['🌰', '🌱', '🌸'], count: 10, exp: 12 },
+      'mushroom': { id: 'mushroom', name: '朱果', icon: '🍄', growTime: 25, stages: ['🥚', '', '🍅'], count: 8, exp: 15 },
+      'ginseng': { id: 'ginseng', name: '人参', icon: '🥕', growTime: 35, stages: ['🌰', '🌱', ''], count: 5, exp: 20 }
+    }
+  };
+
+  // 初始化
+  function initGame() {
+    for(let i=0; i<9; i++) {
+      gameState.plots.push({
+        id: i,
+        seedId: null,
+        plantTime: 0,
+        totalTime: 0,
+        stage: 0,
+        isWatered: false
+      });
+    }
+    loadPlayerData();
+    renderSeeds();
+    renderGrid();
+    gameLoop();
+  }
+
+  // 加载玩家数据
+  function loadPlayerData() {
+    const playerData = JSON.parse(localStorage.getItem('playerData') || '{}');
+    if (playerData.name) {
+      document.getElementById('playerName').textContent = playerData.name;
+    }
+    if (playerData.realm) {
+      document.getElementById('realmDisplay').textContent = playerData.realm;
+    }
+  }
+
+  // 渲染种子栏
+  function renderSeeds() {
+    const container = document.getElementById('seedSelection');
+    container.innerHTML = '';
+    
+    Object.values(gameState.seeds).forEach(seed => {
+      const slot = document.createElement('div');
+      slot.className = `seed-slot ${gameState.selectedSeedId === seed.id ? 'selected' : ''}`;
+      slot.onclick = () => selectSeed(seed.id);
+      slot.innerHTML = `
+        <div class="seed-icon">${seed.icon}</div>
+        <div class="seed-count">${seed.count}</div>
+      `;
+      container.appendChild(slot);
+    });
+  }
+
+  // 选中种子
+  function selectSeed(id) {
+    if (gameState.selectedSeedId === id) {
+      gameState.selectedSeedId = null;
+      document.getElementById('toolTip').innerText = "请选择一种灵植种子进行播种";
+    } else {
+      gameState.selectedSeedId = id;
+      const seedName = gameState.seeds[id].name;
+      document.getElementById('toolTip').innerText = `已选中 [${seedName}]，点击空地播种`;
+    }
+    renderSeeds();
+  }
+
+  // 渲染土地（等距样式）
+  function renderGrid() {
+    const gridEl = document.getElementById('farmGrid');
+    const effectLayer = document.getElementById('arrayEffect');
+    gridEl.innerHTML = '';
+    gridEl.appendChild(effectLayer);
+
+    gameState.plots.forEach(plot => {
+      const plotEl = document.createElement('div');
+      plotEl.className = `plot ${plot.isWatered ? 'wet' : ''}`;
+      
+      if (gameState.selectedSeedId && !plot.seedId) {
+        plotEl.classList.add('highlight');
+      }
+
+      plotEl.onclick = () => handlePlotClick(plot.id);
+
+      // 创建等距地块结构
+      const plotTop = document.createElement('div');
+      plotTop.className = 'plot-top';
+      
+      const plotSide = document.createElement('div');
+      plotSide.className = 'plot-side';
+
+      // 作物容器
+      const cropContainer = document.createElement('div');
+      cropContainer.className = 'crop-container';
+
+      if (plot.seedId) {
+        const seedInfo = gameState.seeds[plot.seedId];
+        let cropIcon = seedInfo.stages[0];
+        if (plot.stage >= 2) cropIcon = seedInfo.stages[1];
+        if (plot.stage >= 3) cropIcon = seedInfo.stages[2];
+
+        const cropEl = document.createElement('div');
+        cropEl.className = 'crop';
+        cropEl.textContent = cropIcon;
+        cropContainer.appendChild(cropEl);
+
+        // 添加阴影
+        const shadowEl = document.createElement('div');
+        shadowEl.className = 'crop-shadow';
+        cropContainer.appendChild(shadowEl);
+
+        if (plot.stage < 3) {
+          const timerBar = document.createElement('div');
+          timerBar.className = 'timer-bar';
+          timerBar.style.display = 'block';
+          
+          const timerFill = document.createElement('div');
+          timerFill.className = 'timer-fill';
+          timerFill.id = `fill-${plot.id}`;
+          
+          timerBar.appendChild(timerFill);
+          cropContainer.appendChild(timerBar);
+
+          const timerText = document.createElement('div');
+          timerText.className = 'timer-text';
+          timerText.id = `time-${plot.id}`;
+          timerText.textContent = '...';
+          cropContainer.appendChild(timerText);
+        } else {
+          const ripeIndicator = document.createElement('div');
+          ripeIndicator.className = 'ripe-indicator';
+          ripeIndicator.textContent = '✨';
+          cropContainer.appendChild(ripeIndicator);
+        }
+      }
+
+      plotTop.appendChild(cropContainer);
+      plotEl.appendChild(plotTop);
+      plotEl.appendChild(plotSide);
+      gridEl.appendChild(plotEl);
+    });
+  }
+
+  // 处理土地点击
+  function handlePlotClick(id) {
+    const plot = gameState.plots[id];
+
+    if (plot.stage === 3) {
+      harvest(plot);
+      return;
+    }
+
+    if (!plot.seedId && gameState.selectedSeedId) {
+      plant(plot, gameState.selectedSeedId);
+      return;
+    }
+
+    if (plot.seedId && plot.stage < 3) {
+      if (!plot.isWatered) {
+        water(plot);
+      } else {
+        showFloatingText(window.innerWidth/2, window.innerHeight/2, "生长中...", "#fff");
+      }
+    }
+    
+    if (!plot.seedId && !gameState.selectedSeedId) {
+      showFloatingText(window.innerWidth/2, window.innerHeight/2, "请先选择种子", "#ff5252");
+    }
+  }
+
+  function plant(plot, seedId) {
+    if (gameState.seeds[seedId].count <= 0) {
+      showFloatingText(event.clientX, event.clientY, "种子不足!", "#ff5252");
+      return;
+    }
+
+    plot.seedId = seedId;
+    plot.plantTime = Date.now();
+    plot.totalTime = gameState.seeds[seedId].growTime;
+    plot.stage = 1;
+    plot.isWatered = false;
+    
+    gameState.seeds[seedId].count--;
+    
+    showFloatingText(event.clientX, event.clientY, "播种!", "#66bb6a");
+    
+    if (gameState.seeds[seedId].count === 0) {
+      gameState.selectedSeedId = null;
+      document.getElementById('toolTip').innerText = "该种子已用完，请更换";
+    }
+    
+    renderSeeds();
+    renderGrid();
+  }
+
+  function harvest(plot) {
+    const seedInfo = gameState.seeds[plot.seedId];
+    showFloatingText(event.clientX, event.clientY, `+1 ${seedInfo.name}`, "#ffd54f");
+    
+    const earnGold = 15 + Math.floor(Math.random() * 10);
+    gameState.gold += earnGold;
+    document.getElementById('gold-display').innerText = gameState.gold;
+    
+    // 增加经验
+    addExp(seedInfo.exp || 10);
+    
+    plot.seedId = null;
+    plot.stage = 0;
+    plot.isWatered = false;
+    
+    renderGrid();
+  }
+
+  // 增加经验
+  function addExp(amount) {
+    gameState.exp += amount;
+    if (gameState.exp >= gameState.maxExp) {
+      gameState.exp = gameState.exp - gameState.maxExp;
+      gameState.maxExp = Math.floor(gameState.maxExp * 1.2);
+      showFloatingText(window.innerWidth/2, window.innerHeight/3, "升级了！🎉", "#ffd54f");
+    }
+    updateExpBar();
+  }
+
+  // 更新经验条
+  function updateExpBar() {
+    const percentage = (gameState.exp / gameState.maxExp) * 100;
+    document.getElementById('expFill').style.width = percentage + '%';
+  }
+
+  function water(plot) {
+    plot.isWatered = true;
+    showFloatingText(event.clientX, event.clientY, "浇水!", "#4fc3f7");
+    renderGrid();
+  }
+
+  function activateArray() {
+    const effect = document.getElementById('arrayEffect');
+    effect.style.display = 'block';
+    showFloatingText(window.innerWidth/2, window.innerHeight/2, "聚灵阵开启！加速生长！", "#ffd54f");
+    
+    setTimeout(() => {
+      effect.style.display = 'none';
+    }, 5000);
+  }
+
+  function openBackpack() {
+    document.getElementById('backpackModal').classList.add('active');
+  }
+
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('active');
+  }
+
+  function showFloatingText(x, y, text, color) {
+    const el = document.createElement('div');
+    el.className = 'floating-text';
+    el.innerText = text;
+    el.style.left = x + 'px';
+    el.style.top = y + 'px';
+    el.style.color = color;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1200);
+  }
+
+  // 游戏循环
+  function gameLoop() {
+    setInterval(() => {
+      const now = Date.now();
+      let needRender = false;
+      const isArrayActive = document.getElementById('arrayEffect').style.display === 'block';
+
+      gameState.plots.forEach(plot => {
+        if (plot.seedId && plot.stage < 3) {
+          let speed = 1.0;
+          if (plot.isWatered) speed += 0.5;
+          if (isArrayActive) speed += 2.0;
+
+          const elapsed = (now - plot.plantTime) / 1000;
+          const adjustedTotal = plot.totalTime / speed;
+          const progress = Math.min((elapsed / adjustedTotal) * 100, 100);
+
+          const fillEl = document.getElementById(`fill-${plot.id}`);
+          const timeEl = document.getElementById(`time-${plot.id}`);
+          if(fillEl) fillEl.style.width = `${progress}%`;
+          if(timeEl) timeEl.innerText = `${Math.ceil(plot.totalTime/speed - elapsed)}s`;
+
+          if (progress > 40 && plot.stage === 1) {
+            plot.stage = 2;
+            needRender = true;
+          }
+          if (progress >= 100 && plot.stage === 2) {
+            plot.stage = 3;
+            needRender = true;
+          }
+        }
+      });
+
+      if (needRender) renderGrid();
+
+    }, 200);
+  }
+
+  // 启动
+  initGame();
+
+</script>
+  <script src="../js/common.js"></script>
+  <script src="../js/auth-service.js"></script>
+</body>
+</html>

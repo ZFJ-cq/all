@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="../js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="../css/mobile-adapt.css">
+  <title>灵月仙途 - 炼丹师</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Microsoft YaHei", sans-serif;
+    }
+
+    :root {
+      --primary: #d97b3a;
+      --bg: #121a29;
+      --card: #1e293b;
+      --text: #f0f3f5;
+      --sub: #94a3b8;
+      --line: rgba(255,255,255,0.1);
+      --success: #4ade80;
+      --danger: #ef4444;
+      --warn: #f59e0b;
+      --free: #22c55e;
+      --pay: #f43f5e;
+    }
+
+    body {
+      background: #0f172a;
+      background-image: url('https://picsum.photos/id/175/1920/1080');
+      background-size: cover;
+      background-attachment: fixed;
+      background-blend-mode: overlay;
+      color: var(--text);
+      min-height: 100vh;
+      padding: 15px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 500px; /* 竖屏适配，限制最大宽度 */
+      margin: 0 auto;
+      background: rgba(18,26,41,0.95);
+      border-radius: 12px;
+      padding: 20px 15px;
+      border: 1px solid rgba(217,123,58,0.2);
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .title {
+      font-size: 24px;
+      font-weight: bold;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .title::before {
+      content: "🔥";
+      font-size: 28px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .info-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(217,123,58,0.1);
+      border: 1px solid var(--primary);
+      color: var(--primary);
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .info-btn:hover {
+      background: var(--primary);
+      color: #111;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .spirit-stone {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(217,123,58,0.1);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 13px;
+    }
+
+    .btn-back {
+      background: #334155;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 13px;
+    }
+
+    .btn-back:hover {
+      background: #475569;
+    }
+
+    .tab-group {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      background: rgba(0,0,0,0.2);
+      padding: 6px;
+      border-radius: 10px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .tab-group::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tab {
+      padding: 10px 16px;
+      background: #1e293b;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+      font-size: 14px;
+    }
+
+    .tab.active {
+      background: var(--primary);
+      color: #111;
+      font-weight: bold;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(217,123,58,0.3);
+    }
+
+    .panel {
+      display: none;
+    }
+
+    .panel.active {
+      display: block;
+      animation: fade 0.3s;
+    }
+
+    @keyframes fade {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 10px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      transition: all 0.2s;
+      margin-bottom: 15px;
+    }
+
+    .card:last-child {
+      margin-bottom: 0;
+    }
+
+    .card:hover {
+      border-color: rgba(217,123,58,0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+    }
+
+    .card h3 {
+      color: var(--primary);
+      margin-bottom: 12px;
+      font-size: 17px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card p {
+      color: var(--sub);
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .list {
+      margin-top: 10px;
+      padding-left: 20px;
+      color: var(--sub);
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    .list li {
+      margin-bottom: 5px;
+    }
+
+    .grade {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .tag {
+      padding: 5px 10px;
+      background: rgba(217,123,58,0.15);
+      color: var(--primary);
+      border-radius: 20px;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+
+    .tag:hover {
+      background: rgba(217,123,58,0.3);
+    }
+
+    .tag.success {
+      background: rgba(74,222,128,0.15);
+      color: var(--success);
+    }
+
+    .tag.free {
+      background: rgba(34,197,94,0.15);
+      color: var(--free);
+    }
+
+    .tag.pay {
+      background: rgba(244,63,94,0.15);
+      color: var(--pay);
+    }
+
+    .stove-list {
+      margin-top: 12px;
+    }
+
+    .stove-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 12px;
+      border-bottom: 1px dashed var(--line);
+      cursor: pointer;
+      transition: all 0.2s;
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+
+    .stove-item:last-child {
+      border: none;
+    }
+
+    .stove-item:hover {
+      background: rgba(255,255,255,0.05);
+    }
+
+    .stove-item.active {
+      background: rgba(217,123,58,0.1);
+      border: 1px solid var(--primary);
+    }
+
+    .stove-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stove-name {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .stove-rate {
+      font-size: 12px;
+      color: var(--sub);
+      margin-top: 2px;
+    }
+
+    .stove-cost {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-weight: bold;
+    }
+
+    .control-area {
+      background: var(--card);
+      padding: 20px 15px;
+      border-radius: 10px;
+      text-align: center;
+      margin-top: 15px;
+      border: 1px solid var(--line);
+    }
+
+    .pill-selector {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+
+    .pill-option {
+      padding: 8px 12px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid transparent;
+      font-size: 14px;
+      flex: 1;
+      min-width: 80px;
+    }
+
+    .pill-option.active {
+      background: rgba(217,123,58,0.1);
+      border-color: var(--primary);
+      color: var(--primary);
+      font-weight: bold;
+    }
+
+    .fire-game {
+      margin: 20px 0;
+    }
+
+    .fire-tips {
+      font-size: 13px;
+      color: var(--warn);
+      margin-bottom: 12px;
+      padding: 8px;
+      background: rgba(245,158,11,0.1);
+      border-radius: 8px;
+      text-align: left;
+    }
+
+    .fire-bar {
+      width: 100%;
+      height: 15px;
+      background: #334155;
+      border-radius: 8px;
+      margin: 15px 0;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .fire-progress {
+      height: 100%;
+      width: 40%;
+      background: linear-gradient(90deg, #f97316, #ef4444);
+      transition: width 0.3s ease-in-out;
+      border-radius: 8px;
+      position: relative;
+    }
+
+    .fire-mark {
+      position: absolute;
+      top: -25px;
+      width: 2px;
+      height: 10px;
+      background: var(--warn);
+    }
+
+    .fire-mark:nth-child(1) { left: 30%; }
+    .fire-mark:nth-child(2) { left: 60%; }
+    .fire-mark:nth-child(3) { left: 90%; }
+
+    .fire-mark-text {
+      position: absolute;
+      top: -45px;
+      font-size: 12px;
+      color: var(--warn);
+    }
+
+    .fire-mark-text.wen { left: 25%; }
+    .fire-mark-text.zhong { left: 55%; }
+    .fire-mark-text.wu { left: 85%; }
+
+    .fire-btns {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin: 15px 0;
+    }
+
+    .fire-btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+      flex: 1;
+      max-width: 100px;
+      font-size: 14px;
+    }
+
+    .fire-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    .small { background: #22d3ee; color: #000; }
+    .mid { background: #fb923c; color: #000; }
+    .big { background: #ef4444; color: white; }
+
+    .fire-timer {
+      font-size: 15px;
+      font-weight: bold;
+      color: var(--warn);
+      margin: 12px 0;
+    }
+
+    .result {
+      margin-top: 15px;
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: bold;
+      display: none;
+      animation: pop 0.3s;
+      font-size: 14px;
+    }
+
+    @keyframes pop {
+      0% { transform: scale(0.8); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .result.success {
+      background: rgba(74,222,128,0.1);
+      color: var(--success);
+      display: block;
+      border: 1px solid var(--success);
+    }
+
+    .result.fail {
+      background: rgba(239,68,68,0.1);
+      color: var(--danger);
+      display: block;
+      border: 1px solid var(--danger);
+    }
+
+    .action {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .btn-start {
+      background: var(--primary);
+      color: #111;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+      width: 100%;
+    }
+
+    .btn-start:hover {
+      background: #e68948;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(217,123,58,0.3);
+    }
+
+    .btn-start:disabled {
+      background: #64748b;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .material-check {
+      margin: 12px 0;
+      padding: 8px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 8px;
+      text-align: left;
+    }
+
+    .material-item {
+      display: flex;
+      justify-content: space-between;
+      margin: 4px 0;
+      font-size: 13px;
+    }
+
+    /* 弹窗样式 */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-content {
+      width: 90%;
+      max-width: 400px;
+      background: var(--bg);
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid var(--primary);
+      transform: translateY(-20px);
+      transition: all 0.3s;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .modal-overlay.active .modal-content {
+      transform: translateY(0);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .modal-title {
+      font-size: 18px;
+      color: var(--primary);
+      font-weight: bold;
+    }
+
+    .close-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #334155;
+      color: white;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .modal-body {
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .modal-card {
+      background: var(--card);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+
+    .modal-card h4 {
+      color: var(--primary);
+      margin-bottom: 8px;
+      font-size: 15px;
+    }
+
+    /* 竖屏适配优化 */
+    @media (max-width: 480px) {
+      .container {
+        padding: 15px 10px;
+      }
+      
+      .fire-btns {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .fire-btn {
+        max-width: 100%;
+        width: 100%;
+      }
+      
+      .tab-group {
+        padding: 4px;
+      }
+      
+      .tab {
+        padding: 8px 12px;
+        font-size: 13px;
+      }
+    }
+  </style>
+
+  </head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="title">炼丹师 · 丹道大殿</div>
+      <div class="header-actions">
+        <button class="info-btn" id="info-btn">?</button>
+        <div class="user-info">
+          <div class="spirit-stone">
+            <span>💎</span>
+            <span id="stone-count">9999</span>
+          </div>
+          <button class="btn-back" onclick="history.back()">← 返回</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-group">
+      <div class="tab active" data-target="stove">丹炉选择</div>
+      <div class="tab" data-target="pill">丹药图鉴</div>
+      <div class="tab" data-target="make">开始炼丹</div>
+    </div>
+
+    <!-- 丹炉 -->
+    <div class="panel active" id="stove">
+      <div class="card">
+        <h3>🛕 丹炉品质（成功率/消耗）</h3>
+        <div class="stove-list">
+          <div class="stove-item active" data-stove="1" data-rate="30" data-cost="0">
+            <div class="stove-info">
+              <div class="stove-name">凡铁炉</div>
+              <div class="stove-rate">成功率 30% - 新手入门</div>
+            </div>
+            <div class="stove-cost">
+              <span class="tag free">免费</span>
+            </div>
+          </div>
+          <div class="stove-item" data-stove="2" data-rate="45" data-cost="500">
+            <div class="stove-info">
+              <div class="stove-name">青铜炉</div>
+              <div class="stove-rate">成功率 45% - 坊市可购</div>
+            </div>
+            <div class="stove-cost">
+              <span class="tag pay">500灵石</span>
+            </div>
+          </div>
+          <div class="stove-item" data-stove="3" data-rate="60" data-cost="2000">
+            <div class="stove-info">
+              <div class="stove-name">紫金炉</div>
+              <div class="stove-rate">成功率 60% - 宗门贡献兑换</div>
+            </div>
+            <div class="stove-cost">
+              <span class="tag pay">2000灵石</span>
+            </div>
+          </div>
+          <div class="stove-item" data-stove="4" data-rate="80" data-cost="5000">
+            <div class="stove-info">
+              <div class="stove-name">仙火炉</div>
+              <div class="stove-rate">成功率 80% - 上古传承</div>
+            </div>
+            <div class="stove-cost">
+              <span class="tag pay">5000灵石</span>
+            </div>
+          </div>
+        </div>
+        <p style="margin-top: 15px; color: var(--sub); font-size: 14px;">
+          ✨ 点击选择丹炉，凡铁炉永久免费使用，其他丹炉每次炼丹都需消耗对应灵石
+        </p>
+      </div>
+    </div>
+
+    <!-- 丹药 -->
+    <div class="panel" id="pill">
+      <div class="card">
+        <h3>💊 丹药品级</h3>
+        <div class="grade">
+          <span class="tag">废丹</span>
+          <span class="tag">下品</span>
+          <span class="tag">中品</span>
+          <span class="tag">上品</span>
+          <span class="tag">极品</span>
+          <span class="tag success">仙丹</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>✨ 特殊丹药</h3>
+        <ul class="list">
+          <li>驻颜丹：容貌永驻，女性NPC好感+50（材料：雪莲×3、玉露×2）</li>
+          <li>化形丹：妖族提前化形（材料：妖丹×5、化形草×3）</li>
+          <li>轮回丹：死亡保留记忆转世（材料：忘川水×1、灵魂草×5）</li>
+          <li>九转金丹：提升一个境界（大乘以下）（材料：灵草×5、妖丹×2、灵泉×1）</li>
+          <li>解毒丹：解除丹毒（材料：清灵草×3、解毒花×2）</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 开始炼丹 -->
+    <div class="panel" id="make">
+      <div class="card">
+        <h3>🔮 炼丹准备</h3>
+        
+        <!-- 丹药选择 -->
+        <div class="pill-selector">
+          <div class="pill-option active" data-pill="jiuzhuan">九转金丹</div>
+          <div class="pill-option" data-pill="zhuyan">驻颜丹</div>
+          <div class="pill-option" data-pill="huaxing">化形丹</div>
+          <div class="pill-option" data-pill="lunhui">轮回丹</div>
+        </div>
+        
+        <!-- 材料检查 -->
+        <div class="material-check">
+          <h4 style="margin-bottom: 10px; color: var(--primary);">📦 所需材料</h4>
+          <div class="material-item">
+            <span>灵草</span>
+            <span>5/5</span>
+          </div>
+          <div class="material-item">
+            <span>妖丹</span>
+            <span>2/2</span>
+          </div>
+          <div class="material-item">
+            <span>灵泉</span>
+            <span>1/1</span>
+          </div>
+        </div>
+        
+        <!-- 已选丹炉 -->
+        <div style="margin: 15px 0; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+          <h4 style="color: var(--primary); margin-bottom: 8px;">🔥 已选丹炉</h4>
+          <div id="selected-stove">凡铁炉（成功率 30% · 免费）</div>
+        </div>
+      </div>
+
+      <div class="control-area">
+        <h3>🔥 火候控制小游戏</h3>
+        <div class="fire-tips">
+          💡 提示：九转金丹需要先文火（30%）加热5秒，再中火（60%）炼制8秒，最后武火（90%）凝丹3秒
+        </div>
+        
+        <div class="fire-timer">剩余时间：<span id="timer">16</span>秒</div>
+        
+        <div class="fire-game">
+          <div class="fire-bar">
+            <div class="fire-progress" id="fire"></div>
+            <div class="fire-mark"></div>
+            <div class="fire-mark"></div>
+            <div class="fire-mark"></div>
+            <div class="fire-mark-text wen">文火</div>
+            <div class="fire-mark-text zhong">中火</div>
+            <div class="fire-mark-text wu">武火</div>
+          </div>
+          
+          <div class="fire-btns">
+            <button class="fire-btn small" onclick="setFire(30)">文火</button>
+            <button class="fire-btn mid" onclick="setFire(60)">中火</button>
+            <button class="fire-btn big" onclick="setFire(90)">武火</button>
+          </div>
+        </div>
+        
+        <div class="result" id="result"></div>
+        
+        <div class="action">
+          <button class="btn-start" id="start-btn" onclick="startMake()">开始凝丹 · 开炉</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 介绍弹窗 -->
+  <div class="modal-overlay" id="info-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">📜 炼丹介绍</div>
+        <button class="close-btn" id="close-modal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-card">
+          <h4>📜 炼丹流程</h4>
+          <ul class="list">
+            <li>获取丹方：购买、任务、宗师级自创</li>
+            <li>准备材料：草药、妖丹、灵泉等天材地宝</li>
+            <li>选择丹炉：品质影响成功率（凡铁炉免费）</li>
+            <li>控制火候：实时小游戏，需精准把控</li>
+            <li>凝丹开炉：根据综合条件判定品质</li>
+          </ul>
+        </div>
+        
+        <div class="modal-card">
+          <h4>⚠️ 丹毒机制</h4>
+          <p>连续服用同一种丹药 ≥5 颗，触发丹毒：</p>
+          <p style="color:var(--danger); margin: 10px 0;">每小时损失 3% 气血</p>
+          <p>需服用【解毒丹】解除，丹毒等级越高所需解毒丹数量越多。</p>
+        </div>
+        
+        <div class="modal-card">
+          <h4>⭐ 职业进阶（九品 → 宗师）</h4>
+          <div class="grade">
+            <span class="tag">九品学徒</span>
+            <span class="tag">八品</span>
+            <span class="tag">七品</span>
+            <span class="tag">六品</span>
+            <span class="tag">五品</span>
+            <span class="tag">四品</span>
+            <span class="tag">三品</span>
+            <span class="tag">二品</span>
+            <span class="tag">一品</span>
+            <span class="tag success">宗师</span>
+          </div>
+          <ul class="list" style="margin-top:12px">
+            <li>熟练度达标 + 通过职业考核</li>
+            <li>制作对应品级的代表丹药</li>
+            <li>宗师特权：自创丹方、收徒、作品带灵韵</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 全局变量
+    let selectedStove = {
+      id: 1,
+      name: "凡铁炉",
+      rate: 30,
+      cost: 0
+    };
+    let fireHistory = [];
+    let gameTimer = null;
+    let remainingTime = 16;
+    let selectedPill = "jiuzhuan";
+    
+    // 标签切换
+    const tabs = document.querySelectorAll('.tab');
+    tabs.forEach(t => {
+      t.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+        document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
+        t.classList.add('active');
+        document.getElementById(t.dataset.target).classList.add('active');
+        
+        // 重置小游戏状态
+        if (t.dataset.target === 'make') {
+          resetFireGame();
+        }
+      })
+    })
+
+    // 丹炉选择
+    const stoveItems = document.querySelectorAll('.stove-item');
+    stoveItems.forEach(item => {
+      item.addEventListener('click', () => {
+        stoveItems.forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+        
+        // 更新选中的丹炉信息
+        selectedStove = {
+          id: item.dataset.stove,
+          name: item.querySelector('.stove-name').textContent,
+          rate: parseInt(item.dataset.rate),
+          cost: parseInt(item.dataset.cost)
+        };
+        
+        // 更新炼丹页面的丹炉显示
+        document.getElementById('selected-stove').textContent = 
+          `${selectedStove.name}（成功率 ${selectedStove.rate}% · ${selectedStove.cost > 0 ? selectedStove.cost + '灵石' : '免费'}）`;
+      });
+    });
+
+    // 丹药选择
+    const pillOptions = document.querySelectorAll('.pill-option');
+    pillOptions.forEach(option => {
+      option.addEventListener('click', () => {
+        pillOptions.forEach(o => o.classList.remove('active'));
+        option.classList.add('active');
+        selectedPill = option.dataset.pill;
+        
+        // 更新材料显示（简化版，实际项目可根据丹药类型动态更新）
+        updatePillMaterials(selectedPill);
+      });
+    });
+
+    // 更新丹药材料
+    function updatePillMaterials(pillType) {
+      const materialCheck = document.querySelector('.material-check');
+      let materials = '';
+      
+      switch(pillType) {
+        case 'jiuzhuan':
+          materials = `
+            <h4 style="margin-bottom: 10px; color: var(--primary);">📦 所需材料</h4>
+            <div class="material-item">
+              <span>灵草</span>
+              <span>5/5</span>
+            </div>
+            <div class="material-item">
+              <span>妖丹</span>
+              <span>2/2</span>
+            </div>
+            <div class="material-item">
+              <span>灵泉</span>
+              <span>1/1</span>
+            </div>
+          `;
+          break;
+        case 'zhuyan':
+          materials = `
+            <h4 style="margin-bottom: 10px; color: var(--primary);">📦 所需材料</h4>
+            <div class="material-item">
+              <span>雪莲</span>
+              <span>3/3</span>
+            </div>
+            <div class="material-item">
+              <span>玉露</span>
+              <span>2/2</span>
+            </div>
+          `;
+          break;
+        case 'huaxing':
+          materials = `
+            <h4 style="margin-bottom: 10px; color: var(--primary);">📦 所需材料</h4>
+            <div class="material-item">
+              <span>妖丹</span>
+              <span>5/5</span>
+            </div>
+            <div class="material-item">
+              <span>化形草</span>
+              <span>3/3</span>
+            </div>
+          `;
+          break;
+        case 'lunhui':
+          materials = `
+            <h4 style="margin-bottom: 10px; color: var(--primary);">📦 所需材料</h4>
+            <div class="material-item">
+              <span>忘川水</span>
+              <span>1/1</span>
+            </div>
+            <div class="material-item">
+              <span>灵魂草</span>
+              <span>5/5</span>
+            </div>
+          `;
+          break;
+      }
+      
+      materialCheck.innerHTML = materials;
+    }
+
+    // 火候控制
+    function setFire(per) {
+      document.getElementById('fire').style.width = per + '%';
+      fireHistory.push({time: remainingTime, fire: per});
+    }
+
+    // 重置火候游戏
+    function resetFireGame() {
+      clearInterval(gameTimer);
+      remainingTime = 16;
+      document.getElementById('timer').textContent = remainingTime;
+      document.getElementById('fire').style.width = '40%';
+      document.getElementById('result').style.display = 'none';
+      document.getElementById('start-btn').disabled = false;
+      fireHistory = [];
+    }
+
+    // 扣除灵石
+    function deductStone(amount) {
+      if (amount <= 0) return true;
+      
+      let currentStone = parseInt(document.getElementById('stone-count').textContent);
+      if (currentStone >= amount) {
+        document.getElementById('stone-count').textContent = currentStone - amount;
+        return true;
+      } else {
+        showToast('灵石不足！无法使用该丹炉', 'warning');
+        return false;
+      }
+    }
+
+    // 开始炼丹
+    function startMake() {
+      // 扣除丹炉费用
+      if (!deductStone(selectedStove.cost)) {
+        return;
+      }
+      
+      document.getElementById('start-btn').disabled = true;
+      document.getElementById('result').style.display = 'none';
+      
+      // 启动计时器
+      remainingTime = 16;
+      gameTimer = setInterval(() => {
+        remainingTime--;
+        document.getElementById('timer').textContent = remainingTime;
+        
+        if (remainingTime <= 0) {
+          clearInterval(gameTimer);
+          judgeResult();
+        }
+      }, 1000);
+    }
+
+    // 判定炼丹结果
+    function judgeResult() {
+      const res = document.getElementById('result');
+      const baseRate = selectedStove.rate / 100;
+      
+      // 根据火候操作计算精准度
+      let fireScore = 0;
+      fireHistory.forEach(record => {
+        // 九转金丹的理想火候曲线
+        if (record.time > 11) { // 前5秒：文火30%
+          if (record.fire === 30) fireScore += 10;
+          else if (record.fire > 20 && record.fire < 40) fireScore += 5;
+        } else if (record.time > 3) { // 中间8秒：中火60%
+          if (record.fire === 60) fireScore += 10;
+          else if (record.fire > 50 && record.fire < 70) fireScore += 5;
+        } else { // 最后3秒：武火90%
+          if (record.fire === 90) fireScore += 10;
+          else if (record.fire > 80 && record.fire < 100) fireScore += 5;
+        }
+      });
+      
+      const accuracy = fireScore / (fireHistory.length * 10);
+      const finalRate = baseRate * accuracy;
+      const rand = Math.random();
+      
+      // 判定结果
+      if (rand < finalRate) {
+        // 成功，判定品质
+        let quality = '';
+        const qualityRand = Math.random();
+        
+        if (qualityRand < 0.3) quality = '下品';
+        else if (qualityRand < 0.6) quality = '中品';
+        else if (qualityRand < 0.8) quality = '上品';
+        else if (qualityRand < 0.95) quality = '极品';
+        else quality = '仙丹';
+        
+        res.className = 'result success';
+        res.innerText = `✅ 炼丹成功！获得：${getPillName(selectedPill)}（${quality}）\n🔥 火候精准度：${(accuracy*100).toFixed(1)}%`;
+      } else {
+        res.className = 'result fail';
+        res.innerText = `❌ 炼丹失败！获得废丹\n💡 建议：提升丹炉品质或精准控制火候（当前成功率：${(finalRate*100).toFixed(1)}%）`;
+      }
+    }
+
+    // 获取丹药名称
+    function getPillName(pillType) {
+      switch(pillType) {
+        case 'jiuzhuan': return '九转金丹';
+        case 'zhuyan': return '驻颜丹';
+        case 'huaxing': return '化形丹';
+        case 'lunhui': return '轮回丹';
+        default: return '九转金丹';
+      }
+    }
+
+    // 弹窗控制
+    const infoBtn = document.getElementById('info-btn');
+    const infoModal = document.getElementById('info-modal');
+    const closeModal = document.getElementById('close-modal');
+
+    infoBtn.addEventListener('click', () => {
+      infoModal.classList.add('active');
+      // 禁止背景滚动
+      document.body.style.overflow = 'hidden';
+    });
+
+    closeModal.addEventListener('click', () => {
+      infoModal.classList.remove('active');
+      // 恢复背景滚动
+      document.body.style.overflow = 'auto';
+    });
+
+    // 点击弹窗外部关闭
+    infoModal.addEventListener('click', (e) => {
+      if (e.target === infoModal) {
+        infoModal.classList.remove('active');
+        document.body.style.overflow = 'auto';
+      }
+    });
+  </script>
+  <script src="js/ui-components.js"></script>
+  <script src="../js/auth-service.js"></script>
+</body>
+</html>

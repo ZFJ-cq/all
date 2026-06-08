@@ -1,0 +1,678 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>三角形内角和 · 几何实验室 | 互动演示 · 拖拽顶点</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: radial-gradient(circle at 10% 30%, #101d2c, #030a12);
+            font-family: 'Segoe UI', 'Poppins', 'Roboto', system-ui, sans-serif;
+            min-height: 100vh;
+            padding: 24px 20px;
+            color: #eef4ff;
+        }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* 标题区 */
+        .title-area {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+        h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #f9e0a0, #f5b042);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.3px;
+        }
+        .sub {
+            color: #9dc6e5;
+            font-size: 0.85rem;
+            border-bottom: 1px solid #336e8a;
+            display: inline-block;
+            padding-bottom: 5px;
+        }
+
+        /* 左右等高布局 */
+        .lab-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            align-items: stretch;
+        }
+
+        /* 左侧实验画布区 */
+        .canvas-area {
+            flex: 2;
+            min-width: 320px;
+            background: rgba(8, 30, 45, 0.65);
+            backdrop-filter: blur(8px);
+            border-radius: 36px;
+            border: 1px solid rgba(80, 180, 230, 0.45);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .canvas-wrapper {
+            background: #05161f;
+            border-radius: 28px;
+            padding: 8px;
+            box-shadow: inset 0 0 10px rgba(0,200,255,0.1), 0 12px 25px rgba(0,0,0,0.4);
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            background: radial-gradient(ellipse at 30% 40%, #132e3d, #031018);
+            border-radius: 24px;
+            cursor: grab;
+            touch-action: none;
+        }
+        canvas:active {
+            cursor: grabbing;
+        }
+        .info-note {
+            background: #0f2e3c;
+            border-radius: 28px;
+            padding: 10px 16px;
+            text-align: center;
+            font-size: 0.8rem;
+            border: 1px solid #4a8db0;
+        }
+
+        /* 右侧控制面板 */
+        .control-area {
+            flex: 1.2;
+            min-width: 290px;
+            background: rgba(18, 48, 65, 0.75);
+            backdrop-filter: blur(12px);
+            border-radius: 36px;
+            border: 1px solid rgba(100, 190, 230, 0.5);
+            padding: 24px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+        }
+
+        .param-card {
+            background: rgba(0, 28, 42, 0.7);
+            border-radius: 28px;
+            padding: 18px;
+            border: 1px solid #3680a0;
+        }
+        .param-title {
+            font-weight: 600;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            color: #ffdc97;
+        }
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+        .slider-group span {
+            width: 70px;
+            font-size: 0.8rem;
+        }
+        input[type="range"] {
+            flex: 2;
+            min-width: 130px;
+            height: 4px;
+            border-radius: 6px;
+            background: #2b6685;
+            -webkit-appearance: none;
+        }
+        input[type="range"]:focus {
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            width: 16px;
+            height: 16px;
+            background: #ffbc5e;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 4px #ffb82e;
+            border: none;
+        }
+        .num-input {
+            width: 70px;
+            background: #041e2b;
+            border: 1px solid #4090b0;
+            border-radius: 40px;
+            padding: 6px 8px;
+            color: white;
+            text-align: center;
+            font-size: 0.8rem;
+            font-family: monospace;
+        }
+        .preset-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 18px 0 10px;
+        }
+        .preset-btn {
+            background: #235f7a;
+            border: none;
+            padding: 8px 0;
+            border-radius: 40px;
+            flex: 1;
+            font-weight: 500;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.8rem;
+        }
+        .preset-btn:hover {
+            background: #3b88aa;
+            transform: translateY(-2px);
+        }
+        .angle-panel {
+            background: #0a2a3a;
+            border-radius: 28px;
+            padding: 14px;
+            margin-top: 8px;
+            text-align: center;
+        }
+        .angle-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+        .angle-value {
+            color: #ffcf8a;
+            font-family: monospace;
+            font-size: 1.2rem;
+        }
+        .sum-angle {
+            margin-top: 12px;
+            border-top: 1px solid #3c8aaa;
+            padding-top: 8px;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        .interact-hint {
+            font-size: 0.7rem;
+            color: #bbd9f0;
+            text-align: center;
+            margin-top: 10px;
+        }
+        footer {
+            text-align: center;
+            font-size: 0.7rem;
+            color: #7eacc9;
+            margin-top: 28px;
+            border-top: 1px solid #2c708c;
+            padding-top: 18px;
+        }
+        button.subtle {
+            background: #2d6d8a;
+        }
+        @media (max-width: 800px) {
+            .lab-row { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+<div class="main-container">
+    <div class="title-area">
+        <h1>📐 三角形内角和 · 互动几何实验室</h1>
+        <div class="sub">拖拽顶点 ↓ 或调节参数 | 实时计算内角和 = 180°</div>
+    </div>
+
+    <div class="lab-row">
+        <!-- 左侧画布区 -->
+        <div class="canvas-area">
+            <div class="canvas-wrapper">
+                <canvas id="triangleCanvas" width="700" height="450" style="width:100%; height:auto; aspect-ratio:700/450"></canvas>
+            </div>
+            <div class="info-note">
+                💡 提示：鼠标直接拖拽任意顶点 → 形状动态变化，角度自动计算。右侧滑块也可精细调整。
+            </div>
+        </div>
+
+        <!-- 右侧控制区 -->
+        <div class="control-area">
+            <!-- 几何参数卡片 -->
+            <div class="param-card">
+                <div class="param-title">🎛️ 参数调节 (底边 / 高度 / 顶点偏移)</div>
+                <div class="slider-group">
+                    <span>📏 底边长度:</span>
+                    <input type="range" id="baseSlider" min="2.0" max="14.0" step="0.2" value="8.0">
+                    <input type="number" id="baseNum" class="num-input" step="0.2" value="8.0">
+                </div>
+                <div class="slider-group">
+                    <span>📐 三角形高度:</span>
+                    <input type="range" id="heightSlider" min="2.0" max="12.0" step="0.2" value="6.0">
+                    <input type="number" id="heightNum" class="num-input" step="0.2" value="6.0">
+                </div>
+                <div class="slider-group">
+                    <span>📍 顶点水平偏移:</span>
+                    <input type="range" id="offsetSlider" min="-0.5" max="0.5" step="0.02" value="0.0">
+                    <input type="number" id="offsetNum" class="num-input" step="0.02" value="0.0">
+                </div>
+            </div>
+
+            <!-- 预设形状按钮 -->
+            <div class="param-card">
+                <div class="param-title">🎨 预设形状</div>
+                <div class="preset-buttons">
+                    <button id="presetEquilateral" class="preset-btn">等边三角形</button>
+                    <button id="presetIsosceles" class="preset-btn">等腰三角形</button>
+                    <button id="presetRight" class="preset-btn">直角三角形</button>
+                    <button id="presetRandom" class="preset-btn">随机形状</button>
+                </div>
+            </div>
+
+            <!-- 角度显示面板 -->
+            <div class="angle-panel">
+                <div class="angle-item">
+                    <span>∠ A (顶点A)</span>
+                    <span class="angle-value" id="angleA">0.0°</span>
+                </div>
+                <div class="angle-item">
+                    <span>∠ B (顶点B)</span>
+                    <span class="angle-value" id="angleB">0.0°</span>
+                </div>
+                <div class="angle-item">
+                    <span>∠ C (顶点C)</span>
+                    <span class="angle-value" id="angleC">0.0°</span>
+                </div>
+                <div class="sum-angle">
+                    ✅ 内角和 = <span id="sumAngle" style="color:#ffbb66;">0.0°</span>
+                </div>
+                <div class="interact-hint">
+                    🔍 拖拽顶点可直观探索“三角形内角和恒等于180°”
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer>
+        ⚡ 基于向量夹角定理计算角度 | 动态几何验证 | 支持鼠标拖拽任意顶点
+    </footer>
+</div>
+
+<script>
+    (function() {
+        // ----- 画布与上下文
+        const canvas = document.getElementById('triangleCanvas');
+        const ctx = canvas.getContext('2d');
+        const width = 700, height = 450;
+        canvas.width = width;
+        canvas.height = height;
+        
+        // ----- 三角形顶点坐标 (画布坐标系)
+        let points = {
+            A: { x: width/2, y: 100 },   // 顶点
+            B: { x: width/2 - 80, y: 350 },
+            C: { x: width/2 + 80, y: 350 }
+        };
+        
+        // ----- 参数化驱动 (基于理想坐标系: 底边水平放置, A在底边上方, 方便参数调节)
+        // 三角形定义: 底边BC水平, A按高度+偏移定位, 画布中心为底边中点, 尺寸基于参数
+        // 参数: baseLen (实际像素长度映射), heightLen (垂直像素), offsetRatio (-0.5..0.5)
+        let baseLenPx = 160;      // 底边像素长度默认
+        let heightPx = 150;
+        let offsetRatio = 0;       // 顶点A水平偏移比例 (-0.5=左端, 0.5=右端)
+        
+        // 滑块DOM
+        const baseSlider = document.getElementById('baseSlider');
+        const baseNum = document.getElementById('baseNum');
+        const heightSlider = document.getElementById('heightSlider');
+        const heightNum = document.getElementById('heightNum');
+        const offsetSlider = document.getElementById('offsetSlider');
+        const offsetNum = document.getElementById('offsetNum');
+        
+        // 角度显示span
+        const angleASpan = document.getElementById('angleA');
+        const angleBSpan = document.getElementById('angleB');
+        const angleCSpan = document.getElementById('angleC');
+        const sumSpan = document.getElementById('sumAngle');
+        
+        // 根据参数更新三角形顶点 (保持底边中点位于画布中心)
+        function updateVerticesFromParams() {
+            // 底边中点 (canvas中心偏下, 让视觉舒适)
+            const midX = width / 2;
+            const baseY = height - 90;      // 底边Y坐标 (固定)
+            const halfBase = baseLenPx / 2;
+            const leftX = midX - halfBase;
+            const rightX = midX + halfBase;
+            points.B = { x: leftX, y: baseY };
+            points.C = { x: rightX, y: baseY };
+            // 顶点A: 根据偏移比例 (+ 水平偏移量)
+            let offsetX = offsetRatio * baseLenPx;   // 偏移范围 -halfBase ~ halfBase
+            const A_x = midX + offsetX;
+            const A_y = baseY - heightPx;
+            points.A = { x: A_x, y: Math.max(25, Math.min(height - 30, A_y)) };
+        }
+        
+        // 从当前顶点反向计算参数 (用于拖拽后同步滑块)
+        function computeParamsFromVertices() {
+            const B = points.B, C = points.C, A = points.A;
+            const baseLen = Math.hypot(C.x - B.x, C.y - B.y);
+            baseLenPx = baseLen;
+            // 三角形高度: A到直线BC的垂直距离
+            const dx = C.x - B.x, dy = C.y - B.y;
+            const lenBC = baseLen;
+            if (lenBC < 1e-6) return;
+            const cross = Math.abs((A.x - B.x) * dy - (A.y - B.y) * dx);
+            const height = cross / lenBC;
+            heightPx = height;
+            // 偏移比例: 计算A投影点占底边的比例
+            const t = ((A.x - B.x) * dx + (A.y - B.y) * dy) / (lenBC * lenBC);
+            // 偏移比例 -0.5 ~ 0.5, 映射公式: t值 0->中心偏移0, 0.5->右端+0.5, -0.5->左端-0.5
+            const offset = (t - 0.5) * 1.0;   // t=0 → left对应-0.5；t=1 → right对应0.5
+            offsetRatio = Math.min(0.5, Math.max(-0.5, offset));
+            // 更新滑块数值
+            baseSlider.value = baseLenPx / 10;   // 显示比例更友好 (原底边归一化显示为长度数值)
+            baseNum.value = (baseLenPx / 10).toFixed(1);
+            heightSlider.value = heightPx / 10;
+            heightNum.value = (heightPx / 10).toFixed(1);
+            offsetSlider.value = offsetRatio;
+            offsetNum.value = offsetRatio.toFixed(3);
+        }
+        
+        // 计算角度 (使用向量夹角)
+        function angleBetween(p1, p2, p3) {
+            // 夹角 p2为顶点, 向量 p2->p1 和 p2->p3
+            const v1 = { x: p1.x - p2.x, y: p1.y - p2.y };
+            const v2 = { x: p3.x - p2.x, y: p3.y - p2.y };
+            const dot = v1.x * v2.x + v1.y * v2.y;
+            const mag1 = Math.hypot(v1.x, v1.y);
+            const mag2 = Math.hypot(v2.x, v2.y);
+            if (mag1 === 0 || mag2 === 0) return 0;
+            const rad = Math.acos(Math.min(1, Math.max(-1, dot / (mag1 * mag2))));
+            return rad * 180 / Math.PI;
+        }
+        
+        function getAngles() {
+            const A = points.A, B = points.B, C = points.C;
+            const angleA = angleBetween(B, A, C);
+            const angleB = angleBetween(A, B, C);
+            const angleC = angleBetween(A, C, B);
+            return { angleA, angleB, angleC };
+        }
+        
+        function updateAngleDisplay() {
+            const { angleA, angleB, angleC } = getAngles();
+            angleASpan.innerText = angleA.toFixed(1) + "°";
+            angleBSpan.innerText = angleB.toFixed(1) + "°";
+            angleCSpan.innerText = angleC.toFixed(1) + "°";
+            const sum = angleA + angleB + angleC;
+            sumSpan.innerText = sum.toFixed(1) + "°";
+            // 轻微显示误差补偿
+            if (Math.abs(sum - 180) > 0.5) {
+                sumSpan.style.color = "#ffaa77";
+            } else {
+                sumSpan.style.color = "#ffbb66";
+            }
+        }
+        
+        // 绘图函数 (绘制三角形，标注顶点字母，内角圆弧)
+        function drawTriangle() {
+            ctx.clearRect(0, 0, width, height);
+            // 背景辅助网格 (科技感)
+            ctx.strokeStyle = "#28667c";
+            ctx.lineWidth = 0.6;
+            for (let i = 0; i < width; i += 40) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, height);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(0, i % height);
+                ctx.lineTo(width, i % height);
+                ctx.stroke();
+            }
+            
+            const { A, B, C } = points;
+            // 绘制三角形连线
+            ctx.beginPath();
+            ctx.moveTo(A.x, A.y);
+            ctx.lineTo(B.x, B.y);
+            ctx.lineTo(C.x, C.y);
+            ctx.closePath();
+            ctx.fillStyle = "rgba(70, 150, 200, 0.2)";
+            ctx.fill();
+            ctx.strokeStyle = "#ffe0a3";
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
+            
+            // 顶点标记
+            ctx.font = "bold 16px 'Segoe UI'";
+            ctx.fillStyle = "#feeac1";
+            ctx.shadowBlur = 0;
+            ctx.fillText("A", A.x - 12, A.y - 6);
+            ctx.fillText("B", B.x - 12, B.y - 6);
+            ctx.fillText("C", C.x + 6, C.y - 6);
+            // 绘制内角圆弧示意 (简单)
+            function drawArc(vertex, p1, p2, radius = 18) {
+                const ang1 = Math.atan2(p1.y - vertex.y, p1.x - vertex.x);
+                const ang2 = Math.atan2(p2.y - vertex.y, p2.x - vertex.x);
+                let start = ang1;
+                let end = ang2;
+                if (start > end) [start, end] = [end, start];
+                if (end - start > Math.PI) [start, end] = [end, start + 2*Math.PI];
+                ctx.beginPath();
+                ctx.arc(vertex.x, vertex.y, radius, start, end);
+                ctx.strokeStyle = "#ffbc70";
+                ctx.lineWidth = 1.8;
+                ctx.stroke();
+            }
+            drawArc(A, B, C, 20);
+            drawArc(B, A, C, 18);
+            drawArc(C, A, B, 18);
+            
+            // 显示当前角度值在顶点旁边
+            const { angleA, angleB, angleC } = getAngles();
+            ctx.font = "500 12px monospace";
+            ctx.fillStyle = "#ffe4ac";
+            ctx.fillText(`${angleA.toFixed(0)}°`, A.x - 8, A.y - 18);
+            ctx.fillText(`${angleB.toFixed(0)}°`, B.x - 20, B.y - 12);
+            ctx.fillText(`${angleC.toFixed(0)}°`, C.x + 6, C.y - 12);
+            // 绘制底边中点和辅助虚线（美观）
+            ctx.beginPath();
+            ctx.setLineDash([5, 5]);
+            ctx.moveTo(B.x, B.y);
+            ctx.lineTo(C.x, C.y);
+            ctx.strokeStyle = "#5ba0c0";
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+        
+        function syncUIAndRedraw() {
+            updateVerticesFromParams();
+            drawTriangle();
+            updateAngleDisplay();
+        }
+        
+        // 滑块事件绑定 (保持参数联动)
+        function bindSliders() {
+            function updateFromBase() {
+                baseLenPx = parseFloat(baseSlider.value) * 10;
+                heightPx = parseFloat(heightSlider.value) * 10;
+                offsetRatio = parseFloat(offsetSlider.value);
+                updateVerticesFromParams();
+                drawTriangle();
+                updateAngleDisplay();
+                baseNum.value = (baseLenPx / 10).toFixed(1);
+                heightNum.value = (heightPx / 10).toFixed(1);
+                offsetNum.value = offsetRatio.toFixed(3);
+            }
+            baseSlider.addEventListener('input', updateFromBase);
+            baseNum.addEventListener('change', () => {
+                baseLenPx = parseFloat(baseNum.value) * 10;
+                baseSlider.value = baseLenPx / 10;
+                updateFromBase();
+            });
+            heightSlider.addEventListener('input', updateFromBase);
+            heightNum.addEventListener('change', () => {
+                heightPx = parseFloat(heightNum.value) * 10;
+                heightSlider.value = heightPx / 10;
+                updateFromBase();
+            });
+            offsetSlider.addEventListener('input', updateFromBase);
+            offsetNum.addEventListener('change', () => {
+                offsetRatio = parseFloat(offsetNum.value);
+                offsetSlider.value = offsetRatio;
+                updateFromBase();
+            });
+        }
+        
+        // 预设形状
+        function setEquilateral() {
+            // 等边三角形: 底边=160px, 高 = sqrt(3)/2*底边 ≈138.6
+            baseLenPx = 160;
+            heightPx = 138.5;
+            offsetRatio = 0;
+            syncSlidersAndRedraw();
+        }
+        function setIsosceles() {
+            baseLenPx = 160;
+            heightPx = 120;
+            offsetRatio = 0;
+            syncSlidersAndRedraw();
+        }
+        function setRightTriangle() {
+            // 直角三角形 假设角B=90°, 底边160, 高128 => 直角位于B点附近需要偏移
+            baseLenPx = 160;
+            heightPx = 128;
+            offsetRatio = -0.43;  // 让A点投影靠近左端，产生直角
+            syncSlidersAndRedraw();
+        }
+        function setRandom() {
+            baseLenPx = 100 + Math.random() * 120;
+            heightPx = 70 + Math.random() * 120;
+            offsetRatio = (Math.random() - 0.5) * 0.9;
+            syncSlidersAndRedraw();
+        }
+        function syncSlidersAndRedraw() {
+            baseSlider.value = (baseLenPx / 10).toFixed(1);
+            baseNum.value = (baseLenPx / 10).toFixed(1);
+            heightSlider.value = (heightPx / 10).toFixed(1);
+            heightNum.value = (heightPx / 10).toFixed(1);
+            offsetSlider.value = offsetRatio;
+            offsetNum.value = offsetRatio.toFixed(3);
+            updateVerticesFromParams();
+            drawTriangle();
+            updateAngleDisplay();
+        }
+        
+        // ------ 拖拽交互 (支持拖动任意顶点) ------
+        let dragTarget = null;
+        let dragOffsetX = 0, dragOffsetY = 0;
+        
+        function getMousePos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            let clientX, clientY;
+            if (e.touches) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+            let canvasX = (clientX - rect.left) * scaleX;
+            let canvasY = (clientY - rect.top) * scaleY;
+            canvasX = Math.min(width - 5, Math.max(5, canvasX));
+            canvasY = Math.min(height - 5, Math.max(5, canvasY));
+            return { x: canvasX, y: canvasY };
+        }
+        
+        function onMouseDown(e) {
+            e.preventDefault();
+            const pos = getMousePos(e);
+            const threshold = 18;
+            const vertices = ['A', 'B', 'C'];
+            for (let v of vertices) {
+                const p = points[v];
+                const dist = Math.hypot(pos.x - p.x, pos.y - p.y);
+                if (dist < threshold) {
+                    dragTarget = v;
+                    dragOffsetX = p.x - pos.x;
+                    dragOffsetY = p.y - pos.y;
+                    canvas.style.cursor = 'grabbing';
+                    break;
+                }
+            }
+        }
+        
+        function onMouseMove(e) {
+            if (!dragTarget) return;
+            e.preventDefault();
+            const pos = getMousePos(e);
+            let newX = pos.x + dragOffsetX;
+            let newY = pos.y + dragOffsetY;
+            newX = Math.min(width - 6, Math.max(6, newX));
+            newY = Math.min(height - 6, Math.max(6, newY));
+            points[dragTarget] = { x: newX, y: newY };
+            // 拖拽后重新计算参数并同步滑块 (保证参数与拖拽一致)
+            computeParamsFromVertices();
+            baseSlider.value = (baseLenPx / 10).toFixed(1);
+            baseNum.value = (baseLenPx / 10).toFixed(1);
+            heightSlider.value = (heightPx / 10).toFixed(1);
+            heightNum.value = (heightPx / 10).toFixed(1);
+            offsetSlider.value = offsetRatio;
+            offsetNum.value = offsetRatio.toFixed(3);
+            drawTriangle();
+            updateAngleDisplay();
+        }
+        
+        function onMouseUp(e) {
+            dragTarget = null;
+            canvas.style.cursor = 'grab';
+        }
+        
+        // 添加触摸支持
+        canvas.addEventListener('mousedown', onMouseDown);
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('mouseup', onMouseUp);
+        canvas.addEventListener('touchstart', onMouseDown);
+        window.addEventListener('touchmove', onMouseMove);
+        window.addEventListener('touchend', onMouseUp);
+        canvas.style.cursor = 'grab';
+        
+        // 预设按钮绑定
+        document.getElementById('presetEquilateral').addEventListener('click', setEquilateral);
+        document.getElementById('presetIsosceles').addEventListener('click', setIsosceles);
+        document.getElementById('presetRight').addEventListener('click', setRightTriangle);
+        document.getElementById('presetRandom').addEventListener('click', setRandom);
+        
+        // 初始化
+        function init() {
+            bindSliders();
+            // 初始设置标准三角形(参数适中的等腰)
+            baseLenPx = 160;
+            heightPx = 135;
+            offsetRatio = 0;
+            syncSlidersAndRedraw();
+        }
+        init();
+    })();
+</script>
+</body>
+</html>

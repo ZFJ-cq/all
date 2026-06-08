@@ -1,0 +1,205 @@
+<script src="../js/api-service.js"></script>
+<div class="section active">
+  <div class="status-message" id="activityMessage"></div>
+  <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+    <h2 class="section-title">活动管理</h2>
+    <button class="btn btn-primary" onclick="openAddActivityModal()">新增活动</button>
+  </div>
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>活动名称</th>
+        <th>开始时间</th>
+        <th>结束时间</th>
+        <th>状态</th>
+        <th>类型</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody id="activityTableBody">
+      <!-- JS 生成 -->
+    </tbody>
+  </table>
+</div>
+
+<!-- 新增/编辑活动模态框 -->
+<div id="activityModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="activityModalTitle">新增活动</h3>
+      <span class="close" onclick="closeModal()">&times;</span>
+    </div>
+    <form id="activityForm">
+      <input type="hidden" id="activityId">
+      <div class="form-group">
+        <label>活动名称</label>
+        <input type="text" id="activityName" required>
+      </div>
+      <div class="form-group">
+        <label>活动类型</label>
+        <select id="activityType" required>
+          <option value="login">登录活动</option>
+          <option value="recharge">充值活动</option>
+          <option value="consume">消费活动</option>
+          <option value="level">等级活动</option>
+          <option value="other">其他活动</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>开始时间</label>
+        <input type="datetime-local" id="activityStartTime" required>
+      </div>
+      <div class="form-group">
+        <label>结束时间</label>
+        <input type="datetime-local" id="activityEndTime" required>
+      </div>
+      <div class="form-group">
+        <label>状态</label>
+        <select id="activityStatus" required>
+          <option value="1">启用</option>
+          <option value="0">禁用</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>活动描述</label>
+        <textarea id="activityDescription" rows="3"></textarea>
+      </div>
+      <div style="text-align: right; margin-top: 20px;">
+        <button type="button" class="btn btn-secondary" onclick="closeModal()">取消</button>
+        <button type="submit" class="btn btn-primary">保存</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  // 初始化活动管理
+  function initActivities() {
+    loadActivities();
+    bindActivityFormEvents();
+  }
+
+  // 加载活动列表
+  async function loadActivities() {
+    const tableBody = document.getElementById('activityTableBody');
+    tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#999;">加载中...</td></tr>';
+    
+    try {
+      const activities = await apiService.get('/activity');
+      
+      // 处理API返回的数据格式
+      let activitiesData = activities;
+      if (activities && activities.data) {
+        activitiesData = activities.data;
+      }
+      
+      tableBody.innerHTML = '';
+      if (activitiesData && Array.isArray(activitiesData) && activitiesData.length > 0) {
+        activitiesData.forEach(activity => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${activity.id}</td>
+            <td>${activity.name}</td>
+            <td>${activity.startTime}</td>
+            <td>${activity.endTime}</td>
+            <td>${activity.status === 1 ? '启用' : '禁用'}</td>
+            <td>${activity.type}</td>
+            <td>
+              <button class="btn btn-primary" onclick="editActivity(${activity.id})">编辑</button>
+              <button class="btn btn-danger" onclick="deleteActivity(${activity.id})">删除</button>
+            </td>
+          `;
+          tableBody.appendChild(row);
+        });
+      } else {
+        tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#999;">暂无活动</td></tr>';
+      }
+    } catch (error) {
+      console.error('加载活动列表失败:', error);
+      tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#e74c3c;">加载失败: ' + (error.message || '未知错误') + '</td></tr>';
+    }
+  }
+
+  // 打开新增活动模态框
+  function openAddActivityModal() {
+    document.getElementById('activityModalTitle').textContent = '新增活动';
+    document.getElementById('activityForm').reset();
+    document.getElementById('activityId').value = '';
+    openModal('activityModal');
+  }
+
+  // 编辑活动
+  async function editActivity(id) {
+    try {
+      const activity = await apiService.get(`/activity/${id}`);
+      document.getElementById('activityModalTitle').textContent = '编辑活动';
+      document.getElementById('activityId').value = activity.id;
+      document.getElementById('activityName').value = activity.name;
+      document.getElementById('activityType').value = activity.type;
+      document.getElementById('activityStartTime').value = activity.startTime;
+      document.getElementById('activityEndTime').value = activity.endTime;
+      document.getElementById('activityStatus').value = activity.status;
+      document.getElementById('activityDescription').value = activity.description || '';
+      openModal('activityModal');
+    } catch (error) {
+      console.error('获取活动信息失败:', error);
+      showMessage('activityMessage', '获取活动信息失败: ' + (error.message || '未知错误'), 'error');
+    }
+  }
+
+  // 删除活动
+  async function deleteActivity(id) {
+    if (confirm('确定要删除这个活动吗？')) {
+      try {
+        await apiService.delete(`/activity/${id}`);
+        showMessage('activityMessage', '删除成功', 'success');
+        loadActivities();
+      } catch (error) {
+        console.error('删除活动失败:', error);
+        showMessage('activityMessage', '删除失败: ' + (error.message || '未知错误'), 'error');
+      }
+    }
+  }
+
+  // 绑定活动表单事件
+  function bindActivityFormEvents() {
+    document.getElementById('activityForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      saveActivity();
+    });
+  }
+
+  // 保存活动
+  async function saveActivity() {
+    const id = document.getElementById('activityId').value;
+    const activity = {
+      name: document.getElementById('activityName').value,
+      type: document.getElementById('activityType').value,
+      startTime: document.getElementById('activityStartTime').value,
+      endTime: document.getElementById('activityEndTime').value,
+      status: parseInt(document.getElementById('activityStatus').value),
+      description: document.getElementById('activityDescription').value
+    };
+    
+    try {
+      if (id) {
+        await apiService.put(`/activity/${id}`, activity);
+        showMessage('activityMessage', '更新成功', 'success');
+      } else {
+        await apiService.post('/activity', activity);
+        showMessage('activityMessage', '新增成功', 'success');
+      }
+      closeModal();
+      loadActivities();
+    } catch (error) {
+      console.error('保存活动失败:', error);
+      showMessage('activityMessage', '保存失败: ' + (error.message || '未知错误'), 'error');
+    }
+  }
+
+  // 页面加载完成后初始化
+  if (typeof window.initActivities === 'undefined') {
+    window.initActivities = initActivities;
+  }
+</script>

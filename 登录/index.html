@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pure Frontend "Login"</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .login-section, .dashboard-section { max-width: 400px; margin: 20px auto; padding: 20px; border: 1px solid #ccc; border-radius: 5px; }
+        input, select, button { width: 100%; padding: 10px; margin: 5px 0; box-sizing: border-box; }
+        .hidden { display: none; }
+        .user-info { margin-top: 10px; padding: 10px; background-color: #e9ecef; border-radius: 5px; }
+    </style>
+</head>
+<body>
+
+<!-- 模拟登录表单 -->
+<div id="loginSection" class="login-section">
+    <h2>Simulated Login (Pure Frontend)</h2>
+    <p>This is a demo of frontend-only "login". No real authentication occurs.</p>
+    <label for="userNameInput">User Name:</label>
+    <input type="text" id="userNameInput" placeholder="Enter your name">
+
+    <label for="userRoleSelect">Role:</label>
+    <select id="userRoleSelect">
+        <option value="admin">Admin</option>
+        <option value="user">Regular User</option>
+        <option value="guest">Guest</option>
+    </select>
+
+    <button id="loginBtn">Login</button>
+    <div id="loginError" style="color: red; margin-top: 10px; display: none;">Invalid input.</div>
+</div>
+
+<!-- 仪表板 -->
+<div id="dashboardSection" class="dashboard-section hidden">
+    <h2 id="welcomeMessage">Welcome!</h2>
+    <div class="user-info">
+        <p><strong>Name:</strong> <span id="displayName"></span></p>
+        <p><strong>Role:</strong> <span id="displayRole"></span></p>
+    </div>
+    <div id="contentArea">
+        <h3>Protected Content:</h3>
+        <p>This content is displayed based on the selected role.</p>
+        <!-- 根据角色显示不同内容 -->
+        <div id="adminContent" class="hidden">
+            <p>Admin Panel: Manage users, settings, etc.</p>
+            <button>Admin Action</button>
+        </div>
+        <div id="userContent" class="hidden">
+            <p>User Dashboard: View profile, manage preferences.</p>
+            <button>User Action</button>
+        </div>
+        <div id="guestContent" class="hidden">
+            <p>Guest View: Limited access.</p>
+            <button>Guest Action</button>
+        </div>
+    </div>
+    <button id="logoutBtn">Logout</button>
+</div>
+
+<script>
+    const loginSection = document.getElementById('loginSection');
+    const dashboardSection = document.getElementById('dashboardSection');
+    const loginBtn = document.getElementById('loginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const userNameInput = document.getElementById('userNameInput');
+    const userRoleSelect = document.getElementById('userRoleSelect');
+    const loginErrorDiv = document.getElementById('loginError');
+    const welcomeMessage = document.getElementById('welcomeMessage');
+    const displayName = document.getElementById('displayName');
+    const displayRole = document.getElementById('displayRole');
+    const adminContent = document.getElementById('adminContent');
+    const userContent = document.getElementById('userContent');
+    const guestContent = document.getElementById('guestContent');
+
+    // --- 模拟登录 ---
+    loginBtn.addEventListener('click', () => {
+        const userName = userNameInput.value.trim();
+        const userRole = userRoleSelect.value;
+
+        if (!userName) {
+            loginErrorDiv.textContent = "Please enter a user name.";
+            loginErrorDiv.style.display = 'block';
+            return;
+        }
+
+        // 模拟登录成功 (无后端验证)
+        // 保存用户信息到localStorage (模拟)
+        localStorage.setItem('currentUser', JSON.stringify({
+            name: userName,
+            role: userRole
+        }));
+
+        console.log(`Simulated login as ${userName} (${userRole})`);
+        showDashboard(userName, userRole);
+    });
+
+    // --- 显示仪表板 ---
+    function showDashboard(name, role) {
+        loginSection.classList.add('hidden');
+        dashboardSection.classList.remove('hidden');
+
+        // 更新UI
+        welcomeMessage.textContent = `Welcome, ${name}!`;
+        displayName.textContent = name;
+        displayRole.textContent = role;
+
+        // 根据角色显示不同内容
+        // 隐藏所有内容区域
+        adminContent.classList.add('hidden');
+        userContent.classList.add('hidden');
+        guestContent.classList.add('hidden');
+
+        // 显示对应角色的内容
+        if (role === 'admin') {
+            adminContent.classList.remove('hidden');
+        } else if (role === 'user') {
+            userContent.classList.remove('hidden');
+        } else if (role === 'guest') {
+            guestContent.classList.remove('hidden');
+        }
+    }
+
+    // --- 登出 ---
+    logoutBtn.addEventListener('click', () => {
+        // 清除模拟的用户信息 (实际就是清除localStorage)
+        localStorage.removeItem('currentUser');
+        console.log('Simulated logout.');
+
+        // 返回登录页面
+        dashboardSection.classList.add('hidden');
+        loginSection.classList.remove('hidden');
+
+        // 清空输入框
+        userNameInput.value = '';
+        userRoleSelect.value = 'user'; // 默认回退到用户角色
+        loginErrorDiv.style.display = 'none';
+    });
+
+    // --- 页面加载时检查是否已登录 ---
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedUser = localStorage.getItem('currentUser');
+        if (savedUser) {
+            try {
+                const user = JSON.parse(savedUser);
+                console.log('Found saved user:', user);
+                showDashboard(user.name, user.role);
+            } catch (e) {
+                console.error('Error parsing saved user data:', e);
+                localStorage.removeItem('currentUser'); // 清除损坏的数据
+            }
+        }
+        // 如果没有保存的用户信息，则留在登录页面
+    });
+</script>
+
+</body>
+</html>

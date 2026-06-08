@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="../js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="../css/mobile-adapt.css">
+  <title>灵月仙途 - 道启</title>
+  <style>
+    :root {
+      --primary-gold: #b8860b;
+      --text-black: #1a1a1a;
+      --text-grey: #666666;
+      --overlay-color: rgba(255, 255, 255, 0.4); 
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Microsoft YaHei', 'SimSun', serif;
+      
+      background-color: #f0f0f0;
+      background-image: linear-gradient(to bottom, var(--overlay-color), rgba(255, 255, 255, 0.8)), 
+                        url('../images/beijing.png');
+      
+      background-size: cover;
+      background-position: center top;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      color: var(--text-black);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .header-section {
+      display: flex;
+      justify-content: flex-end; 
+      padding: 60px 40px 0 0;
+      z-index: 10;
+      animation: fadeInDown 1.5s ease-out;
+    }
+
+    .main-title {
+      font-family: 'SimSun', serif;
+      font-size: 5rem;
+      font-weight: 900;
+      color: var(--text-black);
+      text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.9);
+      line-height: 1.2;
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+      height: 60vh; 
+      letter-spacing: 15px;
+      position: relative;
+      margin-left: 0; 
+    }
+    
+    .main-title::after {
+      content: '';
+      position: absolute;
+      bottom: -40px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 40px;
+      height: 40px;
+      background: #b22222;
+      mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M10,10 Q50,50 90,10 M10,90 Q50,50 90,90 M10,50 L90,50 M50,10 L50,90" stroke="white" stroke-width="10" fill="none"/></svg>') no-repeat center;
+      -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M10,10 Q50,50 90,10 M10,90 Q50,50 90,90 M10,50 L90,50 M50,10 L50,90" stroke="white" stroke-width="10" fill="none"/></svg>') no-repeat center;
+      mask-size: contain;
+      -webkit-mask-size: contain;
+      opacity: 0.8;
+    }
+
+    .footer-section {
+      width: 100%;
+      padding: 0 40px 60px 40px;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      animation: fadeInUp 1.5s ease-out 0.5s both;
+      background: linear-gradient(to top, rgba(255, 255, 255, 0.95) 0%, transparent 100%);
+    }
+
+    .loading-text {
+      font-size: 1rem;
+      color: var(--primary-gold);
+      letter-spacing: 2px;
+      font-weight: bold;
+      min-height: 1.5em;
+      font-family: 'SimSun', serif;
+      transition: opacity 0.3s ease;
+      margin-left: 0; 
+      text-align: center;
+    }
+
+    .progress-container {
+      width: 100%;
+      max-width: 400px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 2px;
+      background: #d0d0d0;
+      border-radius: 1px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--primary-gold);
+      border-radius: 1px;
+      transition: width 0.3s ease-out;
+      box-shadow: 0 0 10px rgba(184, 134, 11, 0.4);
+    }
+
+    .percentage-text {
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-grey);
+      font-family: monospace;
+      margin-left: 0;
+      margin-top: 5px;
+    }
+
+    .health-warning-container {
+      margin-top: 25px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .age-rating-badge {
+      width: 64px;
+      height: 82px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border: 1px solid #e0e0e0;
+    }
+    
+    .age-rating-top {
+      background: #e8c365;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      padding: 4px 2px;
+    }
+
+    .age-number-group {
+      display: flex;
+      align-items: baseline;
+      line-height: 1;
+    }
+
+    .age-number {
+      font-size: 32px;
+      font-weight: 900;
+      font-family: Arial, sans-serif;
+    }
+    
+    .age-plus {
+      font-size: 18px;
+      font-weight: 900;
+      margin-left: 2px;
+      font-family: Arial, sans-serif;
+    }
+
+    .cadpa-text {
+      font-size: 11px;
+      font-weight: bold;
+      margin-top: 4px;
+      font-family: Arial, sans-serif;
+      letter-spacing: 1px;
+      opacity: 0.95;
+    }
+
+    .age-rating-bottom {
+      background: #fff;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-top: 1px solid #eee;
+    }
+
+    .age-tip-text {
+      font-size: 10px;
+      color: #333;
+      font-weight: bold;
+      font-family: 'Microsoft YaHei', sans-serif;
+      letter-spacing: 1px;
+    }
+
+    .health-warning {
+      font-size: 0.65rem;
+      color: #999999;
+      line-height: 1.6;
+      max-width: 300px;
+      border-top: 1px solid #e0e0e0;
+      padding-top: 10px;
+      width: 100%;
+    }
+    
+    .warning-title {
+      font-weight: bold;
+      color: #777777;
+      margin-bottom: 4px;
+      display: block;
+      font-size: 0.7rem;
+    }
+
+    @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+    @media (max-width: 480px) {
+      .main-title { font-size: 3.5rem; height: 50vh; letter-spacing: 10px; }
+      .header-section { padding-right: 20px; }
+      .footer-section { padding: 0 20px 40px 20px; }
+      .age-rating-badge { width: 54px; height: 70px; }
+      .age-number { font-size: 26px; }
+      .age-plus { font-size: 14px; }
+      .cadpa-text { font-size: 9px; }
+      .age-tip-text { font-size: 9px; }
+      .health-warning { font-size: 0.6rem; max-width: 100%; }
+    }
+    
+    @media (orientation: landscape) and (max-height: 500px) {
+      body::after {
+        content: "为了最佳体验，请旋转设备至竖屏模式";
+        position: fixed; inset: 0; background: rgba(255, 255, 255, 0.95);
+        color: #333; display: flex; justify-content: center; align-items: center;
+        z-index: 999; font-size: 1.2rem; text-align: center; padding: 20px;
+      }
+      .header-section, .footer-section { display: none; }
+    }
+  </style>
+
+  </head>
+<body>
+
+  <div class="header-section">
+    <h1 class="main-title">
+      <span>灵</span><span>月</span><span>仙</span><span>途</span>
+    </h1>
+  </div>
+
+  <div class="footer-section">
+    <div class="loading-text" id="loadingText">正在开辟丹田...</div>
+    
+    <div class="progress-container">
+      <div class="progress-track">
+        <div class="progress-fill" id="loadingFill"></div>
+      </div>
+      <div class="percentage-text" id="loadingPercentage">0%</div>
+    </div>
+
+    <div class="health-warning-container">
+      <div class="age-rating-badge">
+        <div class="age-rating-top">
+          <div class="age-number-group">
+            <span class="age-number">16</span>
+            <span class="age-plus">+</span>
+          </div>
+          <div class="cadpa-text">CADPA</div>
+        </div>
+        <div class="age-rating-bottom">
+          <span class="age-tip-text">适龄提示</span>
+        </div>
+      </div>
+
+      <div class="health-warning">
+        <span class="warning-title">健康游戏忠告</span>
+        抵制不良游戏，拒绝盗版游戏。注意自我保护，谨防受骗上当。<br>
+        适度游戏益脑，沉迷游戏伤身。合理安排时间，享受健康生活。
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/auth-check.js"></script>
+  <script src="../js/token-manager.js"></script>
+  <script src="../js/role-sync.js"></script>
+  <script>
+    // 加载自定义背景
+    window.addEventListener('DOMContentLoaded', function() {
+      const savedBackground = localStorage.getItem('loadingBackground');
+      if (savedBackground) {
+        document.body.style.backgroundImage = `linear-gradient(to bottom, var(--overlay-color), rgba(255, 255, 255, 0.8)), url(${savedBackground})`;
+      }
+    });
+    
+    let progress = 0;
+    const loadingFill = document.getElementById('loadingFill');
+    const loadingPercentage = document.getElementById('loadingPercentage');
+    const loadingText = document.getElementById('loadingText');
+
+    const stages = [
+      { threshold: 10, text: "正在开辟丹田..." },
+      { threshold: 30, text: "正在汇聚天地灵气..." },
+      { threshold: 50, text: "正在构建经脉网络..." },
+      { threshold: 70, text: "正在凝结金丹..." },
+      { threshold: 90, text: "正在突破境界..." },
+      { threshold: 100, text: "飞升在即..." }
+    ];
+
+    const updateText = (currentProgress) => {
+      for (let i = stages.length - 1; i >= 0; i--) {
+        if (currentProgress >= stages[i].threshold) {
+          if (loadingText.textContent !== stages[i].text) {
+            loadingText.style.opacity = 0;
+            setTimeout(() => {
+              loadingText.textContent = stages[i].text;
+              loadingText.style.opacity = 1;
+            }, 200);
+          }
+          break;
+        }
+      }
+    };
+
+    const loadingInterval = setInterval(() => {
+      let increment = Math.random() * 4;
+      if (progress > 80) increment = Math.random() * 1.5;
+      if (progress > 95) increment = Math.random() * 0.5;
+
+      progress += increment;
+
+      // 确保进度最终能达到100%
+      if (progress >= 99.5) {
+        progress = 100;
+        clearInterval(loadingInterval);
+        
+        // 更新 UI 为完成状态
+        loadingFill.style.width = '100%';
+        loadingPercentage.textContent = '100%';
+        loadingText.textContent = "载入完成！";
+        
+        // 确保角色ID同步
+        const selectedCharacterId = localStorage.getItem('selectedCharacterId');
+        if (selectedCharacterId) {
+          localStorage.setItem('currentRoleId', selectedCharacterId);
+          console.log('角色 ID 已同步:', selectedCharacterId);
+        }
+        
+        // 检查认证信息（使用 TokenManager 确保获取最新的 Token）
+        const token = window.TokenUtils ? window.TokenUtils.get() : localStorage.getItem('token');
+        const userId = localStorage.getItem('userId');
+        const roleId = localStorage.getItem('roleId');
+        console.log('=== 加载完成，准备跳转 ===');
+        console.log('Token:', token ? '存在' : '不存在');
+        console.log('userId:', userId ? '存在' : '不存在');
+        console.log('roleId:', roleId ? '存在' : '不存在');
+        
+        // 验证 Token 完整性
+        if (window.TokenUtils) {
+          const status = window.TokenUtils.validate();
+          console.log('Token 完整性检查:', status);
+          
+          if (!status.hasToken) {
+            console.error('❌ 错误：Token 不存在，无法跳转到首页');
+            window.showToast('认证信息丢失，请重新登录', 'error');
+            setTimeout(() => {
+              window.location.href = '../login.html';
+            }, 1500);
+            return;
+          }
+        }
+        
+        // 直接等待 1 秒后跳转
+        setTimeout(() => {
+          console.log('=== 开始跳转到首页 ===');
+          console.log('跳转前 Token:', window.TokenUtils ? window.TokenUtils.get() : localStorage.getItem('token'));
+          window.location.href = '../index.html';
+        }, 1000);
+        
+      } else {
+        loadingFill.style.width = progress + '%';
+        loadingPercentage.textContent = Math.floor(progress) + '%';
+        updateText(Math.floor(progress));
+      }
+    }, 150);
+  </script>
+  <script src="../js/ui-components.js"></script>
+</body>
+</html>

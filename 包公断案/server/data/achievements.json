@@ -1,0 +1,60 @@
+{
+  "achievements": [
+    {
+      "id": "ach_001",
+      "name": "初出茅庐",
+      "description": "完成任意一个案件",
+      "icon": "star",
+      "condition": { "type": "caseCompleted", "count": 1 }
+    },
+    {
+      "id": "ach_002",
+      "name": "明察秋毫",
+      "description": "在一个案件中收集全部证据",
+      "icon": "eye",
+      "condition": { "type": "allEvidenceCollected", "count": 1 }
+    },
+    {
+      "id": "ach_003",
+      "name": "铁面无私",
+      "description": "一次性正确指认凶手",
+      "icon": "judge",
+      "condition": { "type": "correctJudgmentFirstTry", "count": 1 }
+    },
+    {
+      "id": "ach_004",
+      "name": "包青天在世",
+      "description": "完成所有案件",
+      "icon": "crown",
+      "condition": { "type": "allCasesCompleted", "count": 2 }
+    },
+    {
+      "id": "ach_005",
+      "name": "神探狄仁杰",
+      "description": "不使用任何提示完成一个案件",
+      "icon": "detective",
+      "condition": { "type": "noHintCompleted", "count": 1 }
+    },
+    {
+      "id": "ach_006",
+      "name": "速断速决",
+      "description": "在10分钟内完成一个案件",
+      "icon": "lightning",
+      "condition": { "type": "speedRun", "timeLimit": 600 }
+    },
+    {
+      "id": "ach_007",
+      "name": "证据达人",
+      "description": "累计收集20个证据",
+      "icon": "evidence",
+      "condition": { "type": "totalEvidenceCollected", "count": 20 }
+    },
+    {
+      "id": "ach_008",
+      "name": "坚持不懈",
+      "description": "同一个案件尝试了3次以上",
+      "icon": "persist",
+      "condition": { "type": "retryCount", "count": 3 }
+    }
+  ]
+}

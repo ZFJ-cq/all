@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="../js/viewport-adapt.js"></script>
+  <script src="../js/config.js"></script>
+  <link rel="stylesheet" href="../css/mobile-adapt.css">
+  <style>
+    /* 安全区域适配 */
+    @supports (padding: max(0px)) {
+      :root {
+        --safe-top: env(safe-area-inset-top, 0px);
+        --safe-bottom: env(safe-area-inset-bottom, 0px);
+        --safe-left: env(safe-area-inset-left, 0px);
+        --safe-right: env(safe-area-inset-right, 0px);
+      }
+    }
+  </style>
+  <title>灵月仙途 - 地图</title>
+  <style>
+    :root {
+      --gold-primary: #e6c749;
+      --gold-light: #f4d03f;
+      --gold-dim: #8a7525;
+      --text-main: #fdfbf7;
+      --text-dim: #d4c5a9;
+      --bg-dark: rgba(15, 20, 35, 0.95);
+      --bg-panel: rgba(20, 25, 45, 0.85);
+      --border-glow: 0 0 10px rgba(230, 199, 73, 0.3);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      font-family: 'Microsoft YaHei', 'SimSun', serif;
+      background: linear-gradient(to bottom, #0f1420, #1a202c), 
+                  url('https://images.unsplash.com/photo-1518063319789-7217e6706b04?q=80&w=2070&auto=format&fit=crop');
+      background-size: cover;
+      background-position: center;
+      min-height: 100vh;
+      width: 100vw;
+      overflow-x: hidden;
+      overflow-y: auto;
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      padding-top: var(--safe-top, 0px);
+      padding-bottom: calc(80px + var(--safe-bottom, 0px));
+    }
+
+    .particles {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      background-image: radial-gradient(var(--gold-primary) 1px, transparent 1px);
+      background-size: 60px 60px;
+      animation: particleFloat 30s linear infinite;
+      opacity: 0.15;
+    }
+
+    @keyframes particleFloat {
+      from { background-position: 0 0; }
+      to { background-position: 0 1000px; }
+    }
+
+    @keyframes slideDown {
+      from { transform: translate(-50%, -100px); opacity: 0; }
+      to { transform: translate(-50%, 0); opacity: 1; }
+    }
+
+    @keyframes slideUp {
+      from { transform: translate(-50%, 0); opacity: 1; }
+      to { transform: translate(-50%, -100px); opacity: 0; }
+    }
+
+    .main-container {
+      position: relative;
+      z-index: 10;
+      flex: 1;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    /* 状态栏 */
+    .status-bar {
+      background: var(--bg-panel);
+      border: 1px solid rgba(230, 199, 73, 0.3);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      backdrop-filter: blur(10px);
+      box-shadow: var(--border-glow);
+    }
+
+    .status-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .realm-level {
+      font-size: 14px;
+      color: var(--gold-primary);
+      font-weight: bold;
+    }
+
+    .spirit-power {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    .mini-map {
+      width: 60px;
+      height: 60px;
+      background: rgba(15, 20, 35, 0.8);
+      border: 1px solid rgba(230, 199, 73, 0.5);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: var(--text-dim);
+    }
+
+    /* 主地图区域 */
+    .map-area {
+      flex: 1;
+      background: rgba(15, 20, 35, 0.7);
+      border: 1px solid rgba(230, 199, 73, 0.3);
+      border-radius: 12px;
+      position: relative;
+      overflow: hidden;
+      min-height: 300px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* 操作区 */
+    .control-area {
+      background: var(--bg-panel);
+      border: 1px solid rgba(230, 199, 73, 0.3);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      backdrop-filter: blur(10px);
+      box-shadow: var(--border-glow);
+    }
+
+    .joystick {
+      width: 80px;
+      height: 80px;
+      background: rgba(230, 199, 73, 0.1);
+      border: 1px solid rgba(230, 199, 73, 0.3);
+      border-radius: 50%;
+      position: relative;
+    }
+
+    .joystick-control {
+      width: 40px;
+      height: 40px;
+      background: rgba(230, 199, 73, 0.5);
+      border-radius: 50%;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .skill-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .skill-btn {
+      width: 40px;
+      height: 40px;
+      background: rgba(230, 199, 73, 0.2);
+      border: 1px solid rgba(230, 199, 73, 0.3);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .interaction-btn {
+      width: 40px;
+      height: 40px;
+      background: rgba(230, 199, 73, 0.2);
+      border: 1px solid rgba(230, 199, 73, 0.3);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .page-title {
+      font-size: 24px;
+      font-weight: bold;
+      color: var(--gold-primary);
+      text-align: center;
+      margin-bottom: 20px;
+      text-shadow: 0 0 10px rgba(230, 199, 73, 0.5);
+    }
+
+    /* 底部导航 */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 70px;
+      background: var(--bg-panel);
+      border-top: 1px solid rgba(230, 199, 73, 0.3);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 -4px 15px rgba(0,0,0,0.5);
+      padding-bottom: var(--safe-bottom, 0px);
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 12px;
+      text-decoration: none;
+      color: var(--text-dim);
+      transition: all 0.3s ease;
+      border-radius: 8px;
+    }
+
+    .nav-item:hover {
+      background: rgba(230, 199, 73, 0.1);
+    }
+
+    .nav-item.active {
+      color: var(--gold-primary);
+      background: rgba(230, 199, 73, 0.15);
+    }
+
+    .nav-icon {
+      font-size: 24px;
+    }
+
+    .nav-text {
+      font-size: 12px;
+    }
+
+    /* 地图详情弹窗 */
+    .popup-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    /* 响应式 */
+    @media (max-width: 480px) {
+      .page-title {
+        font-size: 20px;
+      }
+    }
+  </style>
+
+  </head>
+<body>
+  <!-- 动态背景 -->
+  <div class="particles"></div>
+
+  <!-- 主容器 -->
+  <div class="main-container">
+    <div class="page-title">🗺️ 云游天下</div>
+    
+    <!-- 状态栏 -->
+    <div class="status-bar">
+      <div class="status-info">
+        <div class="realm-level">练气九层</div>
+        <div class="spirit-power">灵力: 1250/2000</div>
+      </div>
+      <div class="mini-map">
+        📍
+      </div>
+    </div>
+    
+    <!-- 主地图区域 -->
+    <div class="map-area" id="mapArea">
+      <canvas id="mapCanvas" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0;"></canvas>
+      <div id="mapListContainer" style="position: relative; z-index: 10;">
+        <!-- JS 渲染 -->
+      </div>
+    </div>
+    
+    <!-- 操作区 -->
+    <div class="control-area">
+      <div class="joystick">
+        <div class="joystick-control"></div>
+      </div>
+      <div class="skill-buttons">
+        <div class="skill-btn">⚡</div>
+        <div class="skill-btn">🔥</div>
+        <div class="skill-btn">💧</div>
+        <div class="skill-btn">🌪️</div>
+      </div>
+      <div class="interaction-btn">🗣️</div>
+    </div>
+  </div>
+
+  <!-- 地图详情弹窗 -->
+  <div id="mapDetailPopup" class="popup-overlay" onclick="if(event.target===this) closeMapDetailPopup()">
+    <div id="mapDetailContent">
+      <!-- JS 渲染 -->
+    </div>
+  </div>
+
+  <!-- 底部导航 -->
+  <nav class="bottom-nav" role="navigation" aria-label="主导航">
+    <a href="../index.html" class="nav-item" aria-label="修炼页面">
+      <div class="nav-icon">🧘</div>
+      <div class="nav-text">修炼</div>
+    </a>
+    <a href="../skills/skills.html" class="nav-item" aria-label="功法页面">
+      <div class="nav-icon">📜</div>
+      <div class="nav-text">功法</div>
+    </a>
+    <a href="javascript:void(0)" onclick="window.pageUtils.navigateToGuildPage()" class="nav-item" aria-label="宗门页面">
+      <div class="nav-icon">🏯</div>
+      <div class="nav-text">宗门</div>
+    </a>
+    <a href="../word/world.html" class="nav-item" aria-label="仙途页面">
+      <div class="nav-icon">🌌</div>
+      <div class="nav-text">仙途</div>
+    </a>
+    <a href="map.html" class="nav-item active" aria-label="云游页面" aria-current="page">
+      <div class="nav-icon">🗺️</div>
+      <div class="nav-text">云游</div>
+    </a>
+  </nav>
+
+  <script>
+    const API_BASE_URL = typeof window.getApiBaseUrl === 'function' ? window.getApiBaseUrl() : 'http://localhost:8088/api';
+    
+    // 页面加载时初始化
+    document.addEventListener('DOMContentLoaded', function() {
+      loadAllMaps();
+      // 初始化渲染引擎
+      const canvas = document.getElementById('mapCanvas');
+      if (canvas) {
+        mapRenderEngine = new MapRenderEngine(canvas);
+      }
+    });
+  </script>
+  <script src="../js/common.js"></script>
+  <script src="../js/map-api.js"></script>
+</body>
+</html>

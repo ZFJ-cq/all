@@ -1,0 +1,402 @@
+<div class="section active">
+  <div class="status-message" id="clanStatusMessage"></div>
+  
+  <!-- 统计概览 -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <h3>宗门总数</h3>
+      <div class="value" id="totalClans">0</div>
+    </div>
+    <div class="stat-card blue">
+      <h3>活跃宗门</h3>
+      <div class="value" id="activeClans">0</div>
+    </div>
+    <div class="stat-card green">
+      <h3>总成员数</h3>
+      <div class="value" id="totalMembers">0</div>
+    </div>
+    <div class="stat-card orange">
+      <h3>平均等级</h3>
+      <div class="value" id="avgLevel">0</div>
+    </div>
+  </div>
+
+  <!-- Tab 切换 -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="window.switchClanTab('list')">宗门列表</button>
+    <button class="tab-btn" onclick="window.switchClanTab('detail')">宗门详情</button>
+  </div>
+
+  <!-- 1. 宗门列表 Tab -->
+  <div id="clanListTab" class="tab-content active">
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">全量宗门信息管理</h2>
+      </div>
+
+      <!-- 筛选条件 -->
+      <div class="filter-bar">
+        <input type="text" id="clanSearchName" placeholder="宗门名称" onkeyup="window.loadClans()">
+        <select id="clanFilterLevel" onchange="window.loadClans()">
+          <option value="">全部等级</option>
+          <option value="1">1 级</option>
+          <option value="2">2 级</option>
+          <option value="3">3 级</option>
+          <option value="4">4 级</option>
+          <option value="5">5 级</option>
+        </select>
+        <button class="btn btn-primary" onclick="window.loadClans()">查询</button>
+      </div>
+
+      <!-- 数据表格 -->
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>宗门名称</th>
+            <th>等级</th>
+            <th>人数</th>
+            <th>宗主</th>
+            <th>活跃度</th>
+            <th>创建时间</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="clanTableBody">
+          <!-- JS 动态生成 -->
+        </tbody>
+      </table>
+
+      <div id="clanPagination" class="pagination"></div>
+    </div>
+  </div>
+
+  <!-- 2. 宗门详情 Tab -->
+  <div id="clanDetailTab" class="tab-content">
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">宗门完整档案</h2>
+        <select id="clanDetailSelect" onchange="window.loadClanDetail()" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; min-width: 200px;">
+          <option value="">选择宗门</option>
+        </select>
+      </div>
+
+      <div id="clanDetailContent" style="display: none;">
+        <!-- 基本信息 -->
+        <div class="form-row">
+          <div>
+            <h3 style="margin-bottom: 15px; color: var(--primary-dark);">基本信息</h3>
+            <div class="form-group">
+              <label>宗门名称</label>
+              <input type="text" id="clanDetailName" readonly>
+            </div>
+            <div class="form-group">
+              <label>宗门等级</label>
+              <input type="text" id="clanDetailLevel" readonly>
+            </div>
+            <div class="form-group">
+              <label>宗主</label>
+              <input type="text" id="clanDetailLeader" readonly>
+            </div>
+            <div class="form-group">
+              <label>创建时间</label>
+              <input type="text" id="clanDetailCreateTime" readonly>
+            </div>
+          </div>
+          <div>
+            <h3 style="margin-bottom: 15px; color: var(--primary-dark);">统计数据</h3>
+            <div class="form-group">
+              <label>成员总数</label>
+              <input type="text" id="clanDetailMemberCount" readonly>
+            </div>
+            <div class="form-group">
+              <label>当前活跃度</label>
+              <input type="text" id="clanDetailActivity" readonly>
+            </div>
+            <div class="form-group">
+              <label>总贡献值</label>
+              <input type="text" id="clanDetailContribution" readonly>
+            </div>
+            <div class="form-group">
+              <label>仓库总价值</label>
+              <input type="text" id="clanDetailTreasure" readonly>
+            </div>
+          </div>
+        </div>
+
+        <!-- 成员列表 -->
+        <h3 style="margin: 25px 0 15px; color: var(--primary-dark);">成员列表</h3>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>角色名</th>
+              <th>职位</th>
+              <th>贡献度</th>
+              <th>在线状态</th>
+              <th>加入时间</th>
+            </tr>
+          </thead>
+          <tbody id="clanMemberTableBody">
+            <!-- JS 动态生成 -->
+          </tbody>
+        </table>
+      </div>
+
+      <div id="noClanDetailSelected" style="text-align: center; padding: 50px; color: #999;">
+        请选择一个宗门查看详情
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    const API_BASE_URL = 'http://localhost:8088/api';
+    let clanCurrentPage = 1;
+    let clanTotalPages = 1;
+    let currentClanId = null;
+
+    function initClanManagement() {
+      loadClans();
+      loadClanStatistics();
+      loadClanSelectOptions();
+    }
+
+    function switchClanTab(tabName) {
+      document.querySelectorAll('.tabs .tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      
+      event.target.classList.add('active');
+      document.getElementById('clan' + tabName.charAt(0).toUpperCase() + tabName.slice(1) + 'Tab').classList.add('active');
+    }
+
+    async function loadClans() {
+      const tbody = document.getElementById('clanTableBody');
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#999;">加载中...</td></tr>';
+      
+      try {
+        const name = document.getElementById('clanSearchName').value;
+        const level = document.getElementById('clanFilterLevel').value;
+        
+        let url = `${API_BASE_URL}/clan/list?page=${clanCurrentPage}&size=20`;
+        if (name) url += `&name=${encodeURIComponent(name)}`;
+        if (level) url += `&level=${level}`;
+        
+        const response = await fetch(url);
+        const data = await handleClanResponse(response);
+        
+        tbody.innerHTML = '';
+        if (data && data.list && data.list.length > 0) {
+          data.list.forEach(clan => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${clan.id}</td>
+              <td><strong>${clan.name}</strong></td>
+              <td><span class="badge badge-${getClanLevelBadge(clan.level)}">${clan.level}级</span></td>
+              <td>${clan.memberCount}/${clan.maxMembers}</td>
+              <td>${clan.leaderName || '-'}</td>
+              <td>
+                <div style="display: flex; align-items: center; gap: 5px;">
+                  <div style="flex: 1; background: #ecf0f1; height: 8px; border-radius: 4px; overflow: hidden;">
+                    <div style="width: ${clan.activityPercent}%; background: var(--${getClanActivityColor(clan.activityLevel)}); height: 100%;"></div>
+                  </div>
+                  <span style="font-size: 0.8rem;">${clan.activityLevel}</span>
+                </div>
+              </td>
+              <td>${formatClanDate(clan.createTime)}</td>
+              <td>
+                <button class="btn btn-info btn-sm" onclick="window.viewClanDetail('${clan.id}')">详情</button>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          });
+          
+          clanTotalPages = data.totalPages || 1;
+          updateClanPagination(data.total || 0);
+        } else {
+          tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#999;">暂无数据</td></tr>';
+        }
+      } catch (error) {
+        console.error('加载宗门列表失败:', error);
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#999;">加载失败，请稍后重试</td></tr>';
+        
+        clanTotalPages = 1;
+        updateClanPagination(0);
+      }
+    }
+
+    async function loadClanStatistics() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/clan/statistics`);
+        const data = await handleClanResponse(response);
+        
+        document.getElementById('totalClans').textContent = data.totalClans || 0;
+        document.getElementById('activeClans').textContent = data.activeClans || 0;
+        document.getElementById('totalMembers').textContent = data.totalMembers || 0;
+        document.getElementById('avgLevel').textContent = data.avgLevel || 0;
+      } catch (error) {
+        console.error('加载统计信息失败:', error);
+        // 使用默认数据
+        document.getElementById('totalClans').textContent = '0';
+        document.getElementById('activeClans').textContent = '0';
+        document.getElementById('totalMembers').textContent = '0';
+        document.getElementById('avgLevel').textContent = '0';
+      }
+    }
+
+    async function loadClanSelectOptions() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/clan`);
+        const result = await handleClanResponse(response);
+        const data = result.data || result;
+        
+        const select = document.getElementById('clanDetailSelect');
+        if (select) {
+          select.innerHTML = '<option value="">请选择</option>';
+          if (Array.isArray(data)) {
+            data.forEach(clan => {
+              const option = document.createElement('option');
+              option.value = clan.id;
+              option.textContent = `${clan.name} (${clan.level}级)`;
+              select.appendChild(option);
+            });
+          }
+        }
+      } catch (error) {
+        console.error('加载宗门列表失败:', error);
+      }
+    }
+
+    function viewClanDetail(clanId) {
+      document.getElementById('clanDetailSelect').value = clanId;
+      switchClanTab('detail');
+      loadClanDetail();
+    }
+
+    async function loadClanDetail() {
+      const clanId = document.getElementById('clanDetailSelect').value;
+      
+      if (!clanId) {
+        document.getElementById('clanDetailContent').style.display = 'none';
+        document.getElementById('noClanDetailSelected').style.display = 'block';
+        return;
+      }
+      
+      try {
+        const response = await fetch(`${API_BASE_URL}/clan/${clanId}`);
+        const data = await handleClanResponse(response);
+        
+        document.getElementById('clanDetailName').value = data.name;
+        document.getElementById('clanDetailLevel').value = data.level + '级';
+        document.getElementById('clanDetailLeader').value = data.leaderName || '-';
+        document.getElementById('clanDetailCreateTime').value = formatClanDate(data.createTime);
+        document.getElementById('clanDetailMemberCount').value = data.memberCount;
+        document.getElementById('clanDetailActivity').value = data.activity;
+        document.getElementById('clanDetailContribution').value = data.totalContribution;
+        document.getElementById('clanDetailTreasure').value = formatClanNumber(data.treasureValue);
+        
+        const memberBody = document.getElementById('clanMemberTableBody');
+        memberBody.innerHTML = '';
+        if (data.members && data.members.length > 0) {
+          data.members.forEach(member => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${member.name}</td>
+              <td><span class="badge badge-${getClanPositionBadge(member.position)}">${member.position}</span></td>
+              <td>${member.contribution}</td>
+              <td><span class="badge ${member.online ? 'badge-success' : 'badge-secondary'}">${member.online ? '在线' : '离线'}</span></td>
+              <td>${formatClanDate(member.joinTime)}</td>
+            `;
+            memberBody.appendChild(tr);
+          });
+        }
+        
+        document.getElementById('clanDetailContent').style.display = 'block';
+        document.getElementById('noClanDetailSelected').style.display = 'none';
+        
+      } catch (error) {
+        console.error('加载宗门详情失败:', error);
+        showClanStatus('加载失败：' + error.message, 'error');
+      }
+    }
+
+    function showClanStatus(message, type) {
+      const statusEl = document.getElementById('clanStatusMessage');
+      statusEl.textContent = message;
+      statusEl.className = `status-message ${type}`;
+      statusEl.style.display = 'block';
+      
+      setTimeout(() => {
+        statusEl.style.display = 'none';
+      }, 3000);
+    }
+
+    function updateClanPagination(total) {
+      const pagination = document.getElementById('clanPagination');
+      pagination.innerHTML = '';
+      
+      const prevDisabled = clanCurrentPage === 1 ? 'disabled' : '';
+      const nextDisabled = clanCurrentPage === clanTotalPages ? 'disabled' : '';
+      
+      pagination.innerHTML = `
+        <button ${prevDisabled} onclick="window.changeClanPage(${clanCurrentPage - 1})">上一页</button>
+        <span class="pagination-info">第 ${clanCurrentPage} / ${clanTotalPages} 页，共 ${total} 条</span>
+        <button ${nextDisabled} onclick="window.changeClanPage(${clanCurrentPage + 1})">下一页</button>
+      `;
+    }
+
+    function changeClanPage(page) {
+      if (page < 1 || page > clanTotalPages) return;
+      clanCurrentPage = page;
+      loadClans();
+    }
+
+    function getClanLevelBadge(level) {
+      if (level <= 3) return 'info';
+      if (level <= 6) return 'warning';
+      if (level <= 9) return 'purple';
+      return 'danger';
+    }
+
+    function getClanActivityColor(level) {
+      if (level === '高') return 'success-color';
+      if (level === '中') return 'warning-color';
+      return 'danger-color';
+    }
+
+    function getClanPositionBadge(pos) {
+      if (pos === '宗主') return 'danger';
+      if (pos === '长老') return 'warning';
+      if (pos === '精英') return 'info';
+      return 'secondary';
+    }
+
+    function formatClanNumber(num) {
+      if (num >= 100000000) return (num / 100000000).toFixed(2) + '亿';
+      if (num >= 10000) return (num / 10000).toFixed(2) + '万';
+      return num.toString();
+    }
+
+    function formatClanDate(dateStr) {
+      if (!dateStr) return '-';
+      return dateStr.split(' ')[0];
+    }
+
+    async function handleClanResponse(response) {
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ message: '请求失败' }));
+        throw new Error(error.message || `HTTP ${response.status}`);
+      }
+      return response.json();
+    }
+
+    window.initClanManagement = initClanManagement;
+    window.switchClanTab = switchClanTab;
+    window.loadClans = loadClans;
+    window.loadClanStatistics = loadClanStatistics;
+    window.loadClanSelectOptions = loadClanSelectOptions;
+    window.viewClanDetail = viewClanDetail;
+    window.loadClanDetail = loadClanDetail;
+    window.changeClanPage = changeClanPage;
+  })();
+</script>

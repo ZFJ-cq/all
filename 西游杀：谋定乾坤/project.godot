@@ -1,0 +1,57 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[animation]
+
+compatibility/default_parent_skeleton_in_mesh_instance_3d=true
+
+[application]
+
+config/name="西游杀：谋定乾坤"
+config/description="基于西游记题材的身份推理卡牌对战游戏"
+run/main_scene="res://scenes/main/main_menu.tscn"
+config/features=PackedStringArray("4.6", "Forward Plus")
+
+[autoload]
+
+GameManager="*res://scripts/core/game_manager.gd"
+CardDatabase="*res://scripts/core/card_system/card_database.gd"
+IdentityManager="*res://scripts/core/identity_system/identity_manager.gd"
+HeroManager="*res://scripts/core/hero_system/hero_manager.gd"
+TurnManager="*res://scripts/core/turn_system/turn_manager.gd"
+CombatResolver="*res://scripts/core/combat_system/combat_resolver.gd"
+ScriptingEngine="*res://scripts/core/scripting_engine/scripting_engine.gd"
+EventBus="*res://scripts/core/event_bus.gd"
+
+[display]
+
+window/size/viewport_width=1920
+window/size/viewport_height=1080
+window/size/mode=2
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+
+[input]
+
+ui_select={
+"deadzone": 0.5,
+"events": [Object(InputEventMouseButton,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"button_mask":1,"position":Vector2(0, 0),"global_position":Vector2(0, 0),"factor":1.0,"button_index":1,"canceled":false,"pressed":true,"double_click":false,"script":null)
+]
+}
+
+[layer_names]
+
+2d_physics/layer_1="Cards"
+2d_physics/layer_2="Players"
+2d_physics/layer_3="UI"
+
+[rendering]
+
+textures/canvas_textures/default_texture_filter=0

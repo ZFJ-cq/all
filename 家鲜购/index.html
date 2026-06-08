@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>家鲜购 - 家庭生鲜超市</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --primary:#FF6F61;--primary-light:#FF8A7E;--primary-dark:#E55A4E;
+  --bg:#F5F5F5;--white:#FFFFFF;--text:#333333;--text-secondary:#888888;
+  --border:#EEEEEE;--shadow:0 2px 12px rgba(0,0,0,0.08);
+  --radius:12px;--radius-sm:8px;
+  --sidebar-width:88px;--header-height:56px;--cart-bar-height:56px;
+  --safe-bottom:env(safe-area-inset-bottom, 0px)
+}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;font-size:14px;color:var(--text);background:var(--bg);overflow:hidden}
+
+.app{display:flex;flex-direction:column;height:100%;max-width:768px;margin:0 auto;position:relative;background:var(--white)}
+
+.header{position:sticky;top:0;z-index:100;background:var(--primary);padding:8px 12px;display:flex;align-items:center;gap:10px;height:var(--header-height);flex-shrink:0}
+.header .logo{color:var(--white);font-size:18px;font-weight:700;white-space:nowrap;letter-spacing:1px}
+.header .search-wrap{flex:1;position:relative}
+.header .search-wrap input{width:100%;height:36px;border-radius:18px;border:none;padding:0 16px 0 36px;font-size:14px;background:rgba(255,255,255,0.92);outline:none;transition:all 200ms ease}
+.header .search-wrap input:focus{background:#fff;box-shadow:0 0 0 2px rgba(255,255,255,0.5)}
+.header .search-wrap .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-secondary);font-size:14px;pointer-events:none}
+.header .search-wrap .clear-btn{position:absolute;right:10px;top:50%;transform:translateY(-50%);width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,0.1);border:none;color:#fff;font-size:12px;cursor:pointer;display:none;align-items:center;justify-content:center;line-height:1}
+.header .search-wrap .clear-btn.show{display:flex}
+
+.main{display:flex;flex:1;overflow:hidden;position:relative}
+
+.sidebar{width:var(--sidebar-width);flex-shrink:0;background:#F7F7F7;overflow-y:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.sidebar::-webkit-scrollbar{display:none}
+.sidebar .cat-item{display:flex;flex-direction:column;align-items:center;padding:12px 4px;cursor:pointer;transition:all 200ms ease;position:relative;border-left:3px solid transparent}
+.sidebar .cat-item .cat-icon{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:4px;background:var(--white);transition:all 200ms ease}
+.sidebar .cat-item .cat-name{font-size:11px;color:var(--text-secondary);text-align:center;line-height:1.3;transition:all 200ms ease}
+.sidebar .cat-item.active{background:var(--white);border-left-color:var(--primary)}
+.sidebar .cat-item.active .cat-name{color:var(--primary);font-weight:600}
+.sidebar .cat-item.active .cat-icon{background:var(--primary-light);transform:scale(1.1)}
+.sidebar .cat-item:active{background:rgba(0,0,0,0.04)}
+
+.content{flex:1;overflow-y:auto;padding:8px 10px 80px 10px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.content::-webkit-scrollbar{display:none}
+
+.section-title{font-size:15px;font-weight:700;padding:10px 4px 6px;color:var(--text);position:sticky;top:0;background:var(--white);z-index:10}
+
+.product-card{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);position:relative;transition:background 200ms ease}
+.product-card:last-child{border-bottom:none}
+.product-card:active{background:rgba(0,0,0,0.02)}
+
+.product-card .prod-img{width:90px;height:90px;border-radius:var(--radius-sm);object-fit:cover;flex-shrink:0;background:#f0f0f0}
+.product-card .prod-info{flex:1;display:flex;flex-direction:column;justify-content:space-between;min-width:0}
+.product-card .prod-name{font-size:14px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.product-card .prod-desc{font-size:11px;color:var(--text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px}
+.product-card .prod-tags{display:flex;gap:4px;margin-top:4px;flex-wrap:wrap}
+.product-card .prod-tags .tag{font-size:10px;padding:1px 4px;border-radius:3px;background:rgba(255,111,97,0.1);color:var(--primary)}
+.product-card .prod-bottom{display:flex;align-items:center;justify-content:space-between}
+.product-card .prod-price{display:flex;align-items:baseline;gap:2px}
+.product-card .prod-price .yen{font-size:12px;color:var(--primary);font-weight:600}
+.product-card .prod-price .price{font-size:18px;color:var(--primary);font-weight:700}
+.product-card .prod-price .unit{font-size:11px;color:var(--text-secondary);margin-left:2px}
+.product-card .prod-price .origin{font-size:11px;color:#bbb;text-decoration:line-through;margin-left:4px}
+
+.stepper{display:flex;align-items:center;gap:0;border-radius:16px;overflow:hidden}
+.stepper .btn-minus,.stepper .btn-plus{width:26px;height:26px;border-radius:50%;border:none;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 150ms ease;user-select:none}
+.stepper .btn-plus{background:var(--primary);color:#fff}
+.stepper .btn-plus:active{transform:scale(0.9);background:var(--primary-dark)}
+.stepper .btn-minus{background:var(--white);color:var(--primary);border:1.5px solid var(--primary);font-size:14px}
+.stepper .btn-minus:active{transform:scale(0.9)}
+.stepper .count{min-width:24px;text-align:center;font-size:14px;font-weight:600}
+
+.cart-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:768px;height:calc(var(--cart-bar-height) + var(--safe-bottom));padding-bottom:var(--safe-bottom);background:#2A2A2A;display:flex;align-items:center;z-index:200;transition:transform 300ms ease}
+.cart-bar .cart-icon-wrap{position:relative;width:54px;height:54px;margin:-14px 0 0 12px;flex-shrink:0;cursor:pointer}
+.cart-bar .cart-icon-circle{width:54px;height:54px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;box-shadow:0 -2px 12px rgba(255,111,97,0.4);transition:all 200ms ease}
+.cart-bar .cart-icon-circle:active{transform:scale(0.95)}
+.cart-bar .cart-icon-circle svg{width:28px;height:28px;fill:#fff}
+.cart-bar .badge{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;border-radius:9px;background:var(--primary);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px;transform:scale(0);transition:transform 200ms ease}
+.cart-bar .badge.show{transform:scale(1)}
+.cart-bar .cart-info{flex:1;padding-left:12px;display:flex;flex-direction:column}
+.cart-bar .cart-total{color:#fff;font-size:18px;font-weight:700}
+.cart-bar .cart-total .yen{font-size:12px}
+.cart-bar .cart-delivery{font-size:11px;color:#999;margin-top:1px}
+.cart-bar .checkout-btn{height:100%;padding:0 28px;background:var(--primary);color:#fff;font-size:15px;font-weight:700;border:none;cursor:pointer;transition:all 200ms ease;white-space:nowrap}
+.cart-bar .checkout-btn:active{background:var(--primary-dark)}
+.cart-bar .checkout-btn.disabled{background:#555;color:#888;pointer-events:none}
+
+.cart-panel{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:768px;background:var(--white);border-radius:16px 16px 0 0;z-index:300;transition:transform 350ms cubic-bezier(0.4,0,0.2,1);padding-bottom:var(--safe-bottom);max-height:60vh;display:flex;flex-direction:column}
+.cart-panel.hidden{transform:translateX(-50%) translateY(100%)}
+.cart-panel .panel-header{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 12px;border-bottom:1px solid var(--border);flex-shrink:0}
+.cart-panel .panel-header h3{font-size:16px;font-weight:700}
+.cart-panel .clear-cart{font-size:13px;color:var(--text-secondary);cursor:pointer;padding:4px 8px;border-radius:4px;transition:all 200ms ease}
+.cart-panel .clear-cart:active{background:var(--bg)}
+.cart-panel .panel-body{overflow-y:auto;flex:1;padding:0 16px}
+.cart-panel .cart-item{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--border)}
+.cart-panel .cart-item:last-child{border-bottom:none}
+.cart-panel .cart-item .ci-name{flex:1;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cart-panel .cart-item .ci-price{color:var(--primary);font-weight:600;font-size:14px;min-width:56px;text-align:right}
+
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:250;opacity:0;pointer-events:none;transition:opacity 300ms ease}
+.overlay.show{opacity:1;pointer-events:auto}
+
+.toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.8);background:rgba(0,0,0,0.75);color:#fff;padding:10px 24px;border-radius:8px;font-size:14px;z-index:999;opacity:0;pointer-events:none;transition:all 250ms ease;white-space:nowrap}
+.toast.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;color:var(--text-secondary)}
+.empty-state .empty-icon{font-size:64px;margin-bottom:16px;opacity:0.3}
+.empty-state .empty-text{font-size:14px}
+
+.search-empty{padding:40px 20px;text-align:center;color:var(--text-secondary);font-size:14px}
+
+@keyframes cartBounce{
+  0%{transform:scale(1)}
+  30%{transform:scale(1.2)}
+  60%{transform:scale(0.95)}
+  100%{transform:scale(1)}
+}
+.cart-bounce{animation:cartBounce 400ms ease}
+
+@keyframes flyIn{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.fly-in{animation:flyIn 250ms ease both}
+
+@media(min-width:480px){
+  :root{--sidebar-width:100px}
+  .product-card .prod-img{width:100px;height:100px}
+  .sidebar .cat-item{padding:14px 6px}
+  .sidebar .cat-item .cat-icon{width:36px;height:36px;font-size:20px}
+  .sidebar .cat-item .cat-name{font-size:12px}
+}
+
+@media(min-width:768px){
+  :root{--sidebar-width:120px}
+  .content{padding:12px 16px 80px 16px}
+  .product-card .prod-img{width:110px;height:110px}
+  .product-card .prod-name{font-size:15px}
+  .product-card .prod-desc{font-size:12px}
+}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <header class="header">
+    <div class="logo">🏠 家鲜购</div>
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="搜索商品...">
+      <button class="clear-btn" id="clearSearch">✕</button>
+    </div>
+  </header>
+
+  <div class="main">
+    <nav class="sidebar" id="sidebar"></nav>
+    <div class="content" id="content"></div>
+  </div>
+
+  <div class="cart-bar" id="cartBar">
+    <div class="cart-icon-wrap" id="cartIconWrap">
+      <div class="cart-icon-circle" id="cartIconCircle">
+        <svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1.003 1.003 0 0020 4H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
+      </div>
+      <span class="badge" id="cartBadge">0</span>
+    </div>
+    <div class="cart-info">
+      <div class="cart-total"><span class="yen">¥</span><span id="cartTotal">0</span></div>
+      <div class="cart-delivery" id="cartDelivery">还差¥20起送</div>
+    </div>
+    <button class="checkout-btn disabled" id="checkoutBtn">去结算</button>
+  </div>
+
+  <div class="overlay" id="overlay"></div>
+  <div class="cart-panel hidden" id="cartPanel">
+    <div class="panel-header">
+      <h3>购物车</h3>
+      <span class="clear-cart" id="clearCart">清空</span>
+    </div>
+    <div class="panel-body" id="cartPanelBody"></div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+const CATEGORIES = [
+  { id: 'fruit', name: '水果', icon: '🍎' },
+  { id: 'vegetable', name: '蔬菜', icon: '🥬' },
+  { id: 'meat', name: '肉禽蛋', icon: '🥩' },
+  { id: 'dairy', name: '乳品烘焙', icon: '🥛' },
+  { id: 'frozen', name: '速食冻品', icon: '🥟' },
+  { id: 'snack', name: '零食饮料', icon: '🍿' },
+  { id: 'grain', name: '粮油调味', icon: '🍚' },
+  { id: 'daily', name: '日用百货', icon: '🧴' }
+];
+
+const PRODUCTS = [
+  { id: 1, cat: 'fruit', name: '红富士苹果', desc: '甘肃天水 脆甜多汁', price: 8.9, origin: 12.9, unit: '500g', tags: ['热卖'] },
+  { id: 2, cat: 'fruit', name: '海南金煌芒果', desc: '树上自然熟 香甜浓郁', price: 15.8, origin: 22.0, unit: '500g', tags: ['新品'] },
+  { id: 3, cat: 'fruit', name: '智利车厘子', desc: 'JJ级 果大核小', price: 39.9, origin: 59.9, unit: '250g', tags: ['进口'] },
+  { id: 4, cat: 'fruit', name: '云南蓝莓', desc: '花青素丰富 酸甜可口', price: 12.9, origin: 18.0, unit: '125g', tags: [] },
+  { id: 5, cat: 'fruit', name: '广西沃柑', desc: '皮薄汁多 橙香浓郁', price: 6.9, origin: 9.9, unit: '500g', tags: ['热卖'] },
+  { id: 6, cat: 'fruit', name: '泰国山竹', desc: '5A级 果肉洁白', price: 29.9, origin: 42.0, unit: '500g', tags: ['进口'] },
+  { id: 7, cat: 'vegetable', name: '有机小番茄', desc: '沙瓤多汁 酸甜爽口', price: 9.9, origin: 14.0, unit: '300g', tags: ['有机'] },
+  { id: 8, cat: 'vegetable', name: '新鲜西兰花', desc: '翠绿鲜嫩 营养丰富', price: 5.5, origin: 7.5, unit: '1份', tags: [] },
+  { id: 9, cat: 'vegetable', name: '云南小香葱', desc: '香味浓郁 提鲜必备', price: 2.9, origin: 3.9, unit: '1把', tags: [] },
+  { id: 10, cat: 'vegetable', name: '有机胡萝卜', desc: '甜脆爽口 产地直供', price: 4.9, origin: 6.9, unit: '500g', tags: ['有机'] },
+  { id: 11, cat: 'vegetable', name: '水培生菜', desc: '鲜嫩脆爽 即食沙拉', price: 5.9, origin: 8.0, unit: '1份', tags: ['新品'] },
+  { id: 12, cat: 'vegetable', name: '精品土豆', desc: '粉糯香甜 百搭食材', price: 3.5, origin: 4.9, unit: '500g', tags: [] },
+  { id: 13, cat: 'meat', name: '正大鲜鸡蛋', desc: '谷物喂养 蛋黄饱满', price: 16.9, origin: 22.0, unit: '10枚', tags: ['热卖'] },
+  { id: 14, cat: 'meat', name: '黑猪五花肉', desc: '土猪散养 层次分明', price: 29.9, origin: 39.9, unit: '500g', tags: [] },
+  { id: 15, cat: 'meat', name: '冰鲜鸡胸肉', desc: '低脂高蛋白 健身首选', price: 13.9, origin: 18.0, unit: '500g', tags: [] },
+  { id: 16, cat: 'meat', name: '新鲜牛腱子', desc: '卤牛肉首选 筋膜均匀', price: 45.9, origin: 62.0, unit: '500g', tags: ['进口'] },
+  { id: 17, cat: 'meat', name: '散养土鸡', desc: '农家散养 肉质紧实', price: 35.0, origin: 48.0, unit: '1只', tags: [] },
+  { id: 18, cat: 'meat', name: '猪排骨', desc: '新鲜肋排 肉多骨少', price: 32.9, origin: 42.0, unit: '500g', tags: ['热卖'] },
+  { id: 19, cat: 'dairy', name: '新希望鲜牛奶', desc: '72℃巴氏杀菌 7天短保', price: 9.9, origin: 13.0, unit: '720ml', tags: ['每日必买'] },
+  { id: 20, cat: 'dairy', name: '安佳淡奶油', desc: '新西兰进口 烘焙必备', price: 19.9, origin: 28.0, unit: '250ml', tags: ['进口'] },
+  { id: 21, cat: 'dairy', name: '原味酸奶', desc: '生牛乳发酵 活菌型', price: 6.5, origin: 8.9, unit: '200g', tags: [] },
+  { id: 22, cat: 'dairy', name: '全麦吐司面包', desc: '0添加蔗糖 膳食纤维', price: 12.9, origin: 16.0, unit: '1袋', tags: ['新品'] },
+  { id: 23, cat: 'dairy', name: '手撕老面包', desc: '传统工艺 奶香浓郁', price: 8.9, origin: 12.0, unit: '1袋', tags: [] },
+  { id: 24, cat: 'frozen', name: '湾仔码头水饺', desc: '猪肉白菜 皮薄馅大', price: 19.9, origin: 28.0, unit: '480g', tags: ['热卖'] },
+  { id: 25, cat: 'frozen', name: '正大炸鸡块', desc: '外酥里嫩 空气炸锅适用', price: 15.9, origin: 22.0, unit: '300g', tags: [] },
+  { id: 26, cat: 'frozen', name: '手抓饼', desc: '层层酥脆 早餐速食', price: 9.9, origin: 14.0, unit: '5片', tags: [] },
+  { id: 27, cat: 'frozen', name: '速冻毛豆', desc: '免洗免剥 开袋即烹', price: 6.9, origin: 9.9, unit: '300g', tags: [] },
+  { id: 28, cat: 'frozen', name: '鲜虾滑', desc: '95%虾含量 Q弹爽滑', price: 25.9, origin: 35.0, unit: '200g', tags: ['新品'] },
+  { id: 29, cat: 'snack', name: '每日坚果', desc: '6种坚果果干 营养均衡', price: 59.9, origin: 79.0, unit: '25g×30', tags: ['热卖'] },
+  { id: 30, cat: 'snack', name: '元气森林气泡水', desc: '0糖0脂0卡 白桃味', price: 4.9, origin: 6.0, unit: '480ml', tags: [] },
+  { id: 31, cat: 'snack', name: '良品铺子肉松饼', desc: '咸甜交织 酥软可口', price: 14.9, origin: 19.9, unit: '1箱', tags: [] },
+  { id: 32, cat: 'snack', name: '旺仔牛奶', desc: '经典童年味道', price: 5.5, origin: 7.0, unit: '245ml', tags: [] },
+  { id: 33, cat: 'snack', name: '乐事薯片', desc: '原味 经典不可替代', price: 7.9, origin: 10.0, unit: '75g', tags: [] },
+  { id: 34, cat: 'grain', name: '五常大米', desc: '东北黑土地 一年一季', price: 29.9, origin: 39.9, unit: '2.5kg', tags: ['热卖'] },
+  { id: 35, cat: 'grain', name: '鲁花花生油', desc: '5S物理压榨 香味浓郁', price: 69.9, origin: 89.0, unit: '1.5L', tags: [] },
+  { id: 36, cat: 'grain', name: '海天生抽', desc: '特级酱油 鲜味十足', price: 9.9, origin: 13.0, unit: '500ml', tags: [] },
+  { id: 37, cat: 'grain', name: '金龙鱼面条', desc: '劲道爽滑 煮不烂', price: 5.9, origin: 7.9, unit: '500g', tags: [] },
+  { id: 38, cat: 'grain', name: '老干妈辣酱', desc: '风味豆豉 经典下饭', price: 8.9, origin: 11.0, unit: '280g', tags: [] },
+  { id: 39, cat: 'daily', name: '维达抽纸', desc: '4层加厚 柔韧亲肤', price: 19.9, origin: 29.9, unit: '24包', tags: ['热卖'] },
+  { id: 40, cat: 'daily', name: '蓝月亮洗衣液', desc: '深层洁净 温和不伤手', price: 29.9, origin: 42.0, unit: '1kg', tags: [] },
+  { id: 41, cat: 'daily', name: '舒肤佳香皂', desc: '抑菌99% 经典纯白', price: 5.9, origin: 8.0, unit: '115g×3', tags: [] },
+  { id: 42, cat: 'daily', name: '保鲜袋', desc: '食品级材质 密封保鲜', price: 6.9, origin: 9.9, unit: '1卷', tags: [] },
+  { id: 43, cat: 'daily', name: '厨房纸巾', desc: '吸水吸油 厚实耐用', price: 12.9, origin: 18.0, unit: '2卷', tags: [] }
+];
+
+const DELIVERY_THRESHOLD = 20;
+let cart = [];
+let activeCategory = CATEGORIES[0].id;
+let searchKeyword = '';
+let cartPanelOpen = false;
+
+function loadCart() {
+  try {
+    const saved = localStorage.getItem('jiaxiangou_cart');
+    if (saved) cart = JSON.parse(saved);
+  } catch (e) { cart = []; }
+}
+
+function saveCart() {
+  try { localStorage.setItem('jiaxiangou_cart', JSON.stringify(cart)); } catch (e) {}
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 1200);
+}
+
+function getCartCount() {
+  return cart.reduce((s, i) => s + i.quantity, 0);
+}
+
+function getCartTotal() {
+  return cart.reduce((s, i) => s + i.price * i.quantity, 0);
+}
+
+function getQuantity(productId) {
+  const item = cart.find(i => i.id === productId);
+  return item ? item.quantity : 0;
+}
+
+function addToCart(productId) {
+  const prod = PRODUCTS.find(p => p.id === productId);
+  if (!prod) return;
+  const existing = cart.find(i => i.id === productId);
+  if (existing) {
+    existing.quantity++;
+  } else {
+    cart.push({ id: prod.id, name: prod.name, price: prod.price, unit: prod.unit, quantity: 1 });
+  }
+  saveCart();
+  updateCartUI();
+  renderContent();
+  animateCartIcon();
+  showToast(`已添加 ${prod.name}`);
+}
+
+function decreaseFromCart(productId) {
+  const idx = cart.findIndex(i => i.id === productId);
+  if (idx === -1) return;
+  if (cart[idx].quantity > 1) {
+    cart[idx].quantity--;
+  } else {
+    cart.splice(idx, 1);
+  }
+  saveCart();
+  updateCartUI();
+  renderContent();
+  renderCartPanel();
+  if (cart.length === 0 && cartPanelOpen) closeCartPanel();
+}
+
+function clearCart() {
+  cart = [];
+  saveCart();
+  updateCartUI();
+  renderContent();
+  closeCartPanel();
+  showToast('购物车已清空');
+}
+
+function animateCartIcon() {
+  const circle = document.getElementById('cartIconCircle');
+  circle.classList.remove('cart-bounce');
+  void circle.offsetWidth;
+  circle.classList.add('cart-bounce');
+}
+
+function updateCartUI() {
+  const count = getCartCount();
+  const total = getCartTotal();
+  const badge = document.getElementById('cartBadge');
+  const totalEl = document.getElementById('cartTotal');
+  const deliveryEl = document.getElementById('cartDelivery');
+  const checkoutBtn = document.getElementById('checkoutBtn');
+
+  badge.textContent = count;
+  badge.classList.toggle('show', count > 0);
+  totalEl.textContent = total.toFixed(1);
+
+  if (total >= DELIVERY_THRESHOLD) {
+    deliveryEl.textContent = '已免配送费';
+    deliveryEl.style.color = '#4CAF50';
+    checkoutBtn.classList.remove('disabled');
+  } else {
+    const diff = (DELIVERY_THRESHOLD - total).toFixed(1);
+    deliveryEl.textContent = `还差¥${diff}起送`;
+    deliveryEl.style.color = '#999';
+    checkoutBtn.classList.add('disabled');
+  }
+}
+
+function renderSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  sidebar.innerHTML = CATEGORIES.map(cat => `
+    <div class="cat-item ${cat.id === activeCategory ? 'active' : ''}" data-cat="${cat.id}">
+      <div class="cat-icon">${cat.icon}</div>
+      <div class="cat-name">${cat.name}</div>
+    </div>
+  `).join('');
+
+  sidebar.querySelectorAll('.cat-item').forEach(el => {
+    el.addEventListener('click', () => {
+      activeCategory = el.dataset.cat;
+      searchKeyword = '';
+      document.getElementById('searchInput').value = '';
+      document.getElementById('clearSearch').classList.remove('show');
+      renderSidebar();
+      renderContent();
+      const contentEl = document.getElementById('content');
+      contentEl.scrollTop = 0;
+    });
+  });
+}
+
+function renderContent() {
+  const content = document.getElementById('content');
+  let prods;
+
+  if (searchKeyword) {
+    prods = PRODUCTS.filter(p =>
+      p.name.includes(searchKeyword) || p.desc.includes(searchKeyword)
+    );
+    if (prods.length === 0) {
+      content.innerHTML = `<div class="search-empty">没有找到"${searchKeyword}"相关商品</div>`;
+      return;
+    }
+    content.innerHTML = prods.map((p, i) => renderProductCard(p, i)).join('');
+  } else {
+    const catProducts = PRODUCTS.filter(p => p.cat === activeCategory);
+    const catInfo = CATEGORIES.find(c => c.id === activeCategory);
+    content.innerHTML = `<div class="section-title">${catInfo.icon} ${catInfo.name}</div>` +
+      catProducts.map((p, i) => renderProductCard(p, i)).join('');
+  }
+
+  content.querySelectorAll('.btn-plus').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      addToCart(Number(btn.dataset.id));
+    });
+  });
+  content.querySelectorAll('.btn-minus').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      decreaseFromCart(Number(btn.dataset.id));
+    });
+  });
+}
+
+function renderProductCard(p, index) {
+  const qty = getQuantity(p.id);
+  const tagsHtml = p.tags.map(t => `<span class="tag">${t}</span>`).join('');
+  const originHtml = p.origin ? `<span class="origin">¥${p.origin}</span>` : '';
+  const stepperHtml = qty > 0
+    ? `<div class="stepper">
+        <button class="btn-minus" data-id="${p.id}">−</button>
+        <span class="count">${qty}</span>
+        <button class="btn-plus" data-id="${p.id}">+</button>
+      </div>`
+    : `<div class="stepper">
+        <button class="btn-plus" data-id="${p.id}">+</button>
+      </div>`;
+
+  return `<div class="product-card fly-in" style="animation-delay:${index * 40}ms">
+    <img class="prod-img" src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${encodeURIComponent('fresh ' + p.name + ' product photo on white background, food photography, high quality, clean lighting, commercial style')}&image_size=square" alt="${p.name}" loading="lazy">
+    <div class="prod-info">
+      <div>
+        <div class="prod-name">${p.name}</div>
+        <div class="prod-desc">${p.desc}</div>
+        <div class="prod-tags">${tagsHtml}</div>
+      </div>
+      <div class="prod-bottom">
+        <div class="prod-price">
+          <span class="yen">¥</span><span class="price">${p.price}</span><span class="unit">/${p.unit}</span>${originHtml}
+        </div>
+        ${stepperHtml}
+      </div>
+    </div>
+  </div>`;
+}
+
+function openCartPanel() {
+  if (cart.length === 0) return;
+  cartPanelOpen = true;
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('cartPanel').classList.remove('hidden');
+  renderCartPanel();
+}
+
+function closeCartPanel() {
+  cartPanelOpen = false;
+  document.getElementById('overlay').classList.remove('show');
+  document.getElementById('cartPanel').classList.add('hidden');
+}
+
+function renderCartPanel() {
+  const body = document.getElementById('cartPanelBody');
+  if (cart.length === 0) {
+    body.innerHTML = `<div class="empty-state"><div class="empty-icon">🛒</div><div class="empty-text">购物车空空如也</div></div>`;
+    return;
+  }
+  body.innerHTML = cart.map(item => `
+    <div class="cart-item">
+      <span class="ci-name">${item.name}</span>
+      <span class="ci-price">¥${(item.price * item.quantity).toFixed(1)}</span>
+      <div class="stepper">
+        <button class="btn-minus" data-id="${item.id}">−</button>
+        <span class="count">${item.quantity}</span>
+        <button class="btn-plus" data-id="${item.id}">+</button>
+      </div>
+    </div>
+  `).join('');
+
+  body.querySelectorAll('.btn-plus').forEach(btn => {
+    btn.addEventListener('click', () => {
+      addToCart(Number(btn.dataset.id));
+      renderCartPanel();
+    });
+  });
+  body.querySelectorAll('.btn-minus').forEach(btn => {
+    btn.addEventListener('click', () => {
+      decreaseFromCart(Number(btn.dataset.id));
+    });
+  });
+}
+
+function initSearch() {
+  const input = document.getElementById('searchInput');
+  const clearBtn = document.getElementById('clearSearch');
+  let debounceTimer;
+
+  input.addEventListener('input', () => {
+    clearTimeout(debounceTimer);
+    const val = input.value.trim();
+    clearBtn.classList.toggle('show', val.length > 0);
+    debounceTimer = setTimeout(() => {
+      searchKeyword = val;
+      renderContent();
+    }, 200);
+  });
+
+  clearBtn.addEventListener('click', () => {
+    input.value = '';
+    searchKeyword = '';
+    clearBtn.classList.remove('show');
+    renderContent();
+    input.focus();
+  });
+}
+
+function initEvents() {
+  document.getElementById('cartIconWrap').addEventListener('click', () => {
+    if (cartPanelOpen) closeCartPanel();
+    else openCartPanel();
+  });
+  document.getElementById('overlay').addEventListener('click', closeCartPanel);
+  document.getElementById('clearCart').addEventListener('click', clearCart);
+  document.getElementById('checkoutBtn').addEventListener('click', () => {
+    if (getCartTotal() >= DELIVERY_THRESHOLD) {
+      showToast('🎉 下单成功！感谢购买');
+      clearCart();
+    }
+  });
+}
+
+function init() {
+  loadCart();
+  renderSidebar();
+  renderContent();
+  updateCartUI();
+  initSearch();
+  initEvents();
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

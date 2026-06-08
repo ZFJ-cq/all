@@ -1,0 +1,53 @@
+{
+  "version": 2,
+  "player": {
+    "name": "江湖侠客",
+    "gold": 20982,
+    "power": 20,
+    "currentStage": 4,
+    "totalGoldEarned": 21132,
+    "consecutiveWins": 0,
+    "totalKills": 49,
+    "maxHp": 120,
+    "hp": 120
+  },
+  "unlocked": {
+    "wuxue": true,
+    "shop": true,
+    "bag": true
+  },
+  "skills": {
+    "s1": {
+      "level": 2,
+      "unlocked": true
+    }
+  },
+  "equipment": {
+    "weapon": null
+  },
+  "inventory": [],
+  "currentStageProgress": {
+    "kills": 3,
+    "bossHp": 728,
+    "targetKills": 10
+  },
+  "autoFight": false,
+  "shopLevel": 1,
+  "shopRefreshCount": 1,
+  "dailyDay": 1,
+  "lastDailyClaim": null,
+  "achievements": [
+    "a1"
+  ],
+  "unlockedSkills": [
+    "s1"
+  ],
+  "currentSkill": "s1",
+  "offlineRewards": null,
+  "lastSaveTime": 1779183059315,
+  "completedStages": [
+    1,
+    2,
+    3
+  ]
+}

@@ -1,0 +1,344 @@
+package com.lingyue.service.impl;
+
+import com.lingyue.dto.*;
+import com.lingyue.entity.*;
+import com.lingyue.repository.*;
+import com.lingyue.service.EnhancedTaskService;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+@Service
+public class EnhancedTaskServiceImpl implements EnhancedTaskService {
+    
+    private final TaskRepository taskRepository;
+    private final RoleTaskRepository roleTaskRepository;
+    private final RoleActivityRepository roleActivityRepository;
+    private final ActivityRewardRepository activityRewardRepository;
+    private final TaskLogRepository taskLogRepository;
+    
+    public EnhancedTaskServiceImpl(TaskRepository taskRepository,
+                                   RoleTaskRepository roleTaskRepository,
+                                   RoleActivityRepository roleActivityRepository,
+                                   ActivityRewardRepository activityRewardRepository,
+                                   TaskLogRepository taskLogRepository) {
+        this.taskRepository = taskRepository;
+        this.roleTaskRepository = roleTaskRepository;
+        this.roleActivityRepository = roleActivityRepository;
+        this.activityRewardRepository = activityRewardRepository;
+        this.taskLogRepository = taskLogRepository;
+    }
+    
+    @Override
+    public List<TaskDTO> getDailyTasks() {
+        List<Task> tasks = taskRepository.findDailyTasksWithWeight();
+        return tasks.stream().map(this::convertToDTO).collect(Collectors.toList());
+    }
+    
+    @Override
+    public List<RoleTaskDTO> getRoleTasks(Long roleId) {
+        List<RoleTask> roleTasks = roleTaskRepository.findByRoleId(roleId);
+        return roleTasks.stream().map(this::convertToRoleTaskDTO).collect(Collectors.toList());
+    }
+    
+    @Override
+    @Transactional
+    public RoleTaskDTO acceptTask(TaskAcceptRequest request) {
+        Task task = taskRepository.findById(request.getTaskId()).orElse(null);
+        if (task == null) {
+            throw new RuntimeException("任务不存在");
+        }
+        
+        RoleTask existingTask = roleTaskRepository.findByRoleIdAndTaskId(request.getRoleId(), request.getTaskId());
+        if (existingTask != null && existingTask.getStatus() != 3) {
+            throw new RuntimeException("该任务已在进行中");
+        }
+        
+        RoleTask roleTask = new RoleTask();
+        roleTask.setRoleId(request.getRoleId());
+        roleTask.setTaskId(request.getTaskId());
+        roleTask.setStatus(1);
+        roleTask.setCurrentProgress(0);
+        roleTask.setLoopCount(0);
+        roleTask.setIsDailyTask(task.getIsDaily());
+        roleTask.setAcceptTime(new Date());
+        roleTask.setCreatedAt(new Date());
+        roleTask.setUpdatedAt(new Date());
+        
+        RoleTask saved = roleTaskRepository.save(roleTask);
+        
+        logTaskAction(request.getRoleId(), request.getTaskId(), "ACCEPT", 0, null, 0, 0);
+        
+        return convertToRoleTaskDTO(saved);
+    }
+    
+    @Override
+    @Transactional
+    public RoleTaskDTO updateTaskProgress(TaskProgressRequest request) {
+        RoleTask roleTask = roleTaskRepository.findByRoleIdAndTaskId(request.getRoleId(), request.getTaskId());
+        if (roleTask == null) {
+            throw new RuntimeException("任务不存在");
+        }
+        
+        if (roleTask.getStatus() != 1) {
+            throw new RuntimeException("任务不在进行中");
+        }
+        
+        Task task = taskRepository.findById(request.getTaskId()).orElse(null);
+        int oldProgress = roleTask.getCurrentProgress();
+        int newProgress = Math.min(request.getProgress(), task.getTargetCount());
+        
+        roleTask.setCurrentProgress(newProgress);
+        roleTask.setUpdatedAt(new Date());
+        
+        if (newProgress >= task.getTargetCount()) {
+            roleTask.setStatus(2);
+            roleTask.setCompleteTime(new Date());
+        }
+        
+        RoleTask saved = roleTaskRepository.save(roleTask);
+        
+        logTaskAction(request.getRoleId(), request.getTaskId(), "PROGRESS", 
+            roleTask.getLoopCount(), null, oldProgress, newProgress);
+        
+        return convertToRoleTaskDTO(saved);
+    }
+    
+    @Override
+    @Transactional
+    public TaskRewardDTO claimTaskReward(Long roleId, Long taskId) {
+        RoleTask roleTask = roleTaskRepository.findByRoleIdAndTaskId(roleId, taskId);
+        if (roleTask == null) {
+            throw new RuntimeException("任务不存在");
+        }
+        
+        if (roleTask.getStatus() != 2) {
+            throw new RuntimeException("任务未完成或已领取");
+        }
+        
+        Task task = taskRepository.findById(taskId).orElse(null);
+        
+        int multiplier = 1;
+        int loopCount = roleTask.getLoopCount();
+        if (loopCount == 9 || loopCount == 19 || loopCount == 29) {
+            multiplier = 2;
+        }
+        
+        RoleActivity activity = getOrCreateActivity(roleId);
+        int newActivity = activity.getDailyActivity() + task.getRewardActivity() * multiplier;
+        activity.setDailyActivity(newActivity);
+        activity.setTotalActivity(activity.getTotalActivity() + task.getRewardActivity() * multiplier);
+        activity.setUpdatedAt(new Date());
+        roleActivityRepository.save(activity);
+        
+        roleTask.setStatus(3);
+        roleTask.setClaimTime(new Date());
+        roleTask.setUpdatedAt(new Date());
+        
+        if (task.getIsLoop()) {
+            roleTask.setLoopCount(roleTask.getLoopCount() + 1);
+            roleTask.setStatus(1);
+            roleTask.setCurrentProgress(0);
+            roleTask.setAcceptTime(new Date());
+            roleTask.setCompleteTime(null);
+            roleTask.setClaimTime(null);
+        }
+        
+        roleTaskRepository.save(roleTask);
+        
+        String rewardInfo = String.format("修为:%d,灵石:%d,活跃度:%d",
+            task.getRewardXiuwei() * multiplier,
+            task.getRewardLingshi() * multiplier,
+            task.getRewardActivity() * multiplier);
+        
+        logTaskAction(roleId, taskId, "CLAIM", roleTask.getLoopCount(), rewardInfo, null, null);
+        
+        TaskRewardDTO reward = new TaskRewardDTO();
+        reward.setSuccess(true);
+        reward.setMessage("奖励领取成功！");
+        reward.setRewardXiuwei(task.getRewardXiuwei() * multiplier);
+        reward.setRewardLingshi(task.getRewardLingshi() * multiplier);
+        reward.setRewardActivity(task.getRewardActivity() * multiplier);
+        reward.setRewardClanContribution(task.getRewardClanContribution() * multiplier);
+        reward.setRewardItems(task.getRewardItems());
+        reward.setNewDailyActivity(newActivity);
+        
+        return reward;
+    }
+    
+    @Override
+    public ActivityDTO getActivityInfo(Long roleId) {
+        RoleActivity activity = getOrCreateActivity(roleId);
+        List<ActivityReward> rewards = activityRewardRepository.findByIsEnabledOrderBySortOrderAsc(true);
+        List<Long> claimedRewardIds = parseClaimedRewards(activity.getClaimedRewards());
+        
+        ActivityDTO dto = new ActivityDTO();
+        dto.setRoleId(roleId);
+        dto.setDailyActivity(activity.getDailyActivity());
+        dto.setTotalActivity(activity.getTotalActivity());
+        dto.setClaimedRewards(claimedRewardIds);
+        
+        List<ActivityDTO.ActivityRewardDTO> rewardDTOs = rewards.stream().map(reward -> {
+            ActivityDTO.ActivityRewardDTO r = new ActivityDTO.ActivityRewardDTO();
+            r.setId(reward.getId());
+            r.setActivityThreshold(reward.getActivityThreshold());
+            r.setName(reward.getName());
+            r.setDescription(reward.getDescription());
+            r.setRewardXiuwei(reward.getRewardXiuwei());
+            r.setRewardLingshi(reward.getRewardLingshi());
+            r.setRewardItems(reward.getRewardItems());
+            r.setClaimed(claimedRewardIds.contains(reward.getId()));
+            r.setAvailable(activity.getDailyActivity() >= reward.getActivityThreshold());
+            return r;
+        }).collect(Collectors.toList());
+        
+        dto.setAvailableRewards(rewardDTOs);
+        return dto;
+    }
+    
+    @Override
+    @Transactional
+    public TaskRewardDTO claimActivityReward(Long roleId, Long rewardId) {
+        ActivityReward reward = activityRewardRepository.findById(rewardId).orElse(null);
+        if (reward == null) {
+            throw new RuntimeException("奖励不存在");
+        }
+        
+        RoleActivity activity = getOrCreateActivity(roleId);
+        if (activity.getDailyActivity() < reward.getActivityThreshold()) {
+            throw new RuntimeException("活跃度不足");
+        }
+        
+        List<Long> claimedRewardIds = parseClaimedRewards(activity.getClaimedRewards());
+        if (claimedRewardIds.contains(rewardId)) {
+            throw new RuntimeException("奖励已领取");
+        }
+        
+        claimedRewardIds.add(rewardId);
+        activity.setClaimedRewards(claimedRewardIds.stream().map(String::valueOf).collect(Collectors.joining(",")));
+        activity.setUpdatedAt(new Date());
+        roleActivityRepository.save(activity);
+        
+        TaskRewardDTO result = new TaskRewardDTO();
+        result.setSuccess(true);
+        result.setMessage("活跃度奖励领取成功！");
+        result.setRewardXiuwei(reward.getRewardXiuwei());
+        result.setRewardLingshi(reward.getRewardLingshi());
+        result.setRewardItems(reward.getRewardItems());
+        result.setNewDailyActivity(activity.getDailyActivity());
+        
+        return result;
+    }
+    
+    @Override
+    @Transactional
+    public void refreshDailyTasks(Long roleId) {
+        RoleActivity activity = getOrCreateActivity(roleId);
+        Date now = new Date();
+        
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.HOUR_OF_DAY, 5);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        Date lastReset = activity.getDailyResetTime();
+        
+        if (lastReset == null || lastReset.before(cal.getTime())) {
+            activity.setDailyActivity(0);
+            activity.setClaimedRewards("");
+            activity.setDailyResetTime(now);
+            activity.setUpdatedAt(now);
+            roleActivityRepository.save(activity);
+            
+            List<RoleTask> oldTasks = roleTaskRepository.findByRoleIdAndStatus(roleId, 1);
+            for (RoleTask task : oldTasks) {
+                if (task.getIsDailyTask()) {
+                    roleTaskRepository.delete(task);
+                }
+            }
+        }
+    }
+    
+    private RoleActivity getOrCreateActivity(Long roleId) {
+        return roleActivityRepository.findByRoleId(roleId).orElseGet(() -> {
+            RoleActivity activity = new RoleActivity();
+            activity.setRoleId(roleId);
+            activity.setDailyActivity(0);
+            activity.setTotalActivity(0);
+            activity.setClaimedRewards("");
+            activity.setCreatedAt(new Date());
+            activity.setUpdatedAt(new Date());
+            return roleActivityRepository.save(activity);
+        });
+    }
+    
+    private List<Long> parseClaimedRewards(String claimedRewards) {
+        if (claimedRewards == null || claimedRewards.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return Arrays.stream(claimedRewards.split(","))
+            .filter(s -> !s.isEmpty())
+            .map(Long::parseLong)
+            .collect(Collectors.toList());
+    }
+    
+    private TaskDTO convertToDTO(Task task) {
+        TaskDTO dto = new TaskDTO();
+        dto.setId(task.getId());
+        dto.setName(task.getName());
+        dto.setDescription(task.getDescription());
+        dto.setType(task.getType());
+        dto.setSubType(task.getSubType());
+        dto.setLevelRequirement(task.getLevelRequirement());
+        dto.setRealmRequirement(task.getRealmRequirement());
+        dto.setTargetType(task.getTargetType());
+        dto.setTargetId(task.getTargetId());
+        dto.setTargetCount(task.getTargetCount());
+        dto.setRewardExp(task.getRewardExp());
+        dto.setRewardXiuwei(task.getRewardXiuwei());
+        dto.setRewardLingshi(task.getRewardLingshi());
+        dto.setRewardClanContribution(task.getRewardClanContribution());
+        dto.setRewardActivity(task.getRewardActivity());
+        dto.setRewardItems(task.getRewardItems());
+        dto.setIsDaily(task.getIsDaily());
+        dto.setIsLoop(task.getIsLoop());
+        dto.setSortOrder(task.getSortOrder());
+        return dto;
+    }
+    
+    private RoleTaskDTO convertToRoleTaskDTO(RoleTask roleTask) {
+        RoleTaskDTO dto = new RoleTaskDTO();
+        dto.setId(roleTask.getId());
+        dto.setRoleId(roleTask.getRoleId());
+        dto.setTaskId(roleTask.getTaskId());
+        dto.setStatus(roleTask.getStatus());
+        dto.setCurrentProgress(roleTask.getCurrentProgress());
+        dto.setLoopCount(roleTask.getLoopCount());
+        dto.setAcceptTime(roleTask.getAcceptTime());
+        dto.setCompleteTime(roleTask.getCompleteTime());
+        
+        Task task = taskRepository.findById(roleTask.getTaskId()).orElse(null);
+        if (task != null) {
+            dto.setTask(convertToDTO(task));
+            dto.setTargetCount(task.getTargetCount());
+        }
+        
+        return dto;
+    }
+    
+    private void logTaskAction(Long roleId, Long taskId, String actionType, 
+                               Integer loopCount, String rewardInfo,
+                               Integer progressBefore, Integer progressAfter) {
+        TaskLog log = new TaskLog();
+        log.setRoleId(roleId);
+        log.setTaskId(taskId);
+        log.setActionType(actionType);
+        log.setLoopCount(loopCount);
+        log.setRewardInfo(rewardInfo);
+        log.setProgressBefore(progressBefore);
+        log.setProgressAfter(progressAfter);
+        log.setCreatedAt(new Date());
+        taskLogRepository.save(log);
+    }
+}

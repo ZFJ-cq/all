@@ -1,0 +1,1787 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="css/mobile-adapt.css">
+  <title>灵月仙途 - 修炼突破</title>
+  <link rel="stylesheet" href="css/avatar.css">
+  <style>
+    :root {
+      --gold-primary: #c9a962;
+      --gold-light: #e8d68a;
+      --gold-dim: #9d824a;
+      --gold-bg: rgba(201, 169, 98, 0.15);
+      --text-main: #2c2416;
+      --text-dim: #5a4d3a;
+      --text-dark: #1a1510;
+      --panel-bg: rgba(255, 255, 255, 0.5);
+      --success: #5a9f3a;
+      --danger: #d94444;
+      --warning: #e69500;
+      --fire-red: #ff4444;
+      --fire-orange: #ff8800;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      font-family: 'Microsoft YaHei', 'SimSun', serif;
+      background: url('images/image copy.png') no-repeat center center;
+      background-size: cover;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(255, 255, 255, 0.05);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 14px;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      border-radius: 4px;
+      color: var(--gold-light);
+      font-size: 0.7rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin: 10px;
+      width: fit-content;
+      position: relative;
+      z-index: 10;
+    }
+
+    .back-btn:hover {
+      background: rgba(255,255,255,0.25);
+      border-color: var(--gold-primary);
+    }
+
+    .back-btn span { font-size: 1rem; font-weight: 600; }
+
+    .main-container {
+      position: relative;
+      z-index: 10;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 4px;
+      gap: 4px;
+      overflow-y: auto;
+      padding-bottom: 65px;
+    }
+
+    .top-status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: transparent;
+      padding: 6px 10px;
+    }
+
+    .player-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .avatar {
+      width: 40px;
+      height: 40px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 50%;
+      border: 2px solid var(--gold-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .avatar:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 15px rgba(230, 199, 73, 0.5);
+    }
+
+    .player-details {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .player-name {
+      font-size: 0.85rem;
+      color: var(--text-dark);
+      font-weight: 700;
+      text-shadow: 0 0 3px rgba(255,255,255,0.8);
+    }
+
+    .player-cultivation {
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      text-shadow: 0 0 3px rgba(255,255,255,0.8);
+    }
+
+    .walk-fire-badge {
+      display: none;
+      padding: 3px 8px;
+      background: rgba(255, 68, 68, 0.2);
+      border: 1px solid var(--fire-red);
+      border-radius: 4px;
+      color: var(--fire-red);
+      font-size: 0.6rem;
+      font-weight: 700;
+      animation: firePulse 1.5s ease-in-out infinite;
+    }
+
+    .walk-fire-badge.active {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    @keyframes firePulse {
+      0%, 100% { opacity: 0.7; }
+      50% { opacity: 1; box-shadow: 0 0 8px rgba(255, 68, 68, 0.5); }
+    }
+
+    .cultivation-panel {
+      background: transparent;
+      padding: 10px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .panel-title {
+      font-size: 1.1rem;
+      color: var(--text-dark);
+      font-weight: 700;
+      text-align: center;
+      letter-spacing: 3px;
+      text-shadow: 0 0 5px rgba(255,255,255,0.9);
+    }
+
+    .realm-section {
+      text-align: center;
+      padding: 15px 10px;
+    }
+
+    .realm-title {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin: 8px 0 4px 0;
+      letter-spacing: 8px;
+      text-shadow: 0 0 8px rgba(255,255,255,0.9);
+    }
+
+    .realm-subtitle {
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      margin-bottom: 10px;
+      letter-spacing: 3px;
+      text-shadow: 0 0 5px rgba(255,255,255,0.8);
+    }
+
+    .xiuwei-section {
+      padding: 0 10px;
+    }
+
+    .xiuwei-label {
+      font-size: 0.75rem;
+      color: var(--text-dark);
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+      font-weight: 600;
+    }
+
+    .xiuwei-value {
+      color: var(--warning);
+      font-weight: 700;
+      text-shadow: 0 0 3px rgba(255,255,255,0.8);
+    }
+
+    .progress-track {
+      height: 8px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold-dim), var(--gold-primary), var(--gold-light));
+      width: 0%;
+      transition: width 0.5s ease;
+      border-radius: 4px;
+    }
+
+    .progress-fill.ready {
+      background: linear-gradient(90deg, var(--success), #7bc850);
+      animation: progressGlow 1.5s ease-in-out infinite;
+    }
+
+    @keyframes progressGlow {
+      0%, 100% { box-shadow: 0 0 4px rgba(90, 159, 58, 0.3); }
+      50% { box-shadow: 0 0 12px rgba(90, 159, 58, 0.7); }
+    }
+
+    .breakthrough-requirement {
+      text-align: center;
+      padding: 10px 15px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 4px;
+      margin: 8px 0;
+    }
+
+    .requirement-text {
+      font-size: 0.7rem;
+      color: var(--text-dark);
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+
+    .requirement-value {
+      font-size: 1.1rem;
+      color: var(--warning);
+      font-weight: 700;
+      text-shadow: 0 0 5px rgba(255,255,255,0.8);
+    }
+
+    .breakthrough-rate {
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+
+    .breakthrough-rate .rate-value {
+      color: var(--gold-primary);
+      font-weight: 700;
+    }
+
+    .breakthrough-penalty {
+      font-size: 0.6rem;
+      color: var(--danger);
+      margin-top: 2px;
+    }
+
+    .countdown-section {
+      text-align: center;
+      padding: 8px;
+      margin: 10px 0;
+    }
+
+    .countdown-label {
+      font-size: 0.6rem;
+      color: var(--text-dark);
+      margin-bottom: 2px;
+      font-weight: 600;
+    }
+
+    .countdown-timer {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--warning);
+      text-shadow: 0 0 8px rgba(255,255,255,0.8);
+    }
+
+    .efficiency-info {
+      font-size: 0.55rem;
+      color: var(--text-dim);
+      margin-top: 2px;
+      font-weight: 500;
+    }
+
+    .boost-panel {
+      padding: 10px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 4px;
+      margin: 10px 0;
+    }
+
+    .boost-title {
+      font-size: 0.75rem;
+      color: var(--text-dark);
+      text-align: center;
+      margin-bottom: 6px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-shadow: 0 0 5px rgba(255,255,255,0.9);
+    }
+
+    .boost-options {
+      display: flex;
+      gap: 8px;
+    }
+
+    .boost-btn {
+      flex: 1;
+      padding: 10px 6px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      border-radius: 4px;
+      color: var(--text-main);
+      font-size: 0.7rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+      pointer-events: auto;
+      z-index: 100;
+    }
+
+    .boost-btn:hover:not(:disabled) {
+      background: rgba(255,255,255,0.2);
+      border-color: rgba(212, 175, 55, 0.4);
+    }
+
+    .boost-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .boost-btn .label {
+      font-size: 0.7rem;
+      color: var(--text-dark);
+      margin-bottom: 2px;
+      font-weight: 600;
+    }
+
+    .boost-btn .cost {
+      font-size: 0.6rem;
+      color: var(--text-dim);
+      font-weight: 500;
+    }
+
+    .boost-btn .desc {
+      font-size: 0.55rem;
+      color: var(--gold-dim);
+      font-weight: 500;
+    }
+
+    .breakthrough-panel {
+      background: transparent;
+      padding: 4px 0;
+    }
+
+    .breakthrough-title {
+      font-size: 1.1rem;
+      color: var(--text-dark);
+      text-align: center;
+      margin: 6px 0 2px 0;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-shadow: 0 0 5px rgba(255,255,255,0.9);
+    }
+
+    .realm-comparison {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 6px 0;
+      gap: 6px;
+    }
+
+    .realm-stage {
+      flex: 1;
+      text-align: center;
+      padding: 8px 4px;
+      background: rgba(255,255,255,0.12);
+      border-radius: 4px;
+      border: 1px solid rgba(212, 175, 55, 0.35);
+    }
+
+    .stage-label {
+      font-size: 0.55rem;
+      color: var(--text-dark);
+      margin-bottom: 3px;
+      font-weight: 600;
+    }
+
+    .stage-value {
+      font-size: 0.7rem;
+      color: var(--warning);
+      font-weight: 700;
+      text-shadow: 0 0 5px rgba(255,255,255,0.8);
+    }
+
+    .breakthrough-btn-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 4px;
+    }
+
+    .arrow {
+      color: var(--gold-primary);
+      font-size: 1.5rem;
+      text-shadow: 0 0 10px rgba(230, 199, 73, 0.5);
+    }
+
+    .breakthrough-action {
+      text-align: center;
+      padding: 8px 10px;
+    }
+
+    .breakthrough-btn {
+      width: 70px;
+      height: 70px;
+      padding: 0;
+      background: linear-gradient(135deg, rgba(201,169,98,0.4), rgba(157,130,74,0.5));
+      border: 2px solid var(--gold-primary);
+      color: var(--text-dark);
+      font-size: 0.9rem;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.25s;
+      letter-spacing: 2px;
+      box-shadow: 0 4px 15px rgba(201,169,98,0.5), inset 0 2px 5px rgba(255,255,255,0.3);
+      text-shadow: 0 0 5px rgba(255,255,255,0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: auto;
+      z-index: 100;
+    }
+
+    .breakthrough-btn:hover:not(:disabled) {
+      background: linear-gradient(135deg, rgba(201,169,98,0.55), rgba(157,130,74,0.65));
+      border-color: var(--gold-light);
+      box-shadow: 0 6px 20px rgba(201,169,98,0.7), inset 0 2px 5px rgba(255,255,255,0.4);
+      transform: scale(1.05);
+    }
+
+    .breakthrough-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .breakthrough-btn .loading-spinner {
+      display: none;
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--gold-primary);
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .breakthrough-btn.loading .loading-spinner {
+      display: inline-block;
+    }
+
+    @keyframes spin {
+      to { transform: translateY(-50%) rotate(360deg); }
+    }
+
+    .breakthrough-hint {
+      font-size: 0.65rem;
+      margin-top: 8px;
+      font-style: italic;
+      color: var(--text-dark);
+      font-weight: 500;
+      text-align: center;
+    }
+
+    .hint-ready { color: var(--success); }
+    .hint-waiting { color: var(--danger); }
+
+    .bottom-hint {
+      text-align: center;
+      font-size: 0.65rem;
+      color: var(--text-dark);
+      font-style: italic;
+      padding: 6px 8px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 4px;
+      margin: 2px 0;
+      font-weight: 500;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 60px;
+      background: linear-gradient(to top, rgba(15, 20, 35, 0.98), rgba(15, 20, 35, 0.8));
+      border-top: 2px solid var(--gold-primary);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 100;
+      box-shadow: 0 -5px 30px rgba(230, 199, 73, 0.4);
+      backdrop-filter: blur(15px);
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      color: var(--text-dim);
+      text-decoration: none;
+      padding: 6px 15px;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .nav-item:hover {
+      color: var(--gold-primary);
+      background: rgba(230, 199, 73, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .nav-item.active {
+      color: var(--gold-primary);
+      background: rgba(230, 199, 73, 0.3);
+      box-shadow: 0 0 10px rgba(230, 199, 73, 0.5);
+    }
+
+    .nav-item.active::after {
+      content: '';
+      position: absolute;
+      top: -6px;
+      width: 20px;
+      height: 3px;
+      background: var(--gold-primary);
+      border-radius: 0 0 3px 3px;
+    }
+
+    .nav-icon { font-size: 1.3rem; }
+    .nav-text { font-size: 0.65rem; font-weight: 600; }
+
+    .popup-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      z-index: 2000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+
+    .popup-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .popup-content {
+      background: rgba(20, 25, 45, 0.95);
+      border: 2px solid var(--gold-primary);
+      border-radius: 8px;
+      padding: 20px;
+      width: 85%;
+      max-width: 350px;
+      box-shadow: 0 0 30px rgba(230, 199, 73, 0.4);
+    }
+
+    .popup-title {
+      font-size: 1.1rem;
+      color: var(--gold-primary);
+      text-align: center;
+      margin-bottom: 15px;
+      font-weight: bold;
+    }
+
+    .popup-body {
+      color: #ccc;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .popup-body.error { color: var(--danger); }
+    .popup-body.success { color: var(--success); }
+
+    .popup-btn {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(90deg, transparent, rgba(230,199,73,0.2), transparent);
+      border: 1px solid var(--gold-primary);
+      color: var(--gold-primary);
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    .popup-btn:hover {
+      background: rgba(230,199,73,0.3);
+    }
+
+    .popup-btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .popup-btn-row .popup-btn {
+      flex: 1;
+    }
+
+    .popup-btn.danger {
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    .popup-btn.danger:hover {
+      background: rgba(217, 68, 68, 0.2);
+    }
+
+    .breakthrough-confirm-body {
+      text-align: left;
+    }
+
+    .breakthrough-confirm-body .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 0;
+      font-size: 0.8rem;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .breakthrough-confirm-body .info-label {
+      color: #999;
+    }
+
+    .breakthrough-confirm-body .info-value {
+      color: var(--gold-light);
+      font-weight: 600;
+    }
+
+    .breakthrough-confirm-body .info-value.danger {
+      color: var(--danger);
+    }
+
+    .breakthrough-confirm-body .info-value.success {
+      color: var(--success);
+    }
+
+    .pill-select {
+      margin-top: 10px;
+      padding: 8px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 4px;
+    }
+
+    .pill-select-title {
+      font-size: 0.75rem;
+      color: var(--gold-primary);
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    .pill-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      margin: 4px 0;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.75rem;
+      color: #ccc;
+    }
+
+    .pill-option:hover {
+      background: rgba(255,255,255,0.1);
+    }
+
+    .pill-option.selected {
+      border-color: var(--gold-primary);
+      background: rgba(201, 169, 98, 0.15);
+    }
+
+    .pill-option.disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .pill-option .pill-name {
+      font-weight: 600;
+      color: var(--gold-light);
+    }
+
+    .pill-option .pill-count {
+      margin-left: auto;
+      font-size: 0.65rem;
+      color: #999;
+    }
+
+    .offline-result {
+      padding: 10px;
+    }
+
+    .offline-result .offline-xiuwei {
+      font-size: 1.5rem;
+      color: var(--gold-light);
+      font-weight: 700;
+      text-align: center;
+      margin: 10px 0;
+    }
+
+    .offline-result .offline-time {
+      font-size: 0.75rem;
+      color: #999;
+      text-align: center;
+    }
+
+    .breakthrough-result {
+      text-align: center;
+    }
+
+    .breakthrough-result .result-icon {
+      font-size: 3rem;
+      margin-bottom: 10px;
+    }
+
+    .breakthrough-result .result-realm {
+      font-size: 1.2rem;
+      color: var(--gold-light);
+      font-weight: 700;
+      margin: 8px 0;
+    }
+
+    .breakthrough-result .result-detail {
+      font-size: 0.75rem;
+      color: #999;
+      margin: 4px 0;
+    }
+
+    .breakthrough-result .result-detail.danger {
+      color: var(--danger);
+    }
+
+    .walk-fire-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 50;
+      border: 3px solid transparent;
+      transition: border-color 0.5s;
+    }
+
+    .walk-fire-overlay.active {
+      border-color: rgba(255, 68, 68, 0.4);
+      animation: fireBorder 2s ease-in-out infinite;
+    }
+
+    @keyframes fireBorder {
+      0%, 100% { border-color: rgba(255, 68, 68, 0.2); }
+      50% { border-color: rgba(255, 68, 68, 0.5); }
+    }
+
+    @media (max-height: 700px) {
+      .main-container { padding: 8px; gap: 12px; }
+      .realm-title { font-size: 1.3rem; }
+      .countdown-timer { font-size: 2rem; }
+    }
+  </style>
+
+  </head>
+<body>
+
+  <div class="walk-fire-overlay" id="walkFireOverlay"></div>
+
+  <div class="back-btn" onclick="window.location.href='index.html'">
+    <span>←</span> 返回
+  </div>
+
+  <div class="main-container">
+    
+    <div class="top-status">
+      <div class="player-info">
+        <div class="avatar" id="charAvatar" onclick="window.location.href='character/character.html'">👤</div>
+        <div class="player-details">
+          <div class="player-name" id="charName">加载中...</div>
+          <div class="player-cultivation" id="charLevel">凡人</div>
+        </div>
+      </div>
+      <div class="walk-fire-badge" id="walkFireBadge">🔥 走火入魔</div>
+    </div>
+
+    <div class="cultivation-panel">
+      <div class="panel-title">🧘 修炼</div>
+      
+      <div class="realm-section">
+        <div class="realm-title" id="currentRealmDisplay">凡人</div>
+        <div class="realm-subtitle">道阻且长，行则将至</div>
+      </div>
+
+      <div class="xiuwei-section">
+        <div class="xiuwei-label">
+          <span>修为</span>
+          <span class="xiuwei-value" id="xiuweiProgressText">0 / 0</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="xiuweiProgressBar"></div>
+        </div>
+      </div>
+
+      <div class="breakthrough-requirement">
+        <div class="requirement-text">突破至 <span id="nextRealmName">--</span> 需</div>
+        <div class="requirement-value" id="requiredXiuweiDisplay">-- 修为</div>
+        <div class="breakthrough-rate" id="breakthroughRateInfo"></div>
+        <div class="breakthrough-penalty" id="breakthroughPenaltyInfo"></div>
+      </div>
+
+      <div class="boost-panel">
+        <div class="boost-title">⚡ 修炼加速</div>
+        <div class="boost-options">
+          <button class="boost-btn" id="boostLingshiBtn" onclick="useLingshiBoost()">
+            <div class="label">💎 灵石增幅</div>
+            <div class="cost">消耗 100 灵石</div>
+            <div class="desc">效率 x2</div>
+          </button>
+          <button class="boost-btn" id="boostPillBtn" onclick="usePillBoost()">
+            <div class="label">💊 丹药增幅</div>
+            <div class="cost">消耗 1 筑基丹</div>
+            <div class="desc">效率 x3</div>
+          </button>
+        </div>
+      </div>
+
+      <div class="countdown-section">
+        <div class="countdown-label">下次结算</div>
+        <div class="countdown-timer" id="countdownTimer">30</div>
+        <div class="efficiency-info">当前效率：<span id="efficiencyDisplay">x1.0</span></div>
+        <div class="efficiency-info" id="efficiencyDetail" style="font-size:0.5rem;color:var(--text-dim);margin-top:1px">基础x1.0 + 功法+0 + 装备+0 = x1.0</div>
+      </div>
+
+      <div class="bottom-hint" id="cultivationHint">
+        修为积累中... 继续修炼以突破境界
+      </div>
+    </div>
+
+    <div class="breakthrough-panel">
+      <div class="breakthrough-title">⚡ 突破</div>
+      
+      <div class="realm-comparison">
+        <div class="realm-stage">
+          <div class="stage-label">当前</div>
+          <div class="stage-value" id="breakthroughCurrentRealm">凡人</div>
+        </div>
+        <div class="breakthrough-btn-wrapper">
+          <button class="breakthrough-btn" id="breakthroughBtn" onclick="showBreakthroughConfirm()">
+            突破
+            <span class="loading-spinner"></span>
+          </button>
+        </div>
+        <div class="realm-stage">
+          <div class="stage-label">下一境界</div>
+          <div class="stage-value" id="nextRealm">--</div>
+        </div>
+      </div>
+      <div class="breakthrough-hint" id="breakthroughHint"></div>
+    </div>
+
+  </div>
+
+  <nav class="bottom-nav" role="navigation" aria-label="主导航">
+    <a href="index.html" class="nav-item active" aria-label="修炼页面">
+      <div class="nav-icon">🧘</div>
+      <div class="nav-text">修炼</div>
+    </a>
+    <a href="skills/skills.html" class="nav-item" aria-label="功法页面">
+      <div class="nav-icon">📜</div>
+      <div class="nav-text">功法</div>
+    </a>
+    <a href="clan/clan.html" class="nav-item" aria-label="宗门页面">
+      <div class="nav-icon">🏯</div>
+      <div class="nav-text">宗门</div>
+    </a>
+    <a href="word/world.html" class="nav-item" aria-label="仙途页面">
+      <div class="nav-icon">🌌</div>
+      <div class="nav-text">仙途</div>
+    </a>
+    <a href="map/map.html" class="nav-item" aria-label="云游页面">
+      <div class="nav-icon">🗺️</div>
+      <div class="nav-text">云游</div>
+    </a>
+  </nav>
+
+  <div class="popup-overlay" id="popupOverlay" onclick="closePopup(event)">
+    <div class="popup-content" onclick="event.stopPropagation()">
+      <div class="popup-title" id="popupTitle">标题</div>
+      <div class="popup-body" id="popupBody">内容</div>
+      <button class="popup-btn" id="popupBtn" onclick="closePopup()">确定</button>
+    </div>
+  </div>
+
+  <div class="popup-overlay" id="breakthroughConfirmOverlay" onclick="closeBreakthroughConfirm(event)">
+    <div class="popup-content" onclick="event.stopPropagation()">
+      <div class="popup-title">⚡ 突破确认</div>
+      <div class="popup-body breakthrough-confirm-body" id="breakthroughConfirmBody"></div>
+      <div class="pill-select" id="pillSelectArea"></div>
+      <div class="popup-btn-row">
+        <button class="popup-btn danger" onclick="closeBreakthroughConfirm()">取消</button>
+        <button class="popup-btn" id="confirmBreakthroughBtn" onclick="executeBreakthrough()">确认突破</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="popup-overlay" id="breakthroughResultOverlay" onclick="closeBreakthroughResult(event)">
+    <div class="popup-content" onclick="event.stopPropagation()">
+      <div class="popup-title" id="breakthroughResultTitle">突破结果</div>
+      <div class="popup-body breakthrough-result" id="breakthroughResultBody"></div>
+      <button class="popup-btn" onclick="closeBreakthroughResult()">确定</button>
+    </div>
+  </div>
+
+  <div class="popup-overlay" id="offlineResultOverlay" onclick="closeOfflineResult(event)">
+    <div class="popup-content" onclick="event.stopPropagation()">
+      <div class="popup-title">🌙 离线修炼</div>
+      <div class="popup-body offline-result" id="offlineResultBody"></div>
+      <button class="popup-btn" onclick="closeOfflineResult()">领取</button>
+    </div>
+  </div>
+
+  <script src="js/auth-check.js"></script>
+  <script src="js/token-manager.js"></script>
+  <script src="js/role-sync.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/api-service.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/game-utils.js"></script>
+  <script src="js/ui-components.js"></script>
+  <script>
+    let currentRoleId = null;
+    let resourceMap = {};
+    let countdownTimer = null;
+    let countdownValue = 30;
+    let isCultivating = true;
+    let currentEfficiencyMultiplier = 1;
+    let baseEfficiency = 1;
+    let techniqueBonus = 0;
+    let equipmentBonus = 0;
+    let pillBoostActive = false;
+    let pillBoostEndTime = 0;
+    let currentXiuwei = 0;
+    let requiredXiuwei = 0;
+    let realmInfo = null;
+    let selectedPillCode = null;
+    let walkFireTimer = null;
+    let heartbeatTimer = null;
+    let nextCultivationTime = null;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      currentRoleId = window.getRoleId ? window.getRoleId() : (localStorage.getItem('currentRoleId') || localStorage.getItem('roleId'));
+      const userId = window.getUserId ? window.getUserId() : localStorage.getItem('userId');
+      if (!userId) {
+        window.showToast('请先登录！', 'error');
+        window.location.href = 'login.html';
+        return;
+      }
+      if (currentRoleId) {
+        initPage(userId, currentRoleId);
+      } else {
+        window.location.href = 'start/start.html';
+      }
+    });
+
+    async function initPage(userId, roleId) {
+      await loadCharacterInfo(userId);
+      await loadRoleResources(roleId);
+      await loadRealmInfo(roleId);
+      await checkOfflineCultivation(roleId);
+      startHeartbeat();
+      startAutoCultivation();
+    }
+    
+    function startHeartbeat() {
+      if (heartbeatTimer) clearInterval(heartbeatTimer);
+      sendHeartbeat();
+      heartbeatTimer = setInterval(sendHeartbeat, 60000);
+    }
+    
+    function sendHeartbeat() {
+  if (!currentRoleId) return;
+  window.apiService.post('/cultivation/heartbeat', {roleId: currentRoleId}).catch(() => {});
+}
+
+    function setButtonLoading(buttonId, isLoading, buttonText) {
+      const button = document.getElementById(buttonId);
+      if (!button) return;
+      
+      if (isLoading) {
+        button.disabled = true;
+        button.classList.add('loading');
+        button.dataset.originalText = button.textContent;
+        button.innerHTML = buttonText + '<span class="loading-spinner"></span>';
+      } else {
+        button.disabled = false;
+        button.classList.remove('loading');
+        if (button.dataset.originalText) {
+          button.textContent = button.dataset.originalText;
+        }
+      }
+    }
+
+    function handleError(error, defaultMessage) {
+      let errorMessage = defaultMessage || '操作失败';
+      
+      if (!navigator.onLine) {
+        errorMessage = '网络连接失败，请检查网络';
+      } else if (error && error.message) {
+        if (error.message.includes('灵石不足')) {
+          errorMessage = '灵石不足，请前往云游获取';
+        } else if (error.message.includes('修为不足')) {
+          errorMessage = '修为不足，请继续修炼';
+        } else if (error.message.includes('走火入魔')) {
+          errorMessage = '走火入魔中，无法操作';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
+      return { message: errorMessage };
+    }
+
+    async function loadCharacterInfo(userId) {
+      try {
+        const data = await window.apiService.get(`/role/user/${userId}`);
+        
+        if (data && data.length > 0) {
+          let charData;
+          if (currentRoleId) {
+            charData = data.find(role => role.id == currentRoleId);
+          }
+          if (!charData) {
+            charData = data[0];
+            currentRoleId = charData.id;
+            localStorage.setItem('currentRoleId', charData.id);
+          }
+          
+          document.getElementById('charName').textContent = charData.roleName;
+          setAvatarBySpiritRoot(charData.spiritRoot);
+        }
+      } catch (error) {
+        console.error('获取角色信息失败:', error);
+      }
+    }
+
+    async function loadRoleResources(roleId) {
+      try {
+        const response = await window.apiService.get('/resource/types');
+        const resourceTypes = (response && response.data) ? response.data : response;
+        
+        const typeMap = {};
+        if (Array.isArray(resourceTypes)) {
+          resourceTypes.forEach(type => {
+            typeMap[type.id] = type.code || type.name;
+          });
+        }
+        
+        const resResponse = await window.apiService.get(`/resource/role/${roleId}`);
+        const data = (resResponse && resResponse.data) ? resResponse.data : resResponse;
+        
+        resourceMap = {};
+        if (Array.isArray(data)) {
+          data.forEach(resource => {
+            let resourceCode = null;
+            
+            if (resource.assetTypeCode) {
+              resourceCode = resource.assetTypeCode.toLowerCase();
+            } else if (resource.resourceTypeId && typeMap[resource.resourceTypeId]) {
+              resourceCode = typeMap[resource.resourceTypeId].toLowerCase();
+            } else if (resource.resourceTypeCode) {
+              resourceCode = resource.resourceTypeCode.toLowerCase();
+            }
+            
+            if (resourceCode) {
+              if (resourceMap[resourceCode]) {
+                resourceMap[resourceCode] += resource.quantity;
+              } else {
+                resourceMap[resourceCode] = resource.quantity;
+              }
+            }
+          });
+        }
+        
+        updateBoostButtons();
+        updateXiuweiProgress();
+      } catch (error) {
+        console.error('获取角色资源失败:', error);
+      }
+    }
+
+    async function loadRealmInfo(roleId) {
+      try {
+        const data = await window.apiService.get(`/cultivation/realm-info?roleId=${roleId}`);
+        
+        if (data && data.success) {
+          realmInfo = data;
+          
+          document.getElementById('currentRealmDisplay').textContent = data.fullRealmName || '凡人';
+          document.getElementById('breakthroughCurrentRealm').textContent = data.fullRealmName || '凡人';
+          document.getElementById('charLevel').textContent = data.fullRealmName || '凡人';
+          
+          currentXiuwei = data.currentXiuwei || 0;
+          
+          if (data.nextRealmName) {
+            document.getElementById('nextRealm').textContent = data.nextRealmName;
+            document.getElementById('nextRealmName').textContent = data.nextRealmName;
+          }
+          
+          requiredXiuwei = data.requiredXiuwei || 0;
+          document.getElementById('requiredXiuweiDisplay').textContent = requiredXiuwei > 0 ? formatNumber(requiredXiuwei) + ' 修为' : '已达到最高境界';
+          
+          let rateHtml = '';
+          if (data.baseSuccessRate !== undefined) {
+            rateHtml = `成功率：<span class="rate-value">${data.finalSuccessRate || data.baseSuccessRate}%</span>`;
+            if (data.pityBonus && data.pityBonus > 0) {
+              rateHtml += ` <span style="color:var(--success)">(保底+${data.pityBonus}%)</span>`;
+            }
+          }
+          document.getElementById('breakthroughRateInfo').innerHTML = rateHtml;
+          
+          let penaltyHtml = '';
+          if (data.penaltyType === 'LOSS_XIUWEI') {
+            penaltyHtml = `⚠️ 失败惩罚：损失${data.penaltyValue || 30}%修为`;
+          } else if (data.penaltyType === 'WALK_FIRE') {
+            penaltyHtml = `🔥 失败惩罚：走火入魔${data.penaltyValue || 30}分钟`;
+          }
+          document.getElementById('breakthroughPenaltyInfo').textContent = penaltyHtml;
+          
+          updateWalkFireStatus(data.isWalkFire, data.walkFireUntil);
+          updateXiuweiProgress();
+          updateBreakthroughHint();
+          updateBreakthroughButton();
+          updateBoostButtons();
+        }
+      } catch (error) {
+        console.error('加载境界信息失败:', error);
+      }
+    }
+
+    async function checkOfflineCultivation(roleId) {
+      try {
+        const data = await window.apiService.post('/cultivation/offline-cultivation', { roleId: roleId });
+        
+        if (data && data.success && data.offlineXiuwei > 0) {
+          showOfflineResult(data.offlineXiuwei, data.offlineMinutes);
+          await loadRoleResources(roleId);
+          await loadRealmInfo(roleId);
+        }
+      } catch (error) {
+        console.error('检查离线修炼失败:', error);
+      }
+    }
+
+    function updateXiuweiProgress() {
+      currentXiuwei = resourceMap['xiuwei'] || resourceMap['xiuxiuwei'] || 0;
+      if (realmInfo && realmInfo.currentXiuwei) {
+        currentXiuwei = realmInfo.currentXiuwei;
+      }
+      
+      const progress = requiredXiuwei > 0 ? Math.min((currentXiuwei / requiredXiuwei) * 100, 100) : 0;
+      
+      const progressText = document.getElementById('xiuweiProgressText');
+      const progressBar = document.getElementById('xiuweiProgressBar');
+      
+      if (progressText) {
+        progressText.textContent = `${formatNumber(currentXiuwei)} / ${formatNumber(requiredXiuwei)}`;
+      }
+      if (progressBar) {
+        progressBar.style.width = progress + '%';
+        if (progress >= 100) {
+          progressBar.classList.add('ready');
+        } else {
+          progressBar.classList.remove('ready');
+        }
+      }
+      
+      updateBreakthroughHint();
+      updateBreakthroughButton();
+    }
+
+    function updateBreakthroughHint() {
+      const hintElement = document.getElementById('breakthroughHint');
+      const cultivationHint = document.getElementById('cultivationHint');
+      
+      if (currentXiuwei >= requiredXiuwei && requiredXiuwei > 0) {
+        if (hintElement) {
+          hintElement.textContent = '可以突破了！';
+          hintElement.className = 'breakthrough-hint hint-ready';
+        }
+        if (cultivationHint) {
+          cultivationHint.textContent = '修为已圆满，准备突破';
+          cultivationHint.style.color = 'var(--success)';
+        }
+      } else if (requiredXiuwei > 0) {
+        const remaining = Math.max(0, requiredXiuwei - currentXiuwei);
+        if (hintElement) {
+          hintElement.textContent = `还需 ${formatNumber(remaining)} 修为方可突破`;
+          hintElement.className = 'breakthrough-hint hint-waiting';
+        }
+        if (cultivationHint) {
+          cultivationHint.textContent = '修为积累中... 继续修炼以突破境界';
+          cultivationHint.style.color = 'var(--text-dim)';
+        }
+      } else {
+        if (hintElement) {
+          hintElement.textContent = '已达到最高境界';
+          hintElement.className = 'breakthrough-hint';
+        }
+        if (cultivationHint) {
+          cultivationHint.textContent = '大道已成，无境可破';
+          cultivationHint.style.color = 'var(--gold-primary)';
+        }
+      }
+    }
+
+    function updateBreakthroughButton() {
+      const btn = document.getElementById('breakthroughBtn');
+      
+      if (realmInfo && realmInfo.isWalkFire) {
+        btn.disabled = true;
+        btn.textContent = '走火入魔';
+        return;
+      }
+      
+      if (currentXiuwei >= requiredXiuwei && requiredXiuwei > 0) {
+        btn.disabled = false;
+        btn.textContent = '突破';
+      } else {
+        btn.disabled = true;
+        btn.textContent = '突破';
+      }
+    }
+
+    function updateWalkFireStatus(isWalkFire, walkFireUntil) {
+      const badge = document.getElementById('walkFireBadge');
+      const overlay = document.getElementById('walkFireOverlay');
+      
+      if (window.RoleSync) {
+        window.RoleSync.setWalkFireStatus(isWalkFire, walkFireUntil);
+      }
+      
+      if (isWalkFire) {
+        badge.classList.add('active');
+        overlay.classList.add('active');
+        
+        if (walkFireTimer) clearInterval(walkFireTimer);
+        
+        let isRefreshing = false;
+        
+        walkFireTimer = setInterval(async () => {
+          if (isRefreshing) return;
+          if (walkFireUntil) {
+            const endTime = new Date(walkFireUntil).getTime();
+            const now = Date.now();
+            const remaining = Math.max(0, Math.ceil((endTime - now) / 60000));
+            if (remaining <= 0) {
+              badge.classList.remove('active');
+              overlay.classList.remove('active');
+              clearInterval(walkFireTimer);
+              walkFireTimer = null;
+              isRefreshing = true;
+              await loadRealmInfo(currentRoleId);
+              isRefreshing = false;
+              if (!realmInfo || !realmInfo.isWalkFire) {
+                isCultivating = true;
+                updateBreakthroughButton();
+              }
+            } else {
+              badge.textContent = `🔥 走火入魔 ${remaining}分钟`;
+            }
+          }
+        }, 10000);
+        
+        const endTime = new Date(walkFireUntil).getTime();
+        const remaining = Math.max(0, Math.ceil((endTime - Date.now()) / 60000));
+        badge.textContent = `🔥 走火入魔 ${remaining}分钟`;
+      } else {
+        badge.classList.remove('active');
+        overlay.classList.remove('active');
+        if (walkFireTimer) {
+          clearInterval(walkFireTimer);
+          walkFireTimer = null;
+        }
+        if (window.RoleSync) {
+          window.RoleSync.setWalkFireStatus(false, null);
+        }
+      }
+    }
+
+    function showBreakthroughConfirm() {
+      if (!realmInfo || !requiredXiuwei || requiredXiuwei <= 0) return;
+      if (realmInfo.isWalkFire) {
+        showPopup('无法突破', '走火入魔中，无法突破！', 'error');
+        return;
+      }
+      
+      const body = document.getElementById('breakthroughConfirmBody');
+      let html = '';
+      
+      html += `<div class="info-row"><span class="info-label">当前境界</span><span class="info-value">${realmInfo.fullRealmName || '凡人'}</span></div>`;
+      html += `<div class="info-row"><span class="info-label">突破至</span><span class="info-value success">${realmInfo.nextRealmName || '--'}</span></div>`;
+      html += `<div class="info-row"><span class="info-label">消耗修为</span><span class="info-value">${formatNumber(requiredXiuwei)}</span></div>`;
+      html += `<div class="info-row"><span class="info-label">成功率</span><span class="info-value">${realmInfo.finalSuccessRate || realmInfo.baseSuccessRate || 60}%</span></div>`;
+      
+      if (realmInfo.consecutiveFailures > 0) {
+        html += `<div class="info-row"><span class="info-label">连续失败</span><span class="info-value danger">${realmInfo.consecutiveFailures}次</span></div>`;
+      }
+      
+      if (realmInfo.penaltyType === 'LOSS_XIUWEI') {
+        html += `<div class="info-row"><span class="info-label">失败惩罚</span><span class="info-value danger">损失${realmInfo.penaltyValue || 30}%修为</span></div>`;
+      } else if (realmInfo.penaltyType === 'WALK_FIRE') {
+        html += `<div class="info-row"><span class="info-label">失败惩罚</span><span class="info-value danger">走火入魔${realmInfo.penaltyValue || 30}分钟</span></div>`;
+      }
+      
+      if (realmInfo.isMajorBreakthrough) {
+        html += `<div class="info-row"><span class="info-label">突破类型</span><span class="info-value" style="color:var(--fire-orange)">大境界突破</span></div>`;
+      }
+      
+      body.innerHTML = html;
+      
+      const pillArea = document.getElementById('pillSelectArea');
+      if (realmInfo.requiredPill) {
+        const pillName = getPillName(realmInfo.requiredPill);
+        const pillCount = resourceMap[realmInfo.requiredPill.toLowerCase()] || 0;
+        const requiredCount = realmInfo.requiredPillCount || 1;
+        const hasEnough = pillCount >= requiredCount;
+        
+        selectedPillCode = hasEnough ? realmInfo.requiredPill : null;
+        
+        pillArea.innerHTML = `
+          <div class="pill-select-title">💊 所需丹药</div>
+          <div class="pill-option ${hasEnough ? 'selected' : 'disabled'}" data-pill="${realmInfo.requiredPill}">
+            <span class="pill-name">${pillName}</span>
+            <span>×${requiredCount}</span>
+            <span class="pill-count">拥有: ${pillCount}</span>
+          </div>
+        `;
+        
+        const confirmBtn = document.getElementById('confirmBreakthroughBtn');
+        confirmBtn.disabled = !hasEnough;
+      } else {
+        selectedPillCode = null;
+        pillArea.innerHTML = '';
+      }
+      
+      document.getElementById('breakthroughConfirmOverlay').classList.add('active');
+    }
+
+    function closeBreakthroughConfirm(e) {
+      if (!e || e.target === document.getElementById('breakthroughConfirmOverlay')) {
+        document.getElementById('breakthroughConfirmOverlay').classList.remove('active');
+      }
+    }
+
+    async function executeBreakthrough() {
+      if (!currentRoleId) return;
+      
+      closeBreakthroughConfirm();
+      setButtonLoading('breakthroughBtn', true, '突破中...');
+      
+      try {
+        const requestBody = { roleId: currentRoleId };
+        if (selectedPillCode) {
+          requestBody.pillCode = selectedPillCode;
+        }
+        
+        const data = await window.apiService.post('/cultivation/breakthrough', requestBody);
+        
+        if (data) {
+          showBreakthroughResult(data);
+          await loadRoleResources(currentRoleId);
+          await loadRealmInfo(currentRoleId);
+          await loadCharacterInfo(localStorage.getItem('userId'));
+        }
+      } catch (error) {
+        const errorInfo = handleError(error, '突破失败');
+        showPopup('突破失败', errorInfo.message, 'error');
+      } finally {
+        setButtonLoading('breakthroughBtn', false);
+      }
+    }
+
+    function showBreakthroughResult(data) {
+      const titleEl = document.getElementById('breakthroughResultTitle');
+      const bodyEl = document.getElementById('breakthroughResultBody');
+      
+      if (data.breakthroughSuccess) {
+        titleEl.textContent = '🎉 突破成功';
+        bodyEl.innerHTML = `
+          <div class="result-icon">🎊</div>
+          <div class="result-realm">${data.newRealm || data.fullRealmName}</div>
+          <div class="result-detail">消耗修为：${formatNumber(data.consumedXiuwei || 0)}</div>
+          <div class="result-detail">成功率：${data.successRate ? data.successRate.toFixed(1) : '--'}%</div>
+          <div class="result-detail success">恭喜突破成功！</div>
+        `;
+      } else {
+        titleEl.textContent = '💔 突破失败';
+        let penaltyHtml = '';
+        if (data.penaltyType === 'LOSS_XIUWEI') {
+          penaltyHtml = `<div class="result-detail danger">损失${data.penaltyValue || 30}%修为</div>`;
+        } else if (data.penaltyType === 'WALK_FIRE') {
+          penaltyHtml = `<div class="result-detail danger">🔥 走火入魔${data.penaltyValue || 30}分钟</div>`;
+        }
+        
+        bodyEl.innerHTML = `
+          <div class="result-icon">💥</div>
+          <div class="result-realm">${data.fullRealmName || '境界未变'}</div>
+          <div class="result-detail">成功率：${data.successRate ? data.successRate.toFixed(1) : '--'}%</div>
+          <div class="result-detail">连续失败：${data.consecutiveFailures || 0}次</div>
+          ${penaltyHtml}
+          <div class="result-detail" style="margin-top:8px;color:var(--gold-dim)">继续修炼，再接再厉</div>
+        `;
+      }
+      
+      document.getElementById('breakthroughResultOverlay').classList.add('active');
+    }
+
+    function closeBreakthroughResult(e) {
+      if (!e || e.target === document.getElementById('breakthroughResultOverlay')) {
+        document.getElementById('breakthroughResultOverlay').classList.remove('active');
+      }
+    }
+
+    function showOfflineResult(offlineXiuwei, offlineMinutes) {
+      const bodyEl = document.getElementById('offlineResultBody');
+      const hours = Math.floor(offlineMinutes / 60);
+      const mins = offlineMinutes % 60;
+      const timeStr = hours > 0 ? `${hours}小时${mins}分钟` : `${mins}分钟`;
+      
+      bodyEl.innerHTML = `
+        <div style="font-size:0.8rem;color:#999;margin-bottom:8px">离线期间修炼未曾间断</div>
+        <div class="offline-xiuwei">+${offlineXiuwei.toLocaleString()}</div>
+        <div class="offline-time">离线时长：${timeStr}</div>
+      `;
+      
+      document.getElementById('offlineResultOverlay').classList.add('active');
+    }
+
+    function closeOfflineResult(e) {
+      if (!e || e.target === document.getElementById('offlineResultOverlay')) {
+        document.getElementById('offlineResultOverlay').classList.remove('active');
+      }
+    }
+
+    function startAutoCultivation() {
+      if (countdownTimer) {
+        clearInterval(countdownTimer);
+      }
+      
+      updateCountdownFromServerTime();
+      
+      countdownTimer = setInterval(async () => {
+        if (!isCultivating) return;
+        
+        if (pillBoostActive && Date.now() > pillBoostEndTime) {
+          pillBoostActive = false;
+          currentEfficiencyMultiplier = 1;
+          showToast('丹药效果已结束');
+          document.getElementById('efficiencyDisplay').textContent = 'x1.0';
+        }
+        
+        updateCountdownFromServerTime();
+        
+        if (countdownValue <= 0) {
+          await executeCultivationCycle();
+        }
+      }, 1000);
+    }
+
+    function updateCountdownFromServerTime() {
+      if (nextCultivationTime) {
+        const remaining = Math.ceil((new Date(nextCultivationTime).getTime() - Date.now()) / 1000);
+        countdownValue = Math.max(0, remaining);
+      } else {
+        countdownValue = 30;
+      }
+      updateCountdownDisplay();
+    }
+
+    function updateCountdownDisplay() {
+      document.getElementById('countdownTimer').textContent = countdownValue;
+    }
+
+    async function executeCultivationCycle() {
+  if (!currentRoleId) return;
+  
+  try {
+    const response = await window.apiService.post('/cultivation/auto', { roleId: currentRoleId });
+    const data = response.data || response;
+    
+    if (data && data.success) {
+      const totalXiuwei = data.totalXiuwei || 0;
+      
+      if (data.currentXiuwei) {
+        currentXiuwei = data.currentXiuwei;
+      }
+      
+      if (data.nextCultivationTime) {
+        nextCultivationTime = data.nextCultivationTime;
+      }
+
+      baseEfficiency = data.baseEfficiency || 1;
+      techniqueBonus = data.techniqueBonus || 0;
+      equipmentBonus = data.equipmentBonus || 0;
+      currentEfficiencyMultiplier = data.efficiencyMultiplier || 1;
+
+      const effDisplay = document.getElementById('efficiencyDisplay');
+      if (effDisplay) {
+        effDisplay.textContent = 'x' + currentEfficiencyMultiplier.toFixed(1);
+      }
+      const effDetail = document.getElementById('efficiencyDetail');
+      if (effDetail) {
+        effDetail.textContent = '基础x' + baseEfficiency.toFixed(1) + ' + 功法+' + techniqueBonus + ' + 装备+' + equipmentBonus + ' = x' + currentEfficiencyMultiplier.toFixed(1);
+      }
+      
+      await loadRoleResources(currentRoleId);
+      updateXiuweiProgress();
+      updateBreakthroughHint();
+      updateBreakthroughButton();
+      updateBoostButtons();
+      
+      showToast(`获得 ${formatNumber(totalXiuwei)} 修为！`);
+        } else {
+          const errorMsg = data.message || '修炼失败';
+          if (errorMsg.includes('走火入魔')) {
+            isCultivating = false;
+            await loadRealmInfo(currentRoleId);
+            updateWalkFireStatus(true, null);
+            updateBreakthroughButton();
+            showPopup('走火入魔', '走火入魔中，无法继续修炼！请等待状态恢复。', 'error');
+          }
+        }
+      } catch (error) {
+        console.error('修炼异常:', error);
+        const errorInfo = handleError(error, '');
+        if (errorInfo.message.includes('走火入魔')) {
+          isCultivating = false;
+          await loadRealmInfo(currentRoleId);
+          updateWalkFireStatus(true, null);
+          updateBreakthroughButton();
+        }
+      }
+    }
+
+    function updateBoostButtons() {
+      const lingshiBtn = document.getElementById('boostLingshiBtn');
+      const pillBtn = document.getElementById('boostPillBtn');
+      
+      const lingshi = resourceMap['lingshi'] || 0;
+      lingshiBtn.disabled = lingshi < 100;
+      lingshiBtn.innerHTML = `<div class="label">💎 灵石增幅</div><div class="cost">消耗 100 灵石</div><div class="desc">效率 x2</div>`;
+      
+      const currentRealmPillCode = getCurrentRealmPillCode();
+      const currentPillName = getPillName(currentRealmPillCode);
+      const pill = resourceMap[currentRealmPillCode.toLowerCase()] || 0;
+      pillBtn.disabled = pill < 1 || pillBoostActive;
+      
+      if (pillBoostActive) {
+        const remaining = Math.ceil((pillBoostEndTime - Date.now()) / 1000);
+        if (remaining > 0) {
+          pillBtn.innerHTML = `<div class="label">💊 丹药生效中</div><div class="cost">剩余 ${remaining} 秒</div>`;
+        } else {
+          pillBoostActive = false;
+          pillBtn.disabled = pill < 1;
+          pillBtn.innerHTML = `<div class="label">💊 ${currentPillName}增幅</div><div class="cost">消耗 1 ${currentPillName}</div><div class="desc">效率 x3</div>`;
+        }
+      } else {
+        pillBtn.innerHTML = `<div class="label">💊 ${currentPillName}增幅</div><div class="cost">消耗 1 ${currentPillName}</div><div class="desc">效率 x3</div>`;
+      }
+    }
+    
+    function getCurrentRealmPillCode() {
+      if (!realmInfo || !realmInfo.currentRealm) return 'LIANTIDAN';
+      const realm = realmInfo.currentRealm;
+      if (realm === '凡人' || !realm) return 'LIANTIDAN';
+      switch (realm) {
+        case '炼体': return 'LIANTIDAN';
+        case '炼气': return 'LIANQIDAN';
+        case '筑基': return 'ZHUJIDAN';
+        case '金丹': return 'JINDANDAN';
+        case '元婴': return 'YUANYINGDAN';
+        case '化神': return 'HUASHENDAN';
+        case '炼虚': return 'LIANXUDAN';
+        case '合体': return 'HETIDAN';
+        case '大乘': return 'DACHENGDAN';
+        default: return 'ZHUJIDAN';
+      }
+    }
+
+    async function useLingshiBoost() {
+      if (!currentRoleId) return;
+      
+      if (realmInfo && realmInfo.isWalkFire) {
+        showPopup('无法修炼', '走火入魔中，无法使用灵石增幅！', 'error');
+        return;
+      }
+      
+      const lingshi = resourceMap['lingshi'] || 0;
+      if (lingshi < 100) {
+        showPopup('灵石不足', '灵石不足，请前往云游获取', 'error');
+        return;
+      }
+      
+      try {
+        const response = await window.apiService.post('/cultivation/auto', { 
+          roleId: currentRoleId,
+          boostType: 'LINGSHI'
+        });
+        
+        const data = response.data || response;
+        if (data && data.success) {
+          currentEfficiencyMultiplier = 2;
+          document.getElementById('efficiencyDisplay').textContent = 'x2.0';
+          await loadRoleResources(currentRoleId);
+          updateXiuweiProgress();
+          updateBoostButtons();
+          showPopup('灵石增幅', `修炼效率提升至 x2，获得 ${formatNumber(data.totalXiuwei || 0)} 修为！`, 'success');
+        } else {
+          showPopup('失败', data.message || '灵石增幅失败', 'error');
+        }
+      } catch (error) {
+        const errorInfo = handleError(error, '使用灵石增幅失败');
+        showPopup('失败', errorInfo.message, 'error');
+      }
+    }
+
+    async function usePillBoost() {
+      if (!currentRoleId) return;
+      
+      if (realmInfo && realmInfo.isWalkFire) {
+        showPopup('无法修炼', '走火入魔中，无法使用丹药增幅！', 'error');
+        return;
+      }
+      
+      if (pillBoostActive) {
+        showPopup('提示', '丹药效果正在生效中！', 'error');
+        return;
+      }
+      
+      const currentRealmPillCode = getCurrentRealmPillCode();
+      const currentPillName = getPillName(currentRealmPillCode);
+      const pill = resourceMap[currentRealmPillCode.toLowerCase()] || 0;
+      if (pill < 1) {
+        showPopup('丹药不足', `${currentPillName}不足，请前往坊市购买`, 'error');
+        return;
+      }
+      
+      try {
+        const response = await window.apiService.post('/cultivation/auto', { 
+          roleId: currentRoleId,
+          boostType: 'PILL'
+        });
+        
+        const data = response.data || response;
+        if (data && data.success) {
+          pillBoostActive = true;
+          pillBoostEndTime = Date.now() + 3 * 60 * 1000;
+          currentEfficiencyMultiplier = 3;
+          document.getElementById('efficiencyDisplay').textContent = 'x3.0';
+          await loadRoleResources(currentRoleId);
+          updateXiuweiProgress();
+          updateBoostButtons();
+          showPopup('丹药爆发', `修炼效率提升至 x3，获得 ${formatNumber(data.totalXiuwei || 0)} 修为！`, 'success');
+        } else {
+          showPopup('失败', data.message || '丹药增幅失败', 'error');
+        }
+      } catch (error) {
+        const errorInfo = handleError(error, '使用丹药爆发失败');
+        showPopup('失败', errorInfo.message, 'error');
+      }
+    }
+
+    function getPillName(code) {
+      const names = {
+        'LIANTIDAN': '炼体丹', 'LIANQIDAN': '炼气丹', 'ZHUJIDAN': '筑基丹',
+        'JINDANDAN': '金丹丹', 'YUANYINGDAN': '元婴丹', 'HUASHENDAN': '化神丹',
+        'LIANXUDAN': '炼虚丹', 'HETIDAN': '合体丹', 'DACHENGDAN': '大乘丹'
+      };
+      return names[code] || code;
+    }
+
+    function formatNumber(num) {
+      if (!num && num !== 0) return '0';
+      if (num >= 100000000) return (num / 100000000).toFixed(1) + '亿';
+      if (num >= 10000) return (num / 10000).toFixed(1) + '万';
+      return num.toLocaleString();
+    }
+
+    function setAvatarBySpiritRoot(spiritRoot) {
+      window.GameUtils.setAvatar(document.getElementById('charAvatar'), spiritRoot);
+    }
+
+    function showPopup(title, content, type) {
+  if (type === 'error') {
+    window.uiComponents.showError(content, 4000);
+  } else if (type === 'success') {
+    window.uiComponents.showSuccess(content, 3000);
+  } else {
+    window.uiComponents.showConfirmDialog(title, content, null, null, { confirmText: '知道了' });
+  }
+}
+
+    function closePopup(e) {
+      if (!e || e.target === document.getElementById('popupOverlay')) {
+        document.getElementById('popupOverlay').classList.remove('active');
+      }
+    }
+
+    function showToast(message) {
+  window.showToast(message);
+}
+
+    window.addEventListener('beforeunload', () => {
+      if (countdownTimer) clearInterval(countdownTimer);
+      if (walkFireTimer) clearInterval(walkFireTimer);
+      if (heartbeatTimer) clearInterval(heartbeatTimer);
+      sendHeartbeat();
+    });
+
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes fadeInOut {
+        0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+        20% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+      }
+    `;
+    document.head.appendChild(style);
+  </script>
+</body>
+</html>

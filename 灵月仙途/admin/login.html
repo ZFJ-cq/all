@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>灵月仙途 - 后台管理</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Microsoft YaHei', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .login-container {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 15px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      padding: 40px;
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+    .login-container h1 {
+      color: #333;
+      margin-bottom: 30px;
+      font-size: 2rem;
+    }
+    .form-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #555;
+      font-weight: 500;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.3s;
+    }
+    .form-group input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    .btn {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    .error-message {
+      color: #e74c3c;
+      margin-top: 15px;
+      font-size: 0.9rem;
+    }
+    .default-account {
+      margin-top: 20px;
+      padding: 10px;
+      background: rgba(102, 126, 234, 0.1);
+      border-radius: 8px;
+      font-size: 0.85rem;
+      color: #666;
+    }
+    .default-account p {
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <h1>灵月仙途 - 后台管理</h1>
+    <form id="loginForm">
+      <div class="form-group">
+        <label for="username">用户名</label>
+        <input type="text" id="username" name="username" required>
+      </div>
+      <div class="form-group">
+        <label for="password">密码</label>
+        <input type="password" id="password" name="password" required>
+      </div>
+      <button type="submit" class="btn">登录</button>
+      <div id="errorMessage" class="error-message"></div>
+    </form>
+    <div class="default-account">
+      <p><strong>默认账号：</strong></p>
+      <p>用户名：admin</p>
+      <p>密码：123456</p>
+    </div>
+  </div>
+  <script src="js/admin-api.js"></script>
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      
+      console.log('登录信息:', { username, password });
+      
+      // 显示加载动画
+      const loginButton = document.querySelector('.btn');
+      const originalButtonText = loginButton.textContent;
+      loginButton.textContent = '登录中...';
+      loginButton.disabled = true;
+      
+      // 清空错误信息
+      document.getElementById('errorMessage').textContent = '';
+      
+      try {
+        const result = await window.AdminAPI.login(username, password);
+        
+        // 恢复按钮状态
+        loginButton.textContent = originalButtonText;
+        loginButton.disabled = false;
+        
+        if (result.success) {
+          console.log('登录成功:', result);
+          // 显示成功提示
+          const errorMessage = document.getElementById('errorMessage');
+          errorMessage.textContent = '登录成功，正在跳转...';
+          errorMessage.style.color = '#4CAF50';
+          
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 1000);
+        } else {
+          console.error('登录失败:', result);
+          document.getElementById('errorMessage').textContent = result.message || '登录失败，请检查用户名和密码';
+        }
+      } catch (error) {
+        console.error('登录失败:', error);
+        
+        // 恢复按钮状态
+        loginButton.textContent = originalButtonText;
+        loginButton.disabled = false;
+        
+        if (error.message.includes('NetworkError') || error.message.includes('网络')) {
+          document.getElementById('errorMessage').textContent = '网络连接失败，请检查网络设置';
+        } else if (error.message.includes('timeout')) {
+          document.getElementById('errorMessage').textContent = '登录请求超时，请稍后重试';
+        } else if (error.message.includes('401')) {
+          document.getElementById('errorMessage').textContent = '用户名或密码错误';
+        } else if (error.message.includes('403')) {
+          document.getElementById('errorMessage').textContent = '权限不足，无法登录';
+        } else {
+          document.getElementById('errorMessage').textContent = '登录失败：' + (error.message || '未知错误');
+        }
+      }
+    });
+  </script>
+</body>
+</html>

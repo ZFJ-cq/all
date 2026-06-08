@@ -1,0 +1,654 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>三函数二次函数对比探究器 | 数学教学互动工具</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none; /* 避免拖动滑块时误选文字 */
+        }
+        body {
+            background: linear-gradient(145deg, #e9f0f5 0%, #dce5ec 100%);
+            font-family: 'Segoe UI', 'Roboto', 'Poppins', system-ui, sans-serif;
+            margin: 0;
+            padding: 24px 20px;
+            color: #1e293b;
+        }
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            font-size: 1.9rem;
+            margin: 0 0 8px 0;
+            background: linear-gradient(135deg, #1e3a5f, #2b4f7c);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.3px;
+        }
+        .sub {
+            text-align: center;
+            color: #4b6a8b;
+            margin-bottom: 28px;
+            font-size: 0.9rem;
+        }
+        /* 双栏布局 */
+        .dashboard {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        /* 左侧控制区 */
+        .control-panel {
+            flex: 1.2;
+            min-width: 280px;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(8px);
+            border-radius: 32px;
+            padding: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+        /* 右侧绘图区 */
+        .graph-panel {
+            flex: 2;
+            min-width: 320px;
+            background: #ffffff;
+            border-radius: 32px;
+            padding: 16px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            border: 1px solid #e2e8f0;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            background: #fefcf5;
+            border-radius: 24px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+        /* 函数卡片 */
+        .func-card {
+            background: white;
+            border-radius: 24px;
+            padding: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            border-left: 6px solid;
+            transition: 0.1s;
+        }
+        .func-card h3 {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            font-size: 1.1rem;
+        }
+        .slider-group {
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .slider-group label {
+            width: 28px;
+            font-weight: 600;
+        }
+        input[type="range"] {
+            flex: 2;
+            min-width: 140px;
+            height: 4px;
+            border-radius: 5px;
+            background: #cbd5e1;
+        }
+        .param-value {
+            width: 45px;
+            text-align: right;
+            font-family: monospace;
+            font-weight: 600;
+        }
+        .expr {
+            font-family: monospace;
+            font-size: 0.75rem;
+            background: #f1f5f9;
+            padding: 4px 8px;
+            border-radius: 20px;
+            margin-top: 8px;
+            text-align: center;
+        }
+        .tab-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .tab-btn {
+            flex: 1;
+            background: #eef2ff;
+            border: none;
+            padding: 10px 0;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #1e3a8a;
+        }
+        .tab-btn.active {
+            background: #3b82f6;
+            color: white;
+            box-shadow: 0 2px 8px rgba(59,130,246,0.3);
+        }
+        .info-card {
+            background: #f8fafc;
+            border-radius: 24px;
+            padding: 16px;
+            margin-top: 20px;
+        }
+        .info-card p {
+            margin: 6px 0;
+            font-size: 0.85rem;
+        }
+        .reset-btn {
+            background: #e2e8f0;
+            border: none;
+            border-radius: 40px;
+            padding: 10px;
+            width: 100%;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.2s;
+        }
+        .grid-toggle {
+            margin-top: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-top: 12px;
+        }
+        .legend span {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+        }
+        .color-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 4px;
+        }
+        @media (max-width: 800px) {
+            .dashboard { flex-direction: column; }
+            .slider-group { gap: 8px; }
+        }
+        button {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div class="main-container">
+    <h1>📊 三函数二次函数对比探究器</h1>
+    <div class="sub">独立调节 a, b, c | 实时绘图 | 自动数学分析</div>
+
+    <div class="dashboard">
+        <!-- 左侧控制区域 -->
+        <div class="control-panel">
+            <div class="tab-buttons" id="tabButtons">
+                <button class="tab-btn active" data-func="0">🔴 函数1 (红)</button>
+                <button class="tab-btn" data-func="1">🔵 函数2 (蓝)</button>
+                <button class="tab-btn" data-func="2">🟢 函数3 (绿)</button>
+            </div>
+            <div id="funcSlidersPanel">
+                <!-- 动态生成三个函数的滑块内容 -->
+            </div>
+            <div class="info-card" id="mathInfo">
+                <strong>📐 当前选中函数性质</strong><br>
+                ✨ 表达式: <span id="currentExpr">—</span><br>
+                🧭 开口方向: <span id="direction">—</span><br>
+                📍 顶点: <span id="vertex">—</span><br>
+                📏 对称轴: x = <span id="axis">—</span><br>
+                🔢 判别式 Δ = <span id="delta">—</span><br>
+                🌱 根的情况: <span id="roots">—</span><br>
+                🎯 y轴交点: <span id="yIntercept">—</span>
+            </div>
+            <button id="resetAllBtn" class="reset-btn">🔄 重置所有函数为默认值</button>
+            <div class="grid-toggle">
+                <span>🔲 显示网格</span>
+                <label class="switch">
+                    <input type="checkbox" id="gridToggle" checked>
+                    <span class="slider-round"></span>
+                </label>
+            </div>
+        </div>
+
+        <!-- 右侧绘图区 -->
+        <div class="graph-panel">
+            <canvas id="functionCanvas" width="700" height="450" style="width:100%; height:auto; aspect-ratio:700/450"></canvas>
+            <div class="legend">
+                <span><div class="color-dot" style="background:#ef4444;"></div> 函数1 (红)</span>
+                <span><div class="color-dot" style="background:#3b82f6;"></div> 函数2 (蓝)</span>
+                <span><div class="color-dot" style="background:#10b981;"></div> 函数3 (绿)</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ---------- 三个函数的初始系数 ----------
+    let functions = [
+        { a: 1, b: 0, c: 0, color: '#ef4444', name: 'f₁(x)' },   // 红
+        { a: -2, b: 0, c: 2, color: '#3b82f6', name: 'f₂(x)' },   // 蓝
+        { a: 0.5, b: 1, c: -1, color: '#10b981', name: 'f₃(x)' }    // 绿
+    ];
+
+    let currentFuncIdx = 0;        // 0,1,2
+    let showGrid = true;
+
+    // DOM 元素
+    const canvas = document.getElementById('functionCanvas');
+    const ctx = canvas.getContext('2d');
+    let width = 700, height = 450;
+    canvas.width = width;
+    canvas.height = height;
+
+    const funcSlidersPanel = document.getElementById('funcSlidersPanel');
+    const mathInfoExpr = document.getElementById('currentExpr');
+    const directionSpan = document.getElementById('direction');
+    const vertexSpan = document.getElementById('vertex');
+    const axisSpan = document.getElementById('axis');
+    const deltaSpan = document.getElementById('delta');
+    const rootsSpan = document.getElementById('roots');
+    const yInterceptSpan = document.getElementById('yIntercept');
+    const resetAllBtn = document.getElementById('resetAllBtn');
+    const gridToggleCheck = document.getElementById('gridToggle');
+
+    // 辅助函数：二次函数值
+    function f(a, b, c, x) {
+        return a * x * x + b * x + c;
+    }
+
+    // 计算顶点、对称轴、Δ等信息
+    function analyzeFunction(func) {
+        const a = func.a, b = func.b, c = func.c;
+        if (a === 0) {
+            return { isQuadratic: false };
+        }
+        const vertexX = -b / (2 * a);
+        const vertexY = a * vertexX * vertexX + b * vertexX + c;
+        const axis = vertexX;
+        const delta = b * b - 4 * a * c;
+        let rootDesc = '';
+        if (delta > 0) {
+            const root1 = (-b - Math.sqrt(delta)) / (2 * a);
+            const root2 = (-b + Math.sqrt(delta)) / (2 * a);
+            rootDesc = `两个实根 x₁≈${root1.toFixed(2)}, x₂≈${root2.toFixed(2)}`;
+        } else if (delta === 0) {
+            const root = -b / (2 * a);
+            rootDesc = `一个重根 x = ${root.toFixed(2)}`;
+        } else {
+            rootDesc = '无实数根 (Δ < 0)';
+        }
+        const direction = a > 0 ? '向上' : '向下';
+        const yIntercept = c;
+        return {
+            isQuadratic: true,
+            direction,
+            vertex: { x: vertexX, y: vertexY },
+            axis: axis,
+            delta: delta,
+            rootDesc,
+            yIntercept
+        };
+    }
+
+    // 更新当前选中函数的数学信息显示
+    function updateMathDisplay() {
+        const func = functions[currentFuncIdx];
+        const expr = `${func.a.toFixed(2)}·x² + ${func.b.toFixed(2)}·x + ${func.c.toFixed(2)}`;
+        mathInfoExpr.innerText = `y = ${expr}`;
+        if (func.a === 0) {
+            directionSpan.innerText = "不是二次函数";
+            vertexSpan.innerText = "——";
+            axisSpan.innerText = "——";
+            deltaSpan.innerText = "——";
+            rootsSpan.innerText = "——";
+            yInterceptSpan.innerText = func.c.toFixed(2);
+            return;
+        }
+        const analysis = analyzeFunction(func);
+        directionSpan.innerText = analysis.direction;
+        vertexSpan.innerText = `(${analysis.vertex.x.toFixed(3)}, ${analysis.vertex.y.toFixed(3)})`;
+        axisSpan.innerText = analysis.axis.toFixed(3);
+        deltaSpan.innerText = analysis.delta.toFixed(3);
+        rootsSpan.innerText = analysis.rootDesc;
+        yInterceptSpan.innerText = analysis.yIntercept.toFixed(2);
+    }
+
+    // 绘制坐标系和网格 (使用当前画布)
+    function drawGridAndAxes() {
+        const w = width, h = height;
+        // 坐标系变换: 将数学坐标(x,y)映射到canvas像素坐标
+        // 定义数学范围: x: -6 ~ 6, y: -8 ~ 8
+        const xMin = -6, xMax = 6;
+        const yMin = -8, yMax = 8;
+        function toPixelX(x) { return ((x - xMin) / (xMax - xMin)) * w; }
+        function toPixelY(y) { return h - ((y - yMin) / (yMax - yMin)) * h; }
+
+        // 清空背景
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = "#fefcf5";
+        ctx.fillRect(0, 0, w, h);
+
+        // 画网格 (如果启用)
+        if (showGrid) {
+            ctx.beginPath();
+            ctx.strokeStyle = "#d1dbe8";
+            ctx.lineWidth = 0.6;
+            for (let x = -6; x <= 6; x++) {
+                if (Math.abs(x) < 0.01) continue;
+                const px = toPixelX(x);
+                ctx.moveTo(px, 0);
+                ctx.lineTo(px, h);
+                ctx.stroke();
+            }
+            for (let y = -8; y <= 8; y++) {
+                if (Math.abs(y) < 0.01) continue;
+                const py = toPixelY(y);
+                ctx.moveTo(0, py);
+                ctx.lineTo(w, py);
+                ctx.stroke();
+            }
+        }
+
+        // 绘制坐标轴 (X轴, Y轴)
+        ctx.beginPath();
+        ctx.lineWidth = 1.8;
+        ctx.strokeStyle = "#334155";
+        const xAxisY = toPixelY(0);
+        ctx.moveTo(0, xAxisY);
+        ctx.lineTo(w, xAxisY);
+        ctx.stroke();
+        const yAxisX = toPixelX(0);
+        ctx.moveTo(yAxisX, 0);
+        ctx.lineTo(yAxisX, h);
+        ctx.stroke();
+
+        // 绘制箭头
+        ctx.fillStyle = "#334155";
+        ctx.beginPath();
+        // x轴箭头
+        ctx.moveTo(w-8, xAxisY-3);
+        ctx.lineTo(w, xAxisY);
+        ctx.lineTo(w-8, xAxisY+3);
+        ctx.fill();
+        // y轴箭头
+        ctx.beginPath();
+        ctx.moveTo(yAxisX-3, 8);
+        ctx.lineTo(yAxisX, 0);
+        ctx.lineTo(yAxisX+3, 8);
+        ctx.fill();
+
+        // 刻度标签
+        ctx.font = "10px 'Segoe UI'";
+        ctx.fillStyle = "#2c3e50";
+        for (let x = -6; x <= 6; x++) {
+            if (x === 0) continue;
+            const px = toPixelX(x);
+            ctx.fillText(x, px-4, xAxisY + (x>0?12:-4));
+        }
+        for (let y = -8; y <= 8; y++) {
+            if (y === 0) continue;
+            const py = toPixelY(y);
+            ctx.fillText(y, yAxisX+6, py+3);
+        }
+        ctx.fillText("x", w-8, xAxisY-6);
+        ctx.fillText("y", yAxisX+8, 12);
+    }
+
+    // 绘制单个函数曲线
+    function drawCurve(func) {
+        if (func.a === 0) return;
+        const w = width, h = height;
+        const xMin = -6, xMax = 6, yMin = -8, yMax = 8;
+        function toPixelX(x) { return ((x - xMin) / (xMax - xMin)) * w; }
+        function toPixelY(y) { return h - ((y - yMin) / (yMax - yMin)) * h; }
+
+        const steps = 300;
+        ctx.beginPath();
+        ctx.strokeStyle = func.color;
+        ctx.lineWidth = 2.5;
+        let first = true;
+        for (let i = 0; i <= steps; i++) {
+            const x = xMin + (i / steps) * (xMax - xMin);
+            const y = f(func.a, func.b, func.c, x);
+            if (y < yMin - 0.5 || y > yMax + 0.5) {
+                first = true;
+                continue;
+            }
+            const px = toPixelX(x);
+            const py = toPixelY(y);
+            if (first) {
+                ctx.moveTo(px, py);
+                first = false;
+            } else {
+                ctx.lineTo(px, py);
+            }
+        }
+        ctx.stroke();
+    }
+
+    // 绘制所有曲线
+    function drawAllCurves() {
+        for (let i = 0; i < functions.length; i++) {
+            drawCurve(functions[i]);
+        }
+    }
+
+    // 完整刷新图形
+    function refreshGraph() {
+        drawGridAndAxes();
+        drawAllCurves();
+    }
+
+    // 重建滑块UI (根据currentFuncIdx高亮)
+    function rebuildSliders() {
+        funcSlidersPanel.innerHTML = '';
+        for (let i = 0; i < functions.length; i++) {
+            const func = functions[i];
+            const card = document.createElement('div');
+            card.className = 'func-card';
+            const borderColor = func.color;
+            card.style.borderLeftColor = borderColor;
+            const displayStyle = (i === currentFuncIdx) ? 'block' : 'none';
+            card.id = `funcCard_${i}`;
+            card.style.display = displayStyle;
+            // 头部
+            const header = document.createElement('h3');
+            header.innerHTML = `<span style="background:${func.color}; width:12px;height:12px;display:inline-block;border-radius:4px;"></span> 函数${i+1} (${func.name})`;
+            card.appendChild(header);
+            // a滑块
+            const aGroup = createSliderRow('a', func.a, -5, 5, 0.1, (val) => {
+                func.a = val;
+                updateSliderValueDisplay(i, 'a', val);
+                refreshGraph();
+                if (i === currentFuncIdx) updateMathDisplay();
+                updateExprDisplay(i);
+            });
+            // b滑块
+            const bGroup = createSliderRow('b', func.b, -6, 6, 0.1, (val) => {
+                func.b = val;
+                updateSliderValueDisplay(i, 'b', val);
+                refreshGraph();
+                if (i === currentFuncIdx) updateMathDisplay();
+                updateExprDisplay(i);
+            });
+            // c滑块
+            const cGroup = createSliderRow('c', func.c, -6, 6, 0.1, (val) => {
+                func.c = val;
+                updateSliderValueDisplay(i, 'c', val);
+                refreshGraph();
+                if (i === currentFuncIdx) updateMathDisplay();
+                updateExprDisplay(i);
+            });
+            card.appendChild(aGroup);
+            card.appendChild(bGroup);
+            card.appendChild(cGroup);
+            // 显示表达式
+            const exprDiv = document.createElement('div');
+            exprDiv.className = 'expr';
+            exprDiv.id = `expr_${i}`;
+            exprDiv.innerText = formatExpression(func);
+            card.appendChild(exprDiv);
+            funcSlidersPanel.appendChild(card);
+        }
+        // 确保所有滑块值正确显示
+        for (let i = 0; i < functions.length; i++) {
+            updateAllSliderValues(i);
+        }
+    }
+
+    function createSliderRow(param, value, min, max, step, onChange) {
+        const div = document.createElement('div');
+        div.className = 'slider-group';
+        const label = document.createElement('label');
+        label.innerText = param;
+        const slider = document.createElement('input');
+        slider.type = 'range';
+        slider.min = min;
+        slider.max = max;
+        slider.step = step;
+        slider.value = value;
+        const valueSpan = document.createElement('span');
+        valueSpan.className = 'param-value';
+        valueSpan.innerText = value.toFixed(2);
+        slider.addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value);
+            valueSpan.innerText = val.toFixed(2);
+            onChange(val);
+        });
+        div.appendChild(label);
+        div.appendChild(slider);
+        div.appendChild(valueSpan);
+        // 保存引用用于更新数值显示
+        div.slider = slider;
+        div.valueSpan = valueSpan;
+        return div;
+    }
+
+    function formatExpression(func) {
+        return `y = ${func.a.toFixed(2)}x² + ${func.b.toFixed(2)}x + ${func.c.toFixed(2)}`;
+    }
+
+    function updateExprDisplay(idx) {
+        const exprDiv = document.getElementById(`expr_${idx}`);
+        if (exprDiv) exprDiv.innerText = formatExpression(functions[idx]);
+    }
+
+    function updateSliderValueDisplay(idx, param, val) {
+        const card = document.getElementById(`funcCard_${idx}`);
+        if (!card) return;
+        const groups = card.querySelectorAll('.slider-group');
+        for (let group of groups) {
+            const label = group.querySelector('label');
+            if (label && label.innerText === param) {
+                const slider = group.querySelector('input[type="range"]');
+                const span = group.querySelector('.param-value');
+                if (slider) slider.value = val;
+                if (span) span.innerText = val.toFixed(2);
+                break;
+            }
+        }
+    }
+
+    function updateAllSliderValues(idx) {
+        const func = functions[idx];
+        updateSliderValueDisplay(idx, 'a', func.a);
+        updateSliderValueDisplay(idx, 'b', func.b);
+        updateSliderValueDisplay(idx, 'c', func.c);
+    }
+
+    // 切换当前显示的函数卡片
+    function setCurrentFunc(idx) {
+        currentFuncIdx = idx;
+        // 更新标签页样式
+        const btns = document.querySelectorAll('.tab-btn');
+        btns.forEach((btn, i) => {
+            if (i === idx) btn.classList.add('active');
+            else btn.classList.remove('active');
+        });
+        for (let i = 0; i < functions.length; i++) {
+            const card = document.getElementById(`funcCard_${i}`);
+            if (card) card.style.display = (i === idx) ? 'block' : 'none';
+        }
+        updateMathDisplay();
+    }
+
+    // 重置所有函数为默认值
+    function resetAllFunctions() {
+        functions[0] = { a: 1, b: 0, c: 0, color: '#ef4444', name: 'f₁(x)' };
+        functions[1] = { a: -2, b: 0, c: 2, color: '#3b82f6', name: 'f₂(x)' };
+        functions[2] = { a: 0.5, b: 1, c: -1, color: '#10b981', name: 'f₃(x)' };
+        for (let i = 0; i < functions.length; i++) {
+            updateAllSliderValues(i);
+            updateExprDisplay(i);
+        }
+        refreshGraph();
+        if (currentFuncIdx !== undefined) updateMathDisplay();
+    }
+
+    // 网格切换
+    function toggleGrid() {
+        showGrid = gridToggleCheck.checked;
+        refreshGraph();
+    }
+
+    // 监听窗口尺寸变化，重新计算canvas尺寸并重绘
+    function resizeCanvas() {
+        const container = canvas.parentElement;
+        const newWidth = container.clientWidth;
+        // 保持宽高比 700:450
+        const newHeight = newWidth * 450 / 700;
+        canvas.width = newWidth;
+        canvas.height = newHeight;
+        width = newWidth;
+        height = newHeight;
+        refreshGraph();
+    }
+
+    // 初始化事件监听
+    function init() {
+        rebuildSliders();
+        refreshGraph();
+        updateMathDisplay();
+
+        // 标签页切换
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        tabBtns.forEach((btn, idx) => {
+            btn.addEventListener('click', () => setCurrentFunc(idx));
+        });
+
+        resetAllBtn.addEventListener('click', resetAllFunctions);
+        gridToggleCheck.addEventListener('change', toggleGrid);
+
+        window.addEventListener('resize', () => {
+            setTimeout(resizeCanvas, 80);
+        });
+        resizeCanvas(); // 初始适配
+    }
+
+    // 辅助: 让canvas大小适应父容器后触发重绘
+    init();
+</script>
+</body>
+</html>

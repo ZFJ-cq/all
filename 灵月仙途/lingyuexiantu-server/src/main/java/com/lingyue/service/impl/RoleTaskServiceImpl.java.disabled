@@ -1,0 +1,93 @@
+package com.lingyue.service.impl;
+
+import com.lingyue.entity.RoleTask;
+import com.lingyue.repository.RoleTaskRepository;
+import com.lingyue.service.RoleTaskService;
+import org.springframework.stereotype.Service;
+import java.util.Date;
+import java.util.List;
+
+@Service
+public class RoleTaskServiceImpl implements RoleTaskService {
+    
+    private final RoleTaskRepository roleTaskRepository;
+    
+    public RoleTaskServiceImpl(RoleTaskRepository roleTaskRepository) {
+        this.roleTaskRepository = roleTaskRepository;
+    }
+
+    @Override
+    public List<RoleTask> getRoleTasks(Long roleId) {
+        return roleTaskRepository.findByRoleId(roleId);
+    }
+
+    @Override
+    public List<RoleTask> getRoleTasksByStatus(Long roleId, Integer status) {
+        return roleTaskRepository.findByRoleIdAndStatus(roleId, status);
+    }
+
+    @Override
+    public RoleTask getRoleTask(Long roleId, Long taskId) {
+        return roleTaskRepository.findByRoleIdAndTaskId(roleId, taskId);
+    }
+
+    @Override
+    public RoleTask acceptTask(Long roleId, Long taskId) {
+        RoleTask existingTask = roleTaskRepository.findByRoleIdAndTaskId(roleId, taskId);
+        if (existingTask == null) {
+            RoleTask roleTask = new RoleTask();
+            roleTask.setRoleId(roleId);
+            roleTask.setTaskId(taskId);
+            roleTask.setStatus(1); // 1-未完成
+            roleTask.setProgress(0);
+            roleTask.setAcceptTime(new Date());
+            return roleTaskRepository.save(roleTask);
+        } else if (existingTask.getStatus() == 1) {
+            existingTask.setAcceptTime(new Date());
+            return roleTaskRepository.save(existingTask);
+        }
+        return existingTask;
+    }
+
+    @Override
+    public RoleTask updateTaskProgress(Long roleId, Long taskId, Integer progress) {
+        RoleTask roleTask = roleTaskRepository.findByRoleIdAndTaskId(roleId, taskId);
+        if (roleTask != null && roleTask.getStatus() == 1) {
+            roleTask.setProgress(progress);
+            return roleTaskRepository.save(roleTask);
+        }
+        return null;
+    }
+
+    @Override
+    public RoleTask completeTask(Long roleId, Long taskId) {
+        RoleTask roleTask = roleTaskRepository.findByRoleIdAndTaskId(roleId, taskId);
+        if (roleTask != null && roleTask.getStatus() == 1) {
+            roleTask.setStatus(2); // 2-已完成
+            roleTask.setProgress(100);
+            return roleTaskRepository.save(roleTask);
+        }
+        return null;
+    }
+
+    @Override
+    public RoleTask claimTaskReward(Long roleId, Long taskId) {
+        RoleTask roleTask = roleTaskRepository.findByRoleIdAndTaskId(roleId, taskId);
+        if (roleTask != null && roleTask.getStatus() == 2) {
+            roleTask.setStatus(3); // 3-已领取
+            return roleTaskRepository.save(roleTask);
+        }
+        return null;
+    }
+
+    @Override
+    public void abandonTask(Long roleId, Long taskId) {
+        RoleTask roleTask = roleTaskRepository.findByRoleIdAndTaskId(roleId, taskId);
+        if (roleTask != null && roleTask.getStatus() == 1) {
+            roleTask.setStatus(1); // 1-未完成
+            roleTask.setProgress(0);
+            roleTask.setAcceptTime(new Date());
+            roleTaskRepository.save(roleTask);
+        }
+    }
+}

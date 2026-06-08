@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>交易管理</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <div class="module-content">
+        <h2>交易管理</h2>
+        <div class="module-description">
+            管理玩家之间的交易记录
+        </div>
+        
+        <div class="search-bar">
+            <input type="text" id="searchKeyword" placeholder="搜索交易...">
+            <button onclick="searchTrades()">搜索</button>
+        </div>
+        
+        <div class="filter-bar">
+            <select id="tradeStatus">
+                <option value="">所有状态</option>
+                <option value="pending">待处理</option>
+                <option value="completed">已完成</option>
+                <option value="cancelled">已取消</option>
+            </select>
+            <input type="date" id="startDate">
+            <input type="date" id="endDate">
+            <button onclick="filterTrades()">筛选</button>
+        </div>
+        
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>卖家ID</th>
+                        <th>买家ID</th>
+                        <th>交易物品</th>
+                        <th>交易金额</th>
+                        <th>交易时间</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="tradeTableBody">
+                    <!-- 数据将通过JS动态加载 -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="pagination" id="pagination">
+            <!-- 分页将通过JS动态生成 -->
+        </div>
+    </div>
+    
+    <script>
+        function initTrade() {
+            console.log('初始化交易管理模块');
+            loadTradeData();
+        }
+        
+        function loadTradeData(page = 1) {
+            const tableBody = document.getElementById('tradeTableBody');
+            tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px;">加载中...</td></tr>';
+            
+            // 模拟数据加载
+            setTimeout(() => {
+                tableBody.innerHTML = '';
+                for (let i = 1; i <= 10; i++) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${(page - 1) * 10 + i}</td>
+                        <td>100${i}</td>
+                        <td>200${i}</td>
+                        <td>物品${i}</td>
+                        <td>${Math.floor(Math.random() * 1000) + 100}</td>
+                        <td>2024-01-${i.toString().padStart(2, '0')} 10:00:00</td>
+                        <td>${['待处理', '已完成', '已取消'][Math.floor(Math.random() * 3)]}</td>
+                        <td>
+                            <button onclick="viewTrade(${i})">查看</button>
+                            <button onclick="cancelTrade(${i})">取消</button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                }
+                
+                // 生成分页
+                generatePagination(page, 5);
+            }, 1000);
+        }
+        
+        function searchTrades() {
+            const keyword = document.getElementById('searchKeyword').value;
+            console.log('搜索交易:', keyword);
+            loadTradeData();
+        }
+        
+        function filterTrades() {
+            const status = document.getElementById('tradeStatus').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            console.log('筛选交易:', status, startDate, endDate);
+            loadTradeData();
+        }
+        
+        function viewTrade(id) {
+            console.log('查看交易:', id);
+            alert('查看交易功能开发中');
+        }
+        
+        function cancelTrade(id) {
+            if (confirm('确定要取消交易吗？')) {
+                console.log('取消交易:', id);
+                alert('取消成功');
+            }
+        }
+        
+        function generatePagination(currentPage, totalPages) {
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+            
+            for (let i = 1; i <= totalPages; i++) {
+                const button = document.createElement('button');
+                button.textContent = i;
+                button.className = i === currentPage ? 'active' : '';
+                button.onclick = () => loadTradeData(i);
+                pagination.appendChild(button);
+            }
+        }
+    </script>
+</body>
+</html>

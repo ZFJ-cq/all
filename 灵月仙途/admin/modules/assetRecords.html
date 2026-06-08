@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>资产记录管理</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <div class="module-content">
+        <h2>资产记录管理</h2>
+        <div class="module-description">
+            管理玩家的资产获取和使用记录
+        </div>
+        
+        <div class="search-bar">
+            <input type="text" id="searchKeyword" placeholder="搜索记录...">
+            <button onclick="searchRecords()">搜索</button>
+        </div>
+        
+        <div class="filter-bar">
+            <select id="recordType">
+                <option value="">所有类型</option>
+                <option value="acquisition">获取记录</option>
+                <option value="usage">使用记录</option>
+            </select>
+            <input type="date" id="startDate">
+            <input type="date" id="endDate">
+            <button onclick="filterRecords()">筛选</button>
+        </div>
+        
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>玩家ID</th>
+                        <th>资产类型</th>
+                        <th>数量</th>
+                        <th>操作类型</th>
+                        <th>操作时间</th>
+                        <th>备注</th>
+                    </tr>
+                </thead>
+                <tbody id="recordsTableBody">
+                    <!-- 记录将通过JS动态加载 -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="pagination" id="pagination">
+            <!-- 分页将通过JS动态生成 -->
+        </div>
+    </div>
+    
+    <script>
+        function initAssetRecords() {
+            console.log('初始化资产记录管理模块');
+            loadRecords();
+        }
+        
+        async function loadRecords(page = 1) {
+            const tableBody = document.getElementById('recordsTableBody');
+            tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px;">加载中...</td></tr>';
+            
+            try {
+                const response = await apiService.get(`/asset/record?page=${page}&size=10`);
+                const records = response.data || response;
+                
+                tableBody.innerHTML = '';
+                if (records && records.length > 0) {
+                    records.forEach(record => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${record.id}</td>
+                            <td>${record.roleId}</td>
+                            <td>${record.assetType}</td>
+                            <td>${record.quantity}</td>
+                            <td>${record.type === 'acquisition' ? '获取' : '使用'}</td>
+                            <td>${record.createdAt || record.createTime}</td>
+                            <td>${record.remark || '-'}</td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                } else {
+                    tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: #999;">暂无数据</td></tr>';
+                }
+                
+                // 生成分页
+                generatePagination(page, 5);
+            } catch (error) {
+                console.error('加载资产记录失败:', error);
+                tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: #e74c3c;">加载失败，请重试</td></tr>';
+            }
+        }
+        
+        async function searchRecords() {
+            const keyword = document.getElementById('searchKeyword').value;
+            const tableBody = document.getElementById('recordsTableBody');
+            tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px;">搜索中...</td></tr>';
+            
+            try {
+                const response = await apiService.get(`/asset/record/search?keyword=${encodeURIComponent(keyword)}`);
+                const records = response.data || response;
+                
+                tableBody.innerHTML = '';
+                if (records && records.length > 0) {
+                    records.forEach(record => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${record.id}</td>
+                            <td>${record.roleId}</td>
+                            <td>${record.assetType}</td>
+                            <td>${record.quantity}</td>
+                            <td>${record.type === 'acquisition' ? '获取' : '使用'}</td>
+                            <td>${record.createdAt || record.createTime}</td>
+                            <td>${record.remark || '-'}</td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                } else {
+                    tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: #999;">未找到匹配记录</td></tr>';
+                }
+            } catch (error) {
+                console.error('搜索记录失败:', error);
+                tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: #e74c3c;">搜索失败，请重试</td></tr>';
+            }
+        }
+        
+        async function filterRecords() {
+            const recordType = document.getElementById('recordType').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const tableBody = document.getElementById('recordsTableBody');
+            tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px;">筛选中...</td></tr>';
+            
+            try {
+                let url = `/asset/record/filter`;
+                const params = new URLSearchParams();
+                if (recordType) params.append('type', recordType);
+                if (startDate) params.append('startDate', startDate);
+                if (endDate) params.append('endDate', endDate);
+                
+                const response = await apiService.get(`${url}?${params.toString()}`);
+                const records = response.data || response;
+                
+                tableBody.innerHTML = '';
+                if (records && records.length > 0) {
+                    records.forEach(record => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${record.id}</td>
+                            <td>${record.roleId}</td>
+                            <td>${record.assetType}</td>
+                            <td>${record.quantity}</td>
+                            <td>${record.type === 'acquisition' ? '获取' : '使用'}</td>
+                            <td>${record.createdAt || record.createTime}</td>
+                            <td>${record.remark || '-'}</td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                } else {
+                    tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: #999;">未找到匹配记录</td></tr>';
+                }
+            } catch (error) {
+                console.error('筛选记录失败:', error);
+                tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: #e74c3c;">筛选失败，请重试</td></tr>';
+            }
+        }
+        
+        function generatePagination(currentPage, totalPages) {
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+            
+            for (let i = 1; i <= totalPages; i++) {
+                const button = document.createElement('button');
+                button.textContent = i;
+                button.className = i === currentPage ? 'active' : '';
+                button.onclick = () => loadRecords(i);
+                pagination.appendChild(button);
+            }
+        }
+    </script>
+</body>
+</html>

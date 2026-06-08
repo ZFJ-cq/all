@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="../js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="../css/mobile-adapt.css">
+    <title>仙门宗 - 职位体系</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="common.css">
+    <style>
+        .position-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .position-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: rgba(30, 40, 60, 0.5);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .position-item:hover {
+            background: rgba(40, 60, 90, 0.7);
+            transform: translateX(5px);
+        }
+        
+        .position-current {
+            background: rgba(40, 80, 120, 0.5);
+            border-left: 3px solid #5ca8d8;
+        }
+        
+        .position-details {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(30, 40, 60, 0.8);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .position-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #e6c749;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .position-info {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .info-section {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .info-label {
+            font-weight: bold;
+            color: #5ca8d8;
+        }
+        
+        .info-content {
+            padding: 10px;
+            background: rgba(20, 30, 40, 0.8);
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            line-height: 1.5;
+        }
+        
+        .promotion-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #e6c749, #d4af37);
+            color: #1a2530;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+        
+        .promotion-btn:hover {
+            background: linear-gradient(135deg, #f4d03f, #e6c749);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(230, 199, 73, 0.5);
+        }
+    </style>
+
+  </head>
+<body>
+    <!-- 水墨山水背景 -->
+    <div class="mountain-bg">
+        <div class="mountain"></div>
+        <div class="mountain-1"></div>
+        <div class="mountain-2"></div>
+        <div class="cloud cloud-1"></div>
+        <div class="cloud cloud-2"></div>
+        <div class="cloud cloud-3"></div>
+        <div class="crane crane-1"><i class="fas fa-dove"></i></div>
+        <div class="crane crane-2"><i class="fas fa-dove"></i></div>
+    </div>
+    
+    <!-- 主容器 -->
+    <div class="container">
+        <!-- 顶部宗门信息栏 -->
+        <div class="antique-card top-info">
+            <div class="sect-info">
+                <div>
+                    <div class="sect-level level-5">五流宗门</div>
+                    <div class="sect-name">青云门</div>
+                </div>
+                
+                <div class="sect-resources">
+                    <div class="resource-item">
+                        <i class="fas fa-user-tag" style="color: #d4af37;"></i>
+                        <span>当前职位: <span style="color: #d4af37;">内门弟子</span></span>
+                    </div>
+                    <div class="resource-item">
+                        <i class="fas fa-coins" style="color: #d4af37;"></i>
+                        <span>贡献值: <span style="color: #d4af37;">1,250</span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 职位列表 -->
+        <div class="antique-card module-card">
+            <div class="module-header">
+                <div class="module-icon">
+                    <i class="fas fa-user-tag"></i>
+                </div>
+                <div class="module-title">职位体系</div>
+            </div>
+            
+            <div class="position-list">
+                <div class="position-item" onclick="showPositionDetails('弟子')">
+                    <div>
+                        <div>弟子</div>
+                        <div style="font-size: 12px; color: #aaa;">外门 → 内门 → 核心</div>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+                
+                <div class="position-item" onclick="showPositionDetails('执事')">
+                    <div>执事</div>
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+                
+                <div class="position-item position-current" onclick="showPositionDetails('长老')">
+                    <div>长老</div>
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+                
+                <div class="position-item" onclick="showPositionDetails('护法')">
+                    <div>护法</div>
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+                
+                <div class="position-item" onclick="showPositionDetails('副宗主')">
+                    <div>副宗主</div>
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+                
+                <div class="position-item" onclick="showPositionDetails('宗主')">
+                    <div>宗主</div>
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 职位详情 -->
+        <div class="position-details" id="positionDetails">
+            <div class="position-title" id="positionTitle">长老详情</div>
+            <div class="position-info">
+                <div class="info-section">
+                    <div class="info-label">职位描述</div>
+                    <div class="info-content" id="positionDescription">宗门高层，负责重要事务决策</div>
+                </div>
+                <div class="info-section">
+                    <div class="info-label">晋升要求</div>
+                    <div class="info-content" id="positionRequirements">修为达到元婴期，贡献值≥50000，通过长老会议审核</div>
+                </div>
+                <div class="info-section">
+                    <div class="info-label">职位福利</div>
+                    <div class="info-content" id="positionBenefits">长老会席位、藏经阁全权限、洞天福地使用权</div>
+                </div>
+                <div class="info-section">
+                    <div class="info-label">当前担任</div>
+                    <div class="info-content" id="positionCurrent">玄真道人</div>
+                </div>
+                <button class="promotion-btn" onclick="applyPromotion('长老')">申请晋升长老</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 底部导航栏 -->
+    <nav class="bottom-nav" role="navigation" aria-label="主导航">
+            <a href="../index.html" class="nav-item" aria-label="修炼页面">
+                <div class="nav-icon">🧘</div>
+                <div class="nav-text">修炼</div>
+            </a>
+            <a href="../skills/skills.html" class="nav-item" aria-label="功法页面">
+                <div class="nav-icon">📜</div>
+                <div class="nav-text">功法</div>
+            </a>
+            <a href="clan.html" class="nav-item active" aria-label="宗门页面" aria-current="page">
+                <div class="nav-icon">🏯</div>
+                <div class="nav-text">宗门</div>
+            </a>
+            <a href="../word/world.html" class="nav-item" aria-label="仙途页面">
+                <div class="nav-icon">🌌</div>
+                <div class="nav-text">仙途</div>
+            </a>
+            <a href="../map/map.html" class="nav-item" aria-label="云游页面">
+                <div class="nav-icon">🗺️</div>
+                <div class="nav-text">云游</div>
+            </a>
+        </nav>
+    </div>
+    
+    <script src="data.js"></script>
+    <script src="utils.js"></script>
+    <script>
+        // DOM加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            showPositionDetails('长老');
+        });
+        
+        // 显示职位详情
+        function showPositionDetails(position) {
+            const data = positionData[position];
+            if (!data) return;
+            
+            document.getElementById('positionTitle').textContent = position + '详情';
+            document.getElementById('positionDescription').textContent = data.description;
+            document.getElementById('positionRequirements').textContent = data.requirements;
+            document.getElementById('positionBenefits').textContent = data.benefits;
+            document.getElementById('positionCurrent').textContent = data.current || '暂无';
+            
+            // 更新晋升按钮
+            const promotionBtn = document.querySelector('.promotion-btn');
+            promotionBtn.textContent = `申请晋升${position}`;
+            promotionBtn.onclick = function() {
+                applyPromotion(position);
+            };
+        }
+        
+        // 申请晋升
+        function showMessage(message, type = 'info') {
+            if (typeof pageUtils !== 'undefined' && pageUtils.showToast) {
+                pageUtils.showToast(message);
+            } else {
+                const notification = document.createElement('div');
+                notification.className = 'notification';
+                notification.textContent = message;
+                notification.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.9);color:#e6c749;padding:15px 30px;border-radius:8px;z-index:10000;';
+                document.body.appendChild(notification);
+                setTimeout(() => notification.remove(), 3000);
+            }
+        }
+
+        function applyPromotion(position) {
+            // 检查是否满足晋升条件
+            if (position === '执事' && sectData.playerContribution < 10000) {
+                showMessage('贡献值不足，需要10000贡献值才能申请执事', 'error');
+                return;
+            } else if (position === '长老' && sectData.playerContribution < 50000) {
+                showMessage('贡献值不足，需要50000贡献值才能申请长老', 'error');
+                return;
+            }
+            
+            // 模拟申请过程
+            showMessage(`正在申请晋升${position}，请等待长老会审核`, 'info');
+            
+            // 3秒后显示结果
+            setTimeout(() => {
+                showMessage(`恭喜！你已成功晋升为${position}`, 'success');
+            }, 3000);
+        }
+    </script>
+  <script src="../js/ui-components.js"></script>
+</body>
+</html>

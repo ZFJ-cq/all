@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="css/mobile-adapt.css">
+    <title>修复 401 错误 - 灵月仙途</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 700px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+        .info-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .info-box h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+        .info-box p {
+            color: #856404;
+            line-height: 1.6;
+        }
+        .status-box {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .status-item:last-child {
+            border-bottom: none;
+        }
+        .status-label {
+            color: #666;
+            font-weight: bold;
+        }
+        .status-value {
+            color: #333;
+        }
+        .status-value.error { color: #dc3545; }
+        .status-value.success { color: #28a745; }
+        .status-value.warning { color: #ffc107; }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 5px;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        .btn-secondary {
+            background: #6c757d;
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+        
+        .progress {
+            width: 100%;
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .log-box {
+            background: #1e1e1e;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            padding: 15px;
+            border-radius: 8px;
+            max-height: 250px;
+            overflow-y: auto;
+            font-size: 12px;
+            margin: 15px 0;
+        }
+        
+        .hidden { display: none; }
+        
+        .solution-steps {
+            background: #e7f3ff;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .solution-steps h3 {
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+        .solution-steps ol {
+            margin-left: 20px;
+            color: #155724;
+            line-height: 2;
+        }
+    </style>
+
+  </head>
+<body>
+    <div class="container">
+        <h1>🔧 修复 401 错误</h1>
+        
+        <div class="info-box">
+            <h3>⚠️ 问题说明</h3>
+            <p>检测到 <strong>JWT 签名验证失败</strong>，这是因为后端密钥发生变化，导致之前生成的 Token 失效。</p>
+            <p><strong>错误信息：</strong>JWT signature does not match locally computed signature</p>
+        </div>
+        
+        <div class="solution-steps">
+            <h3>💡 解决方案</h3>
+            <ol>
+                <li>点击下方"一键修复"按钮，清除旧的 Token</li>
+                <li>自动跳转到登录页面</li>
+                <li>重新登录，获取新的 Token</li>
+                <li>问题解决！✅</li>
+            </ol>
+        </div>
+        
+        <div class="status-box" id="statusBox">
+            <h3>当前状态</h3>
+            <div class="status-item">
+                <span class="status-label">Token 状态:</span>
+                <span class="status-value warning" id="tokenStatus">检查中...</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">用户 ID:</span>
+                <span class="status-value" id="userIdStatus">检查中...</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">角色 ID:</span>
+                <span class="status-value" id="roleIdStatus">检查中...</span>
+            </div>
+        </div>
+        
+        <div id="actionButtons">
+            <button class="btn btn-success" onclick="fix401Error()">✨ 一键修复</button>
+            <button class="btn btn-secondary" onclick="goToLogin()">🔐 去登录</button>
+        </div>
+        
+        <div id="progressSection" class="hidden">
+            <div class="progress">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div class="log-box" id="logBox"></div>
+        </div>
+        
+        <div id="resultBox" class="hidden">
+            <div class="info-box" style="background: #d4edda; border-color: #28a745;">
+                <h3 style="color: #155724;">✅ 修复完成</h3>
+                <p style="color: #155724;">所有旧的 Token 已清除，请重新登录获取新 Token。</p>
+            </div>
+            <button class="btn" onclick="goToLogin()">🔐 立即登录</button>
+        </div>
+    </div>
+    
+    <script>
+        let logs = [];
+        
+        function log(message) {
+            logs.push(`> ${message}`);
+            const logBox = document.getElementById('logBox');
+            logBox.innerHTML = logs.join('\n');
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+        
+        function checkStatus() {
+            const token = localStorage.getItem('token');
+            const userId = localStorage.getItem('userId');
+            const roleId = localStorage.getItem('roleId') || localStorage.getItem('currentRoleId');
+            
+            // Token 状态
+            const tokenEl = document.getElementById('tokenStatus');
+            if (token) {
+                const parts = token.split('.');
+                if (parts.length === 3) {
+                    tokenEl.textContent = '存在 (但已失效 ⚠️)';
+                    tokenEl.className = 'status-value warning';
+                } else {
+                    tokenEl.textContent = '格式错误 ❌';
+                    tokenEl.className = 'status-value error';
+                }
+            } else {
+                tokenEl.textContent = '不存在 ✅';
+                tokenEl.className = 'status-value success';
+            }
+            
+            // 用户 ID
+            document.getElementById('userIdStatus').textContent = userId || '不存在';
+            
+            // 角色 ID
+            document.getElementById('roleIdStatus').textContent = roleId || '不存在';
+        }
+        
+        async function fix401Error() {
+            document.getElementById('actionButtons').classList.add('hidden');
+            document.getElementById('progressSection').classList.remove('hidden');
+            
+            const progressBar = document.getElementById('progressBar');
+            
+            try {
+                log('开始修复 401 错误...');
+                progressBar.style.width = '10%';
+                await sleep(300);
+                
+                log('检查当前 Token 状态...');
+                progressBar.style.width = '20%';
+                await sleep(300);
+                
+                log('清除旧的 Token...');
+                localStorage.removeItem('token');
+                progressBar.style.width = '40%';
+                await sleep(500);
+                
+                log('清除用户 ID...');
+                localStorage.removeItem('userId');
+                localStorage.removeItem('username');
+                progressBar.style.width = '60%';
+                await sleep(500);
+                
+                log('清除角色相关数据...');
+                localStorage.removeItem('roleId');
+                localStorage.removeItem('currentRoleId');
+                localStorage.removeItem('selectedCharacterId');
+                progressBar.style.width = '80%';
+                await sleep(500);
+                
+                log('清理缓存...');
+                if (window.apiService && window.apiService.cache) {
+                    window.apiService.cache.clear();
+                }
+                progressBar.style.width = '90%';
+                await sleep(500);
+                
+                log('✅ 修复完成！');
+                progressBar.style.width = '100%';
+                await sleep(500);
+                
+                document.getElementById('progressSection').classList.add('hidden');
+                document.getElementById('resultBox').classList.remove('hidden');
+                
+                checkStatus();
+            } catch (error) {
+                log('❌ 修复失败：' + error.message);
+                console.error(error);
+            }
+        }
+        
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+        
+        function goToLogin() {
+            window.location.href = '/login.html';
+        }
+        
+        // 页面加载时检查状态
+        checkStatus();
+        log('页面已加载，准备修复...');
+    </script>
+</body>
+</html>

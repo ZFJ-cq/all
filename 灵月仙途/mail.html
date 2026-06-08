@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="css/mobile-adapt.css">
+  <title>邮件系统 - 灵月仙途</title>
+  <style>
+    :root {
+      --bg-primary: #0a0e1a;
+      --bg-secondary: #1a1f2e;
+      --bg-panel: #1e2337;
+      --gold-primary: #e6c749;
+      --gold-dim: #b8a34a;
+      --text-primary: #f0f0f0;
+      --text-secondary: #c0c0c0;
+      --text-dim: #888888;
+      --border-color: rgba(230, 199, 73, 0.3);
+      --paper-bg: #f5f5dc;
+      --paper-text: #2c2c2c;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Microsoft YaHei', sans-serif;
+      background: linear-gradient(135deg, #0a0e1a 0%, #1a1f2e 100%);
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding: 20px;
+      background: rgba(30, 35, 55, 0.8);
+      border: 2px solid var(--border-color);
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      position: relative;
+    }
+    
+    .header h1 {
+      font-size: 2.5rem;
+      color: var(--gold-primary);
+      margin-bottom: 10px;
+      text-shadow: 0 0 20px rgba(230, 199, 73, 0.5);
+    }
+    
+    .mail-stats {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin-top: 15px;
+    }
+    
+    .stat-item {
+      position: relative;
+      font-size: 1rem;
+      color: var(--text-secondary);
+    }
+    
+    .unread-badge {
+      position: absolute;
+      top: -8px;
+      right: -15px;
+      background: #ef4444;
+      color: white;
+      border-radius: 10px;
+      padding: 2px 8px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+    
+    .mail-list-container {
+      display: grid;
+      grid-template-columns: 350px 1fr;
+      gap: 20px;
+      background: rgba(30, 35, 55, 0.6);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      min-height: 600px;
+    }
+    
+    .mail-list {
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    
+    .mail-item {
+      padding: 15px;
+      border-bottom: 1px solid rgba(230, 199, 73, 0.2);
+      cursor: pointer;
+      transition: all 0.3s;
+      position: relative;
+    }
+    
+    .mail-item:hover {
+      background: rgba(230, 199, 73, 0.1);
+    }
+    
+    .mail-item.unread {
+      background: rgba(230, 199, 73, 0.05);
+      border-left: 3px solid var(--gold-primary);
+    }
+    
+    .mail-item.selected {
+      background: rgba(230, 199, 73, 0.15);
+      border-left: 3px solid var(--gold-primary);
+    }
+    
+    .mail-title {
+      font-size: 1rem;
+      font-weight: bold;
+      color: var(--text-primary);
+      margin-bottom: 5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .mail-type-icon {
+      font-size: 1.2rem;
+    }
+    
+    .mail-sender {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      margin-bottom: 3px;
+    }
+    
+    .mail-time {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      text-align: right;
+    }
+    
+    .mail-detail {
+      background: var(--paper-bg);
+      color: var(--paper-text);
+      border: 2px solid var(--border-color);
+      border-radius: 10px;
+      padding: 30px;
+      position: relative;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    }
+    
+    .mail-detail-header {
+      border-bottom: 2px solid rgba(230, 199, 73, 0.5);
+      padding-bottom: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .detail-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #2c2c2c;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .detail-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      color: #666;
+    }
+    
+    .mail-detail-body {
+      font-size: 1rem;
+      line-height: 1.8;
+      margin-bottom: 25px;
+      min-height: 200px;
+    }
+    
+    .mail-attachments {
+      background: rgba(230, 199, 73, 0.1);
+      border: 1px dashed var(--border-color);
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .attachments-title {
+      font-size: 0.9rem;
+      font-weight: bold;
+      color: var(--gold-primary);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .attachment-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    
+    .attachment-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(230, 199, 73, 0.3);
+      border-radius: 6px;
+      font-size: 0.85rem;
+    }
+    
+    .attachment-icon {
+      font-size: 1.2rem;
+    }
+    
+    .mail-detail-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+    
+    .action-btn {
+      padding: 12px 30px;
+      background: linear-gradient(135deg, rgba(230, 199, 73, 0.3), rgba(230, 199, 73, 0.1));
+      border: 1px solid var(--border-color);
+      color: var(--gold-primary);
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 1rem;
+      transition: all 0.3s;
+    }
+    
+    .action-btn:hover {
+      background: rgba(230, 199, 73, 0.4);
+      box-shadow: 0 0 15px rgba(230, 199, 73, 0.4);
+      transform: translateY(-2px);
+    }
+    
+    .action-btn.primary {
+      background: linear-gradient(135deg, rgba(74, 222, 128, 0.3), rgba(74, 222, 128, 0.1));
+      border-color: rgba(74, 222, 128, 0.5);
+      color: #4ade80;
+    }
+    
+    .action-btn.primary:hover {
+      background: rgba(74, 222, 128, 0.4);
+      box-shadow: 0 0 15px rgba(74, 222, 128, 0.4);
+    }
+    
+    .empty-state {
+      grid-column: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 100px 20px;
+      color: var(--text-dim);
+    }
+    
+    .empty-state-icon {
+      font-size: 5rem;
+      margin-bottom: 20px;
+      opacity: 0.5;
+    }
+    
+    .filter-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    
+    .filter-btn {
+      padding: 8px 15px;
+      background: rgba(30, 35, 55, 0.6);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.3s;
+    }
+    
+    .filter-btn:hover {
+      background: rgba(230, 199, 73, 0.1);
+      border-color: var(--gold-primary);
+    }
+    
+    .filter-btn.active {
+      background: rgba(230, 199, 73, 0.2);
+      border-color: var(--gold-primary);
+      color: var(--gold-primary);
+    }
+    
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 25px;
+      background: var(--bg-panel);
+      border: 1px solid var(--gold-primary);
+      border-radius: 8px;
+      color: var(--gold-primary);
+      z-index: 3000;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+      animation: slideIn 0.3s ease-out;
+    }
+    
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+  </style>
+
+  </head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📧 邮件</h1>
+      <p style="color: var(--text-dim);">仙途信使，传递三界音讯</p>
+      
+      <div class="mail-stats">
+        <div class="stat-item">
+          总邮件：<span id="totalMails" style="color: var(--gold-primary); font-weight: bold;">0</span>
+        </div>
+        <div class="stat-item">
+          未读邮件：<span id="unreadMails" style="color: var(--gold-primary); font-weight: bold;">0</span>
+          <span class="unread-badge" id="unreadBadge">0</span>
+        </div>
+        <div class="stat-item">
+          附件待领取：<span id="pendingAttachments" style="color: var(--gold-primary); font-weight: bold;">0</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="mail-list-container">
+      <div>
+        <div class="filter-bar">
+          <button class="filter-btn active" onclick="filterMails('all')">全部</button>
+          <button class="filter-btn" onclick="filterMails('unread')">未读</button>
+          <button class="filter-btn" onclick="filterMails('system')">系统</button>
+          <button class="filter-btn" onclick="filterMails('friend')">道友</button>
+          <button class="filter-btn" onclick="filterMails('reward')">奖励</button>
+        </div>
+        
+        <div id="mailList" class="mail-list">
+          <!-- 邮件列表将通过 JS 渲染 -->
+        </div>
+      </div>
+      
+      <div id="mailDetailContainer">
+        <div class="empty-state">
+          <div class="empty-state-icon">📬</div>
+          <div style="font-size: 1.2rem; margin-bottom: 10px;">请选择一封邮件</div>
+          <div style="color: var(--text-dim);">查看邮件内容和附件</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script src="js/api-service.js"></script>
+  <script src="../js/auth-service.js"></script>
+  <script>
+    let currentFilter = 'all';
+    let selectedMailId = null;
+    let allMails = [];
+    let currentRoleId = null;
+    let currentUserId = null;
+    
+    // 邮件类型图标
+    const typeIcons = {
+      1: '📢',
+      2: '💌',
+      3: '🎁',
+      4: '🏯'
+    };
+    
+    // 初始化
+    async function init() {
+      const storedRoleId = localStorage.getItem('currentRoleId');
+      const storedUserId = localStorage.getItem('currentUserId');
+      currentRoleId = storedRoleId && storedRoleId !== 'undefined' ? parseInt(storedRoleId) : null;
+      currentUserId = storedUserId && storedUserId !== 'undefined' ? parseInt(storedUserId) : null;
+      
+      if (!currentUserId) {
+        showToast('请先选择角色');
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 1500);
+        return;
+      }
+      
+      await loadMails();
+    }
+    
+    // 从API加载邮件
+    async function loadMails() {
+      try {
+        allMails = await apiService.getMails(currentUserId);
+        loadMailList();
+        updateStats();
+      } catch (error) {
+        console.error('加载邮件失败:', error);
+        showToast('加载邮件失败，请稍后重试', 'error');
+        // 使用空状态
+        allMails = [];
+        loadMailList();
+        updateStats();
+      }
+    }
+    
+    // 加载邮件列表
+    function loadMailList() {
+      const listEl = document.getElementById('mailList');
+      let filteredMails = allMails;
+      
+      if (currentFilter === 'unread') {
+        filteredMails = allMails.filter(mail => mail.isRead === 0);
+      } else if (currentFilter === 'system') {
+        filteredMails = allMails.filter(mail => mail.type === 1);
+      } else if (currentFilter === 'friend') {
+        filteredMails = allMails.filter(mail => mail.type === 2);
+      } else if (currentFilter === 'reward') {
+        filteredMails = allMails.filter(mail => mail.type === 3);
+      }
+      
+      if (filteredMails.length === 0) {
+        listEl.innerHTML = `
+          <div style="text-align: center; padding: 40px; color: var(--text-dim);">
+            <div style="font-size: 3rem; margin-bottom: 10px;">📭</div>
+            <div>暂无邮件</div>
+          </div>
+        `;
+        return;
+      }
+      
+      listEl.innerHTML = filteredMails.map(mail => `
+        <div class="mail-item ${mail.isRead === 0 ? 'unread' : ''} ${selectedMailId === mail.id ? 'selected' : ''}" 
+             onclick="selectMail(${mail.id})">
+          <div class="mail-title">
+            <span class="mail-type-icon">${typeIcons[mail.type] || '📧'}</span>
+            ${mail.title || '无标题'}
+            ${mail.isRead === 0 ? '<span style="background: #ef4444; color: white; padding: 2px 6px; border-radius: 10px; font-size: 0.7rem;">新</span>' : ''}
+          </div>
+          <div class="mail-sender">来自：${mail.sender || '系统'}</div>
+          <div class="mail-time">${formatTime(mail.sendTime)}</div>
+        </div>
+      `).join('');
+    }
+    
+    // 选择邮件
+    async function selectMail(mailId) {
+      selectedMailId = mailId;
+      const mail = allMails.find(m => m.id === mailId);
+      
+      if (!mail) return;
+      
+      // 标记为已读
+      if (mail.isRead === 0) {
+        try {
+          await apiService.readMail(mailId, currentRoleId);
+          mail.isRead = 1;
+          updateStats();
+        } catch (error) {
+          console.error('标记已读失败:', error);
+        }
+      }
+      
+      loadMailList();
+      showMailDetail(mail);
+    }
+    
+    // 显示邮件详情
+    async function showMailDetail(mail) {
+      const container = document.getElementById('mailDetailContainer');
+      
+      // 获取邮件附件
+      let attachments = [];
+      try {
+        attachments = await apiService.getMailItems ? await apiService.getMailItems(mail.id) : [];
+      } catch (error) {
+        console.error('获取附件失败:', error);
+      }
+      
+      container.innerHTML = `
+        <div class="mail-detail">
+          <div class="mail-detail-header">
+            <div class="detail-title">
+              ${typeIcons[mail.type] || '📧'} ${mail.title || '无标题'}
+            </div>
+            <div class="detail-meta">
+              <span>发件人：${mail.sender || '系统'}</span>
+              <span>${formatTime(mail.sendTime)}</span>
+            </div>
+          </div>
+          
+          <div class="mail-detail-body">
+            ${(mail.content || '暂无内容').replace(/\n/g, '<br>')}
+          </div>
+          
+          ${attachments && attachments.length > 0 ? `
+            <div class="mail-attachments">
+              <div class="attachments-title">📎 附件（${attachments.length}）</div>
+              <div class="attachment-list">
+                ${attachments.map(att => `
+                  <div class="attachment-item">
+                    <span class="attachment-icon">📦</span>
+                    <span>物品 x${att.quantity || 1}</span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          ` : ''}
+          
+          <div class="mail-detail-actions">
+            ${mail.hasAttachment === 1 ? `
+              <button class="action-btn primary" onclick="claimAllRewards(${mail.id})">
+                🎁 一键领取附件
+              </button>
+            ` : ''}
+            <button class="action-btn" onclick="deleteMail(${mail.id})">
+              🗑️ 删除邮件
+            </button>
+          </div>
+        </div>
+      `;
+    }
+    
+    // 筛选邮件
+    function filterMails(filter) {
+      currentFilter = filter;
+      selectedMailId = null;
+      
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      event.target.classList.add('active');
+      
+      loadMailList();
+      
+      document.getElementById('mailDetailContainer').innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">📬</div>
+          <div style="font-size: 1.2rem; margin-bottom: 10px;">请选择一封邮件</div>
+          <div style="color: var(--text-dim);">查看邮件内容和附件</div>
+        </div>
+      `;
+    }
+    
+    // 领取所有附件
+    async function claimAllRewards(mailId) {
+      try {
+        showToast('正在领取附件...', 'info');
+        // 需要后端实现领取附件的API
+        // await apiService.claimMailAttachment(mailId, currentRoleId);
+        showToast('领取成功！', 'success');
+        await loadMails();
+      } catch (error) {
+        console.error('领取附件失败:', error);
+        showToast('领取失败，请稍后重试', 'error');
+      }
+    }
+    
+    // 删除邮件
+    async function deleteMail(mailId) {
+      if (!confirm('确定要删除这封邮件吗？')) return;
+      
+      try {
+        await apiService.delete(`/mail/${mailId}`);
+        showToast('邮件已删除');
+        await loadMails();
+      } catch (error) {
+        console.error('删除邮件失败:', error);
+        showToast('删除失败，请稍后重试', 'error');
+      }
+    }
+    
+    // 更新统计
+    function updateStats() {
+      const total = allMails.length;
+      const unread = allMails.filter(m => m.isRead === 0).length;
+      const pending = allMails.filter(m => m.hasAttachment === 1).length;
+      
+      document.getElementById('totalMails').textContent = total;
+      document.getElementById('unreadMails').textContent = unread;
+      document.getElementById('pendingAttachments').textContent = pending;
+      document.getElementById('unreadBadge').textContent = unread;
+      
+      if (unread > 0) {
+        document.getElementById('unreadBadge').style.display = 'block';
+      } else {
+        document.getElementById('unreadBadge').style.display = 'none';
+      }
+    }
+    
+    // 格式化时间
+    function formatTime(timestamp) {
+      if (!timestamp) return '未知时间';
+      
+      const date = new Date(timestamp);
+      const now = new Date();
+      const diff = now.getTime() - date.getTime();
+      
+      if (diff < 60000) return '刚刚';
+      if (diff < 3600000) return `${Math.floor(diff / 60000)}分钟前`;
+      if (diff < 86400000) return `${Math.floor(diff / 3600000)}小时前`;
+      if (diff < 604800000) return `${Math.floor(diff / 86400000)}天前`;
+      
+      return `${date.getMonth() + 1}月${date.getDate()}日`;
+    }
+    
+    // 显示提示
+    function showToast(message, type = 'info') {
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.textContent = message;
+      toast.style.background = type === 'error' ? '#e74c3c' : type === 'success' ? '#4caf50' : '#e6c749';
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.remove();
+      }, 3000);
+    }
+    
+    // 页面加载时初始化
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

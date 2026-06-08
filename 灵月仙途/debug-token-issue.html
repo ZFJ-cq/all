@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="css/mobile-adapt.css">
+  <title>Token 丢失问题诊断</title>
+  <style>
+    body {
+      background: #1a1a2e;
+      color: #fff;
+      font-family: 'Microsoft YaHei', sans-serif;
+      padding: 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    h1 {
+      color: #f4d03f;
+      text-align: center;
+    }
+    .section {
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    .log-item {
+      margin: 10px 0;
+      padding: 10px;
+      background: rgba(0,0,0,0.3);
+      border-left: 3px solid #f4d03f;
+    }
+    .error { border-left-color: #ff4444; }
+    .success { border-left-color: #4CAF50; }
+    .warning { border-left-color: #FF9800; }
+    button {
+      background: linear-gradient(90deg, #f4d03f, #f1c40f);
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 5px;
+      font-weight: bold;
+    }
+    button:hover {
+      transform: translateY(-2px);
+    }
+    pre {
+      background: rgba(0,0,0,0.5);
+      padding: 10px;
+      border-radius: 5px;
+      overflow-x: auto;
+    }
+  </style>
+
+  </head>
+<body>
+  <div class="container">
+    <h1>🔍 Token 丢失问题诊断工具</h1>
+    
+    <div class="section">
+      <h2>1. 当前存储状态</h2>
+      <div id="storageStatus"></div>
+      <button onclick="checkStorage()">刷新存储状态</button>
+    </div>
+    
+    <div class="section">
+      <h2>2. Token 管理器测试</h2>
+      <button onclick="testTokenManager()">测试 TokenManager</button>
+      <button onclick="testAuthManager()">测试 AuthManager</button>
+      <div id="managerTestResult"></div>
+    </div>
+    
+    <div class="section">
+      <h2>3. 页面跳转测试</h2>
+      <p>点击以下按钮跳转到其他页面，然后检查 token 是否存在</p>
+      <button onclick="testNavigation('index.html')">跳转到主页 (index.html)</button>
+      <button onclick="testNavigation('start/start.html')">跳转到起始页 (start.html)</button>
+      <button onclick="testNavigation('login.html')">跳转到登录页 (login.html)</button>
+      <div id="navigationTestResult"></div>
+    </div>
+    
+    <div class="section">
+      <h2>4. 日志输出</h2>
+      <div id="logContainer"></div>
+    </div>
+  </div>
+  
+  <script src="js/token-manager.js"></script>
+  <script src="js/auth-manager.js"></script>
+  <script>
+    const logContainer = document.getElementById('logContainer');
+    
+    function log(message, type = 'normal') {
+      const div = document.createElement('div');
+      div.className = `log-item ${type}`;
+      div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      logContainer.appendChild(div);
+      console.log(message);
+    }
+    
+    function checkStorage() {
+      const statusDiv = document.getElementById('storageStatus');
+      const token = localStorage.getItem('token');
+      const userId = localStorage.getItem('userId');
+      const roleId = localStorage.getItem('roleId');
+      const backup = localStorage.getItem('_token_backup_');
+      const adminSession = localStorage.getItem('adminSession');
+      
+      statusDiv.innerHTML = `
+        <div class="log-item ${token ? 'success' : 'error'}">Token: ${token ? '存在 (' + token.substring(0, 50) + '...)' : '不存在'}</div>
+        <div class="log-item ${userId ? 'success' : 'error'}">userId: ${userId || '不存在'}</div>
+        <div class="log-item ${roleId ? 'success' : 'warning'}">roleId: ${roleId || '不存在'}</div>
+        <div class="log-item ${backup ? 'success' : 'warning'}">Token 备份：${backup ? '存在' : '不存在'}</div>
+        <div class="log-item ${adminSession ? 'success' : 'warning'}">adminSession: ${adminSession ? '存在' : '不存在'}</div>
+      `;
+      
+      log('存储状态检查完成');
+    }
+    
+    async function testTokenManager() {
+      const resultDiv = document.getElementById('managerTestResult');
+      resultDiv.innerHTML = '<div class="log-item">正在测试 TokenManager...</div>';
+      
+      try {
+        // 测试保存
+        const testToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEyMywidXNlcm5hbWUiOiJ0ZXN0IiwiZXhwIjo5OTk5OTk5OTk5fQ.test';
+        const saved = window.TokenManager.saveToken(testToken, '123', '456');
+        log(`TokenManager 保存测试：${saved ? '成功' : '失败'}`, saved ? 'success' : 'error');
+        
+        // 测试读取
+        const retrieved = window.TokenManager.getToken();
+        log(`TokenManager 读取测试：${retrieved ? '成功' : '失败'}`, retrieved ? 'success' : 'error');
+        
+        // 测试验证
+        const status = window.TokenManager.validateTokenIntegrity();
+        log(`TokenManager 完整性验证：${JSON.stringify(status)}`, 'warning');
+        
+        resultDiv.innerHTML = `
+          <div class="log-item success">TokenManager 测试完成</div>
+          <pre>${JSON.stringify(status, null, 2)}</pre>
+        `;
+      } catch (error) {
+        log(`TokenManager 测试失败：${error.message}`, 'error');
+        resultDiv.innerHTML = `<div class="log-item error">测试失败：${error.message}</div>`;
+      }
+    }
+    
+    async function testAuthManager() {
+      const resultDiv = document.getElementById('managerTestResult');
+      resultDiv.innerHTML = '<div class="log-item">正在测试 AuthManager...</div>';
+      
+      try {
+        if (!window.AuthManager) {
+          throw new Error('AuthManager 未定义');
+        }
+        
+        // 测试保存
+        const testToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEyMywidXNlcm5hbWUiOiJ0ZXN0IiwiZXhwIjo5OTk5OTk5OTk5fQ.test';
+        const saved = window.AuthManager.setToken(testToken, { userId: '123', username: 'test' });
+        log(`AuthManager 保存测试：${saved ? '成功' : '失败'}`, saved ? 'success' : 'error');
+        
+        // 测试读取
+        const retrieved = window.AuthManager.getToken();
+        log(`AuthManager 读取测试：${retrieved ? '成功' : '失败'}`, retrieved ? 'success' : 'error');
+        
+        // 测试登录状态
+        const isLoggedIn = window.AuthManager.isLoggedIn();
+        log(`AuthManager 登录状态：${isLoggedIn ? '已登录' : '未登录'}`, isLoggedIn ? 'success' : 'error');
+        
+        // 调试信息
+        window.AuthManager.debug();
+        
+        resultDiv.innerHTML = `
+          <div class="log-item success">AuthManager 测试完成</div>
+          <pre>${JSON.stringify(window.AuthManager.getAuthInfo(), null, 2)}</pre>
+        `;
+      } catch (error) {
+        log(`AuthManager 测试失败：${error.message}`, 'error');
+        resultDiv.innerHTML = `<div class="log-item error">测试失败：${error.message}</div>`;
+      }
+    }
+    
+    function testNavigation(page) {
+      const resultDiv = document.getElementById('navigationTestResult');
+      
+      // 保存当前 token
+      const currentToken = localStorage.getItem('token');
+      const currentUserId = localStorage.getItem('userId');
+      
+      log(`准备跳转到 ${page}，当前 token: ${currentToken ? '存在' : '不存在'}`);
+      
+      // 设置一个测试 token
+      if (!currentToken) {
+        const testToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEyMywidXNlcm5hbWUiOiJ0ZXN0IiwiZXhwIjo5OTk5OTk5OTk5fQ.test';
+        localStorage.setItem('token', testToken);
+        localStorage.setItem('userId', '123');
+        log('已设置测试 token');
+      }
+      
+      // 跳转
+      window.location.href = page;
+      
+      // 注意：页面跳转后，需要在目标页面手动检查 token
+      resultDiv.innerHTML = `
+        <div class="log-item warning">
+          已跳转到 ${page}<br>
+          请在目标页面打开控制台，检查 token 是否存在
+        </div>
+      `;
+    }
+    
+    // 页面加载时自动检查
+    window.addEventListener('load', () => {
+      log('诊断工具已加载');
+      checkStorage();
+      
+      // 检查是否有多个 token 管理模块冲突
+      if (window.TokenManager && window.AuthManager) {
+        log('检测到多个 Token 管理模块共存，可能存在冲突', 'warning');
+      }
+    });
+  </script>
+</body>
+</html>

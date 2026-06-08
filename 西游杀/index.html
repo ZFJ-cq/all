@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>⚔️ 西游杀 - 第一回合</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Microsoft YaHei", sans-serif;
+    }
+    body {
+      background: linear-gradient(to bottom, #3a7bd5, #00d2ff);
+      color: white;
+      min-height: 100vh;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 {
+      margin: 10px 0 20px;
+      text-align: center;
+      font-size: 2rem;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    .game-area {
+      width: 100%;
+      max-width: 800px;
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+    }
+    .player, .enemy {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      padding: 15px;
+      text-align: center;
+    }
+    .hp-bar {
+      height: 20px;
+      background: #444;
+      border-radius: 10px;
+      margin: 8px auto;
+      width: 80%;
+      overflow: hidden;
+    }
+    .hp-fill {
+      height: 100%;
+      background: linear-gradient(to right, #ff416c, #ff4b2b);
+      transition: width 0.3s;
+    }
+    .hand {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 15px;
+      flex-wrap: wrap;
+    }
+    .card {
+      width: 60px;
+      height: 80px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      cursor: pointer;
+      user-select: none;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+      transition: transform 0.2s;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+    }
+    .card.attack { background: #ff416c; }
+    .card.dodge { background: #1e90ff; }
+    .card.peach { background: #ffcc00; color: #333; }
+    .card.selected {
+      transform: translateY(-10px);
+      box-shadow: 0 5px 15px rgba(255,255,255,0.5);
+      border: 2px solid white;
+    }
+
+    .log {
+      background: rgba(0,0,0,0.4);
+      padding: 12px;
+      border-radius: 10px;
+      height: 100px;
+      overflow-y: auto;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+    .btns {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      background: #ffcc00;
+      color: #333;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .win-message {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 3rem;
+      z-index: 100;
+      display: none;
+    }
+    .discard-instruction {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #ffcc00;
+    }
+  </style>
+</head>
+<body>
+  <h1>⚔️ 西游杀 - 第一回合</h1>
+  <div class="game-area">
+    <!-- 敌人 -->
+    <div class="enemy">
+      <div>妖怪（AI）</div>
+      <div class="hp-bar"><div class="hp-fill" id="enemy-hp" style="width:100%"></div></div>
+      <div>血量: <span id="enemy-hp-text">4</span>/4</div>
+      <div>手牌: <span id="enemy-hand-count">0</span> 张</div>
+    </div>
+
+    <!-- 日志 -->
+    <div class="log" id="log"></div>
+
+    <!-- 玩家 -->
+    <div class="player">
+      <div>你（孙悟空）</div>
+      <div class="hp-bar"><div class="hp-fill" id="player-hp" style="width:100%"></div></div>
+      <div>血量: <span id="player-hp-text">4</span>/4</div>
+      <div class="hand" id="player-hand"></div>
+      <div class="discard-instruction" id="discard-instruction"></div>
+    </div>
+
+    <div class="btns">
+      <button id="end-turn-btn">⏭️ 结束回合</button>
+      <button id="restart-btn">🔄 重新开始</button>
+    </div>
+  </div>
+
+  <div class="win-message" id="win-message"></div>
+
+  <script>
+    // 卡牌库 (108张)
+    const DECK = [
+      // 攻击牌 36张
+      'attack', 'attack', 'attack', 'attack', 'attack', 'attack',
+      'attack', 'attack', 'attack', 'attack', 'attack', 'attack',
+      'attack', 'attack', 'attack', 'attack', 'attack', 'attack',
+      'attack', 'attack', 'attack', 'attack', 'attack', 'attack',
+      'attack', 'attack', 'attack', 'attack', 'attack', 'attack',
+      'attack', 'attack', 'attack', 'attack', 'attack', 'attack',
+
+      // 闪牌 36张
+      'dodge', 'dodge', 'dodge', 'dodge', 'dodge', 'dodge',
+      'dodge', 'dodge', 'dodge', 'dodge', 'dodge', 'dodge',
+      'dodge', 'dodge', 'dodge', 'dodge', 'dodge', 'dodge',
+      'dodge', 'dodge', 'dodge', 'dodge', 'dodge', 'dodge',
+      'dodge', 'dodge', 'dodge', 'dodge', 'dodge', 'dodge',
+      'dodge', 'dodge', 'dodge', 'dodge', 'dodge', 'dodge',
+
+      // 桃牌 36张
+      'peach', 'peach', 'peach', 'peach', 'peach', 'peach',
+      'peach', 'peach', 'peach', 'peach', 'peach', 'peach',
+      'peach', 'peach', 'peach', 'peach', 'peach', 'peach',
+      'peach', 'peach', 'peach', 'peach', 'peach', 'peach',
+      'peach', 'peach', 'peach', 'peach', 'peach', 'peach',
+      'peach', 'peach', 'peach', 'peach', 'peach', 'peach'
+    ];
+
+    // 游戏状态
+    let gameState = {
+      playerHP: 4,
+      enemyHP: 4,
+      playerHand: [],
+      enemyHand: [],
+      deck: [],
+      currentPlayer: 'player', // 'player' or 'enemy'
+      gameEnded: false,
+      isDiscarding: false,
+      selectedDiscards: [],
+      currentPhase: 'start',
+      hasPlayedAttack: false
+    };
+
+    // DOM 元素
+    const logEl = document.getElementById('log');
+    const playerHandEl = document.getElementById('player-hand');
+    const endTurnBtn = document.getElementById('end-turn-btn');
+    const restartBtn = document.getElementById('restart-btn');
+    const winMessage = document.getElementById('win-message');
+    const discardInstruction = document.getElementById('discard-instruction');
+
+    function log(msg) {
+      const div = document.createElement('div');
+      div.textContent = msg;
+      logEl.appendChild(div);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function updateUI() {
+      document.getElementById('player-hp-text').textContent = gameState.playerHP;
+      document.getElementById('enemy-hp-text').textContent = gameState.enemyHP;
+      document.getElementById('player-hp').style.width = (gameState.playerHP / 4 * 100) + '%';
+      document.getElementById('enemy-hp').style.width = (gameState.enemyHP / 4 * 100) + '%';
+      document.getElementById('enemy-hand-count').textContent = gameState.enemyHand.length;
+
+      // 更新玩家手牌
+      playerHandEl.innerHTML = '';
+      gameState.playerHand.forEach((card, i) => {
+        const el = document.createElement('div');
+        el.className = `card ${card}`;
+        el.textContent = card === 'attack' ? '⚔️' : card === 'dodge' ? '🛡️' : '🍑';
+        if (gameState.isDiscarding) {
+          el.classList.toggle('selected', gameState.selectedDiscards.includes(i));
+          el.onclick = () => toggleDiscardSelection(i);
+        } else {
+          if (gameState.currentPlayer === 'player' && !gameState.gameEnded && gameState.currentPhase === 'play') {
+            el.onclick = () => playCard(i);
+          } else {
+            el.onclick = null;
+          }
+        }
+        playerHandEl.appendChild(el);
+      });
+
+      // 更新按钮状态
+      endTurnBtn.disabled = gameState.currentPlayer !== 'player' || gameState.gameEnded || gameState.isDiscarding || gameState.currentPhase !== 'play';
+
+      if (gameState.isDiscarding) {
+        discardInstruction.textContent = `请选择要弃掉的牌 (${gameState.selectedDiscards.length}/${gameState.playerHand.length - gameState.playerHP})`;
+      } else {
+        discardInstruction.textContent = '';
+      }
+
+      if (gameState.currentPhase === 'draw') {
+        endTurnBtn.textContent = '🪄 摸牌结束';
+      } else if (gameState.currentPhase === 'play') {
+        endTurnBtn.textContent = '⏭️ 结束回合';
+      } else if (gameState.currentPhase === 'discard') {
+        endTurnBtn.textContent = '🪄 弃牌结束';
+      } else {
+        endTurnBtn.textContent = '⏭️ 结束回合';
+      }
+    }
+
+    function shuffle(arr) {
+      return [...arr].sort(() => Math.random() - 0.5);
+    }
+
+    function startGame() {
+      const newDeck = shuffle(DECK);
+      gameState = {
+        playerHP: 4,
+        enemyHP: 4,
+        playerHand: [],
+        enemyHand: [],
+        deck: newDeck,
+        currentPlayer: Math.random() >= 0.5 ? 'player' : 'enemy',
+        gameEnded: false,
+        isDiscarding: false,
+        selectedDiscards: [],
+        currentPhase: 'start',
+        hasPlayedAttack: false
+      };
+      logEl.innerHTML = '';
+      winMessage.style.display = 'none';
+      log('游戏开始！');
+      log(gameState.currentPlayer === 'player' ? '你先手。' : '妖怪先手。');
+
+      // 开局：双方各摸4张牌
+      drawCards(true, 4);
+      drawCards(false, 4);
+      log('双方各摸4张牌。');
+
+      if (gameState.currentPlayer === 'player') {
+        startPlayerTurn();
+      } else {
+        startEnemyTurn();
+      }
+    }
+
+    function drawCards(isPlayer, count) {
+      const drawnCards = [];
+      for (let i = 0; i < count; i++) {
+        if (gameState.deck.length === 0) break;
+        const card = gameState.deck.pop();
+        drawnCards.push(card);
+        if (isPlayer) {
+          gameState.playerHand.push(card);
+        } else {
+          gameState.enemyHand.push(card);
+        }
+      }
+      return drawnCards;
+    }
+
+    function startPlayerTurn() {
+      log('=== 你的回合 ===');
+      gameState.currentPlayer = 'player';
+      gameState.hasPlayedAttack = false;
+      gameState.currentPhase = 'draw';
+      const drawnCards = drawCards(true, 2);
+      if (drawnCards.length > 0) {
+        log(`你抽了 ${drawnCards.length} 张牌。`);
+      } else {
+        log('牌堆已空，无法抽牌。');
+      }
+      gameState.currentPhase = 'play';
+      updateUI();
+    }
+
+    function startEnemyTurn() {
+      log('=== 妖怪的回合 ===');
+      gameState.currentPlayer = 'enemy';
+      gameState.hasPlayedAttack = false;
+      gameState.currentPhase = 'draw';
+      const drawnCards = drawCards(false, 2);
+      if (drawnCards.length > 0) {
+        log('妖怪抽了 2 张牌。');
+      } else {
+        log('妖怪试图抽牌但牌堆已空。');
+      }
+      gameState.currentPhase = 'play';
+      updateUI();
+      setTimeout(enemyTurn, 1000);
+    }
+
+    function playCard(index) {
+      if (gameState.currentPlayer !== 'player' || gameState.gameEnded || gameState.isDiscarding || gameState.currentPhase !== 'play') return;
+      const card = gameState.playerHand.splice(index, 1)[0];
+      log(`你使用了【${card === 'attack' ? '攻击' : card === 'dodge' ? '闪' : '桃'}】`);
+
+      if (card === 'attack') {
+        if (gameState.hasPlayedAttack) {
+          log('每回合只能使用一次【攻击】！');
+          gameState.playerHand.push(card);
+          return;
+        }
+        gameState.hasPlayedAttack = true;
+        const dodgeIndex = gameState.enemyHand.indexOf('dodge');
+        if (dodgeIndex !== -1) {
+          gameState.enemyHand.splice(dodgeIndex, 1);
+          log('妖怪使用【闪】躲过了！');
+        } else {
+          gameState.enemyHP--;
+          log('妖怪受到 1 点伤害！');
+          checkWin();
+        }
+      } else if (card === 'peach') {
+        if (gameState.playerHP < 4) {
+          gameState.playerHP++;
+          log('你回复了 1 点血！');
+        } else {
+          log('血量已满，桃无效。');
+          gameState.playerHand.push(card);
+        }
+      } else if (card === 'dodge') {
+        log('【闪】只能响应攻击，不能主动使用！');
+        gameState.playerHand.push(card);
+      }
+
+      updateUI();
+      handleDiscardAfterPlay();
+      if (!gameState.isDiscarding) {
+        setTimeout(endPlayerTurn, 800);
+      }
+    }
+
+    function toggleDiscardSelection(index) {
+      if (!gameState.isDiscarding) return;
+      const selectedIndex = gameState.selectedDiscards.indexOf(index);
+      if (selectedIndex === -1) {
+        gameState.selectedDiscards.push(index);
+      } else {
+        gameState.selectedDiscards.splice(selectedIndex, 1);
+      }
+      updateUI();
+    }
+
+    function handleDiscardAfterPlay() {
+      if (gameState.playerHand.length > gameState.playerHP) {
+        const excessCount = gameState.playerHand.length - gameState.playerHP;
+        log(`手牌数 (${gameState.playerHand.length}) 超过血量 (${gameState.playerHP})，需要弃掉 ${excessCount} 张牌。`);
+        gameState.isDiscarding = true;
+        gameState.selectedDiscards = [];
+        gameState.currentPhase = 'discard';
+        updateUI();
+
+        // 创建确认按钮
+        const confirmBtn = document.createElement('button');
+        confirmBtn.textContent = '✅ 确认弃牌';
+        confirmBtn.onclick = confirmDiscard;
+        confirmBtn.style.marginTop = '10px';
+        playerHandEl.parentElement.appendChild(confirmBtn);
+
+        // 保存按钮引用
+        window.discardConfirmBtn = confirmBtn;
+
+        updateUI();
+        return;
+      }
+    }
+
+    function confirmDiscard() {
+      if (!gameState.isDiscarding || gameState.selectedDiscards.length === 0) return;
+
+      const sortedIndexes = [...gameState.selectedDiscards].sort((a, b) => b - a);
+      sortedIndexes.forEach(index => {
+        const discardedCard = gameState.playerHand.splice(index, 1)[0];
+        log(`弃掉了 ${discardedCard}`);
+      });
+      gameState.selectedDiscards = [];
+      gameState.isDiscarding = false;
+      gameState.currentPhase = 'end';
+      updateUI();
+      log('弃牌完成。');
+
+      // 移除确认按钮
+      if (window.discardConfirmBtn && window.discardConfirmBtn.parentNode) {
+        window.discardConfirmBtn.parentNode.removeChild(window.discardConfirmBtn);
+      }
+
+      setTimeout(endPlayerTurn, 500);
+    }
+
+    function endPlayerTurn() {
+      if (gameState.isDiscarding) {
+        if (gameState.selectedDiscards.length > 0) {
+          confirmDiscard();
+        } else {
+          gameState.isDiscarding = false;
+          gameState.currentPhase = 'end';
+          updateUI();
+        }
+      } else {
+        gameState.currentPhase = 'end';
+        updateUI();
+      }
+      gameState.currentPlayer = 'enemy';
+      setTimeout(startEnemyTurn, 1000);
+    }
+
+    function enemyTurn() {
+      if (gameState.gameEnded) return;
+
+      let acted = false;
+
+      // AI 的行动逻辑（攻击、桃）
+      if (!gameState.hasPlayedAttack && gameState.enemyHand.includes('attack')) {
+        const attackIndex = gameState.enemyHand.indexOf('attack');
+        gameState.enemyHand.splice(attackIndex, 1);
+        log('妖怪使用【攻击】！');
+
+        const playerDodge = gameState.playerHand.indexOf('dodge');
+        if (playerDodge !== -1) {
+          gameState.playerHand.splice(playerDodge, 1);
+          log('你使用【闪】躲过了！');
+        } else {
+          gameState.playerHP--;
+          log('你受到 1 点伤害！');
+          checkWin();
+        }
+        acted = true;
+        gameState.hasPlayedAttack = true;
+      }
+
+      if (!acted && gameState.enemyHP < 3 && gameState.enemyHand.includes('peach')) {
+        const peachIndex = gameState.enemyHand.indexOf('peach');
+        gameState.enemyHand.splice(peachIndex, 1);
+        gameState.enemyHP = Math.min(4, gameState.enemyHP + 1);
+        log('妖怪使用【桃】回复了 1 点血！');
+        acted = true;
+      }
+
+      if (!acted) {
+        const drawnCards = drawCards(false, 1);
+        if (drawnCards.length > 0) {
+          log('妖怪抽了一张牌。');
+        } else {
+          log('妖怪试图抽牌但牌堆已空。');
+        }
+      }
+
+      // ✅ 新增：AI 弃牌逻辑
+      handleEnemyDiscard();
+
+      updateUI();
+      if (!gameState.gameEnded) {
+        setTimeout(() => {
+          startPlayerTurn();
+        }, 1200);
+      }
+    }
+
+    function handleEnemyDiscard() {
+      if (gameState.enemyHand.length > gameState.enemyHP) {
+        const excessCount = gameState.enemyHand.length - gameState.enemyHP;
+        log(`妖怪手牌数 (${gameState.enemyHand.length}) 超过血量 (${gameState.enemyHP})，需要弃掉 ${excessCount} 张牌。`);
+
+        // AI 随机弃牌
+        for (let i = 0; i < excessCount; i++) {
+          const randomIndex = Math.floor(Math.random() * gameState.enemyHand.length);
+          const discardedCard = gameState.enemyHand.splice(randomIndex, 1)[0];
+          log(`妖怪弃掉了 ${discardedCard}`);
+        }
+      }
+    }
+
+    function checkWin() {
+      if (gameState.enemyHP <= 0) {
+        gameState.gameEnded = true;
+        winMessage.textContent = '🎉 你赢了！妖怪被打败了！';
+        winMessage.style.display = 'flex';
+        log('胜利！');
+      } else if (gameState.playerHP <= 0) {
+        gameState.gameEnded = true;
+        winMessage.textContent = '💀 你输了！妖怪太强了…';
+        winMessage.style.display = 'flex';
+        log('失败！');
+      }
+    }
+
+    // 事件绑定
+    endTurnBtn.onclick = () => {
+      if (gameState.currentPhase === 'draw') {
+        gameState.currentPhase = 'play';
+        updateUI();
+        return;
+      } else if (gameState.currentPhase === 'discard') {
+        if (gameState.selectedDiscards.length > 0) {
+          confirmDiscard();
+        } else {
+          gameState.isDiscarding = false;
+          gameState.currentPhase = 'end';
+          updateUI();
+        }
+        return;
+      } else {
+        endPlayerTurn();
+      }
+    };
+    restartBtn.onclick = startGame;
+
+    // 启动游戏
+    startGame();
+  </script>
+</body>
+</html>

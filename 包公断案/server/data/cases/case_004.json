@@ -1,0 +1,245 @@
+{
+  "id": "case_004",
+  "title": "铡美案",
+  "subtitle": "第四案",
+  "difficulty": 2,
+  "description": "贫寒书生陈世美高中状元后抛妻弃子，迎娶公主。前妻秦香莲千里寻夫，却遭陈世美追杀……",
+  "background": "陈州举人陈世美进京赶考，高中状元后被宋仁宗招为驸马，隐瞒已有妻室的事实。其妻秦香莲携儿女进京寻夫，陈世美不仅不认，还派杀手韩琪灭口。",
+  "stages": {
+    "report": {
+      "id": "report",
+      "name": "报案",
+      "dialogues": [
+        {
+          "speaker": "系统",
+          "speakerTitle": "旁白",
+          "content": "一日，开封府来了一位衣衫褴褛的妇人，带着一双儿女跪在府门前，哭哭啼啼要告状。",
+          "emotion": "narrator"
+        },
+        {
+          "speaker": "秦香莲",
+          "speakerTitle": "告状人",
+          "content": "包大人！民妇秦香莲，状告当朝驸马陈世美！他忘恩负义，抛妻弃子，还派人杀害民妇母子！",
+          "emotion": "cry"
+        },
+        {
+          "speaker": "包拯",
+          "speakerTitle": "包青天",
+          "content": "驸马？你且慢慢道来，究竟是怎么回事？",
+          "emotion": "serious"
+        },
+        {
+          "speaker": "秦香莲",
+          "speakerTitle": "告状人",
+          "content": "民妇乃陈州人氏，丈夫陈世美三年前进京赶考，一去不归。民妇听说他中了状元，还做了驸马……",
+          "emotion": "cry"
+        },
+        {
+          "speaker": "秦香莲",
+          "speakerTitle": "告状人",
+          "content": "民妇带着一双儿女进京寻夫，他却闭门不见。后来……后来还派了杀手来杀我们母子……",
+          "emotion": "cry"
+        },
+        {
+          "speaker": "包拯",
+          "speakerTitle": "包青天",
+          "content": "竟有此事！光天化日之下，驸马竟敢行凶杀人？王朝马汉，速去传韩琪！",
+          "emotion": "angry"
+        }
+      ]
+    },
+    "investigation": {
+      "id": "investigation",
+      "name": "取证",
+      "scenes": [
+        {
+          "id": "chenzhou",
+          "name": "陈州老家",
+          "description": "陈世美的故乡，邻里乡亲对他的往事记忆犹新。",
+          "searchHints": ["询问邻里乡亲", "查看陈家老宅", "寻找婚书"]
+        },
+        {
+          "id": "palace",
+          "name": "驸马府",
+          "description": "陈世美的府邸，富丽堂皇，但气氛诡异。",
+          "searchHints": ["搜查书房", "询问下人", "查找书信"]
+        },
+        {
+          "id": "killer_hideout",
+          "name": "杀手居所",
+          "description": "杀手韩琪的住所，可能藏有重要线索。",
+          "searchHints": ["寻找杀人凶器", "检查衣物", "询问家人"]
+        }
+      ],
+      "evidences": [
+        {
+          "id": "ev_301",
+          "name": "邻里证词",
+          "icon": "witness",
+          "description": "陈州乡邻证实，陈世美确有妻室秦香莲，两人育有一子一女，在他进京前感情和睦。",
+          "sceneId": "chenzhou",
+          "isKey": true,
+          "clue": "邻里证词证明秦香莲所言属实，陈世美确实隐瞒了已婚事实。"
+        },
+        {
+          "id": "ev_302",
+          "name": "婚书",
+          "icon": "seal",
+          "description": "在陈家老宅找到的婚书，明确记载陈世美与秦香莲的婚姻关系。",
+          "sceneId": "chenzhou",
+          "isKey": true,
+          "clue": "婚书是铁证，证明陈世美重婚罪成立。"
+        },
+        {
+          "id": "ev_303",
+          "name": "陈世美的亲笔书信",
+          "icon": "note",
+          "description": "在驸马府书房找到的密信，命令韩琪'处理'秦香莲母子。",
+          "sceneId": "palace",
+          "isKey": true,
+          "clue": "书信证明陈世美确实指使韩琪行凶，杀人意图昭然若揭。"
+        },
+        {
+          "id": "ev_304",
+          "name": "杀人匕首",
+          "icon": "knife",
+          "description": "韩琪承认是陈世美给他的匕首，让他去杀害秦香莲母子。",
+          "sceneId": "killer_hideout",
+          "isKey": true,
+          "clue": "匕首是行凶工具，韩琪已供认不讳。"
+        },
+        {
+          "id": "ev_305",
+          "name": "韩琪的证词",
+          "icon": "witness",
+          "description": "杀手韩琪供认，是驸马陈世美指使他去杀害秦香莲母子。",
+          "sceneId": "killer_hideout",
+          "isKey": true,
+          "clue": "韩琪的证词与书信、匕首相互印证，形成完整证据链。"
+        },
+        {
+          "id": "ev_306",
+          "name": "公主的证词",
+          "icon": "witness",
+          "description": "公主证实，陈世美从未提及已有妻室，她是在完全不知情的情况下与陈世美成婚。",
+          "sceneId": "palace",
+          "isKey": false,
+          "clue": "公主也是受害者，她对陈世美的欺骗行为毫不知情。"
+        }
+      ]
+    },
+    "interrogation": {
+      "id": "interrogation",
+      "name": "审讯",
+      "suspects": [
+        {
+          "id": "sus_301",
+          "name": "陈世美",
+          "role": "驸马",
+          "description": "当朝驸马，原是陈州贫寒书生，高中状元后隐瞒婚史，迎娶公主。",
+          "dialogues": [
+            {
+              "speaker": "陈世美",
+              "speakerTitle": "嫌疑人",
+              "content": "包拯！你敢审本宫？别忘了你只是个开封府尹！",
+              "emotion": "arrogant"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "王子犯法与庶民同罪！陈世美，你可知罪？",
+              "emotion": "angry"
+            },
+            {
+              "speaker": "陈世美",
+              "speakerTitle": "嫌疑人",
+              "content": "本宫何罪之有？",
+              "emotion": "defensive"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "你隐瞒婚史，欺骗圣上，迎娶公主，此乃欺君之罪！你派韩琪杀害发妻，此乃杀人之罪！",
+              "emotion": "angry"
+            },
+            {
+              "speaker": "陈世美",
+              "speakerTitle": "嫌疑人",
+              "content": "你……你有何证据？",
+              "emotion": "panic"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "证据确凿！这是你的亲笔书信，这是韩琪的证词，这是你的婚书！你还有何话可说？",
+              "emotion": "angry"
+            },
+            {
+              "speaker": "陈世美",
+              "speakerTitle": "嫌疑人",
+              "content": "……朕……不……本宫……",
+              "emotion": "defeated"
+            }
+          ],
+          "isGuilty": true
+        },
+        {
+          "id": "sus_302",
+          "name": "韩琪",
+          "role": "杀手",
+          "description": "驸马府护卫，被陈世美指使去杀害秦香莲母子，但最终良心发现，放走了他们。",
+          "dialogues": [
+            {
+              "speaker": "韩琪",
+              "speakerTitle": "嫌疑人",
+              "content": "大人饶命！小人只是奉命行事……",
+              "emotion": "fear"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "奉谁的命？为何要杀害秦香莲母子？",
+              "emotion": "serious"
+            },
+            {
+              "speaker": "韩琪",
+              "speakerTitle": "嫌疑人",
+              "content": "是……是驸马爷……他给了小人这把匕首，让小人去杀了那妇人孩子……",
+              "emotion": "panic"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "那为何秦香莲母子还活着？",
+              "emotion": "serious"
+            },
+            {
+              "speaker": "韩琪",
+              "speakerTitle": "嫌疑人",
+              "content": "小人……小人实在下不了手……那孩子还那么小……小人就放了他们……",
+              "emotion": "guilty"
+            }
+          ],
+          "isGuilty": false,
+          "hint": "韩琪虽参与谋杀计划，但良心发现放走了秦香莲母子，可从轻发落"
+        }
+      ]
+    },
+    "judgment": {
+      "id": "judgment",
+      "name": "断案",
+      "correctSuspectId": "sus_301",
+      "requiredEvidenceIds": ["ev_301", "ev_302", "ev_303", "ev_304", "ev_305"],
+      "judgmentText": {
+        "correct": "经查明，陈世美隐瞒已婚事实，欺骗圣上与公主，犯下欺君之罪；为掩盖真相，指使韩琪杀害发妻秦香莲及一双儿女，犯下杀人未遂之罪。其行为天理难容，人神共愤！判陈世美斩立决，狗头铡伺候！韩琪良心发现，放走秦香莲母子，可免死罪，杖责五十，发配边疆。秦香莲母子恢复自由身，由官府妥善安置。",
+        "wrong": "证据尚不足以定案，请大人继续查证。",
+        "partial": "大人已掌握部分证据，但还需完整证据链才能定罪。"
+      }
+    }
+  },
+  "hints": [
+    { "id": "hint_4_1", "content": "陈州老家是关键，去那里寻找陈世美已婚的证据。", "cost": 1 },
+    { "id": "hint_4_2", "content": "韩琪是重要证人，他的证词可以直接指认主谋。", "cost": 1 },
+    { "id": "hint_4_3", "content": "驸马府书房可能藏有陈世美的亲笔书信，这是最直接的证据。", "cost": 1 }
+  ]
+}

@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="../js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="../css/mobile-adapt.css">
+  <title>灵月仙途 - 社交</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    .friend-item {
+      background: rgba(139, 69, 19, 0.1);
+      border: 1px solid #8b4513;
+      border-radius: 5px;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+    
+    .friend-name {
+      font-weight: bold;
+      color: #8b4513;
+      margin-bottom: 5px;
+    }
+    
+    .friend-status {
+      font-size: 0.9rem;
+      color: #654321;
+      margin-bottom: 5px;
+    }
+    
+    .friend-actions {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    
+    /* 宗门页面样式 */
+    .clan-page {
+      position: relative;
+      min-height: 600px;
+      background: url('https://i.imgur.com/2k6X7Yc.png') no-repeat center center;
+      background-size: cover;
+      border-radius: 10px;
+      padding: 20px;
+      overflow: hidden;
+    }
+    
+    .clan-page::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(15, 15, 30, 0.7);
+      z-index: 1;
+      border-radius: 10px;
+    }
+    
+    .clan-content {
+      position: relative;
+      z-index: 2;
+      color: #e8d5b9;
+    }
+    
+    .clan-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .clan-name {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #e6c749;
+      text-shadow: 0 0 15px rgba(230, 199, 73, 0.8);
+      margin-bottom: 10px;
+    }
+    
+    .clan-level {
+      font-size: 1.2rem;
+      color: #e8d5b9;
+      margin-bottom: 15px;
+    }
+    
+    .clan-stats {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      flex-wrap: wrap;
+      margin-bottom: 30px;
+    }
+    
+    .clan-stat {
+      text-align: center;
+      padding: 15px;
+      background: rgba(30, 30, 60, 0.8);
+      border: 1px solid #e6c749;
+      border-radius: 8px;
+      min-width: 120px;
+    }
+    
+    .clan-stat-label {
+      font-size: 0.9rem;
+      color: #e8d5b9;
+      margin-bottom: 5px;
+    }
+    
+    .clan-stat-value {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: #e6c749;
+    }
+    
+    .clan-functions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+    
+    .clan-function {
+      background: rgba(30, 30, 60, 0.8);
+      border: 1px solid #e6c749;
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .clan-function:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(230, 199, 73, 0.5);
+      border-color: #e6c749;
+    }
+    
+    .function-icon {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+    
+    .function-name {
+      font-size: 1rem;
+      font-weight: bold;
+      color: #e6c749;
+      margin-bottom: 5px;
+    }
+    
+    .function-desc {
+      font-size: 0.8rem;
+      color: #e8d5b9;
+      line-height: 1.4;
+    }
+    
+    @media (max-width: 768px) {
+      .friend-actions {
+        justify-content: center;
+      }
+      
+      .clan-stats {
+        gap: 15px;
+      }
+      
+      .clan-stat {
+        min-width: 100px;
+        padding: 10px;
+      }
+      
+      .clan-functions {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .friend-item {
+        padding: 8px;
+      }
+      
+      .friend-actions {
+        justify-content: center;
+        gap: 3px;
+      }
+      
+      .friend-actions button {
+        font-size: 0.6rem;
+        padding: 2px 4px;
+      }
+      
+      .friend-name {
+        font-size: 0.9rem;
+      }
+      
+      .friend-status {
+        font-size: 0.8rem;
+      }
+      
+      .clan-page {
+        padding: 15px;
+        min-height: 500px;
+      }
+      
+      .clan-name {
+        font-size: 1.5rem;
+      }
+      
+      .clan-level {
+        font-size: 1rem;
+      }
+    }
+  </style>
+
+  </head>
+<body>
+  <!-- 顶部状态栏 -->
+  <div class="top-status-bar">
+    <div class="player-avatar">
+      <img src="../images/player.png" alt="角色头像" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2250%22 height=%2250%22 viewBox=%220 0 50 50%22><circle cx=%2225%22 cy=%2225%22 r=%2220%22 fill=%22%23f5deb3%22 stroke=%22%23d4af37%22 stroke-width=%222%22/></svg>'" />
+    </div>
+    <div class="status-info">
+      <div class="status-item">
+        <span class="status-label">境界：</span>
+        <span class="status-value">炼气一层</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">气血：</span>
+        <span class="status-value">150/150</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">灵力：</span>
+        <span class="status-value">100/100</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">灵石：</span>
+        <span class="status-value">1,250</span>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 中部主区域 -->
+  <div class="main-area">
+    <h2>社交</h2>
+    
+    <div class="card">
+      <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+        <button class="action-btn tab-btn active" data-tab="friends">好友</button>
+        <button class="action-btn tab-btn" data-tab="clan">宗门</button>
+        <button class="action-btn tab-btn" data-tab="master">师徒</button>
+        <button class="action-btn tab-btn" data-tab="partner">道侣</button>
+        <button class="action-btn tab-btn" data-tab="enemy">仇敌</button>
+      </div>
+      
+      <!-- 好友标签页 -->
+      <div class="tab-content active" id="friends">
+        <div style="margin-bottom: 15px;">
+          <h3>好友列表(3/50)</h3>
+          <div class="friend-item">
+            <div class="friend-name">李明月</div>
+            <div class="friend-status">境界：炼气四层  好感度：65(友好)</div>
+            <div class="friend-status">状态：在线 - 炼丹中</div>
+            <div class="friend-actions">
+              <button class="action-btn" style="font-size: 0.7rem; padding: 3px 6px;">传音</button>
+              <button class="action-btn" style="font-size: 0.7rem; padding: 3px 6px;">拜访</button>
+              <button class="action-btn" style="font-size: 0.7rem; padding: 3px 6px;">赠送</button>
+              <button class="action-btn" style="font-size: 0.7rem; padding: 3px 6px;">切磋</button>
+              <button class="action-btn" style="font-size: 0.7rem; padding: 3px 6px;">删除</button>
+            </div>
+          </div>
+          <div class="friend-item">
+            <div class="friend-name">王铁柱</div>
+            <div class="friend-status">境界：炼气二层  好感度：40(相识)</div>
+            <div class="friend-status">状态：2小时前在线</div>
+            <div class="friend-actions">
+              <button class="action-btn" style="font-size: 0.7rem; padding: 3px 6px;">传音</button>
+              <button class="action-btn" style="font-size: 0.7rem; padding: 3px 6px;">拜访</button>
+              <button class="action-btn" style="font-size: 0.7rem; padding: 3px 6px;">赠送</button>
+              <button class="action-btn" style="font-size: 0.7rem; padding: 3px 6px;">切磋</button>
+              <button class="action-btn" style="font-size: 0.7rem; padding: 3px 6px;">删除</button>
+            </div>
+          </div>
+          <div class="friend-item">
+            <div class="friend-name">赵灵儿</div>
+            <div class="friend-status">境界：炼气五层  好感度：80(挚友)</div>
+            <div class="friend-status">状态：离线 - 修炼中</div>
+            <div class="friend-actions">
+              <button class="action-btn" style="font-size: 0.7rem; padding: 3px 6px;">传音</button>
+              <button class="action-btn" style="font-size: 0.7rem; padding: 3px 6px;">留言</button>
+              <button class="action-btn" style="font-size: 0.7rem; padding: 3px 6px;">赠送</button>
+              <button class="action-btn" style="font-size: 0.7rem; padding: 3px 6px;">组队</button>
+              <button class="action-btn" style="font-size: 0.7rem; padding: 3px 6px;">删除</button>
+            </div>
+          </div>
+        </div>
+        
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: space-around;">
+          <button class="action-btn" style="font-size: 0.8rem; padding: 6px 12px;">世界频道</button>
+          <button class="action-btn" style="font-size: 0.8rem; padding: 6px 12px;">宗门频道</button>
+          <button class="action-btn" style="font-size: 0.8rem; padding: 6px 12px;">私聊</button>
+          <button class="action-btn" style="font-size: 0.8rem; padding: 6px 12px;">邮件</button>
+          <button class="action-btn" style="font-size: 0.8rem; padding: 6px 12px;">好友申请</button>
+        </div>
+      </div>
+      
+      <!-- 宗门标签页 -->
+      <div class="tab-content" id="clan">
+        <div class="clan-page">
+          <div class="clan-content">
+            <div class="clan-header">
+              <div class="clan-name">青云门</div>
+              <div class="clan-level">宗门等级：3级</div>
+              <div class="clan-stats">
+                <div class="clan-stat">
+                  <div class="clan-stat-label">成员</div>
+                  <div class="clan-stat-value">42/50</div>
+                </div>
+                <div class="clan-stat">
+                  <div class="clan-stat-label">繁荣度</div>
+                  <div class="clan-stat-value">8500</div>
+                </div>
+                <div class="clan-stat">
+                  <div class="clan-stat-label">资金</div>
+                  <div class="clan-stat-value">12500</div>
+                </div>
+                <div class="clan-stat">
+                  <div class="clan-stat-label">建设</div>
+                  <div class="clan-stat-value">78%</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="clan-functions">
+              <div class="clan-function" onclick="showClanFunction('hall')">
+                <div class="function-icon">🏯</div>
+                <div class="function-name">宗门大厅</div>
+                <div class="function-desc">宗门核心建筑，可查看宗门信息和管理成员</div>
+              </div>
+              <div class="clan-function" onclick="showClanFunction('cultivation')">
+                <div class="function-icon">🧘</div>
+                <div class="function-name">修炼堂</div>
+                <div class="function-desc">宗门修炼场所，获得额外修炼效率</div>
+              </div>
+              <div class="clan-function" onclick="showClanFunction('alchemy')">
+                <div class="function-icon">⚗️</div>
+                <div class="function-name">炼丹房</div>
+                <div class="function-desc">炼制丹药的场所，提升炼丹成功率</div>
+              </div>
+              <div class="clan-function" onclick="showClanFunction('smithing')">
+                <div class="function-icon">🔨</div>
+                <div class="function-name">炼器室</div>
+                <div class="function-desc">炼制装备的场所，提升炼器成功率</div>
+              </div>
+              <div class="clan-function" onclick="showClanFunction('warehouse')">
+                <div class="function-icon">📦</div>
+                <div class="function-name">宗门仓库</div>
+                <div class="function-desc">存储宗门物资的地方</div>
+              </div>
+              <div class="clan-function" onclick="showClanFunction('mission')">
+                <div class="function-icon">📋</div>
+                <div class="function-name">任务堂</div>
+                <div class="function-desc">接取宗门任务，获得宗门贡献</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 师徒标签页 -->
+      <div class="tab-content" id="master">
+        <div style="text-align: center; padding: 50px; color: #f5deb3;">
+          师徒系统内容
+        </div>
+      </div>
+      
+      <!-- 道侣标签页 -->
+      <div class="tab-content" id="partner">
+        <div style="text-align: center; padding: 50px; color: #f5deb3;">
+          道侣系统内容
+        </div>
+      </div>
+      
+      <!-- 仇敌标签页 -->
+      <div class="tab-content" id="enemy">
+        <div style="text-align: center; padding: 50px; color: #f5deb3;">
+          仇敌系统内容
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // 标签页切换功能
+    document.addEventListener('DOMContentLoaded', function() {
+      const tabBtns = document.querySelectorAll('.tab-btn');
+      const tabContents = document.querySelectorAll('.tab-content');
+      
+      tabBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+          // 移除所有标签页的active类
+          tabBtns.forEach(b => b.classList.remove('active'));
+          tabContents.forEach(c => c.classList.remove('active'));
+          
+          // 为当前点击的标签页添加active类
+          this.classList.add('active');
+          
+          // 显示对应标签页内容
+          const tabId = this.getAttribute('data-tab');
+          document.getElementById(tabId).classList.add('active');
+        });
+      });
+    });
+    
+    // 显示宗门功能
+    function showClanFunction(functionName) {
+      showToast(`${functionName}功能即将开放`);
+    }
+  </script>
+  
+  <!-- 底部导航栏 -->
+  <div class="bottom-nav">
+    <a href="index.html" class="nav-item">
+      <div class="nav-icon">🏠</div>
+      <div class="nav-text">洞府</div>
+    </a>
+    <a href="inventory.html" class="nav-item">
+      <div class="nav-icon">🎒</div>
+      <div class="nav-text">背包</div>
+    </a>
+    <a href="character.html" class="nav-item">
+      <div class="nav-icon">👤</div>
+      <div class="nav-text">角色</div>
+    </a>
+    <a href="social.html" class="nav-item active">
+      <div class="nav-icon">🏯</div>
+      <div class="nav-text">宗门</div>
+    </a>
+    <a href="tasks.html" class="nav-item">
+      <div class="nav-icon">📜</div>
+      <div class="nav-text">任务</div>
+    </a>
+  </div>
+  <script src="js/ui-components.js"></script>
+  <script src="../js/auth-service.js"></script>
+</body>
+</html>

@@ -1,0 +1,187 @@
+{
+  "id": "case_005",
+  "title": "巧断牛舌案",
+  "subtitle": "第五案",
+  "difficulty": 1,
+  "description": "农夫耕牛被割舌，包拯巧设妙计引蛇出洞，真凶自投罗网！",
+  "background": "包拯任天长知县时，有农夫来告状，称自家耕牛舌头被人割掉。包拯断定是仇家所为，巧设计谋引出真凶。",
+  "stages": {
+    "report": {
+      "id": "report",
+      "name": "报案",
+      "dialogues": [
+        {
+          "speaker": "系统",
+          "speakerTitle": "旁白",
+          "content": "包拯初到天长县任知县，一日清晨，县衙外传来击鼓之声。",
+          "emotion": "narrator"
+        },
+        {
+          "speaker": "农夫",
+          "speakerTitle": "告状人",
+          "content": "青天大老爷！小民冤啊！昨夜不知何人将小民家的耕牛舌头割掉了！",
+          "emotion": "cry"
+        },
+        {
+          "speaker": "包拯",
+          "speakerTitle": "包青天",
+          "content": "耕牛被割舌？你且细细道来，家中可有仇人？",
+          "emotion": "serious"
+        },
+        {
+          "speaker": "农夫",
+          "speakerTitle": "告状人",
+          "content": "小民为人本分，从未与人结仇……只是前日有个叫刁三的来借钱，小民实在拿不出，便拒绝了他……",
+          "emotion": "fear"
+        },
+        {
+          "speaker": "包拯",
+          "speakerTitle": "包青天",
+          "content": "原来如此。你且回去，将那受伤的牛宰杀了，把肉分给乡邻。切记，不要声张报官之事。",
+          "emotion": "thinking"
+        },
+        {
+          "speaker": "农夫",
+          "speakerTitle": "告状人",
+          "content": "大人，这……这私杀耕牛可是违法的啊！",
+          "emotion": "confused"
+        },
+        {
+          "speaker": "包拯",
+          "speakerTitle": "包青天",
+          "content": "本官自有道理，你照办便是！",
+          "emotion": "serious"
+        }
+      ]
+    },
+    "investigation": {
+      "id": "investigation",
+      "name": "取证",
+      "scenes": [
+        {
+          "id": "farm",
+          "name": "农夫家",
+          "description": "农夫的家，院子里躺着一头舌头被割的耕牛，奄奄一息。",
+          "searchHints": ["检查牛舌伤口", "询问农夫", "查看现场痕迹"]
+        },
+        {
+          "id": "village",
+          "name": "村中",
+          "description": "小村庄里，村民们议论纷纷，都在谈论耕牛被割舌一事。",
+          "searchHints": ["询问村民", "寻找可疑人物", "调查刁三"]
+        }
+      ],
+      "evidences": [
+        {
+          "id": "ev_401",
+          "name": "牛舌伤口",
+          "icon": "bone",
+          "description": "耕牛舌头被锋利刀具割下，伤口整齐，是故意伤人。",
+          "sceneId": "farm",
+          "isKey": true,
+          "clue": "伤口整齐，说明是有人故意为之，绝非野兽所为。"
+        },
+        {
+          "id": "ev_402",
+          "name": "村民证词",
+          "icon": "witness",
+          "description": "村民证实刁三近日曾向农夫借钱被拒，怀恨在心。",
+          "sceneId": "village",
+          "isKey": true,
+          "clue": "刁三有作案动机，且案发后行踪可疑。"
+        },
+        {
+          "id": "ev_403",
+          "name": "现场脚印",
+          "icon": "wheel",
+          "description": "牛圈外发现一双可疑脚印，尺码较小，像是城里人穿的鞋。",
+          "sceneId": "farm",
+          "isKey": false,
+          "clue": "脚印与刁三家的鞋子尺码相符。"
+        },
+        {
+          "id": "ev_404",
+          "name": "屠牛刀具",
+          "icon": "knife",
+          "description": "在刁三家搜出一把带血的刀，血迹与牛血吻合。",
+          "sceneId": "village",
+          "isKey": true,
+          "clue": "刀具是作案凶器，血渍与耕牛血型一致。"
+        }
+      ]
+    },
+    "interrogation": {
+      "id": "interrogation",
+      "name": "审讯",
+      "suspects": [
+        {
+          "id": "sus_401",
+          "name": "刁三",
+          "role": "村民",
+          "description": "游手好闲之徒，曾向农夫借钱被拒，有重大嫌疑。",
+          "dialogues": [
+            {
+              "speaker": "刁三",
+              "speakerTitle": "嫌疑人",
+              "content": "大人！小民是来告状的！那农夫私杀耕牛，违反国法！",
+              "emotion": "defensive"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "刁三！你告他私杀耕牛，可你如何得知他杀牛？",
+              "emotion": "serious"
+            },
+            {
+              "speaker": "刁三",
+              "speakerTitle": "嫌疑人",
+              "content": "小……小民路过看到的……",
+              "emotion": "nervous"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "哦？你倒是消息灵通！那我问你，既然你这么关心国法，为何要割掉他家牛的舌头？",
+              "emotion": "angry"
+            },
+            {
+              "speaker": "刁三",
+              "speakerTitle": "嫌疑人",
+              "content": "我……我没有！",
+              "emotion": "panic"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "还敢狡辩！来人，将这把带血的刀呈上来！",
+              "emotion": "angry"
+            },
+            {
+              "speaker": "刁三",
+              "speakerTitle": "嫌疑人",
+              "content": "大人饶命！是小民一时糊涂……谁让他不肯借钱给我……",
+              "emotion": "surrender"
+            }
+          ],
+          "isGuilty": true
+        }
+      ]
+    },
+    "judgment": {
+      "id": "judgment",
+      "name": "断案",
+      "correctSuspectId": "sus_401",
+      "requiredEvidenceIds": ["ev_401", "ev_402", "ev_404"],
+      "judgmentText": {
+        "correct": "经查明，刁三因借钱被拒，怀恨在心，深夜潜入农夫家割掉耕牛舌头，企图让农夫家破人亡。后见农夫杀牛，又想借机告发陷害。其行为恶毒，心肠歹毒！判刁三杖责五十，赔偿农夫耕牛损失。此案彰显包拯明断是非、智计百出的断案才能！",
+        "wrong": "证据尚不足，请继续调查。",
+        "partial": "已掌握部分证据，但还需进一步查证。"
+      }
+    }
+  },
+  "hints": [
+    { "id": "hint_5_1", "content": "割牛舌者必是仇家，想让农夫私杀耕牛再告发他。", "cost": 1 },
+    { "id": "hint_5_2", "content": "让农夫杀牛是引蛇出洞之计，真凶定会来告状。", "cost": 1 },
+    { "id": "hint_5_3", "content": "凶器是关键，去刁三家搜查可能找到带血的刀。", "cost": 1 }
+  ]
+}

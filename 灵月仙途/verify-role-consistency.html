@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="css/mobile-adapt.css">
+  <title>角色一致性验证 - 灵月仙途</title>
+  <style>
+    body {
+      font-family: 'Microsoft YaHei', sans-serif;
+      background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      padding: 20px;
+    }
+    .container {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      padding: 30px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      max-width: 600px;
+      width: 100%;
+    }
+    h1 {
+      color: #f4d03f;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .result-box {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .result-title {
+      font-size: 1.2rem;
+      margin-bottom: 15px;
+      color: #aaa;
+    }
+    .result-status {
+      font-size: 2rem;
+      font-weight: bold;
+      padding: 10px 30px;
+      border-radius: 30px;
+      display: inline-block;
+      margin-bottom: 20px;
+    }
+    .status-pass {
+      background: linear-gradient(90deg, #4CAF50, #45a049);
+      color: white;
+    }
+    .status-fail {
+      background: linear-gradient(90deg, #f44336, #d32f2f);
+      color: white;
+    }
+    .info-list {
+      text-align: left;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 15px;
+    }
+    .info-item {
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      justify-content: space-between;
+    }
+    .info-item:last-child {
+      border-bottom: none;
+    }
+    .info-label {
+      color: #aaa;
+    }
+    .info-value {
+      color: #f4d03f;
+      font-family: monospace;
+    }
+    .btn {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(90deg, #f4d03f, #f1c40f);
+      border: none;
+      border-radius: 8px;
+      color: #333;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 10px;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(244, 208, 63, 0.4);
+    }
+    .btn-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .log-box {
+      background: #000;
+      border-radius: 8px;
+      padding: 15px;
+      max-height: 200px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 0.85rem;
+      color: #0f0;
+      margin-top: 20px;
+    }
+    .log-entry {
+      margin-bottom: 5px;
+    }
+    .log-error { color: #f44; }
+    .log-warn { color: #ff0; }
+    .log-info { color: #0f0; }
+  </style>
+
+  </head>
+<body>
+  <div class="container">
+    <h1>🎭 角色一致性验证</h1>
+    
+    <div class="result-box">
+      <div class="result-title">验证结果</div>
+      <div id="resultStatus" class="result-status status-fail">检测中...</div>
+      <div id="resultMessage" style="color: #aaa; margin-top: 15px;"></div>
+    </div>
+    
+    <div class="info-list" id="infoList">
+      <!-- 动态填充 -->
+    </div>
+    
+    <div class="btn-group">
+      <button class="btn" onclick="checkNow()">重新检查</button>
+      <button class="btn" onclick="fixNow()">立即修复</button>
+      <button class="btn" onclick="goToLogin()">去登录</button>
+      <button class="btn" onclick="refreshPage()">刷新页面</button>
+    </div>
+    
+    <div class="log-box" id="logBox">
+      <div class="log-entry log-info">验证工具已启动...</div>
+    </div>
+  </div>
+  
+  <script src="js/role-sync.js"></script>
+  <script>
+    const logBox = document.getElementById('logBox');
+    
+    function log(message, type = 'info') {
+      const entry = document.createElement('div');
+      entry.className = 'log-entry log-' + type;
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      logBox.appendChild(entry);
+      logBox.scrollTop = logBox.scrollHeight;
+      console.log(message);
+    }
+    
+    function checkNow() {
+      log('=== 开始检查角色一致性 ===', 'info');
+      
+      const currentRoleId = localStorage.getItem('currentRoleId');
+      const roleId = localStorage.getItem('roleId');
+      const selectedCharacterId = localStorage.getItem('selectedCharacterId');
+      const appConfigRoleId = window.APP_CONFIG ? window.APP_CONFIG.currentRoleId : null;
+      
+      // 显示所有值
+      const infoList = document.getElementById('infoList');
+      infoList.innerHTML = `
+        <div class="info-item">
+          <span class="info-label">currentRoleId</span>
+          <span class="info-value">${currentRoleId || '不存在'}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">roleId</span>
+          <span class="info-value">${roleId || '不存在'}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">selectedCharacterId</span>
+          <span class="info-value">${selectedCharacterId || '不存在'}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">APP_CONFIG.currentRoleId</span>
+          <span class="info-value">${appConfigRoleId || '不存在'}</span>
+        </div>
+      `;
+      
+      // 检查是否都存在
+      const values = [currentRoleId, roleId, selectedCharacterId].filter(v => v);
+      
+      if (values.length === 0) {
+        // 没有任何角色 ID
+        log('❌ 未检测到任何角色 ID', 'error');
+        showResult(false, '未设置角色 ID', '请先登录并选择角色');
+      } else {
+        // 检查是否一致
+        const allSame = values.every(v => v === values[0]);
+        
+        if (allSame) {
+          log(`✅ 所有角色 ID 一致：${values[0]}`, 'info');
+          showResult(true, '角色数据一致', `所有页面使用同一个角色 (ID: ${values[0]})`);
+        } else {
+          log('❌ 角色 ID 不一致', 'error');
+          showResult(false, '角色数据不一致', '不同页面使用了不同的角色 ID');
+        }
+      }
+    }
+    
+    function showResult(pass, title, message) {
+      const statusEl = document.getElementById('resultStatus');
+      const messageEl = document.getElementById('resultMessage');
+      
+      if (pass) {
+        statusEl.className = 'result-status status-pass';
+        statusEl.textContent = '✅ 通过';
+      } else {
+        statusEl.className = 'result-status status-fail';
+        statusEl.textContent = '❌ 失败';
+      }
+      
+      messageEl.innerHTML = `<strong>${title}</strong><br>${message}`;
+    }
+    
+    function fixNow() {
+      log('=== 开始修复角色同步 ===', 'info');
+      window.RoleSync.init();
+      
+      setTimeout(() => {
+        log('修复完成，重新检查...', 'info');
+        checkNow();
+      }, 500);
+    }
+    
+    function goToLogin() {
+      log('跳转到登录页面...', 'info');
+      window.location.href = 'login.html';
+    }
+    
+    function refreshPage() {
+      log('刷新页面...', 'info');
+      window.location.reload();
+    }
+    
+    // 页面加载时自动检查
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(checkNow, 500);
+    });
+  </script>
+</body>
+</html>

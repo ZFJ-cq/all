@@ -1,0 +1,218 @@
+{
+  "id": "case_010",
+  "title": "灰圈记",
+  "subtitle": "第十案",
+  "difficulty": 2,
+  "description": "富翁娶妾生子，正室与奸夫合谋毒杀亲夫，反诬小妾，包拯巧断夺子案！",
+  "background": "富翁马均卿娶妾张海棠，生有一子。马妻与赵令史合谋毒杀亲夫，反诬海棠，并欲夺其子为己子。包拯用石灰画圈辨真假母亲。",
+  "stages": {
+    "report": {
+      "id": "report",
+      "name": "报案",
+      "dialogues": [
+        {
+          "speaker": "系统",
+          "speakerTitle": "旁白",
+          "content": "富翁马均卿暴毙家中，其妻控告小妾张海棠毒杀亲夫，并声称孩子是自己所生。",
+          "emotion": "narrator"
+        },
+        {
+          "speaker": "马妻",
+          "speakerTitle": "报案人",
+          "content": "大人！这个贱人毒死了我的丈夫！还想抢走我的孩子！",
+          "emotion": "angry"
+        },
+        {
+          "speaker": "张海棠",
+          "speakerTitle": "嫌疑人",
+          "content": "大人冤枉！民妇没有下毒！孩子是我十月怀胎所生！",
+          "emotion": "cry"
+        },
+        {
+          "speaker": "包拯",
+          "speakerTitle": "包青天",
+          "content": "来人，带仵作验尸！此事本官定会查明真相！",
+          "emotion": "serious"
+        }
+      ]
+    },
+    "investigation": {
+      "id": "investigation",
+      "name": "取证",
+      "scenes": [
+        {
+          "id": "ma_house",
+          "name": "马府",
+          "description": "马均卿的府邸，命案发生地。",
+          "searchHints": ["检查尸体", "寻找毒药", "询问家人"]
+        },
+        {
+          "id": "market",
+          "name": "街市",
+          "description": "城中药店和市场，可能找到购买毒药的线索。",
+          "searchHints": ["询问药铺", "查找买主", "寻找证据"]
+        }
+      ],
+      "evidences": [
+        {
+          "id": "ev_901",
+          "name": "尸体检验",
+          "icon": "bone",
+          "description": "仵作验尸发现马均卿是被砒霜毒死。",
+          "sceneId": "ma_house",
+          "isKey": true,
+          "clue": "死者是被毒杀，非自然死亡。"
+        },
+        {
+          "id": "ev_902",
+          "name": "药店证词",
+          "icon": "witness",
+          "description": "药铺老板证实赵令史曾购买砒霜。",
+          "sceneId": "market",
+          "isKey": true,
+          "clue": "赵令史有重大嫌疑。"
+        },
+        {
+          "id": "ev_903",
+          "name": "情书",
+          "icon": "note",
+          "description": "在马妻房间找到的情书，是赵令史写给马妻的。",
+          "sceneId": "ma_house",
+          "isKey": true,
+          "clue": "马妻与赵令史有奸情，有作案动机。"
+        },
+        {
+          "id": "ev_904",
+          "name": "灰圈试验",
+          "icon": "grain",
+          "description": "包拯用石灰画圈，让两妇人争夺孩子，张海棠不忍伤害孩子。",
+          "sceneId": "ma_house",
+          "isKey": true,
+          "clue": "张海棠是孩子的亲生母亲。"
+        }
+      ]
+    },
+    "interrogation": {
+      "id": "interrogation",
+      "name": "审讯",
+      "suspects": [
+        {
+          "id": "sus_901",
+          "name": "马妻",
+          "role": "正室",
+          "description": "马均卿的正妻，与赵令史有奸情，毒杀亲夫。",
+          "dialogues": [
+            {
+              "speaker": "马妻",
+              "speakerTitle": "嫌疑人",
+              "content": "大人！海棠她……她毒死了老爷！",
+              "emotion": "defensive"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "哦？那这封情书是怎么回事？你与赵令史有奸情！",
+              "emotion": "angry"
+            },
+            {
+              "speaker": "马妻",
+              "speakerTitle": "嫌疑人",
+              "content": "我……我没有……",
+              "emotion": "panic"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "还敢狡辩！药铺老板已经证实是赵令史买的砒霜！",
+              "emotion": "angry"
+            },
+            {
+              "speaker": "马妻",
+              "speakerTitle": "嫌疑人",
+              "content": "是……是赵令史让我做的……",
+              "emotion": "surrender"
+            }
+          ],
+          "isGuilty": true
+        },
+        {
+          "id": "sus_902",
+          "name": "赵令史",
+          "role": "文书",
+          "description": "县衙文书，与马妻私通，合谋毒杀马均卿。",
+          "dialogues": [
+            {
+              "speaker": "赵令史",
+              "speakerTitle": "嫌疑人",
+              "content": "大人，小民冤枉！",
+              "emotion": "fear"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "冤枉？你买砒霜做什么？",
+              "emotion": "serious"
+            },
+            {
+              "speaker": "赵令史",
+              "speakerTitle": "嫌疑人",
+              "content": "我……我只是……",
+              "emotion": "nervous"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "你与马妻合谋毒杀亲夫，还想夺子！证据确凿！",
+              "emotion": "angry"
+            },
+            {
+              "speaker": "赵令史",
+              "speakerTitle": "嫌疑人",
+              "content": "大人饶命！是马妻勾引我的……",
+              "emotion": "surrender"
+            }
+          ],
+          "isGuilty": true
+        },
+        {
+          "id": "sus_903",
+          "name": "张海棠",
+          "role": "小妾",
+          "description": "马均卿的小妾，孩子的亲生母亲，被诬陷。",
+          "dialogues": [
+            {
+              "speaker": "张海棠",
+              "speakerTitle": "嫌疑人",
+              "content": "大人，孩子真的是我的……我怎么舍得伤害他……",
+              "emotion": "cry"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "本官相信你，你的母爱已经证明了一切。",
+              "emotion": "kind"
+            }
+          ],
+          "isGuilty": false,
+          "hint": "张海棠是被冤枉的，是孩子的亲生母亲"
+        }
+      ]
+    },
+    "judgment": {
+      "id": "judgment",
+      "name": "断案",
+      "correctSuspectId": "sus_901",
+      "requiredEvidenceIds": ["ev_901", "ev_902", "ev_903", "ev_904"],
+      "judgmentText": {
+        "correct": "经查明，马妻与赵令史通奸，合谋用砒霜毒杀马均卿，反诬小妾张海棠。包拯巧用灰圈试验，让两妇人争夺孩子，张海棠因不忍伤害孩子而松手，证明她是孩子的亲生母亲。判马妻凌迟处死，赵令史斩立决！张海棠无罪释放，孩子归其抚养。此案彰显包拯明断是非的智慧！",
+        "wrong": "证据不足，请继续调查。",
+        "partial": "已掌握部分证据，但还需进一步查证。"
+      }
+    }
+  },
+  "hints": [
+    { "id": "hint_10_1", "content": "检查毒药来源，可能有人购买砒霜。", "cost": 1 },
+    { "id": "hint_10_2", "content": "观察两妇人对孩子的态度，真母会更心疼孩子。", "cost": 1 },
+    { "id": "hint_10_3", "content": "调查马妻的人际关系，可能有奸情。", "cost": 1 }
+  ]
+}

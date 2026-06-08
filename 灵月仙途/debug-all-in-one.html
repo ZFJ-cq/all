@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="css/mobile-adapt.css">
+  <title>综合调试工具 - 灵月仙途</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+      color: #fff;
+      font-family: 'Microsoft YaHei', sans-serif;
+      padding: 20px;
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    
+    h1 {
+      color: #f4d03f;
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 2rem;
+      text-shadow: 0 0 20px rgba(244, 208, 63, 0.5);
+    }
+    
+    .section {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      padding: 20px;
+      margin: 20px 0;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+    
+    .section h2 {
+      color: #f4d03f;
+      margin-bottom: 15px;
+      font-size: 1.3rem;
+      border-bottom: 2px solid rgba(244, 208, 63, 0.3);
+      padding-bottom: 10px;
+    }
+    
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 10px;
+      margin: 15px 0;
+    }
+    
+    .status-item {
+      padding: 12px;
+      background: rgba(0, 0, 0, 0.3);
+      border-left: 3px solid #f4d03f;
+      border-radius: 5px;
+      font-size: 0.9rem;
+    }
+    
+    .status-item.success {
+      border-left-color: #4CAF50;
+      background: rgba(76, 175, 80, 0.1);
+    }
+    
+    .status-item.error {
+      border-left-color: #ff4444;
+      background: rgba(255, 68, 68, 0.1);
+    }
+    
+    .status-item.warning {
+      border-left-color: #FF9800;
+      background: rgba(255, 152, 0, 0.1);
+    }
+    
+    button {
+      background: linear-gradient(90deg, #f4d03f, #f1c40f);
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      color: #1a1a2e;
+      font-weight: bold;
+      cursor: pointer;
+      margin: 5px;
+      transition: all 0.3s ease;
+      font-size: 0.95rem;
+    }
+    
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(244, 208, 63, 0.4);
+    }
+    
+    button:active {
+      transform: translateY(0);
+    }
+    
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .log-container {
+      background: rgba(0, 0, 0, 0.6);
+      padding: 15px;
+      border-radius: 8px;
+      max-height: 400px;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 0.85rem;
+      border: 1px solid rgba(244, 208, 63, 0.2);
+    }
+    
+    .log-entry {
+      margin: 5px 0;
+      padding: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    
+    .log-entry:last-child {
+      border-bottom: none;
+    }
+    
+    .log-time {
+      color: #888;
+      font-size: 0.75rem;
+      white-space: nowrap;
+    }
+    
+    .log-message {
+      flex: 1;
+    }
+    
+    .log-error { color: #ff6b6b; }
+    .log-success { color: #51cf66; }
+    .log-warning { color: #ffd43b; }
+    .log-info { color: #74c0fc; }
+    
+    .action-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    
+    .data-preview {
+      background: rgba(0, 0, 0, 0.5);
+      padding: 15px;
+      border-radius: 8px;
+      margin: 10px 0;
+      max-height: 300px;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 0.8rem;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    
+    .progress-container {
+      margin: 15px 0;
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 25px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(244, 208, 63, 0.3);
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #f4d03f, #f1c40f);
+      transition: width 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #1a1a2e;
+      font-weight: bold;
+      font-size: 0.85rem;
+    }
+    
+    .tab-container {
+      margin: 20px 0;
+    }
+    
+    .tab-buttons {
+      display: flex;
+      gap: 5px;
+      border-bottom: 2px solid rgba(244, 208, 63, 0.3);
+    }
+    
+    .tab-button {
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px 8px 0 0;
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .tab-button.active {
+      background: linear-gradient(90deg, #f4d03f, #f1c40f);
+      color: #1a1a2e;
+    }
+    
+    .tab-content {
+      display: none;
+      padding: 20px 0;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    .api-test-result {
+      background: rgba(0, 0, 0, 0.5);
+      padding: 15px;
+      border-radius: 8px;
+      margin: 10px 0;
+      font-family: 'Courier New', monospace;
+      font-size: 0.85rem;
+      border: 1px solid rgba(244, 208, 63, 0.2);
+    }
+  </style>
+
+  </head>
+<body>
+  <div class="container">
+    <h1>🔧 灵月仙途 - 综合调试工具</h1>
+    
+    <div class="tab-container">
+      <div class="tab-buttons">
+        <button class="tab-button active" onclick="switchTab('storage')">存储状态</button>
+        <button class="tab-button" onclick="switchTab('token')">Token 诊断</button>
+        <button class="tab-button" onclick="switchTab('role')">角色数据</button>
+        <button class="tab-button" onclick="switchTab('api')">API 测试</button>
+      </div>
+      
+      <!-- 存储状态标签页 -->
+      <div id="storage-tab" class="tab-content active">
+        <div class="section">
+          <h2>📊 localStorage 存储状态</h2>
+          <div class="status-grid" id="storageStatus"></div>
+          <button onclick="checkStorage()">🔄 刷新状态</button>
+        </div>
+      </div>
+      
+      <!-- Token 诊断标签页 -->
+      <div id="token-tab" class="tab-content">
+        <div class="section">
+          <h2>🔍 Token 诊断</h2>
+          <div id="tokenDiagnosis"></div>
+          <button onclick="diagnoseToken()">🔬 运行诊断</button>
+          <div class="action-buttons">
+            <button onclick="fixToken()">🔧 修复 Token</button>
+            <button onclick="syncTokenData()">🔄 同步数据</button>
+            <button onclick="clearTokenData()">🗑️ 清除 Token</button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 角色数据标签页 -->
+      <div id="role-tab" class="tab-content">
+        <div class="section">
+          <h2>👤 角色数据</h2>
+          <button onclick="loadRoleData()">📥 加载角色数据</button>
+          <button onclick="fixRoleData()">🔧 修复角色数据</button>
+          <div id="roleDataDisplay" class="data-preview" style="display: none;"></div>
+        </div>
+      </div>
+      
+      <!-- API 测试标签页 -->
+      <div id="api-tab" class="tab-content">
+        <div class="section">
+          <h2>🌐 API 接口测试</h2>
+          <div class="action-buttons">
+            <button onclick="testGetRole()">测试获取角色列表</button>
+            <button onclick="testGetRoleAsset()">测试获取角色资产</button>
+            <button onclick="testAuthHeader()">测试认证头</button>
+          </div>
+          <div id="apiTestResult" class="api-test-result" style="display: none;"></div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2>📝 实时日志</h2>
+      <div class="log-container" id="logContainer"></div>
+    </div>
+  </div>
+  
+  <script src="js/config.js"></script>
+  <script src="js/token-manager.js"></script>
+  <script src="js/auth-manager.js"></script>
+  <script src="js/token-sync.js"></script>
+  <script src="js/api-service.js"></script>
+  
+  <script>
+    const logContainer = document.getElementById('logContainer');
+    let logCount = 0;
+    
+    // 日志函数
+    function log(message, type = 'info') {
+      logCount++;
+      const now = new Date();
+      const time = now.toLocaleTimeString();
+      
+      const div = document.createElement('div');
+      div.className = 'log-entry';
+      
+      const timeSpan = document.createElement('span');
+      timeSpan.className = 'log-time';
+      timeSpan.textContent = `[${time}]`;
+      
+      const msgSpan = document.createElement('span');
+      msgSpan.className = `log-message log-${type}`;
+      msgSpan.textContent = ` ${message}`;
+      
+      div.appendChild(timeSpan);
+      div.appendChild(msgSpan);
+      logContainer.appendChild(div);
+      
+      // 自动滚动到底部
+      logContainer.scrollTop = logContainer.scrollHeight;
+      
+      // 同时输出到控制台
+      console.log(`[DebugTool] ${message}`);
+    }
+    
+    // 切换标签页
+    function switchTab(tabName) {
+      // 移除所有激活状态
+      document.querySelectorAll('.tab-button').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+      
+      // 添加激活状态
+      document.querySelector(`.tab-button:nth-child(${getTabIndex(tabName)})`).classList.add('active');
+      document.getElementById(`${tabName}-tab`).classList.add('active');
+      
+      log(`切换到 ${tabName} 标签页`, 'info');
+    }
+    
+    function getTabIndex(tabName) {
+      const tabs = ['storage', 'token', 'role', 'api'];
+      return tabs.indexOf(tabName) + 1;
+    }
+    
+    // 检查存储状态
+    function checkStorage() {
+      log('开始检查存储状态...', 'info');
+      const statusDiv = document.getElementById('storageStatus');
+      
+      const items = {
+        'token': localStorage.getItem('token'),
+        'userId': localStorage.getItem('userId'),
+        'roleId': localStorage.getItem('roleId'),
+        'currentRoleId': localStorage.getItem('currentRoleId'),
+        'selectedCharacterId': localStorage.getItem('selectedCharacterId'),
+        'username': localStorage.getItem('username'),
+        'token_backup': localStorage.getItem('_token_backup_'),
+        'adminSession': localStorage.getItem('adminSession')
+      };
+      
+      let html = '';
+      for (const [key, value] of Object.entries(items)) {
+        const status = value ? 'success' : 'warning';
+        const displayValue = value ? 
+          (value.length > 50 ? value.substring(0, 50) + '...' : value) : 
+          '不存在';
+        html += `<div class="status-item ${status}">
+          <strong>${key}:</strong> ${displayValue}
+        </div>`;
+      }
+      
+      statusDiv.innerHTML = html;
+      log('存储状态检查完成', 'success');
+    }
+    
+    // Token 诊断
+    function diagnoseToken() {
+      log('开始 Token 诊断...', 'info');
+      const diagnosisDiv = document.getElementById('tokenDiagnosis');
+      
+      const token = localStorage.getItem('token');
+      const userId = localStorage.getItem('userId');
+      const roleId = localStorage.getItem('roleId');
+      const currentRoleId = localStorage.getItem('currentRoleId');
+      const backup = localStorage.getItem('_token_backup_');
+      const authManagerToken = window.AuthManager ? window.AuthManager.getToken() : null;
+      
+      const issues = [];
+      
+      // 检查 1: Token 是否存在
+      if (!token) {
+        issues.push({ type: 'error', message: '主 Token 不存在' });
+      }
+      
+      // 检查 2: userId 是否存在
+      if (!userId) {
+        issues.push({ type: 'warning', message: 'userId 不存在' });
+      }
+      
+      // 检查 3: 角色 ID 是否一致
+      const roleIds = [roleId, currentRoleId, selectedCharacterId].filter(id => id);
+      if (roleIds.length > 0) {
+        const uniqueIds = [...new Set(roleIds)];
+        if (uniqueIds.length > 1) {
+          issues.push({ 
+            type: 'warning', 
+            message: `角色 ID 不一致：${uniqueIds.join(', ')}` 
+          });
+        }
+      }
+      
+      // 检查 4: 数据完整性
+      if (!token && (userId || roleId)) {
+        issues.push({ 
+          type: 'error', 
+          message: '数据不一致：有 userId/roleId 但没有 Token' 
+        });
+      }
+      
+      // 检查 5: AuthManager Token
+      if (!token && authManagerToken) {
+        issues.push({ 
+          type: 'warning', 
+          message: 'Token 存在于 AuthManager 但不在 localStorage' 
+        });
+      }
+      
+      // 显示诊断结果
+      if (issues.length === 0) {
+        diagnosisDiv.innerHTML = '<div class="status-item success">✅ 未发现问题，Token 完整且一致</div>';
+        log('诊断完成：Token 状态良好', 'success');
+      } else {
+        let html = '';
+        issues.forEach((issue, index) => {
+          html += `<div class="status-item ${issue.type}">
+            ${index + 1}. ${issue.message}
+          </div>`;
+          log(`诊断发现：${issue.message}`, issue.type === 'error' ? 'error' : 'warning');
+        });
+        diagnosisDiv.innerHTML = html;
+      }
+    }
+    
+    // 修复 Token
+    function fixToken() {
+      log('开始修复 Token...', 'info');
+      
+      const token = localStorage.getItem('token');
+      
+      if (token) {
+        log('Token 已存在，无需修复', 'success');
+        return;
+      }
+      
+      // 尝试从备份恢复
+      const backup = localStorage.getItem('_token_backup_');
+      if (backup) {
+        try {
+          const backupData = JSON.parse(backup);
+          if (backupData.token) {
+            localStorage.setItem('token', backupData.token);
+            if (backupData.userId) localStorage.setItem('userId', backupData.userId);
+            if (backupData.roleId) localStorage.setItem('roleId', backupData.roleId);
+            log('从备份恢复 Token 成功', 'success');
+            checkStorage();
+            return;
+          }
+        } catch (e) {
+          log('备份数据解析失败：' + e.message, 'error');
+        }
+      }
+      
+      // 尝试从 AuthManager 恢复
+      if (window.AuthManager) {
+        const authToken = window.AuthManager.getToken();
+        if (authToken) {
+          localStorage.setItem('token', authToken);
+          log('从 AuthManager 恢复 Token 成功', 'success');
+          checkStorage();
+          return;
+        }
+      }
+      
+      log('无法恢复 Token，建议重新登录', 'error');
+    }
+    
+    // 同步 Token 数据
+    function syncTokenData() {
+      log('开始同步 Token 数据...', 'info');
+      
+      if (window.TokenSync) {
+        window.TokenSync.sync();
+        log('使用 TokenSync 同步完成', 'success');
+      } else {
+        const token = localStorage.getItem('token');
+        const userId = localStorage.getItem('userId');
+        const roleId = localStorage.getItem('roleId') || localStorage.getItem('currentRoleId');
+        
+        if (token && userId) {
+          localStorage.setItem('roleId', roleId || '');
+          localStorage.setItem('currentRoleId', roleId || '');
+          localStorage.setItem('selectedCharacterId', roleId || '');
+          log('手动同步完成', 'success');
+        } else {
+          log('没有足够的数据进行同步', 'warning');
+        }
+      }
+      
+      checkStorage();
+    }
+    
+    // 清除 Token 数据
+    function clearTokenData() {
+      if (confirm('确定要清除所有 Token 相关数据吗？此操作不可恢复！')) {
+        log('清除 Token 数据...', 'warning');
+        localStorage.removeItem('token');
+        localStorage.removeItem('userId');
+        localStorage.removeItem('roleId');
+        localStorage.removeItem('currentRoleId');
+        localStorage.removeItem('selectedCharacterId');
+        localStorage.removeItem('username');
+        localStorage.removeItem('_token_backup_');
+        log('Token 数据已清除', 'success');
+        checkStorage();
+      }
+    }
+    
+    // 加载角色数据
+    async function loadRoleData() {
+      log('开始加载角色数据...', 'info');
+      const displayDiv = document.getElementById('roleDataDisplay');
+      displayDiv.style.display = 'block';
+      displayDiv.textContent = '加载中...';
+      
+      try {
+        const userId = localStorage.getItem('userId');
+        if (!userId) {
+          throw new Error('userId 不存在');
+        }
+        
+        log(`获取用户 ${userId} 的角色列表`, 'info');
+        const roles = await window.apiService.getRole(userId);
+        
+        if (roles && Array.isArray(roles)) {
+          displayDiv.textContent = `角色数量：${roles.length}\n\n${JSON.stringify(roles, null, 2)}`;
+          log(`成功加载 ${roles.length} 个角色`, 'success');
+        } else {
+          displayDiv.textContent = '未找到角色数据';
+          log('未找到角色数据', 'warning');
+        }
+      } catch (error) {
+        displayDiv.textContent = `加载失败：${error.message}`;
+        log(`加载角色数据失败：${error.message}`, 'error');
+      }
+    }
+    
+    // 修复角色数据
+    function fixRoleData() {
+      log('开始修复角色数据...', 'info');
+      
+      const roleId = localStorage.getItem('roleId');
+      const currentRoleId = localStorage.getItem('currentRoleId');
+      const selectedCharacterId = localStorage.getItem('selectedCharacterId');
+      
+      const roleIds = [roleId, currentRoleId, selectedCharacterId].filter(id => id);
+      
+      if (roleIds.length === 0) {
+        log('没有角色 ID 可修复', 'warning');
+        return;
+      }
+      
+      // 使用第一个有效的 ID
+      const targetId = roleIds[0];
+      log(`统一使用角色 ID: ${targetId}`, 'info');
+      
+      localStorage.setItem('roleId', targetId);
+      localStorage.setItem('currentRoleId', targetId);
+      localStorage.setItem('selectedCharacterId', targetId);
+      
+      if (window.APP_CONFIG) {
+        window.APP_CONFIG.currentRoleId = targetId;
+      }
+      
+      log('角色数据已修复', 'success');
+      checkStorage();
+    }
+    
+    // API 测试
+    async function testGetRole() {
+      log('测试获取角色列表 API...', 'info');
+      const resultDiv = document.getElementById('apiTestResult');
+      resultDiv.style.display = 'block';
+      resultDiv.textContent = '测试中...';
+      
+      try {
+        const userId = localStorage.getItem('userId');
+        if (!userId) {
+          throw new Error('userId 不存在');
+        }
+        
+        log(`请求：GET /role/user/${userId}`, 'info');
+        const roles = await window.apiService.getRole(userId);
+        
+        resultDiv.textContent = `✅ 成功\n\n角色数量：${roles ? roles.length : 0}\n\n${JSON.stringify(roles, null, 2)}`;
+        log(`获取角色列表成功：${roles ? roles.length : 0} 个角色`, 'success');
+      } catch (error) {
+        resultDiv.textContent = `❌ 失败\n\n错误信息：${error.message}`;
+        log(`获取角色列表失败：${error.message}`, 'error');
+      }
+    }
+    
+    async function testGetRoleAsset() {
+      log('测试获取角色资产 API...', 'info');
+      const resultDiv = document.getElementById('apiTestResult');
+      resultDiv.style.display = 'block';
+      resultDiv.textContent = '测试中...';
+      
+      try {
+        const roleId = localStorage.getItem('roleId') || localStorage.getItem('currentRoleId');
+        if (!roleId) {
+          throw new Error('roleId 不存在');
+        }
+        
+        log(`请求：GET /role-asset/${roleId}`, 'info');
+        const assets = await window.apiService.getAssets(roleId);
+        
+        resultDiv.textContent = `✅ 成功\n\n资产数量：${assets ? assets.length : 0}\n\n${JSON.stringify(assets, null, 2)}`;
+        log(`获取角色资产成功：${assets ? assets.length : 0} 个资产`, 'success');
+      } catch (error) {
+        resultDiv.textContent = `❌ 失败\n\n错误信息：${error.message}`;
+        log(`获取角色资产失败：${error.message}`, 'error');
+      }
+    }
+    
+    function testAuthHeader() {
+      log('测试认证头...', 'info');
+      const resultDiv = document.getElementById('apiTestResult');
+      resultDiv.style.display = 'block';
+      
+      const token = localStorage.getItem('token');
+      const userId = localStorage.getItem('userId');
+      const roleId = localStorage.getItem('roleId') || localStorage.getItem('currentRoleId');
+      
+      let result = '认证头信息:\n\n';
+      result += `Token: ${token ? '存在 ✓' : '不存在 ✗'}\n`;
+      result += `userId: ${userId || '不存在'}\n`;
+      result += `roleId: ${roleId || '不存在'}\n`;
+      
+      if (token) {
+        result += `\nAuthorization Header:\nBearer ${token.substring(0, 50)}...`;
+      }
+      
+      resultDiv.textContent = result;
+      log('认证头检查完成', 'success');
+    }
+    
+    // 页面加载时自动执行
+    window.addEventListener('load', () => {
+      log('调试工具已加载', 'success');
+      checkStorage();
+      
+      // 延迟自动诊断
+      setTimeout(() => {
+        diagnoseToken();
+      }, 500);
+    });
+  </script>
+</body>
+</html>

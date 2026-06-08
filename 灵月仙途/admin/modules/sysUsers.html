@@ -1,0 +1,840 @@
+<div class="section active">
+  <div class="status-message" id="sysUserMessage"></div>
+  <div style="margin-bottom: 15px;">
+    <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+      <h2 class="section-title">系统用户</h2>
+      <div style="display: flex; gap: 10px;">
+        <div id="batchActions" style="display: none;">
+          <button class="btn btn-danger" onclick="window.batchDeleteSysUsers()">批量删除</button>
+          <button class="btn btn-secondary" onclick="window.batchEnableSysUsers()">批量启用</button>
+          <button class="btn btn-secondary" onclick="window.batchDisableSysUsers()">批量禁用</button>
+        </div>
+        <div style="display: flex; gap: 5px;">
+          <button class="btn btn-success" onclick="window.exportUsers('csv')">导出CSV</button>
+          <button class="btn btn-success" onclick="window.exportUsers('excel')">导出Excel</button>
+        </div>
+        <button class="btn btn-primary" onclick="window.openAddSysUserModal()">新增管理员</button>
+      </div>
+    </div>
+    
+    <!-- 筛选和搜索选项 -->
+    <div style="display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap;">
+      <div class="form-group" style="flex: 1; min-width: 200px;">
+        <label>搜索</label>
+        <input type="text" id="userSearch" placeholder="输入账号或昵称" onkeyup="if(event.key === 'Enter') window.searchUsers()">
+      </div>
+      <div class="form-group" style="flex: 1; min-width: 150px;">
+        <label>状态</label>
+        <select id="userStatusFilter" onchange="window.filterUsers()">
+          <option value="">全部</option>
+          <option value="1">启用</option>
+          <option value="0">禁用</option>
+        </select>
+      </div>
+      <div class="form-group" style="flex: 1; min-width: 150px;">
+        <label>角色</label>
+        <select id="userRoleFilter" onchange="window.filterUsers()">
+          <option value="">全部</option>
+          <!-- 动态加载角色 -->
+        </select>
+      </div>
+      <div style="display: flex; align-items: flex-end; gap: 10px;">
+        <button class="btn btn-primary" onclick="window.searchUsers()">搜索</button>
+        <button class="btn btn-secondary" onclick="window.resetFilters()">重置</button>
+      </div>
+    </div>
+  </div>
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th><input type="checkbox" id="selectAllUsers" onchange="window.toggleSelectAllUsers(this)"></th>
+        <th>ID</th>
+        <th>账号</th>
+        <th>昵称</th>
+        <th>角色</th>
+        <th>状态</th>
+        <th>最后登录</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody id="sysUserTableBody">
+      <!-- JS 生成 -->
+    </tbody>
+  </table>
+  
+  <!-- 分页控件 -->
+  <div class="pagination-container" id="userPagination">
+    <div class="pagination-info">
+      共 <span id="totalUsers">0</span> 条记录，每页显示 <select id="pageSize" onchange="window.changePageSize(this.value)">
+        <option value="10">10</option>
+        <option value="20">20</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+      </select> 条
+    </div>
+    <div class="pagination-controls">
+      <button class="btn btn-secondary" id="firstPage" onclick="window.goToPage(1)">首页</button>
+      <button class="btn btn-secondary" id="prevPage" onclick="window.goToPage(window.currentPage - 1)">上一页</button>
+      <span class="pagination-info-text">第 <span id="currentPage">1</span> / <span id="totalPages">1</span> 页</span>
+      <button class="btn btn-secondary" id="nextPage" onclick="window.goToPage(window.currentPage + 1)">下一页</button>
+      <button class="btn btn-secondary" id="lastPage" onclick="window.goToPage(window.totalPages)">末页</button>
+    </div>
+  </div>
+</div>
+
+<!-- 新增/编辑系统用户模态框 -->
+<div id="sysUserModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="sysUserModalTitle">新增系统用户</h3>
+      <span class="close" onclick="closeModal()">&times;</span>
+    </div>
+    <form id="sysUserForm">
+      <input type="hidden" id="sysUserId">
+      <div class="form-group">
+        <label>账号</label>
+        <input type="text" id="sysUserUsername" required minlength="3" maxlength="20">
+        <div class="form-error" id="sysUserUsernameError"></div>
+      </div>
+      <div class="form-group">
+        <label>密码</label>
+        <input type="password" id="sysUserPassword" minlength="6">
+        <div class="form-error" id="sysUserPasswordError"></div>
+      </div>
+      <div class="form-group">
+        <label>昵称</label>
+        <input type="text" id="sysUserNickname" required minlength="2" maxlength="30">
+        <div class="form-error" id="sysUserNicknameError"></div>
+      </div>
+      <div class="form-group">
+        <label>手机号</label>
+        <input type="tel" id="sysUserPhone" pattern="1[3-9]\d{9}">
+        <div class="form-error" id="sysUserPhoneError"></div>
+      </div>
+      <div class="form-group">
+        <label>状态</label>
+        <select id="sysUserStatus" required>
+          <option value="1">启用</option>
+          <option value="0">禁用</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>角色</label>
+        <select id="sysUserRole" multiple style="height: 100px;">
+          <!-- 动态加载角色 -->
+        </select>
+      </div>
+      <div style="text-align: right; margin-top: 20px;">
+        <button type="button" class="btn btn-secondary" onclick="closeModal()">取消</button>
+        <button type="submit" class="btn btn-primary">保存</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  window.initSysUsers = async function() {
+    try {
+      // 先加载角色数据，再加载用户数据
+      await loadRoles();
+      await loadSysUsers();
+      bindSysUserFormEvents();
+    } catch (error) {
+      console.error('初始化系统用户管理失败:', error);
+      showMessage('sysUserMessage', '初始化失败: ' + (error.message || '未知错误'), 'error');
+    }
+  };
+
+  let roles = [];
+  let allUsers = [];
+  let currentPage = 1;
+  let pageSize = 10;
+  let totalUsers = 0;
+  let totalPages = 1;
+
+  async function loadSysUsers() {
+    const tableBody = document.getElementById('sysUserTableBody');
+    tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#999;">加载中...</td></tr>';
+    
+    try {
+      const sysUsers = await apiService.get('/sys/user');
+      
+      // 处理API返回的数据格式
+      let usersData = sysUsers;
+      if (sysUsers && sysUsers.data) {
+        usersData = sysUsers.data;
+      }
+      
+      allUsers = usersData || [];
+      totalUsers = allUsers.length;
+      totalPages = Math.ceil(totalUsers / pageSize);
+      
+      updatePagination();
+      renderUsersPage();
+    } catch (error) {
+      console.error('加载系统用户列表失败:', error);
+      tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#e74c3c;">加载失败: ' + (error.message || '未知错误') + '</td></tr>';
+    }
+  }
+
+  function renderUsersPage() {
+    const tableBody = document.getElementById('sysUserTableBody');
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    const pageUsers = allUsers.slice(startIndex, endIndex);
+    
+    tableBody.innerHTML = '';
+    if (pageUsers.length > 0) {
+      pageUsers.forEach(user => {
+        // 查找用户的角色名称
+        let roleName = '-';
+        if (user.roleId) {
+          const role = roles.find(r => r.id == user.roleId);
+          if (role) {
+            roleName = role.roleName || role.name || '-';
+          }
+        } else if (user.role) {
+          roleName = user.role;
+        }
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td><input type="checkbox" class="user-checkbox" value="${user.id}" onchange="updateBatchActions()"></td>
+          <td>${user.id}</td>
+          <td>${user.username}</td>
+          <td>${user.nickname}</td>
+          <td>${roleName}</td>
+          <td>${user.status === 1 ? '启用' : '禁用'}</td>
+          <td>${user.lastLogin || '-'}</td>
+          <td>
+            <button class="btn btn-primary" onclick="window.editSysUser(${user.id})">编辑</button>
+            <button class="btn btn-danger" onclick="window.deleteSysUser(${user.id})">删除</button>
+            <button class="btn btn-info" onclick="window.assignRolesToUser(${user.id})">分配角色</button>
+          </td>
+        `;
+        tableBody.appendChild(row);
+      });
+    } else {
+      tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#999;">暂无数据</td></tr>';
+    }
+  }
+
+  function updatePagination() {
+    document.getElementById('totalUsers').textContent = totalUsers;
+    document.getElementById('currentPage').textContent = currentPage;
+    document.getElementById('totalPages').textContent = totalPages;
+    
+    // 更新分页按钮状态
+    document.getElementById('firstPage').disabled = currentPage === 1;
+    document.getElementById('prevPage').disabled = currentPage === 1;
+    document.getElementById('nextPage').disabled = currentPage === totalPages;
+    document.getElementById('lastPage').disabled = currentPage === totalPages;
+    
+    // 更新每页显示数量
+    document.getElementById('pageSize').value = pageSize;
+  }
+
+  window.changePageSize = function(size) {
+    pageSize = parseInt(size);
+    currentPage = 1;
+    totalPages = Math.ceil(totalUsers / pageSize);
+    updatePagination();
+    renderUsersPage();
+  };
+
+  window.goToPage = function(page) {
+    if (page >= 1 && page <= totalPages) {
+      currentPage = page;
+      updatePagination();
+      renderUsersPage();
+    }
+  };
+
+  window.toggleSelectAllUsers = function(checkbox) {
+    const checkboxes = document.querySelectorAll('.user-checkbox');
+    checkboxes.forEach(cb => {
+      cb.checked = checkbox.checked;
+    });
+    updateBatchActions();
+  };
+
+  window.updateBatchActions = function() {
+    const checkboxes = document.querySelectorAll('.user-checkbox:checked');
+    const batchActions = document.getElementById('batchActions');
+    batchActions.style.display = checkboxes.length > 0 ? 'inline-block' : 'none';
+  };
+
+  window.batchDeleteSysUsers = async function() {
+    const selectedIds = getSelectedUserIds();
+    if (selectedIds.length === 0) {
+      showMessage('sysUserMessage', '请选择要删除的用户', 'error');
+      return;
+    }
+    
+    if (confirm(`确定要删除选中的 ${selectedIds.length} 个用户吗？`)) {
+      try {
+        const deletePromises = selectedIds.map(id => apiService.delete(`/sys/user/${id}`));
+        await Promise.all(deletePromises);
+        showMessage('sysUserMessage', '批量删除成功', 'success');
+        loadSysUsers();
+      } catch (error) {
+        console.error('批量删除失败:', error);
+        showMessage('sysUserMessage', '批量删除失败', 'error');
+      }
+    }
+  };
+
+  window.batchEnableSysUsers = async function() {
+    const selectedIds = getSelectedUserIds();
+    if (selectedIds.length === 0) {
+      showMessage('sysUserMessage', '请选择要启用的用户', 'error');
+      return;
+    }
+    
+    try {
+      const updatePromises = selectedIds.map(id => apiService.put(`/sys/user/${id}`, { status: 1 }));
+      await Promise.all(updatePromises);
+      showMessage('sysUserMessage', '批量启用成功', 'success');
+      loadSysUsers();
+    } catch (error) {
+      console.error('批量启用失败:', error);
+      showMessage('sysUserMessage', '批量启用失败', 'error');
+    }
+  };
+
+  window.batchDisableSysUsers = async function() {
+    const selectedIds = getSelectedUserIds();
+    if (selectedIds.length === 0) {
+      showMessage('sysUserMessage', '请选择要禁用的用户', 'error');
+      return;
+    }
+    
+    try {
+      const updatePromises = selectedIds.map(id => apiService.put(`/sys/user/${id}`, { status: 0 }));
+      await Promise.all(updatePromises);
+      showMessage('sysUserMessage', '批量禁用成功', 'success');
+      loadSysUsers();
+    } catch (error) {
+      console.error('批量禁用失败:', error);
+      showMessage('sysUserMessage', '批量禁用失败', 'error');
+    }
+  };
+
+  function getSelectedUserIds() {
+    const checkboxes = document.querySelectorAll('.user-checkbox:checked');
+    return Array.from(checkboxes).map(cb => parseInt(cb.value));
+  }
+
+  async function loadRoles() {
+    try {
+      const response = await apiService.get('/sys/role');
+      
+      // 处理API返回的数据格式
+      let rolesData = response;
+      if (response && response.data) {
+        rolesData = response.data;
+      }
+      
+      roles = rolesData || [];
+      
+      // 更新角色选择下拉框
+      const roleSelect = document.getElementById('sysUserRole');
+      if (roleSelect) {
+        roleSelect.innerHTML = '';
+        roles.forEach(role => {
+          const option = document.createElement('option');
+          option.value = role.id;
+          option.textContent = role.roleName || role.name;
+          roleSelect.appendChild(option);
+        });
+      }
+      
+      // 更新角色筛选下拉框
+      const roleFilterSelect = document.getElementById('userRoleFilter');
+      if (roleFilterSelect) {
+        roleFilterSelect.innerHTML = '<option value="">全部</option>';
+        roles.forEach(role => {
+          const option = document.createElement('option');
+          option.value = role.id;
+          option.textContent = role.roleName || role.name;
+          roleFilterSelect.appendChild(option);
+        });
+      }
+    } catch (error) {
+      console.error('加载角色列表失败:', error);
+      showMessage('sysUserMessage', '加载角色失败: ' + (error.message || '未知错误'), 'error');
+    }
+  }
+
+  window.searchUsers = async function() {
+    const searchTerm = document.getElementById('userSearch').value.toLowerCase();
+    const statusFilter = document.getElementById('userStatusFilter').value;
+    const roleFilter = document.getElementById('userRoleFilter').value;
+    
+    const tableBody = document.getElementById('sysUserTableBody');
+    tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#999;">搜索中...</td></tr>';
+    
+    try {
+      const sysUsers = await apiService.get('/sys/user');
+      
+      // 处理API返回的数据格式
+      let usersData = sysUsers;
+      if (sysUsers && sysUsers.data) {
+        usersData = sysUsers.data;
+      }
+      
+      let filteredUsers = usersData || [];
+      
+      // 应用搜索筛选
+      if (searchTerm) {
+        filteredUsers = filteredUsers.filter(user => 
+          (user.username && user.username.toLowerCase().includes(searchTerm)) ||
+          (user.nickname && user.nickname.toLowerCase().includes(searchTerm))
+        );
+      }
+      
+      // 应用状态筛选
+      if (statusFilter) {
+        filteredUsers = filteredUsers.filter(user => user.status == statusFilter);
+      }
+      
+      // 应用角色筛选
+      if (roleFilter) {
+        filteredUsers = filteredUsers.filter(user => user.roleId == roleFilter);
+      }
+      
+      tableBody.innerHTML = '';
+      if (filteredUsers && filteredUsers.length > 0) {
+        filteredUsers.forEach(user => {
+          // 查找用户的角色名称
+          let roleName = '-';
+          if (user.roleId) {
+            const role = roles.find(r => r.id == user.roleId);
+            if (role) {
+              roleName = role.roleName || role.name || '-';
+            }
+          } else if (user.role) {
+            roleName = user.role;
+          }
+          
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td><input type="checkbox" class="user-checkbox" value="${user.id}" onchange="updateBatchActions()"></td>
+            <td>${user.id}</td>
+            <td>${user.username}</td>
+            <td>${user.nickname}</td>
+            <td>${roleName}</td>
+            <td>${user.status === 1 ? '启用' : '禁用'}</td>
+            <td>${user.lastLogin || '-'}</td>
+            <td>
+              <button class="btn btn-primary" onclick="window.editSysUser(${user.id})">编辑</button>
+              <button class="btn btn-danger" onclick="window.deleteSysUser(${user.id})">删除</button>
+              <button class="btn btn-info" onclick="window.assignRolesToUser(${user.id})">分配角色</button>
+            </td>
+          `;
+          tableBody.appendChild(row);
+        });
+      } else {
+        tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#999;">没有找到匹配的用户</td></tr>';
+      }
+    } catch (error) {
+      console.error('搜索用户失败:', error);
+      tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#e74c3c;">搜索失败: ' + (error.message || '未知错误') + '</td></tr>';
+    }
+  };
+
+  window.filterUsers = function() {
+    searchUsers();
+  };
+
+  window.resetFilters = function() {
+    document.getElementById('userSearch').value = '';
+    document.getElementById('userStatusFilter').value = '';
+    document.getElementById('userRoleFilter').value = '';
+    loadSysUsers();
+  };
+
+  window.exportUsers = async function(format) {
+    try {
+      const sysUsers = await apiService.get('/sys/user');
+      
+      // 处理API返回的数据格式
+      let usersData = sysUsers;
+      if (sysUsers && sysUsers.data) {
+        usersData = sysUsers.data;
+      }
+      
+      if (!usersData || usersData.length === 0) {
+        showMessage('sysUserMessage', '没有数据可导出', 'error');
+        return;
+      }
+      
+      if (format === 'csv') {
+        exportToCSV(usersData);
+      } else if (format === 'excel') {
+        exportToExcel(usersData);
+      }
+    } catch (error) {
+      console.error('导出用户数据失败:', error);
+      showMessage('sysUserMessage', '导出失败: ' + (error.message || '未知错误'), 'error');
+    }
+  };
+
+  function exportToCSV(users) {
+    const headers = ['ID', '账号', '昵称', '角色', '状态', '最后登录'];
+    const rows = users.map(user => [
+      user.id,
+      user.username,
+      user.nickname,
+      user.role || '-',
+      user.status === 1 ? '启用' : '禁用',
+      user.lastLogin || '-'
+    ]);
+    
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.join(','))
+    ].join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `系统用户_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    showMessage('sysUserMessage', '导出CSV成功', 'success');
+  }
+
+  function exportToExcel(users) {
+    // 创建HTML表格
+    let html = `
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <style>
+          table { border-collapse: collapse; width: 100%; }
+          th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+          th { background-color: #f2f2f2; }
+        </style>
+      </head>
+      <body>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>账号</th>
+              <th>昵称</th>
+              <th>角色</th>
+              <th>状态</th>
+              <th>最后登录</th>
+            </tr>
+          </thead>
+          <tbody>
+    `;
+    
+    users.forEach(user => {
+      html += `
+        <tr>
+          <td>${user.id}</td>
+          <td>${user.username}</td>
+          <td>${user.nickname}</td>
+          <td>${user.role || '-'}</td>
+          <td>${user.status === 1 ? '启用' : '禁用'}</td>
+          <td>${user.lastLogin || '-'}</td>
+        </tr>
+      `;
+    });
+    
+    html += `
+          </tbody>
+        </table>
+      </body>
+      </html>
+    `;
+    
+    const blob = new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `系统用户_${new Date().toISOString().slice(0, 10)}.xls`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    showMessage('sysUserMessage', '导出Excel成功', 'success');
+  }
+
+  window.openAddSysUserModal = function() {
+    document.getElementById('sysUserModalTitle').textContent = '新增系统用户';
+    document.getElementById('sysUserForm').reset();
+    document.getElementById('sysUserId').value = '';
+    openModal('sysUserModal');
+  };
+
+  window.editSysUser = async function(id) {
+    try {
+      const userResponse = await apiService.get(`/sys/user/${id}`);
+      
+      // 处理API返回的数据格式
+      let user = userResponse;
+      if (userResponse && userResponse.data) {
+        user = userResponse.data;
+      }
+      
+      document.getElementById('sysUserModalTitle').textContent = '编辑系统用户';
+      document.getElementById('sysUserId').value = user.id;
+      document.getElementById('sysUserUsername').value = user.username;
+      document.getElementById('sysUserNickname').value = user.nickname;
+      document.getElementById('sysUserPhone').value = user.phone || '';
+      document.getElementById('sysUserStatus').value = user.status;
+      
+      // 选中角色
+      const roleSelect = document.getElementById('sysUserRole');
+      if (roleSelect) {
+        // 先清空所有选中状态
+        Array.from(roleSelect.options).forEach(option => {
+          option.selected = false;
+        });
+        
+        // 然后根据用户的roleId或roleName选中对应的角色
+        if (user.roleId) {
+          const roleOption = Array.from(roleSelect.options).find(option => option.value == user.roleId);
+          if (roleOption) {
+            roleOption.selected = true;
+          }
+        } else if (user.role) {
+          const roleOption = Array.from(roleSelect.options).find(option => option.textContent == user.role);
+          if (roleOption) {
+            roleOption.selected = true;
+          }
+        }
+      }
+      
+      openModal('sysUserModal');
+    } catch (error) {
+      console.error('获取用户信息失败:', error);
+      showMessage('sysUserMessage', '获取用户信息失败: ' + (error.message || '未知错误'), 'error');
+    }
+  };
+
+  window.deleteSysUser = async function(id) {
+    if (confirm('确定要删除这个系统用户吗？')) {
+      try {
+        await apiService.delete(`/sys/user/${id}`);
+        showMessage('sysUserMessage', '删除成功', 'success');
+        loadSysUsers();
+      } catch (error) {
+        console.error('删除系统用户失败:', error);
+        showMessage('sysUserMessage', '删除失败', 'error');
+      }
+    }
+  };
+
+  window.assignRolesToUser = async function(userId) {
+    try {
+      const user = await apiService.get(`/sys/user/${userId}`);
+      
+      // 创建角色分配模态框
+      const modalHtml = `
+        <div id="roleAssignmentModal" class="modal">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3>分配角色给用户: ${user.nickname}</h3>
+              <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="form-group">
+              <label>选择角色</label>
+              <select id="roleAssignmentSelect" multiple style="height: 150px;">
+                ${roles.map(role => `
+                  <option value="${role.id}" ${user.roleId == role.id ? 'selected' : ''}>${role.roleName || role.name}</option>
+                `).join('')}
+              </select>
+            </div>
+            <div style="text-align: right; margin-top: 20px;">
+              <button type="button" class="btn btn-secondary" onclick="closeModal()">取消</button>
+              <button type="button" class="btn btn-primary" onclick="saveRoleAssignment(${userId})">保存</button>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      // 添加模态框到页面
+      document.body.insertAdjacentHTML('beforeend', modalHtml);
+      openModal('roleAssignmentModal');
+    } catch (error) {
+      console.error('获取用户信息失败:', error);
+      showMessage('sysUserMessage', '获取用户信息失败', 'error');
+    }
+  };
+  
+  window.saveRoleAssignment = async function(userId) {
+    try {
+      const selectedRoles = Array.from(document.getElementById('roleAssignmentSelect').selectedOptions).map(option => option.value);
+      const roleId = selectedRoles.length > 0 ? selectedRoles[0] : null;
+      
+      await apiService.put(`/sys/user/${userId}`, { roleId });
+      showMessage('sysUserMessage', '角色分配成功', 'success');
+      closeModal();
+      document.getElementById('roleAssignmentModal').remove();
+      loadSysUsers();
+    } catch (error) {
+      console.error('角色分配失败:', error);
+      showMessage('sysUserMessage', '角色分配失败', 'error');
+    }
+  };
+
+  function bindSysUserFormEvents() {
+    const form = document.getElementById('sysUserForm');
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      if (validateForm()) {
+        await saveSysUser();
+      }
+    });
+    
+    // 添加实时表单验证
+    const inputs = form.querySelectorAll('input, select');
+    inputs.forEach(input => {
+      input.addEventListener('input', function() {
+        validateField(this);
+        saveFormData();
+      });
+      input.addEventListener('blur', function() {
+        validateField(this);
+      });
+    });
+    
+    // 加载保存的表单数据
+    loadFormData();
+  }
+  
+  // 实时表单验证
+  function validateForm() {
+    let isValid = true;
+    const inputs = document.querySelectorAll('#sysUserForm input[required], #sysUserForm select[required]');
+    
+    inputs.forEach(input => {
+      if (!validateField(input)) {
+        isValid = false;
+      }
+    });
+    
+    return isValid;
+  }
+  
+  function validateField(field) {
+    const errorElement = document.getElementById(`${field.id}Error`);
+    let errorMessage = '';
+    
+    if (field.hasAttribute('required') && !field.value.trim()) {
+      errorMessage = '此字段不能为空';
+    } else if (field.hasAttribute('minlength') && field.value.length < parseInt(field.getAttribute('minlength'))) {
+      errorMessage = `最少需要${field.getAttribute('minlength')}个字符`;
+    } else if (field.hasAttribute('maxlength') && field.value.length > parseInt(field.getAttribute('maxlength'))) {
+      errorMessage = `最多只能${field.getAttribute('maxlength')}个字符`;
+    } else if (field.hasAttribute('pattern') && field.value && !new RegExp(field.getAttribute('pattern')).test(field.value)) {
+      errorMessage = '请输入有效的手机号';
+    }
+    
+    if (errorMessage) {
+      if (errorElement) {
+        errorElement.textContent = errorMessage;
+        errorElement.style.display = 'block';
+      }
+      field.classList.add('error');
+      return false;
+    } else {
+      if (errorElement) {
+        errorElement.textContent = '';
+        errorElement.style.display = 'none';
+      }
+      field.classList.remove('error');
+      return true;
+    }
+  }
+  
+  // 表单数据自动保存
+  function saveFormData() {
+    const formData = {
+      username: document.getElementById('sysUserUsername').value,
+      password: document.getElementById('sysUserPassword').value,
+      nickname: document.getElementById('sysUserNickname').value,
+      phone: document.getElementById('sysUserPhone').value,
+      status: document.getElementById('sysUserStatus').value,
+      role: Array.from(document.getElementById('sysUserRole').selectedOptions).map(option => option.value)
+    };
+    localStorage.setItem('sysUserFormData', JSON.stringify(formData));
+  }
+  
+  function loadFormData() {
+    const savedData = localStorage.getItem('sysUserFormData');
+    if (savedData) {
+      const formData = JSON.parse(savedData);
+      document.getElementById('sysUserUsername').value = formData.username || '';
+      document.getElementById('sysUserPassword').value = formData.password || '';
+      document.getElementById('sysUserNickname').value = formData.nickname || '';
+      document.getElementById('sysUserPhone').value = formData.phone || '';
+      document.getElementById('sysUserStatus').value = formData.status || '1';
+      
+      // 恢复角色选择
+      if (formData.role && formData.role.length > 0) {
+        const roleSelect = document.getElementById('sysUserRole');
+        Array.from(roleSelect.options).forEach(option => {
+          option.selected = formData.role.includes(option.value);
+        });
+      }
+    }
+  }
+  
+  // 清除保存的表单数据
+  function clearFormData() {
+    localStorage.removeItem('sysUserFormData');
+  }
+
+  async function saveSysUser() {
+    const id = document.getElementById('sysUserId').value;
+    const user = {
+      username: document.getElementById('sysUserUsername').value,
+      password: document.getElementById('sysUserPassword').value,
+      nickname: document.getElementById('sysUserNickname').value,
+      phone: document.getElementById('sysUserPhone').value,
+      status: parseInt(document.getElementById('sysUserStatus').value),
+      roleId: Array.from(document.getElementById('sysUserRole').selectedOptions).map(option => option.value)[0] || null
+    };
+    
+    try {
+      if (id) {
+        await apiService.put(`/sys/user/${id}`, user);
+        showMessage('sysUserMessage', '更新成功', 'success');
+      } else {
+        await apiService.post('/sys/user', user);
+        showMessage('sysUserMessage', '新增成功', 'success');
+      }
+      closeModal();
+      clearFormData();
+      loadSysUsers();
+    } catch (error) {
+      console.error('保存系统用户失败:', error);
+      showMessage('sysUserMessage', '保存失败: ' + (error.message || '未知错误'), 'error');
+    }
+  }
+
+  function showMessage(elementId, message, type) {
+    const statusEl = document.getElementById(elementId);
+    if (statusEl) {
+      statusEl.textContent = message;
+      statusEl.className = `status-message ${type}`;
+      statusEl.style.display = 'block';
+      
+      setTimeout(() => {
+        statusEl.style.display = 'none';
+      }, 3000);
+    }
+  }
+</script>
+<!-- sysUsers module loaded -->

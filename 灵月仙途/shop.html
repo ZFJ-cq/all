@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="css/mobile-adapt.css">
+  <title>商城系统 - 灵月仙途</title>
+  <style>
+    :root {
+      --bg-primary: #0a0e1a;
+      --bg-secondary: #1a1f2e;
+      --bg-panel: #1e2337;
+      --gold-primary: #e6c749;
+      --gold-dim: #b8a34a;
+      --text-primary: #f0f0f0;
+      --text-secondary: #c0c0c0;
+      --text-dim: #888888;
+      --border-color: rgba(230, 199, 73, 0.3);
+      --jade-primary: #5eead4;
+      --contribution-primary: #fbbf24;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Microsoft YaHei', sans-serif;
+      background: linear-gradient(135deg, #0a0e1a 0%, #1a1f2e 100%);
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding: 20px;
+      background: rgba(30, 35, 55, 0.8);
+      border: 2px solid var(--border-color);
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+    
+    .header h1 {
+      font-size: 2.5rem;
+      color: var(--gold-primary);
+      margin-bottom: 10px;
+      text-shadow: 0 0 20px rgba(230, 199, 73, 0.5);
+    }
+    
+    .currency-bar {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 20px;
+      padding: 15px;
+      background: rgba(30, 35, 55, 0.6);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+    }
+    
+    .currency-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.1rem;
+    }
+    
+    .currency-icon {
+      font-size: 1.5rem;
+    }
+    
+    .currency-value {
+      font-weight: bold;
+      color: var(--gold-primary);
+    }
+    
+    .shop-tabs {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .shop-tab {
+      flex: 1;
+      padding: 15px 25px;
+      background: rgba(30, 35, 55, 0.6);
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 1.1rem;
+      transition: all 0.3s;
+      text-align: center;
+    }
+    
+    .shop-tab:hover {
+      background: rgba(230, 199, 73, 0.1);
+      border-color: var(--gold-primary);
+    }
+    
+    .shop-tab.active {
+      background: linear-gradient(135deg, rgba(230, 199, 73, 0.3), rgba(230, 199, 73, 0.1));
+      border-color: var(--gold-primary);
+      color: var(--gold-primary);
+      box-shadow: 0 0 20px rgba(230, 199, 73, 0.4);
+    }
+    
+    .shop-tab .tab-icon {
+      font-size: 1.5rem;
+      display: block;
+      margin-bottom: 5px;
+    }
+    
+    .goods-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 20px;
+      background: rgba(30, 35, 55, 0.6);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      min-height: 500px;
+    }
+    
+    .goods-card {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 15px;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .goods-card:hover {
+      transform: translateY(-5px);
+      border-color: var(--gold-primary);
+      box-shadow: 0 5px 20px rgba(230, 199, 73, 0.3);
+    }
+    
+    .goods-card.limited {
+      border-color: #f97316;
+      box-shadow: 0 0 15px rgba(249, 115, 22, 0.3);
+    }
+    
+    .goods-card.hot {
+      border-color: #ef4444;
+      box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
+    }
+    
+    .badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: bold;
+    }
+    
+    .badge-hot {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: white;
+    }
+    
+    .badge-limited {
+      background: linear-gradient(135deg, #f97316, #ea580c);
+      color: white;
+    }
+    
+    .goods-icon {
+      font-size: 3.5rem;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    
+    .goods-name {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: var(--gold-primary);
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    
+    .goods-info {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    
+    .goods-price {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 5px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: var(--gold-primary);
+      margin-bottom: 10px;
+    }
+    
+    .goods-stock {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    
+    .countdown {
+      font-size: 0.85rem;
+      color: #f97316;
+      text-align: center;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+    
+    .buy-controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .count-btn {
+      width: 30px;
+      height: 30px;
+      background: rgba(230, 199, 73, 0.2);
+      border: 1px solid var(--border-color);
+      color: var(--gold-primary);
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+    
+    .count-btn:hover {
+      background: rgba(230, 199, 73, 0.3);
+    }
+    
+    .count-input {
+      width: 50px;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border-color);
+      border-radius: 5px;
+      color: var(--text-primary);
+      font-weight: bold;
+    }
+    
+    .buy-btn {
+      flex: 1;
+      padding: 8px 15px;
+      background: linear-gradient(135deg, rgba(230, 199, 73, 0.3), rgba(230, 199, 73, 0.1));
+      border: 1px solid var(--border-color);
+      color: var(--gold-primary);
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+    
+    .buy-btn:hover {
+      background: rgba(230, 199, 73, 0.4);
+      box-shadow: 0 0 15px rgba(230, 199, 73, 0.4);
+    }
+    
+    .buy-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 100px 20px;
+      color: var(--text-dim);
+    }
+    
+    .empty-state-icon {
+      font-size: 5rem;
+      margin-bottom: 20px;
+      opacity: 0.5;
+    }
+    
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 25px;
+      background: var(--bg-panel);
+      border: 1px solid var(--gold-primary);
+      border-radius: 8px;
+      color: var(--gold-primary);
+      z-index: 3000;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+      animation: slideIn 0.3s ease-out;
+    }
+    
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+  </style>
+  <script src="../js/auth-service.js"></script>
+
+  </head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🏪 商城</h1>
+      <p style="color: var(--text-dim);">汇聚天下奇物，助道友仙途坦荡</p>
+    </div>
+    
+    <div class="currency-bar">
+      <div class="currency-item">
+        <span class="currency-icon">💰</span>
+        <span>灵石：</span>
+        <span class="currency-value" id="spiritStones">10000</span>
+      </div>
+      <div class="currency-item">
+        <span class="currency-icon">💎</span>
+        <span>仙玉：</span>
+        <span class="currency-value" id="jadeCoins">1000</span>
+      </div>
+      <div class="currency-item">
+        <span class="currency-icon">🎖️</span>
+        <span>贡献：</span>
+        <span class="currency-value" id="contribution">500</span>
+      </div>
+    </div>
+    
+    <div class="shop-tabs">
+      <div class="shop-tab active" onclick="switchShop('spirit')">
+        <span class="tab-icon">💰</span>
+        灵石商店
+      </div>
+      <div class="shop-tab" onclick="switchShop('jade')">
+        <span class="tab-icon">💎</span>
+        仙玉商店
+      </div>
+      <div class="shop-tab" onclick="switchShop('contribution')">
+        <span class="tab-icon">🎖️</span>
+        贡献商店
+      </div>
+    </div>
+    
+    <div id="goodsGrid" class="goods-grid">
+      <!-- 商品将通过 JS 渲染 -->
+    </div>
+  </div>
+  
+  <script>
+    let currentShop = 'spirit';
+    let currentRoleId = null;
+    
+    // 模拟商品数据（实际应从后端获取）
+    const shopData = {
+      spirit: [
+        {
+          id: 1,
+          name: '聚气丹',
+          icon: '🧪',
+          price: 100,
+          currency: '灵石',
+          stock: 999,
+          limitPerBuy: 10,
+          limitPerDay: 50,
+          type: 'dan_yao',
+          description: '增加少量修为',
+          isHot: true,
+          isLimited: false
+        },
+        {
+          id: 2,
+          name: '回灵散',
+          icon: '💊',
+          price: 50,
+          currency: '灵石',
+          stock: 999,
+          limitPerBuy: 20,
+          limitPerDay: 100,
+          type: 'dan_yao',
+          description: '恢复少量灵力',
+          isHot: false,
+          isLimited: false
+        },
+        {
+          id: 3,
+          name: '精铁',
+          icon: '🔩',
+          price: 200,
+          currency: '灵石',
+          stock: 50,
+          limitPerBuy: 5,
+          limitPerDay: 20,
+          type: 'cai_liao',
+          description: '炼制装备的材料',
+          isHot: false,
+          isLimited: false
+        },
+        {
+          id: 4,
+          name: '千年灵芝',
+          icon: '🌿',
+          price: 5000,
+          currency: '灵石',
+          stock: 5,
+          limitPerBuy: 1,
+          limitPerDay: 1,
+          type: 'cai_liao',
+          description: '珍稀药材，可炼制高阶丹药',
+          isHot: false,
+          isLimited: true,
+          endTime: new Date().getTime() + 7200000 // 2 小时后结束
+        }
+      ],
+      jade: [
+        {
+          id: 11,
+          name: '筑基丹',
+          icon: '🧪',
+          price: 100,
+          currency: '仙玉',
+          stock: 20,
+          limitPerBuy: 3,
+          limitPerDay: 10,
+          type: 'dan_yao',
+          description: '辅助突破筑基期',
+          isHot: true,
+          isLimited: false
+        },
+        {
+          id: 12,
+          name: '飞剑',
+          icon: '⚔️',
+          price: 500,
+          currency: '仙玉',
+          stock: 10,
+          limitPerBuy: 1,
+          limitPerDay: 3,
+          type: 'zhuang_bei',
+          description: '基础飞剑，可御剑飞行',
+          isHot: false,
+          isLimited: false
+        },
+        {
+          id: 13,
+          name: '储物袋',
+          icon: '👜',
+          price: 200,
+          currency: '仙玉',
+          stock: 50,
+          limitPerBuy: 2,
+          limitPerDay: 5,
+          type: 'fa_bao',
+          description: '扩充背包空间',
+          isHot: false,
+          isLimited: false
+        }
+      ],
+      contribution: [
+        {
+          id: 21,
+          name: '金丹秘方',
+          icon: '📜',
+          price: 1000,
+          currency: '贡献',
+          stock: 5,
+          limitPerBuy: 1,
+          limitPerDay: 1,
+          type: 'qi_ta',
+          description: '炼制金丹的丹方',
+          isHot: true,
+          isLimited: true,
+          endTime: new Date().getTime() + 14400000 // 4 小时后结束
+        },
+        {
+          id: 22,
+          name: '玄铁精',
+          icon: '💎',
+          price: 500,
+          currency: '贡献',
+          stock: 30,
+          limitPerBuy: 5,
+          limitPerDay: 20,
+          type: 'cai_liao',
+          description: '高品质炼器材料',
+          isHot: false,
+          isLimited: false
+        },
+        {
+          id: 23,
+          name: '护宗大阵',
+          icon: '✨',
+          price: 2000,
+          currency: '贡献',
+          stock: 3,
+          limitPerBuy: 1,
+          limitPerDay: 1,
+          type: 'fa_bao',
+          description: '宗门防御阵法',
+          isHot: false,
+          isLimited: false
+        }
+      ]
+    };
+    
+    // 初始化
+    function init() {
+      const storedRoleId = localStorage.getItem('currentRoleId');
+      currentRoleId = storedRoleId && storedRoleId !== 'undefined' ? parseInt(storedRoleId) : null;
+      
+      if (!currentRoleId) {
+        showToast('请先选择角色');
+        setTimeout(() => {
+          window.location.href = 'start/start.html';
+        }, 1500);
+        return;
+      }
+      
+      loadShop(currentShop);
+      startCountdownTimer();
+    }
+    
+    // 切换商店
+    function switchShop(shop) {
+      currentShop = shop;
+      
+      document.querySelectorAll('.shop-tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      event.target.closest('.shop-tab').classList.add('active');
+      
+      loadShop(shop);
+    }
+    
+    // 加载商店
+    function loadShop(shopType) {
+      const gridEl = document.getElementById('goodsGrid');
+      const goods = shopData[shopType] || [];
+      
+      if (goods.length === 0) {
+        gridEl.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">🏪</div>
+            <div style="font-size: 1.2rem; margin-bottom: 10px;">商店货物已空</div>
+            <div style="color: var(--text-dim);">请稍后再来</div>
+          </div>
+        `;
+        return;
+      }
+      
+      gridEl.innerHTML = goods.map(goods => {
+        const countdown = goods.isLimited && goods.endTime 
+          ? getCountdownHTML(goods.endTime)
+          : '';
+        
+        return `
+          <div class="goods-card ${goods.isHot ? 'hot' : ''} ${goods.isLimited ? 'limited' : ''}">
+            ${goods.isHot ? '<span class="badge badge-hot">🔥 热销</span>' : ''}
+            ${goods.isLimited ? '<span class="badge badge-limited">⏰ 限时</span>' : ''}
+            
+            <div class="goods-icon">${goods.icon}</div>
+            <div class="goods-name">${goods.name}</div>
+            <div class="goods-info">${goods.description}</div>
+            
+            <div class="goods-price">
+              <span>${goods.currency === '灵石' ? '💰' : goods.currency === '仙玉' ? '💎' : '🎖️'}</span>
+              <span>${goods.price}</span>
+            </div>
+            
+            ${goods.stock > 0 ? `
+              <div class="goods-stock">库存：${goods.stock}</div>
+            ` : `
+              <div class="goods-stock" style="color: #f87171;">缺货</div>
+            `}
+            
+            ${countdown}
+            
+            <div class="buy-controls">
+              <button class="count-btn" onclick="changeCount(this, -1)">-</button>
+              <input type="number" class="count-input" value="1" min="1" max="${goods.limitPerBuy}" readonly>
+              <button class="count-btn" onclick="changeCount(this, 1)">+</button>
+              <button class="buy-btn" onclick="buyGoods(${goods.id})" ${goods.stock <= 0 ? 'disabled' : ''}>
+                购买
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+    
+    // 修改数量
+    function changeCount(btn, delta) {
+      const controls = btn.closest('.buy-controls');
+      const input = controls.querySelector('.count-input');
+      const buyBtn = controls.querySelector('.buy-btn');
+      
+      let value = parseInt(input.value) + delta;
+      const max = parseInt(input.max);
+      
+      if (value < 1) value = 1;
+      if (value > max) value = max;
+      
+      input.value = value;
+    }
+    
+    // 购买商品
+    function buyGoods(goodsId) {
+      const controls = event.target.closest('.buy-controls');
+      const count = parseInt(controls.querySelector('.count-input').value);
+      const goods = getAllGoods().find(g => g.id === goodsId);
+      
+      if (!goods) {
+        showToast('商品不存在');
+        return;
+      }
+      
+      const totalPrice = goods.price * count;
+      
+      // 检查货币是否足够（模拟）
+      const currencyMap = {
+        '灵石': 'spiritStones',
+        '仙玉': 'jadeCoins',
+        '贡献': 'contribution'
+      };
+      
+      const currencyId = currencyMap[goods.currency];
+      const currentCurrency = parseInt(document.getElementById(currencyId).textContent);
+      
+      if (currentCurrency < totalPrice) {
+        showToast(`${goods.currency}不足`);
+        return;
+      }
+      
+      // 模拟购买
+      showToast(`购买${count}x${goods.name}成功，花费${totalPrice}${goods.currency}`);
+      
+      // 更新货币显示
+      document.getElementById(currencyId).textContent = currentCurrency - totalPrice;
+    }
+    
+    // 获取所有商品
+    function getAllGoods() {
+      return [...shopData.spirit, ...shopData.jade, ...shopData.contribution];
+    }
+    
+    // 倒计时 HTML
+    function getCountdownHTML(endTime) {
+      const now = new Date().getTime();
+      const diff = endTime - now;
+      
+      if (diff <= 0) {
+        return '<div class="countdown" style="color: #f87171;">已结束</div>';
+      }
+      
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+      
+      return `<div class="countdown">⏰ 剩余：${hours}时${minutes}分${seconds}秒</div>`;
+    }
+    
+    // 启动倒计时定时器
+    function startCountdownTimer() {
+      setInterval(() => {
+        loadShop(currentShop);
+      }, 1000);
+    }
+    
+    // 显示提示
+    function showToast(message) {
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.remove();
+      }, 3000);
+    }
+    
+    // 页面加载时初始化
+    init();
+  </script>
+</body>
+</html>

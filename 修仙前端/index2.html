@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>灵月仙途 - 角色面板</title>
+    <style>
+        :root {
+            --bg-dark: #1a1f2c;
+            --bg-panel: #252b3a;
+            --text-light: #e0e0ff;
+            --text-muted: #a0aec0;
+            --gold: #d4af37;
+            --green: #4caf50;
+            --blue: #2196f3;
+            --red: #f44336;
+            --border: #3a4255;
+            --highlight: rgba(212, 175, 55, 0.2);
+            --quality-common: #9e9e9e;
+            --quality-magic: #4caf50;
+            --quality-special: #9c27b0;
+            --cultivation-bg: #1e2535;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Alibaba PuHuiTi", "Microsoft YaHei", sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f121c, #1a1f2c);
+            color: var(--text-light);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .character-modal {
+            width: 90%;
+            max-width: 800px;
+            background: var(--bg-panel);
+            border: 1px solid var(--gold);
+            border-radius: 12px;
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.2);
+            overflow: hidden;
+        }
+
+        /* 标签栏 */
+        .tabs {
+            display: flex;
+            background: linear-gradient(to right, #1e2535, #2a3042);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 14px;
+            text-align: center;
+            font-weight: bold;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+            border-right: 1px solid var(--border);
+        }
+
+        .tab-btn:last-child {
+            border-right: none;
+        }
+
+        .tab-btn.active {
+            color: var(--gold);
+            background: rgba(212, 175, 55, 0.1);
+        }
+
+        .tab-btn:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* 内容区 */
+        .tab-content {
+            display: none;
+            padding: 0;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* 通用组件 */
+        .section-title {
+            margin: 20px 20px 12px;
+            color: var(--gold);
+            font-size: 1.1rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 6px;
+        }
+
+        .button-group, .operation-bar {
+            display: flex;
+            gap: 10px;
+            padding: 16px 20px;
+            background: var(--cultivation-bg);
+            border-top: 1px solid var(--border);
+        }
+
+        .btn {
+            flex: 1;
+            padding: 8px;
+            background: #2a3042;
+            border: 1px solid var(--border);
+            color: var(--text-light);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            border-color: var(--gold);
+            background: var(--highlight);
+        }
+
+        .action-btn {
+            background: rgba(212, 175, 55, 0.15);
+            color: var(--gold);
+            border: 1px solid var(--gold);
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            background: rgba(212, 175, 55, 0.3);
+        }
+
+        .modal-header {
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--cultivation-bg);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--gold);
+        }
+
+        /* 通用卡片 */
+        .card {
+            background: var(--cultivation-bg);
+            margin: 0 20px 16px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            padding: 14px;
+            display: flex;
+            gap: 16px;
+            position: relative;
+        }
+
+        .icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #2a3a5a, #1e2a4a);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            flex-shrink: 0;
+        }
+
+        .info {
+            flex: 1;
+        }
+
+        .name {
+            font-weight: bold;
+            font-size: 1.05rem;
+            color: var(--gold);
+            margin-bottom: 4px;
+        }
+
+        .desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin: 8px 0;
+            font-size: 0.9rem;
+        }
+
+        .stat-cell {
+            text-align: center;
+            background: rgba(0,0,0,0.2);
+            padding: 4px 0;
+            border-radius: 4px;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: var(--text-light);
+        }
+
+        .progress-container {
+            margin: 8px 0;
+        }
+
+        .progress-text {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: #3a4255;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(to right, var(--gold), #a67c00);
+        }
+
+        .active-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--green);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        /* 装备专用 */
+        .slot-row {
+            display: flex;
+            align-items: center;
+            background: var(--cultivation-bg);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin: 0 20px 12px;
+        }
+
+        .slot-name {
+            width: 60px;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .item-info { flex: 1; }
+        .item-name { font-weight: bold; color: var(--gold); margin-bottom: 4px; }
+        .item-desc { font-size: 0.85rem; color: var(--text-muted); }
+        .item-quality { font-size: 0.8rem; margin-top: 2px; }
+        .quality-common { color: var(--quality-common); }
+        .quality-magic { color: var(--quality-magic); }
+        .quality-special { color: var(--quality-special); }
+        .durability { font-size: 0.8rem; color: var(--text-muted); }
+
+        .grid-backpack {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 6px;
+            padding: 0 20px 16px;
+        }
+
+        .grid-item {
+            aspect-ratio: 1;
+            background: var(--cultivation-bg);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            font-size: 0.75rem;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .grid-item:hover {
+            border-color: var(--gold);
+            background: var(--highlight);
+        }
+
+        .grid-icon { font-size: 1.2rem; margin-bottom: 2px; }
+        .grid-count {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            background: rgba(0,0,0,0.6);
+            padding: 0 4px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+        }
+
+        .empty-slot { background: #151a25; }
+
+        /* 快捷栏 */
+        .hotbar {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin: 0 20px 16px;
+        }
+
+        .hotkey {
+            width: 40px;
+            height: 40px;
+            background: #151a25;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            color: var(--gold);
+        }
+
+        .hotkey.active {
+            border-color: var(--gold);
+            background: rgba(212, 175, 55, 0.15);
+        }
+
+        .resource-bar {
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 20px;
+            background: var(--cultivation-bg);
+            border-top: 1px solid var(--border);
+            font-size: 0.95rem;
+        }
+
+        .res-item { text-align: center; }
+        .res-value { font-weight: bold; color: var(--gold); font-size: 1.1rem; }
+        .res-label { color: var(--text-muted); font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+
+<div class="character-modal">
+    <!-- 标签栏 -->
+    <div class="tabs">
+        <div class="tab-btn active" data-tab="equip">装备</div>
+        <div class="tab-btn" data-tab="skill">技能</div>
+        <div class="tab-btn" data-tab="cultivate">修炼</div>
+    </div>
+
+    <!-- 装备界面 -->
+    <div class="tab-content active" id="equip">
+        <div class="modal-header">
+            <div class="modal-title">装备栏</div>
+            <button class="action-btn">强化</button>
+        </div>
+
+        <div class="slot-row">
+            <div class="slot-name">头部</div>
+            <div class="item-info">
+                <div class="item-name">青木冠</div>
+                <div class="item-desc">防御+3</div>
+                <div class="item-quality quality-magic">品质：下品法器</div>
+                <div class="durability">耐久：45</div>
+            </div>
+        </div>
+        <div class="slot-row">
+            <div class="slot-name">身体</div>
+            <div class="item-info">
+                <div class="item-name">麻布衣</div>
+                <div class="item-desc">防御+2</div>
+                <div class="item-quality quality-common">品质：凡器</div>
+                <div class="durability">耐久：30</div>
+            </div>
+        </div>
+        <div class="slot-row">
+            <div class="slot-name">武器</div>
+            <div class="item-info">
+                <div class="item-name">精铁剑</div>
+                <div class="item-desc">攻击+8</div>
+                <div class="item-quality quality-magic">品质：下品法器</div>
+                <div class="durability">耐久：50</div>
+            </div>
+        </div>
+        <div class="slot-row">
+            <div class="slot-name">饰品</div>
+            <div class="item-info">
+                <div class="item-name">家传玉佩</div>
+                <div class="item-desc">灵力+5</div>
+                <div class="item-quality quality-special">品质：特殊</div>
+                <div class="durability">不可损</div>
+            </div>
+        </div>
+
+        <div style="padding: 0 20px; margin-bottom: 10px; color: var(--text-muted); font-size: 0.95rem;">背包 (24/50格)</div>
+        <div class="grid-backpack">
+            <div class="grid-item"><div class="grid-icon">💊</div><div class="grid-count">5</div></div>
+            <div class="grid-item"><div class="grid-icon">🩹</div><div class="grid-count">3</div></div>
+            <div class="grid-item"><div class="grid-icon">🔥</div><div class="grid-count">10</div></div>
+            <!-- 空格 -->
+            <div class="grid-item empty-slot"></div><div class="grid-item empty-slot"></div><div class="grid-item empty-slot"></div>
+            <div class="grid-item empty-slot"></div><div class="grid-item empty-slot"></div><div class="grid-item empty-slot"></div>
+            <div class="grid-item empty-slot"></div><div class="grid-item empty-slot"></div><div class="grid-item empty-slot"></div>
+            <div class="grid-item empty-slot"></div><div class="grid-item empty-slot"></div><div class="grid-item empty-slot"></div>
+            <div class="grid-item empty-slot"></div><div class="grid-item empty-slot"></div><div class="grid-item empty-slot"></div>
+            <div class="grid-item empty-slot"></div><div class="grid-item empty-slot"></div><div class="grid-item empty-slot"></div>
+            <div class="grid-item empty-slot"></div><div class="grid-item empty-slot"></div><div class="grid-item empty-slot"></div>
+            <div class="grid-item empty-slot"></div><div class="grid-item empty-slot"></div><div class="grid-item empty-slot"></div>
+        </div>
+
+        <div class="operation-bar">
+            <div class="btn">穿戴/卸下</div>
+            <div class="btn">分解</div>
+            <div class="btn">出售</div>
+            <div class="btn">整理</div>
+            <div class="btn">筛选</div>
+        </div>
+    </div>
+
+    <!-- 技能界面 -->
+    <div class="tab-content" id="skill">
+        <div class="modal-header">
+            <div class="modal-title">技能列表</div>
+            <button class="action-btn">升级</button>
+        </div>
+
+        <div class="section-title">攻击类技能</div>
+        <div class="card">
+            <div class="icon">🔥</div>
+            <div class="info">
+                <div class="name">火球术</div>
+                <div class="stats-row">
+                    <div class="stat-cell"><div class="stat-label">伤害</div><div class="stat-value">25</div></div>
+                    <div class="stat-cell"><div class="stat-label">消耗</div><div class="stat-value">10灵</div></div>
+                    <div class="stat-cell"><div class="stat-label">冷却</div><div class="stat-value">2秒</div></div>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-text">熟练度：125/500（入门）</div>
+                    <div class="progress-bar"><div class="progress-fill" style="width:25%"></div></div>
+                </div>
+                <div class="button-group" style="margin-top:10px; background:transparent; padding:0;">
+                    <div class="btn">装备</div><div class="btn">练习</div><div class="btn">详情</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-title">防御类技能</div>
+        <div class="card">
+            <div class="icon">🛡️</div>
+            <div class="info">
+                <div class="name">金光罩</div>
+                <div class="stats-row">
+                    <div class="stat-cell"><div class="stat-label">吸收</div><div class="stat-value">50伤</div></div>
+                    <div class="stat-cell"><div class="stat-label">消耗</div><div class="stat-value">15灵</div></div>
+                    <div class="stat-cell"><div class="stat-label">冷却</div><div class="stat-value">30秒</div></div>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-text">熟练度：45/500（入门）</div>
+                    <div class="progress-bar"><div class="progress-fill" style="width:9%"></div></div>
+                </div>
+                <div class="button-group" style="margin-top:10px; background:transparent; padding:0;">
+                    <div class="btn">装备</div><div class="btn">练习</div><div class="btn">详情</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-title">辅助类技能</div>
+        <div class="card">
+            <div class="icon">💨</div>
+            <div class="info">
+                <div class="name">御风术</div>
+                <div class="stats-row">
+                    <div class="stat-cell"><div class="stat-label">速度+</div><div class="stat-value">30%</div></div>
+                    <div class="stat-cell"><div class="stat-label">消耗</div><div class="stat-value">5灵</div></div>
+                    <div class="stat-cell"><div class="stat-label">持续</div><div class="stat-value">60秒</div></div>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-text">熟练度：80/500（入门）</div>
+                    <div class="progress-bar"><div class="progress-fill" style="width:16%"></div></div>
+                </div>
+                <div class="button-group" style="margin-top:10px; background:transparent; padding:0;">
+                    <div class="btn">装备</div><div class="btn">练习</div><div class="btn">详情</div>
+                </div>
+            </div>
+        </div>
+
+        <div style="padding: 12px 20px; background: var(--cultivation-bg); margin: 0 20px 16px; border-radius:8px; border:1px solid var(--border); font-size:0.95rem; color:var(--text-muted);">
+            技能槽位：当前 <span style="color:var(--gold)">3/6</span> 个技能槽可用
+        </div>
+
+        <div style="padding: 0 20px; margin-bottom: 10px; color: var(--text-muted); font-size: 0.95rem;">快捷栏设置：</div>
+        <div class="hotbar">
+            <div class="hotkey active">F1</div>
+            <div class="hotkey active">F2</div>
+            <div class="hotkey active">F3</div>
+            <div class="hotkey">F4</div>
+            <div class="hotkey">F5</div>
+            <div class="hotkey">F6</div>
+        </div>
+    </div>
+
+    <!-- 修炼界面 -->
+    <div class="tab-content" id="cultivate">
+        <div class="modal-header">
+            <div class="modal-title">修炼系统</div>
+            <div style="color: var(--text-muted); font-size: 0.9rem;">境界：炼气期三层</div>
+        </div>
+
+        <div style="display:flex; gap:16px; padding:16px 20px; background:var(--cultivation-bg); border-bottom:1px solid var(--border);">
+            <div class="icon" style="width:60px; height:60px; font-size:1.8rem;">👤</div>
+            <div style="flex:1;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                    <span class="name">林小凡</span>
+                    <span style="color:var(--text-muted); font-size:0.95rem;">Lv.12</span>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-text">经验：1300 / 2000</div>
+                    <div class="progress-bar"><div class="progress-fill" style="width:65%"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-title">修炼方式</div>
+
+        <div class="card">
+            <div class="icon">🧘</div>
+            <div class="info">
+                <div class="name">静心打坐</div>
+                <div class="desc">消耗时间，缓慢恢复灵力并积累经验</div>
+                <div class="stats-row">
+                    <div class="stat-cell"><div class="stat-label">经验/时</div><div class="stat-value">+50</div></div>
+                    <div class="stat-cell"><div class="stat-label">灵力/时</div><div class="stat-value">+30</div></div>
+                    <div class="stat-cell"><div class="stat-label">消耗</div><div class="stat-value">无</div></div>
+                </div>
+                <div class="button-group" style="margin-top:10px; background:transparent; padding:0;">
+                    <div class="btn">开始</div><div class="btn">加速</div>
+                </div>
+            </div>
+            <div class="active-badge">进行中</div>
+        </div>
+
+        <div class="card">
+            <div class="icon">💊</div>
+            <div class="info">
+                <div class="name">服用聚气丹</div>
+                <div class="desc">立即获得大量经验，但需消耗丹药</div>
+                <div class="stats-row">
+                    <div class="stat-cell"><div class="stat-label">经验</div><div class="stat-value">+200</div></div>
+                    <div class="stat-cell"><div class="stat-label">冷却</div><div class="stat-value">5分钟</div></div>
+                    <div class="stat-cell"><div class="stat-label">消耗</div><div class="stat-value">1丹</div></div>
+                </div>
+                <div class="button-group" style="margin-top:10px; background:transparent; padding:0;">
+                    <div class="btn">使用</div><div class="btn">批量</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="icon">⚔️</div>
+            <div class="info">
+                <div class="name">斩妖除魔</div>
+                <div class="desc">通过战斗快速提升修为，但有受伤风险</div>
+                <div class="stats-row">
+                    <div class="stat-cell"><div class="stat-label">经验/战</div><div class="stat-value">+80~150</div></div>
+                    <div class="stat-cell"><div class="stat-label">掉落</div><div class="stat-value">可能</div></div>
+                    <div class="stat-cell"><div class="stat-label">风险</div><div class="stat-value">中</div></div>
+                </div>
+                <div class="button-group" style="margin-top:10px; background:transparent; padding:0;">
+                    <div class="btn">前往</div><div class="btn">组队</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="resource-bar">
+            <div class="res-item"><div class="res-value">5</div><div class="res-label">聚气丹</div></div>
+            <div class="res-item"><div class="res-value">120</div><div class="res-label">灵石</div></div>
+            <div class="res-item"><div class="res-value">85%</div><div class="res-label">灵力</div></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 标签切换逻辑
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            // 移除所有 active
+            document.querySelectorAll('.tab-btn, .tab-content').forEach(el => {
+                el.classList.remove('active');
+            });
+            // 激活当前
+            btn.classList.add('active');
+            const tabId = btn.getAttribute('data-tab');
+            document.getElementById(tabId).classList.add('active');
+        });
+    });
+
+    // 示例交互（可选）
+    document.querySelectorAll('.btn, .grid-item:not(.empty-slot)').forEach(el => {
+        if (!el.classList.contains('empty-slot')) {
+            el.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const text = this.textContent.trim() || this.querySelector('.name')?.textContent || '物品';
+                alert(`已执行操作：${text}`);
+            });
+        }
+    });
+</script>
+
+</body>
+</html>

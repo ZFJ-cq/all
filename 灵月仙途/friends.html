@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="css/mobile-adapt.css">
+  <title>道友系统 - 灵月仙途</title>
+  <style>
+    :root {
+      --bg-primary: #0a0e1a;
+      --bg-secondary: #1a1f2e;
+      --bg-panel: #1e2337;
+      --gold-primary: #e6c749;
+      --gold-dim: #b8a34a;
+      --text-primary: #f0f0f0;
+      --text-secondary: #c0c0c0;
+      --text-dim: #888888;
+      --border-color: rgba(230, 199, 73, 0.3);
+      --success: #4ade80;
+      --danger: #f87171;
+      --online: #22c55e;
+      --offline: #6b7280;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Microsoft YaHei', sans-serif;
+      background: linear-gradient(135deg, #0a0e1a 0%, #1a1f2e 100%);
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding: 20px;
+      background: rgba(30, 35, 55, 0.8);
+      border: 2px solid var(--border-color);
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+    
+    .header h1 {
+      font-size: 2.5rem;
+      color: var(--gold-primary);
+      margin-bottom: 10px;
+      text-shadow: 0 0 20px rgba(230, 199, 73, 0.5);
+    }
+    
+    .tabs {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .tab-btn {
+      flex: 1;
+      padding: 12px 20px;
+      background: rgba(30, 35, 55, 0.6);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+    
+    .tab-btn:hover {
+      background: rgba(230, 199, 73, 0.1);
+      border-color: var(--gold-primary);
+    }
+    
+    .tab-btn.active {
+      background: linear-gradient(135deg, rgba(230, 199, 73, 0.2), rgba(230, 199, 73, 0.05));
+      border-color: var(--gold-primary);
+      color: var(--gold-primary);
+      box-shadow: 0 0 15px rgba(230, 199, 73, 0.3);
+    }
+    
+    .content-section {
+      background: rgba(30, 35, 55, 0.6);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      min-height: 500px;
+    }
+    
+    .search-box {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    
+    .search-input {
+      flex: 1;
+      padding: 12px 15px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-size: 1rem;
+    }
+    
+    .search-input:focus {
+      outline: none;
+      border-color: var(--gold-primary);
+      box-shadow: 0 0 10px rgba(230, 199, 73, 0.3);
+    }
+    
+    .action-btn {
+      padding: 12px 25px;
+      background: linear-gradient(135deg, rgba(230, 199, 73, 0.2), rgba(230, 199, 73, 0.05));
+      border: 1px solid var(--border-color);
+      color: var(--gold-primary);
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+    
+    .action-btn:hover {
+      background: rgba(230, 199, 73, 0.3);
+      box-shadow: 0 0 15px rgba(230, 199, 73, 0.4);
+      transform: translateY(-2px);
+    }
+    
+    .friend-list {
+      display: grid;
+      gap: 15px;
+    }
+    
+    .friend-card {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+    
+    .friend-card:hover {
+      background: rgba(230, 199, 73, 0.1);
+      border-color: var(--gold-primary);
+      transform: translateX(5px);
+    }
+    
+    .friend-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(230, 199, 73, 0.3), rgba(0, 0, 0, 0.3));
+      border: 2px solid var(--gold-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      margin-right: 15px;
+      position: relative;
+      box-shadow: 0 0 15px rgba(230, 199, 73, 0.3);
+    }
+    
+    .online-indicator {
+      position: absolute;
+      bottom: -2px;
+      right: -2px;
+      width: 16px;
+      height: 16px;
+      background: var(--online);
+      border: 2px solid var(--bg-panel);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--online);
+    }
+    
+    .friend-info {
+      flex: 1;
+    }
+    
+    .friend-name {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: var(--gold-primary);
+      margin-bottom: 5px;
+    }
+    
+    .friend-detail {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      margin-bottom: 3px;
+    }
+    
+    .friend-actions {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .friend-btn {
+      padding: 8px 15px;
+      background: rgba(230, 199, 73, 0.1);
+      border: 1px solid rgba(230, 199, 73, 0.3);
+      color: var(--gold-primary);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.3s;
+    }
+    
+    .friend-btn:hover {
+      background: rgba(230, 199, 73, 0.25);
+      box-shadow: 0 0 10px rgba(230, 199, 73, 0.3);
+    }
+    
+    .request-card {
+      padding: 15px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+    
+    .request-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    
+    .request-actions {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .accept-btn {
+      background: rgba(74, 222, 128, 0.2);
+      border: 1px solid var(--success);
+      color: var(--success);
+    }
+    
+    .accept-btn:hover {
+      background: rgba(74, 222, 128, 0.3);
+      box-shadow: 0 0 15px rgba(74, 222, 128, 0.4);
+    }
+    
+    .reject-btn {
+      background: rgba(248, 113, 113, 0.2);
+      border: 1px solid var(--danger);
+      color: var(--danger);
+    }
+    
+    .reject-btn:hover {
+      background: rgba(248, 113, 113, 0.3);
+      box-shadow: 0 0 15px rgba(248, 113, 113, 0.4);
+    }
+    
+    .chat-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 3000;
+    }
+    
+    .chat-modal.active {
+      display: flex;
+    }
+    
+    .chat-window {
+      width: 500px;
+      max-width: 90%;
+      max-height: 70vh;
+      background: var(--bg-panel);
+      border: 2px solid var(--gold-primary);
+      border-radius: 15px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 0 30px rgba(230, 199, 73, 0.3);
+    }
+    
+    .chat-header {
+      padding: 15px;
+      background: linear-gradient(135deg, rgba(230, 199, 73, 0.2), rgba(0, 0, 0, 0.3));
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-radius: 13px 13px 0 0;
+    }
+    
+    .chat-body {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      background: rgba(0, 0, 0, 0.2);
+    }
+    
+    .chat-footer {
+      padding: 15px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      gap: 10px;
+    }
+    
+    .chat-input {
+      flex: 1;
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      color: var(--text-primary);
+      resize: none;
+      font-family: inherit;
+    }
+    
+    .chat-input:focus {
+      outline: none;
+      border-color: var(--gold-primary);
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-dim);
+    }
+    
+    .empty-state-icon {
+      font-size: 4rem;
+      margin-bottom: 20px;
+      opacity: 0.5;
+    }
+    
+    .gift-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 3000;
+    }
+    
+    .gift-modal.active {
+      display: flex;
+    }
+    
+    .gift-window {
+      width: 400px;
+      background: var(--bg-panel);
+      border: 2px solid var(--gold-primary);
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 0 30px rgba(230, 199, 73, 0.3);
+    }
+    
+    .gift-options {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin: 20px 0;
+    }
+    
+    .gift-option {
+      padding: 15px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .gift-option:hover {
+      background: rgba(230, 199, 73, 0.15);
+      border-color: var(--gold-primary);
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(230, 199, 73, 0.3);
+    }
+    
+    .gift-icon {
+      font-size: 2.5rem;
+      margin-bottom: 8px;
+    }
+    
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 25px;
+      background: var(--bg-panel);
+      border: 1px solid var(--gold-primary);
+      border-radius: 8px;
+      color: var(--gold-primary);
+      z-index: 4000;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+      animation: slideIn 0.3s ease-out;
+    }
+    
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+  </style>
+  <script src="../js/auth-service.js"></script>
+
+  </head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🤝 道友系统</h1>
+      <p style="color: var(--text-dim);">结交天下道友，共赴仙途</p>
+    </div>
+    
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('friends')">我的道友</button>
+      <button class="tab-btn" onclick="switchTab('requests')">好友申请</button>
+      <button class="tab-btn" onclick="switchTab('search')">搜索道友</button>
+    </div>
+    
+    <div id="friendsSection" class="content-section">
+      <div id="friendList" class="friend-list">
+        <!-- 道友列表将通过 JS 渲染 -->
+      </div>
+    </div>
+    
+    <div id="requestsSection" class="content-section" style="display: none;">
+      <div id="requestList">
+        <!-- 好友申请列表将通过 JS 渲染 -->
+      </div>
+    </div>
+    
+    <div id="searchSection" class="content-section" style="display: none;">
+      <div class="search-box">
+        <input type="text" id="searchInput" class="search-input" placeholder="输入道友昵称或用户名搜索...">
+        <button class="action-btn" onclick="searchFriends()">🔍 搜索</button>
+      </div>
+      <div id="searchResults" class="friend-list">
+        <!-- 搜索结果将通过 JS 渲染 -->
+      </div>
+    </div>
+  </div>
+  
+  <!-- 聊天窗口 -->
+  <div id="chatModal" class="chat-modal" onclick="closeChat(event)">
+    <div class="chat-window" onclick="event.stopPropagation()">
+      <div class="chat-header">
+        <div>
+          <div id="chatFriendName" style="color: var(--gold-primary); font-weight: bold;"></div>
+          <div id="chatFriendStatus" style="font-size: 0.85rem; color: var(--text-dim);">在线</div>
+        </div>
+        <button onclick="closeChat()" style="background: none; border: none; color: var(--gold-primary); font-size: 1.5rem; cursor: pointer;">×</button>
+      </div>
+      <div id="chatBody" class="chat-body">
+        <!-- 聊天记录 -->
+      </div>
+      <div class="chat-footer">
+        <input type="text" id="chatInput" class="chat-input" placeholder="输入消息...">
+        <button class="action-btn" onclick="sendMessage()">发送</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 送礼窗口 -->
+  <div id="giftModal" class="gift-modal" onclick="closeGift(event)">
+    <div class="gift-window" onclick="event.stopPropagation()">
+      <div style="text-align: center; margin-bottom: 20px;">
+        <h2 style="color: var(--gold-primary);">🎁 赠送礼物</h2>
+        <p id="giftFriendName" style="color: var(--text-dim); margin-top: 5px;"></p>
+      </div>
+      <div class="gift-options">
+        <div class="gift-option" onclick="sendGift('灵石', 100)">
+          <div class="gift-icon">💰</div>
+          <div style="color: var(--gold-primary); font-weight: bold;">灵石</div>
+          <div style="font-size: 0.85rem; color: var(--text-dim);">100 灵石</div>
+        </div>
+        <div class="gift-option" onclick="sendGift('体力', 50)">
+          <div class="gift-icon">💪</div>
+          <div style="color: var(--gold-primary); font-weight: bold;">体力</div>
+          <div style="font-size: 0.85rem; color: var(--text-dim);">50 体力</div>
+        </div>
+        <div class="gift-option" onclick="sendGift('仙玉', 10)">
+          <div class="gift-icon">💎</div>
+          <div style="color: var(--gold-primary); font-weight: bold;">仙玉</div>
+          <div style="font-size: 0.85rem; color: var(--text-dim);">10 仙玉</div>
+        </div>
+        <div class="gift-option" onclick="sendGift('丹药', 1)">
+          <div class="gift-icon">🧪</div>
+          <div style="color: var(--gold-primary); font-weight: bold;">丹药</div>
+          <div style="font-size: 0.85rem; color: var(--text-dim);">1 聚气丹</div>
+        </div>
+      </div>
+      <button class="action-btn" onclick="closeGift()" style="width: 100%;">取消</button>
+    </div>
+  </div>
+  
+  <script>
+    const API_BASE = window.APP_CONFIG?.API_BASE_URL || 'http://localhost:8088/api';
+    let currentTab = 'friends';
+    let currentFriendId = null;
+    let currentUserId = null;
+    
+    // 初始化
+    async function init() {
+      const storedUserId = localStorage.getItem('userId');
+      currentUserId = storedUserId && storedUserId !== 'undefined' ? parseInt(storedUserId) : null;
+      
+      if (!currentUserId) {
+        showToast('请先登录');
+        setTimeout(() => {
+          window.location.href = 'login.html';
+        }, 1500);
+        return;
+      }
+      
+      await loadFriends();
+    }
+    
+    // 切换标签页
+    function switchTab(tab) {
+      currentTab = tab;
+      
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      event.target.classList.add('active');
+      
+      document.querySelectorAll('.content-section').forEach(section => {
+        section.style.display = 'none';
+      });
+      
+      document.getElementById(`${tab}Section`).style.display = 'block';
+      
+      if (tab === 'friends') {
+        loadFriends();
+      } else if (tab === 'requests') {
+        loadRequests();
+      }
+    }
+    
+    // 加载好友列表
+    async function loadFriends() {
+      const listEl = document.getElementById('friendList');
+      listEl.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-dim);">加载中...</div>';
+      
+      try {
+        const response = await fetch(`${API_BASE}/friend/list/${currentUserId}`);
+        const result = await response.json();
+        
+        if (result.friends && result.friends.length > 0) {
+          listEl.innerHTML = result.friends.map(friend => `
+            <div class="friend-card">
+              <div class="friend-avatar">
+                👤
+                <div class="online-indicator"></div>
+              </div>
+              <div class="friend-info">
+                <div class="friend-name">${friend.remark || friend.nickname || friend.username}</div>
+                <div class="friend-detail">${friend.roleName || '暂无角色'} · ${friend.realm || '未入门'}</div>
+                <div class="friend-detail">等级：${friend.level || 1}</div>
+              </div>
+              <div class="friend-actions">
+                <button class="friend-btn" onclick="openChat(${friend.friendId}, '${friend.nickname || friend.username}')">💬 私聊</button>
+                <button class="friend-btn" onclick="openGift(${friend.friendId}, '${friend.nickname || friend.username}')">🎁 送礼</button>
+                <button class="friend-btn" onclick="deleteFriend(${friend.friendId})">❌ 删除</button>
+              </div>
+            </div>
+          `).join('');
+        } else {
+          listEl.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">👥</div>
+              <div style="font-size: 1.2rem; margin-bottom: 10px;">暂无道友</div>
+              <div style="color: var(--text-dim);">快去结交天下道友，共赴仙途吧！</div>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('加载好友列表失败:', error);
+        listEl.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-dim);">加载失败，请重试</div>';
+      }
+    }
+    
+    // 加载好友申请
+    async function loadRequests() {
+      const listEl = document.getElementById('requestList');
+      listEl.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-dim);">加载中...</div>';
+      
+      try {
+        const response = await fetch(`${API_BASE}/friend/requests/${currentUserId}`);
+        const result = await response.json();
+        
+        if (result.requests && result.requests.length > 0) {
+          listEl.innerHTML = result.requests.map(request => `
+            <div class="request-card">
+              <div class="request-header">
+                <div>
+                  <div style="color: var(--gold-primary); font-weight: bold; font-size: 1.1rem;">
+                    ${request.nickname || request.username}
+                  </div>
+                  <div style="font-size: 0.85rem; color: var(--text-dim);">
+                    ${request.roleName || '暂无角色'} · ${request.realm || '未入门'}
+                  </div>
+                </div>
+                <div style="font-size: 0.85rem; color: var(--text-dim);">
+                  ${new Date(request.createTime).toLocaleString('zh-CN')}
+                </div>
+              </div>
+              <div class="request-actions">
+                <button class="friend-btn accept-btn" onclick="acceptRequest(${request.id})">✅ 接受</button>
+                <button class="friend-btn reject-btn" onclick="rejectRequest(${request.id})">❌ 拒绝</button>
+              </div>
+            </div>
+          `).join('');
+        } else {
+          listEl.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">📧</div>
+              <div style="font-size: 1.2rem; margin-bottom: 10px;">暂无新申请</div>
+              <div style="color: var(--text-dim);">暂时没有人申请加你为好友哦</div>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('加载好友申请失败:', error);
+        listEl.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-dim);">加载失败，请重试</div>';
+      }
+    }
+    
+    // 搜索好友
+    async function searchFriends() {
+      const keyword = document.getElementById('searchInput').value.trim();
+      const resultsEl = document.getElementById('searchResults');
+      
+      if (!keyword) {
+        showToast('请输入搜索关键词');
+        return;
+      }
+      
+      resultsEl.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-dim);">搜索中...</div>';
+      
+      try {
+        const response = await fetch(`${API_BASE}/friend/search?keyword=${encodeURIComponent(keyword)}&userId=${currentUserId}`);
+        const result = await response.json();
+        
+        if (result.results && result.results.length > 0) {
+          resultsEl.innerHTML = result.results.map(user => `
+            <div class="friend-card">
+              <div class="friend-avatar">👤</div>
+              <div class="friend-info">
+                <div class="friend-name">${user.nickname || user.username}</div>
+                <div class="friend-detail">${user.roleName || '暂无角色'} · ${user.realm || '未入门'}</div>
+                <div class="friend-detail">等级：${user.level || 1}</div>
+              </div>
+              <div class="friend-actions">
+                ${user.isFriend 
+                  ? '<button class="friend-btn" disabled>已是好友</button>'
+                  : `<button class="friend-btn" onclick="addFriend(${user.userId}, '${user.nickname || user.username}')">➕ 加好友</button>`
+                }
+              </div>
+            </div>
+          `).join('');
+        } else {
+          resultsEl.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">🔍</div>
+              <div style="font-size: 1.2rem; margin-bottom: 10px;">未找到相关道友</div>
+              <div style="color: var(--text-dim);">换个关键词试试吧</div>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('搜索失败:', error);
+        resultsEl.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-dim);">搜索失败，请重试</div>';
+      }
+    }
+    
+    // 添加好友
+    async function addFriend(friendId, friendName) {
+      try {
+        const response = await fetch(`${API_BASE}/friend/add`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: currentUserId, friendId })
+        });
+        const result = await response.json();
+        
+        if (result.success) {
+          showToast(`已向${friendName}发送好友申请`);
+          searchFriends();
+        } else {
+          showToast(result.message || '操作失败');
+        }
+      } catch (error) {
+        console.error('添加好友失败:', error);
+        showToast('操作失败，请重试');
+      }
+    }
+    
+    // 接受好友请求
+    async function acceptRequest(requestId) {
+      try {
+        const response = await fetch(`${API_BASE}/friend/accept`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ requestId, userId: currentUserId })
+        });
+        const result = await response.json();
+        
+        if (result.success) {
+          showToast('已成为好友');
+          loadRequests();
+        } else {
+          showToast(result.message || '操作失败');
+        }
+      } catch (error) {
+        console.error('接受请求失败:', error);
+        showToast('操作失败，请重试');
+      }
+    }
+    
+    // 拒绝好友请求
+    async function rejectRequest(requestId) {
+      try {
+        const response = await fetch(`${API_BASE}/friend/reject`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ requestId })
+        });
+        const result = await response.json();
+        
+        if (result.success) {
+          showToast('已拒绝');
+          loadRequests();
+        } else {
+          showToast(result.message || '操作失败');
+        }
+      } catch (error) {
+        console.error('拒绝请求失败:', error);
+        showToast('操作失败，请重试');
+      }
+    }
+    
+    // 删除好友
+    async function deleteFriend(friendId) {
+      if (!confirm('确定要删除该道友吗？')) return;
+      
+      try {
+        const response = await fetch(`${API_BASE}/friend/${friendId}?userId=${currentUserId}`, {
+          method: 'DELETE'
+        });
+        const result = await response.json();
+        
+        if (result.success) {
+          showToast('已删除道友');
+          loadFriends();
+        } else {
+          showToast(result.message || '操作失败');
+        }
+      } catch (error) {
+        console.error('删除好友失败:', error);
+        showToast('操作失败，请重试');
+      }
+    }
+    
+    // 打开聊天窗口
+    function openChat(friendId, friendName) {
+      currentFriendId = friendId;
+      document.getElementById('chatFriendName').textContent = friendName;
+      document.getElementById('chatModal').classList.add('active');
+    }
+    
+    // 关闭聊天窗口
+    function closeChat(event) {
+      if (!event || event.target === document.getElementById('chatModal')) {
+        document.getElementById('chatModal').classList.remove('active');
+      }
+    }
+    
+    // 发送消息
+    function sendMessage() {
+      const input = document.getElementById('chatInput');
+      const message = input.value.trim();
+      
+      if (!message) return;
+      
+      const chatBody = document.getElementById('chatBody');
+      chatBody.innerHTML += `
+        <div style="text-align: right; margin-bottom: 10px;">
+          <div style="display: inline-block; background: rgba(230, 199, 73, 0.2); border: 1px solid var(--gold-primary); 
+                      padding: 8px 12px; border-radius: 8px; color: var(--text-primary);">
+            ${message}
+          </div>
+        </div>
+      `;
+      
+      input.value = '';
+      chatBody.scrollTop = chatBody.scrollHeight;
+      
+      showToast('消息已发送（演示功能，暂未接入后端）');
+    }
+    
+    // 打开送礼窗口
+    function openGift(friendId, friendName) {
+      currentFriendId = friendId;
+      document.getElementById('giftFriendName').textContent = friendName;
+      document.getElementById('giftModal').classList.add('active');
+    }
+    
+    // 关闭送礼窗口
+    function closeGift(event) {
+      if (!event || event.target === document.getElementById('giftModal')) {
+        document.getElementById('giftModal').classList.remove('active');
+      }
+    }
+    
+    // 赠送礼物
+    async function sendGift(giftType, amount) {
+      showToast(`赠送${amount}${giftType}给道友（演示功能，暂未接入后端）`);
+      closeGift();
+    }
+    
+    // 显示提示
+    function showToast(message) {
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.remove();
+      }, 3000);
+    }
+    
+    // 页面加载时初始化
+    init();
+  </script>
+</body>
+</html>

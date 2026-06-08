@@ -1,0 +1,177 @@
+{
+  "id": "case_016",
+  "title": "斗粟三升米",
+  "subtitle": "第十六案",
+  "difficulty": 1,
+  "description": "婆媳争斗起纷争，一斗粟米藏玄机，包拯巧计破冤案！",
+  "background": "婆媳因家庭琐事起争执，婆婆状告儿媳不孝，儿媳喊冤。包拯以一斗粟米为线索，巧破这桩家庭纠纷案。",
+  "stages": {
+    "report": {
+      "id": "report",
+      "name": "报案",
+      "dialogues": [
+        {
+          "speaker": "系统",
+          "speakerTitle": "旁白",
+          "content": "开封府公堂之上，一位老妇人拄着拐杖，颤巍巍地跪下。",
+          "emotion": "narrator"
+        },
+        {
+          "speaker": "婆婆",
+          "speakerTitle": "告状人",
+          "content": "包大人！我那儿媳不守妇道，不孝顺我这个婆婆！求大人为老妇做主！",
+          "emotion": "cry"
+        },
+        {
+          "speaker": "儿媳",
+          "speakerTitle": "嫌疑人",
+          "content": "大人冤枉！民妇每日侍奉婆婆，不敢有半点懈怠！她……她诬陷我！",
+          "emotion": "cry"
+        },
+        {
+          "speaker": "包拯",
+          "speakerTitle": "包青天",
+          "content": "肃静！婆说婆有理，媳说媳有理，待本官查个明白。",
+          "emotion": "serious"
+        },
+        {
+          "speaker": "婆婆",
+          "speakerTitle": "告状人",
+          "content": "大人，她每日只给我三升米熬粥，哪里够吃！分明是想饿死我这个老太婆！",
+          "emotion": "angry"
+        },
+        {
+          "speaker": "儿媳",
+          "speakerTitle": "嫌疑人",
+          "content": "大人，家里贫困，一斗粟米本来就只能舂出三升米，民妇实属无奈！",
+          "emotion": "cry"
+        }
+      ]
+    },
+    "investigation": {
+      "id": "investigation",
+      "name": "取证",
+      "scenes": [
+        {
+          "id": "home",
+          "name": "儿媳家",
+          "description": "儿媳家中一贫如洗，家徒四壁。",
+          "searchHints": ["检查米缸", "查看粟米", "了解家境"]
+        },
+        {
+          "id": "neighborhood",
+          "name": "邻里",
+          "description": "街坊邻居了解这家的情况。",
+          "searchHints": ["询问邻居", "了解婆媳关系", "调查家境"]
+        }
+      ],
+      "evidences": [
+        {
+          "id": "ev_1601",
+          "name": "粟米实物",
+          "icon": "grain",
+          "description": "儿媳家中的粟米，确实一斗只能舂出三升。",
+          "sceneId": "home",
+          "isKey": true,
+          "clue": "粟米品种决定出米率，儿媳说的是实话。"
+        },
+        {
+          "id": "ev_1602",
+          "name": "邻居证词",
+          "icon": "witness",
+          "description": "邻居证明儿媳素来孝顺，每日辛苦操持家务。",
+          "sceneId": "neighborhood",
+          "isKey": true,
+          "clue": "邻居都说儿媳孝顺，婆婆是无理取闹。"
+        },
+        {
+          "id": "ev_1603",
+          "name": "婆婆诉状",
+          "icon": "note",
+          "description": "婆婆状告儿媳的诉状，言语激烈。",
+          "sceneId": "home",
+          "isKey": false,
+          "clue": "诉状内容偏激，可能另有隐情。"
+        }
+      ]
+    },
+    "interrogation": {
+      "id": "interrogation",
+      "name": "审讯",
+      "suspects": [
+        {
+          "id": "sus_1601",
+          "name": "婆婆",
+          "role": "婆婆",
+          "description": "老妇人，告儿媳不孝。",
+          "dialogues": [
+            {
+              "speaker": "婆婆",
+              "speakerTitle": "嫌疑人",
+              "content": "大人，那粟米明明可以舂出更多米，她就是想饿死我！",
+              "emotion": "angry"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "你可知粟米一斗能舂几升米？",
+              "emotion": "serious"
+            },
+            {
+              "speaker": "婆婆",
+              "speakerTitle": "嫌疑人",
+              "content": "这……我老婆子不懂这些……",
+              "emotion": "confused"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "来人，当堂验米！看看一斗粟米能舂出多少米来！",
+              "emotion": "serious"
+            }
+          ],
+          "isGuilty": false,
+          "hint": "婆婆可能被人挑拨"
+        },
+        {
+          "id": "sus_1602",
+          "name": "儿媳",
+          "role": "儿媳",
+          "description": "被诬陷的儿媳，实为孝顺之人。",
+          "dialogues": [
+            {
+              "speaker": "儿媳",
+              "speakerTitle": "嫌疑人",
+              "content": "大人，民妇说的句句是实，那粟米确实只能舂出三升米！",
+              "emotion": "cry"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "本官已命人验过，确实如此。你是冤枉的。",
+              "emotion": "kind"
+            }
+          ],
+          "isGuilty": false,
+          "hint": "儿媳是清白的"
+        }
+      ]
+    },
+    "judgment": {
+      "id": "judgment",
+      "name": "断案",
+      "correctSuspectId": "sus_1602",
+      "requiredEvidenceIds": ["ev_1601", "ev_1602"],
+      "judgmentText": {
+        "correct": "经查明，儿媳家中贫困，一斗粟米本就只能舂出三升米，并非儿媳偷工减料。儿媳每日辛苦操持，孝顺婆婆，邻居皆可作证。婆婆听信旁人挑拨，诬告儿媳不孝。念其年迈糊涂，不予追究。此案告诫：耳听为虚，眼见为实，不可轻信谗言。婆媳当互相体谅，家庭和睦方能长久。",
+        "wrong": "案情已明，请宣判。",
+        "partial": "已查明部分真相。"
+      }
+    }
+  },
+  "hints": [
+    { "id": "hint_16_1", "content": "粟米的品种决定出米率，需当堂验证。", "cost": 1 },
+    { "id": "hint_16_2", "content": "邻居的证词很重要，可以了解儿媳的为人。", "cost": 1 },
+    { "id": "hint_16_3", "content": "婆婆可能听信了别人的谗言。", "cost": 1 }
+  ]
+}

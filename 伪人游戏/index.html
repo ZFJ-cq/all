@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>伪人鉴定师</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#080810;--bg2:#0e0e1a;--card:#14142a;--card-hover:#1c1c3a;
+  --accent:#e94560;--accent2:#0f3460;--gold:#f5c518;
+  --text:#eaeaea;--text2:#8a8a9a;--text3:#4a4a5a;
+  --success:#4ecca3;--danger:#e94560;--warning:#f5c518;
+  --radius:14px;--radius-sm:10px;
+  --safe-bottom:env(safe-area-inset-bottom, 0px);
+  --safe-top:env(safe-area-inset-top, 0px);
+}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);overflow:hidden;-webkit-overflow-scrolling:touch}
+.screen{display:none;position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;scroll-behavior:smooth}
+.screen.active{display:flex;flex-direction:column;align-items:center}
+.screen::-webkit-scrollbar{width:3px}
+.screen::-webkit-scrollbar-thumb{background:var(--accent2);border-radius:3px}
+
+#homeScreen{justify-content:center;background:radial-gradient(ellipse at 50% 30%,#1a0a2e 0%,#080810 70%)}
+.home-content{text-align:center;padding:24px 20px;padding-bottom:calc(24px + var(--safe-bottom));max-width:440px;width:100%}
+.home-eye{width:80px;height:80px;margin:0 auto 16px;position:relative;animation:eyeFloat 4s ease-in-out infinite}
+.home-eye-inner{width:80px;height:80px;border-radius:50%;background:radial-gradient(circle,#e94560 0%,#e94560 30%,transparent 31%),radial-gradient(circle,#fff 0%,#fff 18%,transparent 19%);background-size:40px 40px;background-position:center;background-repeat:no-repeat;box-shadow:0 0 40px rgba(233,69,96,.4),0 0 80px rgba(233,69,96,.15);border:2px solid rgba(233,69,96,.3)}
+@keyframes eyeFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.game-logo{font-size:clamp(42px,9vw,64px);font-weight:900;letter-spacing:6px;background:linear-gradient(135deg,#e94560 0%,#f5c518 50%,#e94560 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-size:200% 200%;animation:logoShine 3s ease infinite;line-height:1.2}
+@keyframes logoShine{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.game-subtitle{font-size:15px;color:var(--text2);margin-top:4px;margin-bottom:32px;letter-spacing:8px;font-weight:300}
+.home-stats{display:flex;justify-content:center;gap:0;margin-bottom:28px;background:var(--card);border-radius:var(--radius);overflow:hidden;border:1px solid rgba(255,255,255,.05)}
+.stat-item{flex:1;text-align:center;padding:14px 8px;position:relative}
+.stat-item+.stat-item::before{content:'';position:absolute;left:0;top:20%;height:60%;width:1px;background:rgba(255,255,255,.06)}
+.stat-num{font-size:24px;font-weight:800;color:var(--gold)}
+.stat-label{font-size:11px;color:var(--text2);margin-top:2px;letter-spacing:1px}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:15px 32px;border:none;border-radius:var(--radius);font-size:16px;font-weight:700;cursor:pointer;transition:all .25s ease;letter-spacing:2px;position:relative;overflow:hidden;min-height:48px;-webkit-user-select:none;user-select:none}
+.btn:active{transform:scale(.96)}
+.btn-primary{background:linear-gradient(135deg,var(--accent),#c0392b);color:#fff;box-shadow:0 4px 24px rgba(233,69,96,.35)}
+.btn-secondary{background:var(--card);color:var(--text2);border:1px solid rgba(255,255,255,.08)}
+.btn-secondary:active{border-color:var(--accent);color:var(--accent)}
+.btn-gold{background:linear-gradient(135deg,var(--gold),#d4a200);color:#1a1a2e;box-shadow:0 4px 24px rgba(245,197,24,.3)}
+.btn-sm{padding:12px 20px;font-size:14px;min-height:42px}
+.btn-block{width:100%}
+.btn-group{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:16px}
+.home-btns{display:flex;flex-direction:column;gap:10px;align-items:center}
+.home-btns .btn{min-width:200px}
+.how-to-play{margin-top:20px;padding:16px;background:var(--card);border-radius:var(--radius);text-align:left;border:1px solid rgba(255,255,255,.04)}
+.how-to-play h3{font-size:14px;margin-bottom:10px;color:var(--gold);letter-spacing:1px}
+.how-to-play p{font-size:13px;color:var(--text2);line-height:2;margin-bottom:0}
+
+#levelScreen{background:var(--bg)}
+.level-top{width:100%;padding:calc(16px + var(--safe-top)) 20px 0;position:sticky;top:0;z-index:10;background:linear-gradient(var(--bg),var(--bg) 80%,transparent)}
+.level-top h2{font-size:22px;font-weight:800;margin-bottom:2px}
+.level-top p{color:var(--text2);font-size:13px;margin-bottom:12px}
+.level-progress-bar{height:3px;background:var(--card);border-radius:2px;overflow:hidden;margin-bottom:16px}
+.level-progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--gold));border-radius:2px;transition:width .6s ease}
+.level-list{width:100%;max-width:500px;padding:0 16px 16px;padding-bottom:calc(16px + var(--safe-bottom))}
+.level-card{display:flex;align-items:center;gap:14px;background:var(--card);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;cursor:pointer;transition:all .25s ease;border:2px solid transparent;position:relative;overflow:hidden;-webkit-user-select:none;user-select:none}
+.level-card:active:not(.locked){transform:scale(.98);background:var(--card-hover)}
+.level-card.locked{opacity:.35;cursor:not-allowed;filter:grayscale(.5)}
+.level-card.completed{border-color:rgba(78,204,163,.3)}
+.level-card.current{border-color:rgba(245,197,24,.4);box-shadow:0 0 0 1px rgba(245,197,24,.1)}
+.level-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;position:relative}
+.level-icon.diff-easy{background:rgba(78,204,163,.12)}
+.level-icon.diff-normal{background:rgba(59,130,246,.12)}
+.level-icon.diff-hard{background:rgba(245,197,24,.12)}
+.level-icon.diff-hell{background:rgba(233,69,96,.12)}
+.level-info{flex:1;min-width:0}
+.level-title-row{display:flex;align-items:center;gap:8px;margin-bottom:2px}
+.level-title{font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.level-diff-tag{font-size:10px;padding:2px 7px;border-radius:6px;font-weight:700;flex-shrink:0;letter-spacing:.5px}
+.diff-tag-easy{background:rgba(78,204,163,.15);color:var(--success)}
+.diff-tag-normal{background:rgba(59,130,246,.15);color:#3b82f6}
+.diff-tag-hard{background:rgba(245,197,24,.15);color:var(--gold)}
+.diff-tag-hell{background:rgba(233,69,96,.15);color:var(--danger)}
+.level-stars{font-size:12px;letter-spacing:1px;margin-top:2px}
+.level-right{display:flex;flex-direction:column;align-items:center;gap:2px;flex-shrink:0}
+.level-num{font-size:20px;font-weight:900;color:var(--text3)}
+.level-card.completed .level-num{color:var(--success)}
+.level-card.current .level-num{color:var(--gold)}
+.level-lock{font-size:16px;color:var(--text3)}
+.level-connector{width:2px;height:10px;background:linear-gradient(var(--accent2),transparent);margin:0 auto 0 38px;border-radius:1px}
+
+.back-btn{position:sticky;top:calc(12px + var(--safe-top));left:12px;z-index:20;background:rgba(20,20,42,.9);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.06);color:var(--text);width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;transition:all .25s;margin:12px 0 0 12px;flex-shrink:0;align-self:flex-start}
+.back-btn:active{transform:scale(.9);border-color:var(--accent)}
+
+#gameScreen{background:var(--bg)}
+.game-header{width:100%;position:sticky;top:0;z-index:10;background:rgba(8,8,16,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.04);padding:0 16px}
+.game-header-inner{display:flex;align-items:center;gap:10px;padding:12px 0;max-width:600px;margin:0 auto}
+.game-back{background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;padding:4px;min-width:32px;min-height:32px;display:flex;align-items:center;justify-content:center}
+.game-back:active{color:var(--accent)}
+.game-progress{flex:1;height:3px;background:var(--card);border-radius:2px;overflow:hidden}
+.game-progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--gold));border-radius:2px;transition:width .5s ease}
+.game-level-tag{font-size:12px;color:var(--text2);white-space:nowrap;font-weight:600}
+.game-timer{font-size:13px;color:var(--gold);font-weight:700;font-variant-numeric:tabular-nums;min-width:42px;text-align:right}
+
+.game-body{width:100%;max-width:600px;padding:0 16px;margin:0 auto;flex:1}
+.scene-card{background:var(--card);border-radius:var(--radius);padding:18px;margin-top:14px;border-left:3px solid var(--accent);position:relative}
+.scene-icon{font-size:24px;margin-bottom:6px}
+.scene-title{font-size:17px;font-weight:800;margin-bottom:6px}
+.scene-desc{font-size:13px;line-height:1.9;color:var(--text2)}
+.section-label{font-size:12px;color:var(--text3);letter-spacing:2px;margin-top:16px;margin-bottom:8px;padding-left:2px;font-weight:600}
+.char-card{background:var(--card);border-radius:var(--radius);margin-bottom:8px;border:2px solid transparent;transition:all .25s ease;overflow:hidden;-webkit-user-select:none;user-select:none}
+.char-card.selectable{cursor:pointer}
+.char-card.selectable:active{transform:scale(.98)}
+.char-card.selected{border-color:var(--accent);background:rgba(233,69,96,.06)}
+.char-card.revealed-fake{border-color:var(--danger);background:rgba(233,69,96,.08)}
+.char-card.revealed-real{border-color:var(--success);background:rgba(78,204,163,.05)}
+.char-main{display:flex;align-items:center;gap:12px;padding:14px 16px}
+.char-avatar{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.char-info{flex:1;min-width:0}
+.char-name{font-weight:700;font-size:15px}
+.char-role{font-size:12px;color:var(--text2);margin-top:1px}
+.char-expand{font-size:12px;color:var(--text3);transition:transform .3s;flex-shrink:0}
+.char-card.expanded .char-expand{transform:rotate(180deg)}
+.char-dialogues{max-height:0;overflow:hidden;transition:max-height .4s ease}
+.char-card.expanded .char-dialogues{max-height:600px}
+.dialogue-list{padding:0 16px 14px}
+.dialogue{font-size:13px;line-height:1.8;padding:8px 12px;margin-top:6px;background:rgba(255,255,255,.02);border-radius:var(--radius-sm);border-left:2px solid var(--accent2);color:var(--text2)}
+.dialogue .d-label{color:var(--accent);font-weight:700;font-size:12px}
+.char-result{padding:10px 16px;font-size:13px;font-weight:600;display:none;border-top:1px solid rgba(255,255,255,.04)}
+.char-card.revealed-fake .char-result{display:flex;align-items:center;gap:6px;color:var(--danger);background:rgba(233,69,96,.06)}
+.char-card.revealed-real .char-result{display:flex;align-items:center;gap:6px;color:var(--success);background:rgba(78,204,163,.04)}
+.clue-box{background:rgba(245,197,24,.06);border:1px solid rgba(245,197,24,.12);border-radius:var(--radius);padding:12px 14px;font-size:13px;color:var(--gold);line-height:1.7;margin-top:14px}
+.clue-label{font-weight:700;margin-bottom:2px;font-size:12px;letter-spacing:1px}
+
+.game-footer{position:sticky;bottom:0;z-index:10;background:rgba(8,8,16,.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid rgba(255,255,255,.04);padding:12px 16px;padding-bottom:calc(12px + var(--safe-bottom));width:100%}
+.game-footer-inner{max-width:600px;margin:0 auto}
+.judge-row{display:flex;align-items:center;gap:10px}
+.judge-info{flex:1;font-size:13px;color:var(--text2);min-width:0}
+.judge-info .selected-name{color:var(--accent);font-weight:700}
+.judge-btn{flex-shrink:0}
+
+.result-area{padding:16px;padding-bottom:calc(16px + var(--safe-bottom));max-width:600px;width:100%;margin:0 auto}
+.result-card{background:var(--card);border-radius:var(--radius);padding:24px 20px;text-align:center;border:1px solid rgba(255,255,255,.04)}
+.result-icon{font-size:48px;margin-bottom:10px}
+.result-title{font-size:22px;font-weight:800;margin-bottom:6px}
+.result-desc{font-size:14px;color:var(--text2);line-height:1.6;margin-bottom:16px}
+.result-score{font-size:40px;font-weight:900;color:var(--gold);margin-bottom:2px}
+.result-score-label{font-size:12px;color:var(--text2);margin-bottom:16px;letter-spacing:1px}
+.result-detail{text-align:left;background:rgba(255,255,255,.02);border-radius:var(--radius-sm);padding:14px;margin-bottom:16px;font-size:13px;line-height:1.9;color:var(--text2);border:1px solid rgba(255,255,255,.03)}
+.result-detail .fake-name{color:var(--danger);font-weight:700}
+.result-detail .clue-point{color:var(--gold);font-weight:600}
+
+#endingScreen{justify-content:center;background:radial-gradient(ellipse at 50% 40%,#1a0a2e 0%,#080810 70%)}
+.ending-content{text-align:center;padding:24px 20px;padding-bottom:calc(24px + var(--safe-bottom));max-width:440px;width:100%}
+.ending-title{font-size:32px;font-weight:900;background:linear-gradient(135deg,var(--gold),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px}
+.ending-subtitle{font-size:14px;color:var(--text2);margin-bottom:28px}
+.ending-rank{font-size:64px;margin-bottom:8px}
+.ending-rank-title{font-size:22px;font-weight:800;color:var(--gold);margin-bottom:4px}
+.ending-rank-desc{font-size:13px;color:var(--text2);margin-bottom:28px;line-height:1.8;white-space:pre-line}
+.ending-stats{display:flex;justify-content:center;gap:0;margin-bottom:28px;background:var(--card);border-radius:var(--radius);overflow:hidden;border:1px solid rgba(255,255,255,.04)}
+.ending-stat{flex:1;text-align:center;padding:14px 8px;position:relative}
+.ending-stat+.ending-stat::before{content:'';position:absolute;left:0;top:20%;height:60%;width:1px;background:rgba(255,255,255,.06)}
+.ending-stat-num{font-size:22px;font-weight:800;color:var(--accent)}
+.ending-stat-label{font-size:11px;color:var(--text2);margin-top:2px}
+
+.fade-in{animation:fadeIn .4s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.slide-up{animation:slideUp .35s ease}
+@keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+.particles{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.particle{position:absolute;width:2px;height:2px;background:var(--accent);border-radius:50%;opacity:.2;animation:float linear infinite}
+@keyframes float{0%{transform:translateY(100vh);opacity:0}10%{opacity:.2}90%{opacity:.2}100%{transform:translateY(-10vh);opacity:0}}
+
+@media(min-width:500px){
+  .level-list{padding:0 24px 24px}
+  .game-body{padding:0 24px}
+}
+@media(max-width:360px){
+  .game-logo{letter-spacing:3px}
+  .game-subtitle{letter-spacing:4px;font-size:13px}
+  .char-avatar{width:38px;height:38px;font-size:18px}
+  .char-main{padding:12px 14px;gap:10px}
+}
+</style>
+</head>
+<body>
+
+<div class="particles" id="particles"></div>
+
+<div class="screen active" id="homeScreen">
+  <div class="home-content">
+    <div class="home-eye"><div class="home-eye-inner"></div></div>
+    <div class="game-logo">伪人</div>
+    <div class="game-subtitle">鉴 定 师</div>
+    <div class="home-stats">
+      <div class="stat-item"><div class="stat-num" id="homeCleared">0</div><div class="stat-label">已通关</div></div>
+      <div class="stat-item"><div class="stat-num" id="homeTotal">8</div><div class="stat-label">总关卡</div></div>
+      <div class="stat-item"><div class="stat-num" id="homeScore">0</div><div class="stat-label">总分</div></div>
+    </div>
+    <div class="home-btns">
+      <button class="btn btn-primary" onclick="showScreen('levelScreen');renderLevels()">开始鉴定</button>
+      <button class="btn btn-secondary btn-sm" onclick="resetProgress()">重置进度</button>
+    </div>
+    <div class="how-to-play">
+      <h3>📖 游戏规则</h3>
+      <p>🔍 每个场景中混入了一个「伪人」</p>
+      <p>💬 点击角色展开对话，仔细阅读</p>
+      <p>🧩 寻找对话中的矛盾和破绽</p>
+      <p>⚖️ 选出伪人并揭晓真相</p>
+    </div>
+  </div>
+</div>
+
+<div class="screen" id="levelScreen">
+  <div class="level-top">
+    <div style="display:flex;align-items:center;gap:12px">
+      <button class="back-btn" style="position:static;margin:0;flex-shrink:0" onclick="showScreen('homeScreen');updateHomeStats()">←</button>
+      <div style="flex:1">
+        <h2>选择关卡</h2>
+        <p>找出每个场景中的伪人</p>
+      </div>
+    </div>
+    <div class="level-progress-bar"><div class="level-progress-fill" id="levelProgressFill" style="width:0%"></div></div>
+  </div>
+  <div class="level-list" id="levelList"></div>
+</div>
+
+<div class="screen" id="gameScreen">
+  <div class="game-header">
+    <div class="game-header-inner">
+      <button class="game-back" onclick="exitGame()">←</button>
+      <div class="game-progress"><div class="game-progress-fill" id="progressFill" style="width:0%"></div></div>
+      <span class="game-level-tag" id="progressText">1/8</span>
+      <span class="game-timer" id="gameTimer">00:00</span>
+    </div>
+  </div>
+  <div class="game-body" id="gameBody"></div>
+  <div class="game-footer" id="gameFooter" style="display:none">
+    <div class="game-footer-inner">
+      <div class="judge-row">
+        <div class="judge-info" id="judgeInfo">点击角色选择你认为的伪人</div>
+        <button class="btn btn-primary btn-sm judge-btn" id="judgeBtn" disabled onclick="makeJudgment()">确认鉴定</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="screen" id="endingScreen">
+  <div class="ending-content">
+    <div class="ending-title">鉴定完成</div>
+    <div class="ending-subtitle">你已识破所有伪人的伪装</div>
+    <div class="ending-rank" id="endingRank"></div>
+    <div class="ending-rank-title" id="endingRankTitle"></div>
+    <div class="ending-rank-desc" id="endingRankDesc"></div>
+    <div class="ending-stats">
+      <div class="ending-stat"><div class="ending-stat-num" id="endingCorrect">0</div><div class="ending-stat-label">正确识别</div></div>
+      <div class="ending-stat"><div class="ending-stat-num" id="endingScore">0</div><div class="ending-stat-label">总分</div></div>
+      <div class="ending-stat"><div class="ending-stat-num" id="endingTime">—</div><div class="ending-stat-label">总用时</div></div>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-gold" onclick="showScreen('levelScreen');renderLevels()">再次挑战</button>
+      <button class="btn btn-secondary btn-sm" onclick="resetProgress();showScreen('homeScreen')">重置进度</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const DIFF_MAP = {'简单':'easy','普通':'normal','困难':'hard','噩梦':'hell'};
+
+const LEVELS = [
+  {
+    id:1,title:"咖啡馆的午后",diff:"简单",icon:"☕",
+    scene:"一家安静的街角咖啡馆，午后的阳光透过落地窗洒在木质桌面上。咖啡师正在擦拭吧台，一位常客坐在老位置翻着杂志，门口走进来一位面生的顾客。",
+    characters:[
+      {name:"小林",role:"咖啡师",avatar:"👨‍🍳",color:"#4ecca3",
+        dialogues:["欢迎光临！还是老样子，王姐？","今天新到了云南的豆子，要不要试试？","小陈是吧？第一次来？我们这儿的拿铁奶泡打得特别细腻。"]},
+      {name:"王姐",role:"常客",avatar:"👩",color:"#e94560",
+        dialogues:["小林，给我来杯美式，少冰。","这杂志上说最近开了家新店，不过我还是习惯来这儿。","新来的啊？这家店的WiFi密码是店名加8个8，特别好记。"]},
+      {name:"小陈",role:"新顾客",avatar:"🧑",color:"#f5c518",fake:true,
+        dialogues:["这杯拿铁的奶泡很细腻，拉花也好看。","你们这儿的WiFi密码多少？我手机信号不太好。","我就在附近上班，以后应该常来。"]}
+    ],
+    answer:2,
+    explanation:"小陈是伪人。他点的是美式咖啡（从吧台取走的杯子上没有拉花），却评论「拿铁的奶泡很细腻」——美式咖啡根本没有奶泡。而且他不知道WiFi密码，但王姐刚说了密码是店名加8个8，真正在店里的人不可能没注意到这个信息。",
+    clueHint:"💡 注意每个人说的话和他们实际点的饮品是否一致"
+  },
+  {
+    id:2,title:"深夜便利店",diff:"简单",icon:"🏪",
+    scene:"凌晨两点的便利店，日光灯发出嗡嗡的声响。店员百无聊赖地刷着手机，一个穿着卫衣的女生进来买泡面，还有一位大叔在货架前徘徊了很久。",
+    characters:[
+      {name:"阿杰",role:"夜班店员",avatar:"🧑‍💼",color:"#4ecca3",
+        dialogues:["又来买泡面啊小美？今天只剩香辣牛肉的了。","张叔，您又来啦？还是老样子一包红塔山？","我们这个片区就这一家便利店，方圆两公里没有别的店了。"]},
+      {name:"小美",role:"大学生",avatar:"👩‍🎓",color:"#e94560",
+        dialogues:["阿杰哥，还有酸辣粉味的吗？我室友就爱吃那个。","期末复习到这么晚，全靠泡面续命了。","张叔好，您也这么晚来买东西啊？"]},
+      {name:"张叔",role:"附近居民",avatar:"👴",color:"#f5c518",fake:true,
+        dialogues:["我每天走后面那条巷子来这儿买烟，习惯了。","给我来包黄鹤楼，你们一直有货的吧？","住这一带十来年了，闭着眼都能走到这儿。"]}
+    ],
+    answer:2,
+    explanation:"张叔是伪人。他说「每天走后面那条巷子」，但便利店后面是一堵围墙，根本没有巷子。而且他要买「黄鹤楼」，阿杰说的一直是「红塔山」——这家店从来不卖黄鹤楼，住在附近十年的人不可能不知道。",
+    clueHint:"💡 留意每个人对周围环境的描述是否准确"
+  },
+  {
+    id:3,title:"公司团建",diff:"普通",icon:"🏔️",
+    scene:"公司组织户外团建，大家围坐在草地上休息。HR在整理活动物资，技术部老刘在啃苹果，新来的同事小赵在四处张望，销售部的陈姐在自拍。",
+    characters:[
+      {name:"小周",role:"HR",avatar:"👩‍💼",color:"#4ecca3",
+        dialogues:["大家注意安全啊，下午还有拓展项目。","小赵你来了快三个月了吧？适应得怎么样？","陈姐别自拍了，来帮忙搬一下物资。"]},
+      {name:"老刘",role:"技术部",avatar:"👨‍💻",color:"#e94560",
+        dialogues:["这苹果不错，食堂新换的供应商吧？","小赵，你工位在几楼来着？我好像没在办公区见过你。","上次搬工位之后我老走错楼层，现在3楼全是咱们技术部。"]},
+      {name:"小赵",role:"新同事",avatar:"🧑‍💼",color:"#f5c518",fake:true,
+        dialogues:["来公司三个月了，大家都很照顾我。","我工位在4楼，跟销售部一起。","对了，马总上次开会说的那个项目，进展怎么样了？"]},
+      {name:"陈姐",role:"销售部",avatar:"💃",color:"#9b59b6",
+        dialogues:["这草地拍照太出片了！","小赵你也来一张？","我们销售部在4楼，跟你们新来的几个坐一起。"]}
+    ],
+    answer:2,
+    explanation:"小赵是伪人。他说「来公司三个月了」，但老刘提到「上次搬工位后3楼全是技术部」，而小赵说自己在4楼——如果来了三个月，应该经历过搬工位。最关键的破绽是他叫CEO「马总」，但公司CEO姓「牛」，一个来了三个月的员工不可能叫错老板的姓。",
+    clueHint:"💡 注意新员工对公司基本信息的了解程度"
+  },
+  {
+    id:4,title:"同学聚会",diff:"普通",icon:"🎓",
+    scene:"高中毕业十年聚会，包厢里热闹非凡。班长张罗着点菜，当年的文艺委员还是那么文静，体育委员壮了一圈，角落里还坐着一个自称是转学来的老同学。",
+    characters:[
+      {name:"李磊",role:"班长",avatar:"👨",color:"#4ecca3",
+        dialogues:["来来来，都坐都坐！老规矩我先点几个硬菜。","阿明？哎你什么时候转来的我怎么没印象……哦对对对，高三下学期是吧？","还记得高二那次运动会吗？大壮跑1000米跑岔气了哈哈哈。"]},
+      {name:"小雪",role:"文艺委员",avatar:"👩",color:"#e94560",
+        dialogues:["好久不见大家，我都快认不出来了。","阿明同学，我记得你好像是美术特长生转来的？","那时候赵老师当班主任，天天让我们早读背古诗。"]},
+      {name:"大壮",role:"体育委员",avatar:"💪",color:"#3498db",
+        dialogues:["哈哈别提1000米了，我现在跑都跑不动。","阿明，你当年是不是也参加了运动会？跑哪个项目来着？","赵老师现在退休了，上次我还在公园碰见他遛鸟。"]},
+      {name:"阿明",role:"转学生",avatar:"🤓",color:"#f5c518",fake:true,
+        dialogues:["对对对，我高三下转来的，待了半年就毕业了。","我记得高三那次运动会特别热闹，我还参加了4×100接力。","赵老师对我们可严了，天天盯着我们晚自习。"]}
+    ],
+    answer:3,
+    explanation:"阿明是伪人。他说「高三那次运动会特别热闹」，但这所中学高三不参加运动会——这是学校传统，高三学生全力备考。而且他说赵老师「天天盯着晚自习」，但赵老师是体育老师，从不负责晚自习。真正的高三转学生不可能不知道这些。",
+    clueHint:"💡 转学生对学校的特殊规定和老师职责了解是否准确"
+  },
+  {
+    id:5,title:"医院夜班",diff:"困难",icon:"🏥",
+    scene:"深夜的医院急诊科，走廊里弥漫着消毒水的气味。护士长在整理病历，实习医生刚处理完一个病人，保安在门口值守，还有一位自称来探病的先生在走廊徘徊。",
+    characters:[
+      {name:"刘姐",role:"护士长",avatar:"👩‍⚕️",color:"#4ecca3",
+        dialogues:["今晚还算太平，就来了三个急诊。","小孙，5床那个病人半小时后量个体温。","王先生，探视时间已经过了，您明天白天再来吧。"]},
+      {name:"小孙",role:"实习医生",avatar:"👨‍⚕️",color:"#e94560",
+        dialogues:["刘姐，3床那位大爷情况稳定了，我开了医嘱。","王先生，心内科在5楼，您走错楼层了。","我下个月转正考试，最近天天值夜班刷经验。"]},
+      {name:"老赵",role:"保安",avatar:"👮",color:"#3498db",
+        dialogues:["今晚大门锁了，出去走侧门。","王先生，您要上楼探病得换拖鞋，这是医院规定。","我在这干了八年了，每个科室在几楼我闭眼都知道。"]},
+      {name:"王先生",role:"探病家属",avatar:"🧑",color:"#f5c518",fake:true,
+        dialogues:["我母亲住在3楼心内科，我上来给她送点东西。","我知道探视时间过了，但明天一早我得出差，就想看一眼。","拖鞋我穿着呢，你看，医院发的那种蓝色拖鞋。"]}
+    ],
+    answer:3,
+    explanation:"王先生是伪人。他说母亲在「3楼心内科」，但小孙明确说了「心内科在5楼」——3楼是急诊科。而且他说穿着「医院发的蓝色拖鞋」，但医院提供的访客拖鞋是白色的，蓝色是医护人员专用的。一个真正来探病的人不会搞错楼层，也不会穿错拖鞋颜色。",
+    clueHint:"💡 仔细对比每个人对医院楼层和物品的描述"
+  },
+  {
+    id:6,title:"婚礼现场",diff:"困难",icon:"💒",
+    scene:"一场温馨的婚礼正在举行，宾客们举杯祝福。新娘的闺蜜在帮忙整理裙摆，新郎的表弟在拍照，婚礼策划师在协调流程，还有一位自称新郎大学室友的人坐在主桌。",
+    characters:[
+      {name:"小琳",role:"新娘闺蜜",avatar:"👰",color:"#4ecca3",
+        dialogues:["新娘妆都哭花了，我带她去补一下。","新郎大学那会儿可瘦了，现在都发福了。","Coco，流程单上第三个环节是不是切蛋糕？"]},
+      {name:"阿豪",role:"新郎表弟",avatar:"🤵",color:"#e94560",
+        dialogues:["哥，敬酒的时候记得别喝真酒啊！","阿杰哥，你从南京过来辛苦了！","我帮你们拍的照片回头发群里。"]},
+      {name:"Coco",role:"策划师",avatar:"👩‍🎨",color:"#9b59b6",
+        dialogues:["各位注意，五分钟后新人入场。","小琳，第三个环节是交换戒指，切蛋糕在第五。","阿杰先生，您坐主桌右边第二个位置。"]},
+      {name:"阿杰",role:"大学室友",avatar:"🧔",color:"#f5c518",fake:true,
+        dialogues:["大学四年睡我上铺的兄弟，终于结婚了！","我从南京坐高铁过来的，差点迟到。","还记得咱们在学校后街那家烧烤店通宵吗？老板叫什么来着……老孙！对，孙老板！"]}
+    ],
+    answer:3,
+    explanation:"阿杰是伪人。阿豪说「你从南京过来辛苦了」，但新郎的大学在上海——如果真是四年室友，不可能说错大学所在的城市。而且他说学校后街烧烤店老板叫「老孙」，但那家店老板姓「周」，开了十几年从来没换过人，这是那届学生都知道的。",
+    clueHint:"💡 室友对大学城市的描述和共同记忆是否一致"
+  },
+  {
+    id:7,title:"直播间",diff:"噩梦",icon:"📺",
+    scene:"一个拥有百万粉丝的直播间正在进行晚间直播。主播正在和弹幕互动，老粉在评论区刷梗，管理员在维护秩序，还有一个自称从开播就关注的「真爱粉」频频发言。",
+    characters:[
+      {name:"小雨",role:"主播",avatar:"🎤",color:"#4ecca3",
+        dialogues:["家人们晚上好！今天聊点什么呢？","星辰你又来啦，老粉了！","对对对，我去年换过一次直播间背景，被你们吐槽了好久。"]},
+      {name:"星辰",role:"老粉",avatar:"⭐",color:"#e94560",
+        dialogues:["小雨今天状态不错啊！","还记得你第一次直播的时候只有30个人看，现在百万粉了！","阿K，帮我禁一下那个刷广告的。"]},
+      {name:"阿K",role:"管理员",avatar:"🛡️",color:"#3498db",
+        dialogues:["大家文明发言，不要引战。","星辰说得对，小雨刚开播那会儿确实人很少。","真爱粉你好，新来的记得看置顶公告。"]},
+      {name:"真爱粉",role:"粉丝",avatar:"❤️",color:"#f5c518",fake:true,
+        dialogues:["我从你开播第一天就关注了，铁粉中的铁粉！","你以前那个粉色背景超好看的，换了好可惜。","还记得你第一次破万人的那晚吗？你激动得哭了，我也跟着哭了。"]}
+    ],
+    answer:3,
+    explanation:"真爱粉是伪人。她说「从开播第一天就关注」，但小雨是去年才开播的，而真爱粉提到「以前那个粉色背景」——小雨从来没有用过粉色背景，她之前用的是蓝色背景。而且她说「第一次破万人你激动得哭了」，但小雨第一次破万时是因为感冒没直播，是第二天看回放才知道的。真正的铁粉不会记错这些名场面。",
+    clueHint:"💡 真正的老粉对直播间的历史细节应该了如指掌"
+  },
+  {
+    id:8,title:"密室逃脱",diff:"噩梦",icon:"🔐",
+    scene:"你们一行人被困在一间密室里，墙上的倒计时在滴答作响。队长在分析线索，解谜高手在研究密码锁，一个胆小的女生缩在角落，还有一位自称玩过上百个密室的老玩家在指挥全局。",
+    characters:[
+      {name:"小何",role:"队长",avatar:"🧭",color:"#4ecca3",
+        dialogues:["大家别慌，我们先把所有线索找齐。","老王，你玩过这么多密室，有没有见过类似的机关？","小月，你去看看那个书架后面有没有暗格。"]},
+      {name:"阿诚",role:"解谜高手",avatar:"🧩",color:"#e94560",
+        dialogues:["这个密码锁是四位数的，线索应该在墙上那幅画里。","老王，你说的对讲机在哪儿？我找不到。","等等，这个机关需要两个人同时按才能触发。"]},
+      {name:"小月",role:"胆小女生",avatar:"😨",color:"#9b59b6",
+        dialogues:["我好害怕，这个房间好暗啊……","书架后面有个暗格！里面有一张纸条！","老王，你说的对讲机是不是门口那个黑色的东西？"]},
+      {name:"老王",role:"密室老手",avatar:"🎮",color:"#f5c518",fake:true,
+        dialogues:["放心，这个密室我玩过，难度不算高。","大家不用急，密室都有对讲机可以求助的，找不到就问工作人员。","这种四位密码锁一般跟房间主题有关，看看有没有数字线索。"]}
+    ],
+    answer:3,
+    explanation:"老王是伪人。他说「这个密室我玩过」，但这间密室是该店独家原创的全球首发主题，还没有任何人通关过。他说「密室都有对讲机可以求助」，但这家密室用的是门口的呼叫按钮，根本没有对讲机——小月找到的黑色东西是呼叫按钮，不是对讲机。一个玩过上百个密室的老手不会搞错这么基本的道具。",
+    clueHint:"💡 老手的经验是否真的适用于当前这个密室"
+  }
+];
+
+let gameState = {
+  currentLevel: null,
+  selectedChar: null,
+  phase: 'observe',
+  timer: null,
+  seconds: 0,
+  scores: {},
+  cleared: {},
+  totalScore: 0,
+  totalTime: 0
+};
+
+function loadProgress() {
+  try {
+    const saved = localStorage.getItem('fakePersonGame');
+    if (saved) {
+      const data = JSON.parse(saved);
+      gameState.scores = data.scores || {};
+      gameState.cleared = data.cleared || {};
+      gameState.totalScore = data.totalScore || 0;
+      gameState.totalTime = data.totalTime || 0;
+    }
+  } catch(e) {}
+}
+
+function saveProgress() {
+  try {
+    localStorage.setItem('fakePersonGame', JSON.stringify({
+      scores: gameState.scores,
+      cleared: gameState.cleared,
+      totalScore: gameState.totalScore,
+      totalTime: gameState.totalTime
+    }));
+  } catch(e) {}
+}
+
+function resetProgress() {
+  if (!confirm('确定要重置所有游戏进度吗？')) return;
+  gameState.scores = {};
+  gameState.cleared = {};
+  gameState.totalScore = 0;
+  gameState.totalTime = 0;
+  saveProgress();
+  updateHomeStats();
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.getElementById(id).scrollTop = 0;
+}
+
+function updateHomeStats() {
+  const cleared = Object.keys(gameState.cleared).length;
+  document.getElementById('homeCleared').textContent = cleared;
+  document.getElementById('homeTotal').textContent = LEVELS.length;
+  document.getElementById('homeScore').textContent = gameState.totalScore;
+}
+
+function getDiffClass(diff) {
+  return DIFF_MAP[diff] || 'easy';
+}
+
+function renderLevels() {
+  const list = document.getElementById('levelList');
+  list.innerHTML = '';
+  const clearedCount = Object.keys(gameState.cleared).length;
+  const progressPct = (clearedCount / LEVELS.length * 100).toFixed(0);
+  document.getElementById('levelProgressFill').style.width = progressPct + '%';
+
+  LEVELS.forEach((level, i) => {
+    const isCleared = gameState.cleared[level.id];
+    const isUnlocked = i === 0 || gameState.cleared[LEVELS[i-1].id];
+    const diffCls = getDiffClass(level.diff);
+
+    const card = document.createElement('div');
+    card.className = 'level-card' + (isCleared ? ' completed' : '') + (!isUnlocked ? ' locked' : '') + (isUnlocked && !isCleared ? ' current' : '');
+
+    const stars = isCleared ? getStars(gameState.scores[level.id]) : '';
+    const rightContent = !isUnlocked ? '<div class="level-lock">🔒</div>' :
+      `<div class="level-num">${String(level.id).padStart(2,'0')}</div>`;
+
+    card.innerHTML = `
+      <div class="level-icon diff-${diffCls}">${level.icon}</div>
+      <div class="level-info">
+        <div class="level-title-row">
+          <span class="level-title">${level.title}</span>
+          <span class="level-diff-tag diff-tag-${diffCls}">${level.diff}</span>
+        </div>
+        ${isCleared ? '<div class="level-stars">' + stars + '</div>' : ''}
+      </div>
+      <div class="level-right">${rightContent}</div>
+    `;
+
+    if (isUnlocked) {
+      card.onclick = () => startLevel(level.id);
+    }
+
+    list.appendChild(card);
+
+    if (i < LEVELS.length - 1) {
+      const connector = document.createElement('div');
+      connector.className = 'level-connector';
+      if (!isUnlocked) connector.style.opacity = '0.15';
+      list.appendChild(connector);
+    }
+  });
+}
+
+function getStars(score) {
+  if (score >= 90) return '⭐⭐⭐';
+  if (score >= 60) return '⭐⭐';
+  if (score > 0) return '⭐';
+  return '';
+}
+
+function startLevel(levelId) {
+  const level = LEVELS.find(l => l.id === levelId);
+  if (!level) return;
+  gameState.currentLevel = level;
+  gameState.selectedChar = null;
+  gameState.phase = 'observe';
+  gameState.seconds = 0;
+  showScreen('gameScreen');
+  renderGame();
+  startTimer();
+}
+
+function startTimer() {
+  clearInterval(gameState.timer);
+  gameState.seconds = 0;
+  updateTimerDisplay();
+  gameState.timer = setInterval(() => {
+    gameState.seconds++;
+    updateTimerDisplay();
+  }, 1000);
+}
+
+function stopTimer() {
+  clearInterval(gameState.timer);
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(gameState.seconds / 60).toString().padStart(2, '0');
+  const s = (gameState.seconds % 60).toString().padStart(2, '0');
+  document.getElementById('gameTimer').textContent = m + ':' + s;
+}
+
+function renderGame() {
+  const level = gameState.currentLevel;
+  const progress = ((level.id) / LEVELS.length * 100).toFixed(0);
+  document.getElementById('progressFill').style.width = progress + '%';
+  document.getElementById('progressText').textContent = level.id + '/' + LEVELS.length;
+
+  const body = document.getElementById('gameBody');
+  let html = `
+    <div class="scene-card fade-in">
+      <div class="scene-icon">${level.icon}</div>
+      <div class="scene-title">${level.title}</div>
+      <div class="scene-desc">${level.scene}</div>
+    </div>
+    <div class="section-label">角色对话（点击展开）</div>
+  `;
+
+  level.characters.forEach((char, i) => {
+    let dialoguesHTML = '';
+    if (Array.isArray(char.dialogues)) {
+      char.dialogues.forEach(d => {
+        dialoguesHTML += `<div class="dialogue"><span class="d-label">${char.name}：</span>${d}</div>`;
+      });
+    } else {
+      dialoguesHTML += `<div class="dialogue"><span class="d-label">${char.name}：</span>${char.dialogues}</div>`;
+    }
+
+    html += `
+      <div class="char-card selectable" id="char-${i}" onclick="toggleChar(${i})">
+        <div class="char-main">
+          <div class="char-avatar" style="background:${char.color}18;color:${char.color}">${char.avatar}</div>
+          <div class="char-info">
+            <div class="char-name">${char.name}</div>
+            <div class="char-role">${char.role}</div>
+          </div>
+          <div class="char-expand">▼</div>
+        </div>
+        <div class="char-dialogues">
+          <div class="dialogue-list">${dialoguesHTML}</div>
+        </div>
+        <div class="char-result" id="charResult-${i}"></div>
+      </div>
+    `;
+  });
+
+  html += `
+    <div class="clue-box">
+      <div class="clue-label">🔍 鉴定提示</div>
+      ${level.clueHint}
+    </div>
+    <div style="height:16px"></div>
+  `;
+
+  body.innerHTML = html;
+
+  document.getElementById('gameFooter').style.display = 'block';
+  document.getElementById('judgeInfo').innerHTML = '点击角色选择你认为的伪人';
+  document.getElementById('judgeBtn').disabled = true;
+}
+
+function toggleChar(index) {
+  if (gameState.phase !== 'observe') return;
+  const card = document.getElementById('char-' + index);
+  const wasExpanded = card.classList.contains('expanded');
+
+  if (!wasExpanded) {
+    card.classList.add('expanded');
+  }
+
+  selectChar(index);
+}
+
+function selectChar(index) {
+  if (gameState.phase !== 'observe') return;
+  gameState.selectedChar = index;
+  const level = gameState.currentLevel;
+  const charName = level.characters[index].name;
+
+  document.querySelectorAll('.char-card').forEach((c, i) => {
+    c.classList.toggle('selected', i === index);
+  });
+
+  document.getElementById('judgeInfo').innerHTML = '已选择：<span class="selected-name">' + charName + '</span>';
+  document.getElementById('judgeBtn').disabled = false;
+}
+
+function makeJudgment() {
+  if (gameState.selectedChar === null) return;
+  gameState.phase = 'reveal';
+  stopTimer();
+
+  const level = gameState.currentLevel;
+  const correct = gameState.selectedChar === level.answer;
+  const timeBonus = Math.max(0, 30 - gameState.seconds);
+  const baseScore = correct ? 70 : 0;
+  const score = Math.min(100, baseScore + timeBonus);
+
+  document.querySelectorAll('.char-card').forEach((card, i) => {
+    card.classList.remove('selectable', 'selected');
+    card.onclick = null;
+    card.classList.add('expanded');
+
+    if (i === level.answer) {
+      card.classList.add('revealed-fake');
+      document.getElementById('charResult-' + i).innerHTML = '❌ 伪人 — ' + level.characters[i].name;
+    } else {
+      card.classList.add('revealed-real');
+      document.getElementById('charResult-' + i).innerHTML = '✅ 真人 — ' + level.characters[i].name;
+    }
+  });
+
+  document.getElementById('gameFooter').style.display = 'none';
+
+  const fakeChar = level.characters[level.answer];
+  const explanationHTML = level.explanation.replace(new RegExp(fakeChar.name, 'g'), '<span class="fake-name">' + fakeChar.name + '</span>');
+
+  const resultHTML = `
+    <div class="result-area fade-in">
+      <div class="result-card">
+        <div class="result-icon">${correct ? '🎯' : '💔'}</div>
+        <div class="result-title">${correct ? '鉴定成功！' : '鉴定失败'}</div>
+        <div class="result-desc">${correct ? '你成功识破了伪人的伪装！' : '伪人逃过了你的眼睛……'}</div>
+        <div class="result-score">${score}</div>
+        <div class="result-score-label">鉴定评分</div>
+        <div class="result-detail">
+          <div style="margin-bottom:6px"><strong>真相揭晓：</strong></div>
+          伪人是 <span class="fake-name">${fakeChar.name}</span>（${fakeChar.role}）<br><br>
+          ${explanationHTML}
+        </div>
+        <div class="btn-group">
+          ${level.id < LEVELS.length
+            ? '<button class="btn btn-primary" onclick="startLevel(' + (level.id + 1) + ')">下一关 →</button>'
+            : '<button class="btn btn-gold" onclick="showEnding()">查看结局</button>'}
+          <button class="btn btn-secondary btn-sm" onclick="startLevel(' + level.id + ')">重新挑战</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('gameBody').insertAdjacentHTML('beforeend', resultHTML);
+
+  if (!gameState.cleared[level.id] || score > (gameState.scores[level.id] || 0)) {
+    gameState.scores[level.id] = score;
+  }
+  if (correct) {
+    gameState.cleared[level.id] = true;
+  }
+  gameState.totalScore = Object.values(gameState.scores).reduce((a, b) => a + b, 0);
+  gameState.totalTime += gameState.seconds;
+  saveProgress();
+
+  setTimeout(() => {
+    const resultEl = document.querySelector('.result-area');
+    if (resultEl) resultEl.scrollIntoView({behavior:'smooth', block:'center'});
+  }, 100);
+}
+
+function exitGame() {
+  stopTimer();
+  showScreen('levelScreen');
+  renderLevels();
+}
+
+function showEnding() {
+  const totalCorrect = Object.keys(gameState.cleared).length;
+  const totalScore = gameState.totalScore;
+  const allScores = Object.values(gameState.scores);
+  const avgScore = allScores.length ? Math.round(allScores.reduce((a, b) => a + b, 0) / allScores.length) : 0;
+
+  let rank, rankTitle, rankDesc;
+  if (avgScore >= 90) {
+    rank = '🏆'; rankTitle = 'S级鉴定师'; rankDesc = '你的洞察力令人叹服！\n没有任何伪人能逃过你的法眼。\n你就是天生的鉴定大师！';
+  } else if (avgScore >= 70) {
+    rank = '🎖️'; rankTitle = 'A级鉴定师'; rankDesc = '出色的判断力！\n大部分伪人都被你识破了。\n再细心一点就能成为大师。';
+  } else if (avgScore >= 50) {
+    rank = '📋'; rankTitle = 'B级鉴定师'; rankDesc = '还不错，但有些伪人骗过了你。\n多注意细节中的矛盾，\n你会变得更强。';
+  } else {
+    rank = '🔍'; rankTitle = 'C级鉴定师'; rankDesc = '伪人们在你面前如鱼得水……\n别灰心，仔细观察每个人的言行，\n破绽就藏在细节里。';
+  }
+
+  document.getElementById('endingRank').textContent = rank;
+  document.getElementById('endingRankTitle').textContent = rankTitle;
+  document.getElementById('endingRankDesc').textContent = rankDesc;
+  document.getElementById('endingCorrect').textContent = totalCorrect + '/' + LEVELS.length;
+  document.getElementById('endingScore').textContent = totalScore;
+
+  const totalSec = gameState.totalTime || 0;
+  const tm = Math.floor(totalSec / 60);
+  const ts = totalSec % 60;
+  document.getElementById('endingTime').textContent = tm > 0 ? tm + '分' + ts + '秒' : ts + '秒';
+
+  showScreen('endingScreen');
+}
+
+function createParticles() {
+  const container = document.getElementById('particles');
+  for (let i = 0; i < 20; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.animationDuration = (10 + Math.random() * 15) + 's';
+    p.style.animationDelay = Math.random() * 10 + 's';
+    p.style.width = p.style.height = (1 + Math.random() * 2) + 'px';
+    container.appendChild(p);
+  }
+}
+
+loadProgress();
+updateHomeStats();
+createParticles();
+</script>
+</body>
+</html>

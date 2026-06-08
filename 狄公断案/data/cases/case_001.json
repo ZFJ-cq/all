@@ -1,0 +1,233 @@
+{
+  "id": "case_001",
+  "title": "屏风血案",
+  "subtitle": "第一案",
+  "difficulty": 1,
+  "description": "洛阳富商在家中书房遇害，凶案现场只有一面屏风和满地鲜血。狄仁杰初到洛阳，便遇此奇案……",
+  "background": "唐武则天时期，洛阳富商王员外被发现死于自家书房中，胸口插着一把匕首。书房门窗紧闭，只有一面屏风上溅有血迹。管家称当夜未闻异响，凶手似乎凭空消失。",
+  "stages": {
+    "report": {
+      "id": "report",
+      "name": "报案",
+      "dialogues": [
+        {
+          "speaker": "系统",
+          "speakerTitle": "旁白",
+          "content": "洛阳城，晨曦初露。狄仁杰刚被任命为洛阳令，便有衙役急报：城东王员外家中出了命案！",
+          "emotion": "narrator"
+        },
+        {
+          "speaker": "狄仁杰",
+          "speakerTitle": "洛阳令",
+          "content": "带路！本官即刻前往查看。",
+          "emotion": "serious"
+        },
+        {
+          "speaker": "系统",
+          "speakerTitle": "旁白",
+          "content": "狄仁杰赶到王府书房，只见王员外倒在血泊之中，胸口插着一把匕首。书房门窗紧闭，室内只有一面屏风上溅有血迹。",
+          "emotion": "narrator"
+        },
+        {
+          "speaker": "狄仁杰",
+          "speakerTitle": "洛阳令",
+          "content": "门窗紧闭，凶手如何出入？这屏风上的血迹……有些蹊跷。来人，封锁现场！",
+          "emotion": "serious"
+        },
+        {
+          "speaker": "管家",
+          "speakerTitle": "王府管家",
+          "content": "大人！小人昨夜守在前院，未曾听到任何声响。今早送茶时才发现老爷已经……已经遇害了！",
+          "emotion": "fear"
+        },
+        {
+          "speaker": "狄仁杰",
+          "speakerTitle": "洛阳令",
+          "content": "你且退下。本官要仔细勘察此案，定要找出真凶！",
+          "emotion": "serious"
+        }
+      ]
+    },
+    "investigation": {
+      "id": "investigation",
+      "name": "取证",
+      "scenes": [
+        {
+          "id": "study",
+          "name": "书房现场",
+          "description": "王员外的书房，书籍散落一地，屏风上有明显的血迹喷溅痕迹。",
+          "searchHints": ["检查屏风背面", "查看地面痕迹", "注意匕首上的标记"]
+        },
+        {
+          "id": "courtyard",
+          "name": "王府前院",
+          "description": "王府前院，管家夜间值守之处，院中有一口枯井。",
+          "searchHints": ["查看枯井内部", "检查院墙痕迹", "询问仆人"]
+        }
+      ],
+      "evidences": [
+        {
+          "id": "ev_001",
+          "name": "屏风背面的指纹",
+          "icon": "note",
+          "description": "屏风背面发现一组清晰的指纹，与正面血迹的位置不对应，说明有人从屏风后方移动过它。",
+          "sceneId": "study",
+          "isKey": true,
+          "clue": "屏风被人从后方推动过，凶手可能利用屏风制造了密室假象！"
+        },
+        {
+          "id": "ev_002",
+          "name": "匕首上的刻字",
+          "icon": "knife",
+          "description": "匕首柄上刻有'李记铁铺'字样，这是城西李铁匠的铺子。",
+          "sceneId": "study",
+          "isKey": true,
+          "clue": "匕首来自城西李记铁铺，可以追查购买者。"
+        },
+        {
+          "id": "ev_003",
+          "name": "地上的拖痕",
+          "icon": "shoe",
+          "description": "书房地面有一道细微的拖痕，从屏风位置延伸到书桌下方。",
+          "sceneId": "study",
+          "isKey": false,
+          "clue": "拖痕说明屏风被人移动过，可能用来遮挡什么。"
+        },
+        {
+          "id": "ev_004",
+          "name": "枯井中的暗门",
+          "icon": "seal",
+          "description": "枯井内壁有一个隐蔽的暗门，可以通往书房地下的密道。",
+          "sceneId": "courtyard",
+          "isKey": true,
+          "clue": "枯井暗门连接密道直通书房，这就是凶手出入的秘密通道！"
+        },
+        {
+          "id": "ev_005",
+          "name": "管家的账本",
+          "icon": "book",
+          "description": "管家房中发现一本账本，记录着王员外近期的大笔银两支出，收款人标注为'李三'。",
+          "sceneId": "courtyard",
+          "isKey": true,
+          "clue": "王员外近期频繁向'李三'支付大笔银两，这李三与李记铁铺是否有关系？"
+        },
+        {
+          "id": "ev_006",
+          "name": "邻居的证词",
+          "icon": "witness",
+          "description": "邻居张老汉称，案发当夜曾看到一个人影从王府后院枯井方向翻墙而出。",
+          "sceneId": "courtyard",
+          "isKey": false,
+          "clue": "邻居看到有人从枯井方向逃离，证实了密道逃走的推测。"
+        }
+      ]
+    },
+    "interrogation": {
+      "id": "interrogation",
+      "name": "审讯",
+      "suspects": [
+        {
+          "id": "sus_001",
+          "name": "李三",
+          "role": "铁匠",
+          "description": "城西李记铁匠，身材魁梧，与王员外有银两往来。被传唤时神色慌张。",
+          "dialogues": [
+            {
+              "speaker": "李三",
+              "speakerTitle": "嫌疑人",
+              "content": "大人！小人只是个打铁的，与王员外之死毫无关系！",
+              "emotion": "fear"
+            },
+            {
+              "speaker": "狄仁杰",
+              "speakerTitle": "洛阳令",
+              "content": "那王员外为何频繁给你支付银两？你且如实说来！",
+              "emotion": "serious"
+            },
+            {
+              "speaker": "李三",
+              "speakerTitle": "嫌疑人",
+              "content": "那是……那是王员外让我打造的东西的工钱！对，就是工钱！",
+              "emotion": "panic"
+            },
+            {
+              "speaker": "狄仁杰",
+              "speakerTitle": "洛阳令",
+              "content": "打造何物需要如此多银两？你那铁铺的匕首又怎会出现在命案现场？",
+              "emotion": "angry"
+            },
+            {
+              "speaker": "李三",
+              "speakerTitle": "嫌疑人",
+              "content": "匕首……那匕首小人卖给了很多人，谁知道是谁买的！",
+              "emotion": "panic"
+            },
+            {
+              "speaker": "系统",
+              "speakerTitle": "旁白",
+              "content": "李三额头冒汗，双手微微发抖，显然在隐瞒什么。",
+              "emotion": "narrator"
+            }
+          ],
+          "isGuilty": true
+        },
+        {
+          "id": "sus_002",
+          "name": "赵福",
+          "role": "王府管家",
+          "description": "王府管家，在王府服务十余年，对府中布局了如指掌。",
+          "dialogues": [
+            {
+              "speaker": "赵福",
+              "speakerTitle": "嫌疑人",
+              "content": "大人，小人昨夜一直守在前院，确实没有听到什么动静。",
+              "emotion": "nervous"
+            },
+            {
+              "speaker": "狄仁杰",
+              "speakerTitle": "洛阳令",
+              "content": "王府中可有什么暗道密室？你在此府十余年，应当知晓。",
+              "emotion": "serious"
+            },
+            {
+              "speaker": "赵福",
+              "speakerTitle": "嫌疑人",
+              "content": "暗道？小人……小人从未听说过什么暗道。",
+              "emotion": "nervous"
+            },
+            {
+              "speaker": "狄仁杰",
+              "speakerTitle": "洛阳令",
+              "content": "枯井中的暗门，你当真不知？本官已亲自查探过了。",
+              "emotion": "angry"
+            },
+            {
+              "speaker": "赵福",
+              "speakerTitle": "嫌疑人",
+              "content": "大人饶命！小人确实知道那密道，但……但那是老爷吩咐小人不可说的！",
+              "emotion": "surrender"
+            }
+          ],
+          "isGuilty": false,
+          "hint": "赵福虽知情不报，但他只是奉命行事，并非凶手"
+        }
+      ]
+    },
+    "judgment": {
+      "id": "judgment",
+      "name": "断案",
+      "correctSuspectId": "sus_001",
+      "requiredEvidenceIds": ["ev_001", "ev_002", "ev_004", "ev_005"],
+      "judgmentText": {
+        "correct": "经查明，铁匠李三与王员外因银两纠纷生怨，趁夜通过枯井密道潜入书房行凶。李三以匕首刺杀王员外后，推动屏风制造密室假象，再由密道原路返回。铁证如山，判李三斩立决！管家赵福知情不报，杖责二十。此案彰显狄公明察秋毫之智！",
+        "wrong": "本案证据尚不充分，大人还需仔细查证，切莫冤枉了好人。",
+        "partial": "大人所断有部分道理，但仍有关键证据未纳入考量，请重新审视所有证据。"
+      }
+    }
+  },
+  "hints": [
+    { "id": "hint_1", "content": "注意屏风——它被人从后方推动过，这是制造密室假象的关键。", "cost": 1 },
+    { "id": "hint_2", "content": "枯井并不简单，仔细检查井壁也许会有发现。", "cost": 1 },
+    { "id": "hint_3", "content": "匕首上的刻字和管家的账本，都指向同一个人。", "cost": 1 }
+  ]
+}

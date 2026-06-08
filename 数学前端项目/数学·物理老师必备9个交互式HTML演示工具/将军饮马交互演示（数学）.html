@@ -1,0 +1,649 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>将军饮马问题 · 最短路径几何实验室 | 对称原理 · 动态优化</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: radial-gradient(circle at 10% 30%, #0a1928, #030d17);
+            font-family: 'Segoe UI', 'Poppins', 'Roboto', system-ui, sans-serif;
+            min-height: 100vh;
+            padding: 24px 20px;
+            color: #eef4ff;
+        }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .title-area {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #f2d779, #f0b34b);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.3px;
+        }
+        .sub {
+            color: #9dc0dc;
+            font-size: 0.85rem;
+            border-bottom: 1px solid #3f7d99;
+            display: inline-block;
+            padding-bottom: 5px;
+        }
+
+        /* 左右等高布局 */
+        .lab-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            align-items: stretch;
+        }
+
+        /* 左侧实验画布区 */
+        .canvas-area {
+            flex: 2;
+            min-width: 320px;
+            background: rgba(10, 32, 48, 0.65);
+            backdrop-filter: blur(8px);
+            border-radius: 36px;
+            border: 1px solid rgba(70, 170, 210, 0.5);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .canvas-wrapper {
+            background: #041722;
+            border-radius: 28px;
+            padding: 8px;
+            box-shadow: inset 0 0 12px rgba(0,200,255,0.12), 0 12px 25px rgba(0,0,0,0.4);
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            background: radial-gradient(ellipse at 30% 40%, #15303f, #02101a);
+            border-radius: 24px;
+            cursor: crosshair;
+            touch-action: none;
+        }
+
+        /* 右侧控制区 */
+        .control-area {
+            flex: 1.2;
+            min-width: 290px;
+            background: rgba(20, 55, 75, 0.75);
+            backdrop-filter: blur(12px);
+            border-radius: 36px;
+            border: 1px solid rgba(100, 190, 230, 0.5);
+            padding: 22px 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+        }
+
+        .info-card {
+            background: rgba(0, 32, 46, 0.7);
+            border-radius: 28px;
+            padding: 18px;
+            border: 1px solid #3182a2;
+        }
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 12px 0;
+            font-size: 1rem;
+            border-bottom: 1px dashed #437e9a;
+            padding-bottom: 6px;
+        }
+        .stat-label {
+            font-weight: 500;
+        }
+        .stat-value {
+            font-family: 'JetBrains Mono', monospace;
+            color: #ffdd99;
+            font-weight: 600;
+        }
+        .shorten-badge {
+            background: #1c5e7a;
+            border-radius: 40px;
+            padding: 6px 12px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 8px;
+        }
+        button {
+            flex: 1;
+            background: linear-gradient(105deg, #2f779b, #1b5677);
+            border: none;
+            padding: 10px 0;
+            border-radius: 60px;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.85rem;
+            letter-spacing: 0.3px;
+        }
+        button.primary {
+            background: linear-gradient(105deg, #e59c31, #c4781a);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        button:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.05);
+        }
+        .legend {
+            font-size: 0.7rem;
+            margin-top: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+        }
+        .legend span {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .color-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 12px;
+            display: inline-block;
+        }
+        footer {
+            text-align: center;
+            font-size: 0.7rem;
+            color: #7eabc7;
+            margin-top: 28px;
+            border-top: 1px solid #2c6f8a;
+            padding-top: 18px;
+        }
+        @media (max-width: 800px) {
+            .lab-row { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+<div class="main-container">
+    <div class="title-area">
+        <h1>🏇 将军饮马问题 · 最短路径几何实验室</h1>
+        <div class="sub">对称原理 | 拖拽点 A / B / 河上取水点 P  实时求解最优路径</div>
+    </div>
+
+    <div class="lab-row">
+        <!-- 左侧 canvas 区 -->
+        <div class="canvas-area">
+            <div class="canvas-wrapper">
+                <canvas id="mainCanvas" width="800" height="500" style="width:100%; height:auto; aspect-ratio:800/500"></canvas>
+            </div>
+            <div class="legend">
+                <span><div class="color-dot" style="background:#ff9f4a;"></div> 将军A</span>
+                <span><div class="color-dot" style="background:#6bc5ff;"></div> 营地B</span>
+                <span><div class="color-dot" style="background:#ffee66;"></div> 取水点P (可拖拽)</span>
+                <span><div class="color-dot" style="background:#ff66b5;"></div> 对称点B'</span>
+                <span><div class="color-dot" style="background:#88ffaa;"></div> 最短路径(A→P*→B)</span>
+            </div>
+        </div>
+
+        <!-- 右侧控制面板 -->
+        <div class="control-area">
+            <div class="info-card">
+                <div class="stat-row">
+                    <span class="stat-label">🌊 当前路径长度</span>
+                    <span class="stat-value" id="currentPath">0.00</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">✨ 最短路径长度</span>
+                    <span class="stat-value" id="optimalPath">0.00</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">📉 还可缩短</span>
+                    <span class="stat-value" id="shortenGap">0.00</span>
+                </div>
+                <div class="shorten-badge" id="optimalHint" style="margin-top: 6px;">
+                    💡 拖拽取水点P → 寻找最小值
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button id="toggleSymmetryBtn" class="primary">🔮 显示对称点 B'</button>
+                <button id="showOptimalBtn">⭐ 显示最优解</button>
+                <button id="resetDefaultBtn">🔄 重置位置</button>
+            </div>
+            <div class="btn-group">
+                <button id="togglePathBtn">📐 显示最短路径</button>
+            </div>
+            <div class="info-card" style="padding: 12px; font-size:0.75rem;">
+                <strong>📖 几何原理</strong><br>
+                作营地B关于河流的对称点B'，连接A与B'，与河流的交点P*即为最优取水点。<br>
+                ➜ 此时 AP* + P*B = AB' 最短。<br>
+                ✅ 支持拖拽A/B/河上点，体验“对称变换”的优化魅力。
+            </div>
+        </div>
+    </div>
+    <footer>
+        🖱️ 鼠标/手指拖拽任意彩色圆点：将军 A 、营地 B 、河上取水点 P → 实时计算路径变化 | 最短路径由对称原理自动标注
+    </footer>
+</div>
+
+<script>
+    (function(){
+        // ----- 画布与上下文 -----
+        const canvas = document.getElementById('mainCanvas');
+        const ctx = canvas.getContext('2d');
+        const width = 800, height = 500;
+        canvas.width = width;
+        canvas.height = height;
+        
+        // 河流参数 (水平线)
+        const riverY = 360;      // 河流纵坐标
+        const riverXMin = 40;
+        const riverXMax = width - 40;
+        
+        // ----- 可交互点的初始坐标 (均位于河流上方)
+        let A = { x: 180, y: 160 };
+        let B = { x: 620, y: 200 };
+        let P = { x: 400, y: riverY };    // 取水点默认位于河流中点附近
+        
+        // UI 显示元素
+        const currentPathSpan = document.getElementById('currentPath');
+        const optimalPathSpan = document.getElementById('optimalPath');
+        const shortenGapSpan = document.getElementById('shortenGap');
+        
+        // 辅助标志: 是否显示对称点B' ; 是否高亮最短路径 (显示最优路径线)
+        let showSymmetry = true;       // 默认显示对称点，更有教学意义
+        let highlightOptimalPath = true; // 默认显示最短路径参考线
+        
+        // ----- 辅助函数：两点距离
+        function dist(p1, p2) {
+            const dx = p1.x - p2.x, dy = p1.y - p2.y;
+            return Math.hypot(dx, dy);
+        }
+        
+        // 计算 B 关于河流的对称点 B'
+        function getSymmetricB() {
+            return { x: B.x, y: 2 * riverY - B.y };
+        }
+        
+        // 计算最优取水点 (线段 A-B' 与河流的交点)
+        function getOptimalPoint() {
+            const Bprime = getSymmetricB();
+            const A_ = A;
+            // 线段 A -> Bprime 与水平线 y = riverY 的交点
+            if (Math.abs(A_.y - Bprime.y) < 1e-6) {
+                // 平行情况，返回中间点
+                return { x: (A_.x + Bprime.x) / 2, y: riverY };
+            }
+            const t = (riverY - A_.y) / (Bprime.y - A_.y);
+            const interX = A_.x + t * (Bprime.x - A_.x);
+            // 限制 x 在河流范围内
+            const clampX = Math.min(riverXMax, Math.max(riverXMin, interX));
+            return { x: clampX, y: riverY };
+        }
+        
+        // 计算当前路径长度 (A-P-B)
+        function currentPathLength() {
+            return dist(A, P) + dist(P, B);
+        }
+        
+        // 计算最短路径长度 (利用对称性 A-B' 的距离)
+        function optimalPathLength() {
+            const Bprime = getSymmetricB();
+            return dist(A, Bprime);
+        }
+        
+        // 更新右侧面板数据和提示
+        function updateStats() {
+            const cur = currentPathLength();
+            const opt = optimalPathLength();
+            const shorten = cur - opt;
+            currentPathSpan.innerText = cur.toFixed(2);
+            optimalPathSpan.innerText = opt.toFixed(2);
+            shortenGapSpan.innerText = (shorten > 0 ? shorten : 0).toFixed(2);
+            const hintDiv = document.getElementById('optimalHint');
+            const optimalP = getOptimalPoint();
+            const isOptimal = (Math.abs(P.x - optimalP.x) < 2.0 && Math.abs(P.y - optimalP.y) < 1.0);
+            if (isOptimal && shorten < 0.05) {
+                hintDiv.innerHTML = '🎉 当前P点已是理论最优解！ AP+PB = 最短路径 🎉';
+                hintDiv.style.background = '#3b9066';
+            } else {
+                hintDiv.innerHTML = '💡 拖拽取水点P → 寻找最小值 | 最优解通过对称点自动定位';
+                hintDiv.style.background = '#1c5e7a';
+            }
+        }
+        
+        // 绘图核心: 河流，点A,B,P，对称点，最优路径线
+        function draw() {
+            ctx.clearRect(0, 0, width, height);
+            
+            // 1. 绘制科技网格背景
+            ctx.save();
+            ctx.beginPath();
+            ctx.strokeStyle = "#2c6f8c";
+            ctx.lineWidth = 0.5;
+            for (let i = 0; i < width; i += 40) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, height);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(0, i % height);
+                ctx.lineTo(width, i % height);
+                ctx.stroke();
+            }
+            
+            // 2. 河流 (带光效)
+            ctx.beginPath();
+            ctx.moveTo(0, riverY);
+            ctx.lineTo(width, riverY);
+            ctx.strokeStyle = "#4ccdff";
+            ctx.lineWidth = 3;
+            ctx.shadowBlur = 5;
+            ctx.shadowColor = "#00aaff";
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = "#a3e4ff";
+            ctx.font = "italic 14px 'Segoe UI'";
+            ctx.fillText("🏞️ 河流 (取水点必须在此)", width-160, riverY-5);
+            
+            // 绘制河流范围虚线示意
+            ctx.beginPath();
+            ctx.setLineDash([8, 8]);
+            ctx.moveTo(riverXMin, riverY);
+            ctx.lineTo(riverXMax, riverY);
+            ctx.strokeStyle = "#ffdd88";
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // 3. 绘制对称点 B'  (如果开启)
+            if (showSymmetry) {
+                const Bprime = getSymmetricB();
+                ctx.beginPath();
+                ctx.arc(Bprime.x, Bprime.y, 8, 0, 2*Math.PI);
+                ctx.fillStyle = "#ff66b5";
+                ctx.shadowBlur = 6;
+                ctx.fill();
+                ctx.fillStyle = "white";
+                ctx.font = "bold 12px monospace";
+                ctx.fillText("B'", Bprime.x-6, Bprime.y-6);
+                // 虚线连接 B 与 B' (对称轴)
+                ctx.beginPath();
+                ctx.moveTo(B.x, B.y);
+                ctx.lineTo(Bprime.x, Bprime.y);
+                ctx.strokeStyle = "#ff99cc";
+                ctx.setLineDash([5, 6]);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                // 画垂直符号（示意对称）
+                ctx.beginPath();
+                ctx.moveTo(Bprime.x-5, riverY);
+                ctx.lineTo(Bprime.x+5, riverY);
+                ctx.strokeStyle = "#ffc074";
+                ctx.stroke();
+            }
+            
+            // 4. 最优路径及最优取水点 (连接 A -> 最优P* -> B)
+            const optimalP = getOptimalPoint();
+            if (highlightOptimalPath) {
+                // 绘制 A-最优P*-B 的路径 (绿色高亮)
+                ctx.beginPath();
+                ctx.moveTo(A.x, A.y);
+                ctx.lineTo(optimalP.x, optimalP.y);
+                ctx.lineTo(B.x, B.y);
+                ctx.strokeStyle = "#88ffaa";
+                ctx.lineWidth = 3;
+                ctx.shadowBlur = 4;
+                ctx.shadowColor = "#66ff99";
+                ctx.stroke();
+                // 绘制最优取水点标记 (金色)
+                ctx.beginPath();
+                ctx.arc(optimalP.x, optimalP.y, 10, 0, 2*Math.PI);
+                ctx.fillStyle = "rgba(255,215,0,0.4)";
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(optimalP.x, optimalP.y, 6, 0, 2*Math.PI);
+                ctx.fillStyle = "#ffdd77";
+                ctx.fill();
+                ctx.fillStyle = "#000000cc";
+                ctx.font = "bold 10px monospace";
+                ctx.fillText("最优", optimalP.x-12, optimalP.y-8);
+            }
+            
+            // 5. 绘制当前取水点 P (可拖拽)
+            ctx.beginPath();
+            ctx.arc(P.x, P.y, 12, 0, 2*Math.PI);
+            ctx.fillStyle = "#ffee88";
+            ctx.shadowBlur = 8;
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(P.x, P.y, 5, 0, 2*Math.PI);
+            ctx.fillStyle = "#ffbb44";
+            ctx.fill();
+            ctx.fillStyle = "#1a2f3f";
+            ctx.font = "bold 11px 'Segoe UI'";
+            ctx.fillText("取水点P", P.x-15, P.y-10);
+            
+            // 6. 绘制 A 和 B 点 (可拖拽)
+            ctx.beginPath();
+            ctx.arc(A.x, A.y, 12, 0, 2*Math.PI);
+            ctx.fillStyle = "#ff9f4a";
+            ctx.fill();
+            ctx.fillStyle = "white";
+            ctx.font = "bold 14px 'Segoe UI'";
+            ctx.fillText("A", A.x-5, A.y-6);
+            
+            ctx.beginPath();
+            ctx.arc(B.x, B.y, 12, 0, 2*Math.PI);
+            ctx.fillStyle = "#6bc5ff";
+            ctx.fill();
+            ctx.fillStyle = "white";
+            ctx.fillText("B", B.x-5, B.y-6);
+            
+            // 7. 当前路径 A-P-B (红色实线箭头效果)
+            ctx.beginPath();
+            ctx.moveTo(A.x, A.y);
+            ctx.lineTo(P.x, P.y);
+            ctx.lineTo(B.x, B.y);
+            ctx.strokeStyle = "#ff8866";
+            ctx.lineWidth = 2.5;
+            ctx.setLineDash([]);
+            ctx.stroke();
+            
+            // 绘制连线上的小光晕
+            ctx.beginPath();
+            ctx.moveTo(A.x, A.y);
+            ctx.lineTo(P.x, P.y);
+            ctx.strokeStyle = "#ffb37c";
+            ctx.lineWidth = 1.8;
+            ctx.stroke();
+            
+            // 额外画一点点方向箭头标记
+            ctx.fillStyle = "#ffaa77";
+            ctx.font = "12px monospace";
+            ctx.fillText("当前路径", (A.x+P.x)/2-10, (A.y+P.y)/2-8);
+            
+            // 如果显示对称点时，虚线显示 A->B' 线（辅助理解）
+            if (showSymmetry) {
+                const Bprime = getSymmetricB();
+                ctx.beginPath();
+                ctx.moveTo(A.x, A.y);
+                ctx.lineTo(Bprime.x, Bprime.y);
+                ctx.strokeStyle = "#ffb355";
+                ctx.setLineDash([6, 8]);
+                ctx.lineWidth = 1.8;
+                ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.fillStyle = "#ffc27a";
+                ctx.font = "italic 10px monospace";
+                ctx.fillText("A → B' (对称最短路径)", (A.x+Bprime.x)/2-15, (A.y+Bprime.y)/2-6);
+            }
+            
+            ctx.shadowBlur = 0;
+        }
+        
+        // 完整刷新界面 (数据和绘图)
+        function refresh() {
+            // 确保取水点P在河流线上，且X在合理区间
+            if (P.y !== riverY) P.y = riverY;
+            P.x = Math.min(riverXMax, Math.max(riverXMin, P.x));
+            // 边界约束 A,B 不能超出画布太多，但保留自由
+            A.x = Math.min(width-15, Math.max(15, A.x));
+            A.y = Math.min(riverY-20, Math.max(20, A.y));
+            B.x = Math.min(width-15, Math.max(15, B.x));
+            B.y = Math.min(riverY-20, Math.max(20, B.y));
+            
+            updateStats();
+            draw();
+        }
+        
+        // 重置为合理的初始位置
+        function resetDefault() {
+            A = { x: 160, y: 140 };
+            B = { x: 620, y: 180 };
+            P = { x: 380, y: riverY };
+            refresh();
+        }
+        
+        // ----- 交互拖拽逻辑 (支持鼠标和触摸)-----
+        let dragTarget = null;  // 'A', 'B', 'P'
+        
+        function getCanvasCoords(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            let clientX, clientY;
+            if (e.touches) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+            let canvasX = (clientX - rect.left) * scaleX;
+            let canvasY = (clientY - rect.top) * scaleY;
+            canvasX = Math.min(width, Math.max(0, canvasX));
+            canvasY = Math.min(height, Math.max(0, canvasY));
+            return { x: canvasX, y: canvasY };
+        }
+        
+        function onPointerDown(e) {
+            e.preventDefault();
+            const pos = getCanvasCoords(e);
+            const threshold = 18;
+            // 检测点 P (优先检测拖拽)
+            if (Math.hypot(pos.x - P.x, pos.y - P.y) < threshold) {
+                dragTarget = 'P';
+                canvas.style.cursor = 'grabbing';
+                return;
+            }
+            if (Math.hypot(pos.x - A.x, pos.y - A.y) < threshold) {
+                dragTarget = 'A';
+                canvas.style.cursor = 'grabbing';
+                return;
+            }
+            if (Math.hypot(pos.x - B.x, pos.y - B.y) < threshold) {
+                dragTarget = 'B';
+                canvas.style.cursor = 'grabbing';
+                return;
+            }
+        }
+        
+        function onPointerMove(e) {
+            if (!dragTarget) return;
+            e.preventDefault();
+            const pos = getCanvasCoords(e);
+            let newX = pos.x, newY = pos.y;
+            if (dragTarget === 'A') {
+                A.x = Math.min(width-12, Math.max(12, newX));
+                A.y = Math.min(riverY-15, Math.max(15, newY));
+                refresh();
+            } else if (dragTarget === 'B') {
+                B.x = Math.min(width-12, Math.max(12, newX));
+                B.y = Math.min(riverY-15, Math.max(15, newY));
+                refresh();
+            } else if (dragTarget === 'P') {
+                // 只能沿河流移动
+                let newPx = Math.min(riverXMax, Math.max(riverXMin, newX));
+                P.x = newPx;
+                P.y = riverY;
+                refresh();
+            }
+        }
+        
+        function onPointerUp(e) {
+            dragTarget = null;
+            canvas.style.cursor = 'crosshair';
+        }
+        
+        // 注册事件
+        canvas.addEventListener('mousedown', onPointerDown);
+        window.addEventListener('mousemove', onPointerMove);
+        window.addEventListener('mouseup', onPointerUp);
+        canvas.addEventListener('touchstart', onPointerDown);
+        window.addEventListener('touchmove', onPointerMove);
+        window.addEventListener('touchend', onPointerUp);
+        canvas.style.cursor = 'crosshair';
+        
+        // 按钮交互
+        const toggleSymBtn = document.getElementById('toggleSymmetryBtn');
+        const showOptimalBtn = document.getElementById('showOptimalBtn');
+        const resetBtn = document.getElementById('resetDefaultBtn');
+        const togglePathBtn = document.getElementById('togglePathBtn');
+        
+        toggleSymBtn.addEventListener('click', () => {
+            showSymmetry = !showSymmetry;
+            toggleSymBtn.textContent = showSymmetry ? '🔮 隐藏对称点' : '🔮 显示对称点';
+            refresh();
+        });
+        showOptimalBtn.addEventListener('click', () => {
+            // 将P点移动到最优取水点位置，并高亮最优路径
+            const optimalP = getOptimalPoint();
+            P.x = optimalP.x;
+            P.y = riverY;
+            highlightOptimalPath = true;   // 确保显示最优路径线
+            refresh();
+            // 视觉反馈闪烁
+            canvas.style.transition = 'box-shadow 0.1s';
+            canvas.style.boxShadow = '0 0 0 2px #ffdd88';
+            setTimeout(() => { canvas.style.boxShadow = ''; }, 300);
+        });
+        resetBtn.addEventListener('click', () => {
+            resetDefault();
+        });
+        togglePathBtn.addEventListener('click', () => {
+            highlightOptimalPath = !highlightOptimalPath;
+            togglePathBtn.textContent = highlightOptimalPath ? '📐 隐藏最短路径' : '📐 显示最短路径';
+            refresh();
+        });
+        
+        // 初始化
+        resetDefault();  // 初始绘制
+        // 手动设定一些初始标志文字
+        toggleSymBtn.textContent = showSymmetry ? '🔮 隐藏对称点' : '🔮 显示对称点';
+        togglePathBtn.textContent = highlightOptimalPath ? '📐 隐藏最短路径' : '📐 显示最短路径';
+    })();
+</script>
+</body>
+</html>

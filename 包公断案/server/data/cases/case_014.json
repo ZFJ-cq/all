@@ -1,0 +1,220 @@
+{
+  "id": "case_014",
+  "title": "鬼推磨",
+  "subtitle": "第十四案",
+  "difficulty": 2,
+  "description": "有钱能使鬼推磨？恶人行贿害人，包拯识破钱能通神的黑暗！",
+  "background": "俗话说'有钱使得鬼推磨'，讽刺那些以为金钱可以颠倒黑白之人。有恶霸勾结官府，以金钱行贿，害死无辜，包拯不畏权财，为民伸冤。",
+  "stages": {
+    "report": {
+      "id": "report",
+      "name": "报案",
+      "dialogues": [
+        {
+          "speaker": "系统",
+          "speakerTitle": "旁白",
+          "content": "一老者携幼孙跪在开封府门前鸣冤，哭声震天。",
+          "emotion": "narrator"
+        },
+        {
+          "speaker": "老者",
+          "speakerTitle": "告状人",
+          "content": "包大人！我儿子被恶霸钱百万害死了！他们行贿官府，反说我儿是自杀！",
+          "emotion": "cry"
+        },
+        {
+          "speaker": "包拯",
+          "speakerTitle": "包青天",
+          "content": "竟有此事？你儿子是如何死的？",
+          "emotion": "serious"
+        },
+        {
+          "speaker": "老者",
+          "speakerTitle": "告状人",
+          "content": "我儿子李小二，欠了钱百万十两银子……他无力偿还，钱百万就把他害死了！",
+          "emotion": "cry"
+        },
+        {
+          "speaker": "包拯",
+          "speakerTitle": "包青天",
+          "content": "既有命案，官府为何说是自杀？",
+          "emotion": "serious"
+        },
+        {
+          "speaker": "老者",
+          "speakerTitle": "告状人",
+          "content": "钱百万有钱有势，买通了县官……我儿明明是被他们打死后扔下河的！",
+          "emotion": "angry"
+        },
+        {
+          "speaker": "包拯",
+          "speakerTitle": "包青天",
+          "content": "本官必为你查明真相！",
+          "emotion": "angry"
+        }
+      ]
+    },
+    "investigation": {
+      "id": "investigation",
+      "name": "取证",
+      "scenes": [
+        {
+          "id": "river",
+          "name": "河边",
+          "description": "李小二尸体被发现的地方。",
+          "searchHints": ["查看尸体伤痕", "询问目击者", "调查死亡时间"]
+        },
+        {
+          "id": "qian_manor",
+          "name": "钱百万府上",
+          "description": "钱百万的豪宅，权势滔天。",
+          "searchHints": ["调查钱百万", "寻找行贿证据", "询问府中下人"]
+        },
+        {
+          "id": "yamen",
+          "name": "县衙",
+          "description": "原审县衙，记录着离奇判决。",
+          "searchHints": ["查阅案卷", "调查受贿官员", "寻找判决漏洞"]
+        }
+      ],
+      "evidences": [
+        {
+          "id": "ev_1401",
+          "name": "尸体伤痕",
+          "icon": "bone",
+          "description": "李小二尸体头部有钝器击打伤痕，绝非自尽。",
+          "sceneId": "river",
+          "isKey": true,
+          "clue": "伤痕证明李小二是被他杀而非自杀。"
+        },
+        {
+          "id": "ev_1402",
+          "name": "目击者证词",
+          "icon": "witness",
+          "description": "有渔夫亲眼看见钱百万的家丁将李小二扔下河。",
+          "sceneId": "river",
+          "isKey": true,
+          "clue": "目击证词证明钱百万家丁行凶。"
+        },
+        {
+          "id": "ev_1403",
+          "name": "县官受贿证据",
+          "icon": "money",
+          "description": "县官收受钱百万银两的收据。",
+          "sceneId": "yamen",
+          "isKey": true,
+          "clue": "收据证明县官受贿，判决不公。"
+        },
+        {
+          "id": "ev_1404",
+          "name": "借据",
+          "icon": "note",
+          "description": "李小二欠钱百万十两银子的借据。",
+          "sceneId": "qian_manor",
+          "isKey": false,
+          "clue": "借据只是普通债务，不是杀人理由。"
+        }
+      ]
+    },
+    "interrogation": {
+      "id": "interrogation",
+      "name": "审讯",
+      "suspects": [
+        {
+          "id": "sus_1401",
+          "name": "钱百万",
+          "role": "恶霸",
+          "description": "当地恶霸，有钱有势，横行乡里。",
+          "dialogues": [
+            {
+              "speaker": "钱百万",
+              "speakerTitle": "嫌疑人",
+              "content": "包大人，那李小二是自己跳河死的，与我何干？",
+              "emotion": "defensive"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "自己跳河？头部钝器伤痕从何而来？",
+              "emotion": "serious"
+            },
+            {
+              "speaker": "钱百万",
+              "speakerTitle": "嫌疑人",
+              "content": "这……这我不知道……",
+              "emotion": "nervous"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "你行贿县官，收据已在本官手中！还敢抵赖？",
+              "emotion": "angry"
+            },
+            {
+              "speaker": "钱百万",
+              "speakerTitle": "嫌疑人",
+              "content": "大人饶命……是我一时糊涂……",
+              "emotion": "surrender"
+            }
+          ],
+          "isGuilty": true
+        },
+        {
+          "id": "sus_1402",
+          "name": "县官",
+          "role": "贪官",
+          "description": "收受贿赂，颠倒黑白的贪官。",
+          "dialogues": [
+            {
+              "speaker": "县官",
+              "speakerTitle": "嫌疑人",
+              "content": "包大人，卑职是依法审案……",
+              "emotion": "defensive"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "依法？你收了钱百万多少银子？",
+              "emotion": "angry"
+            },
+            {
+              "speaker": "县官",
+              "speakerTitle": "嫌疑人",
+              "content": "我……",
+              "emotion": "panic"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "收据在此，你还有何话说？",
+              "emotion": "serious"
+            },
+            {
+              "speaker": "县官",
+              "speakerTitle": "嫌疑人",
+              "content": "大人饶命……是我一时贪念……",
+              "emotion": "surrender"
+            }
+          ],
+          "isGuilty": true
+        }
+      ]
+    },
+    "judgment": {
+      "id": "judgment",
+      "name": "断案",
+      "correctSuspectId": "sus_1401",
+      "requiredEvidenceIds": ["ev_1401", "ev_1402", "ev_1403"],
+      "judgmentText": {
+        "correct": "经查明，钱百万因李小二欠债不还，遣家丁将李小二打死，扔入河中，伪造成自尽假象。又以银两贿赂县官，颠倒黑白，判李小二自杀。包拯不为权势所动，查明真相！判钱百万故意杀人，凌迟处死；县官受贿枉法，革职查办，徒三年。钱百万家产抄没，赔偿老者。此案警示：钱能买通贪官，却买不通公道！",
+        "wrong": "案情复杂，需继续调查。",
+        "partial": "已掌握部分证据，需深挖。"
+      }
+    }
+  },
+  "hints": [
+    { "id": "hint_14_1", "content": "尸体头部的钝器伤痕说明不是自尽。", "cost": 1 },
+    { "id": "hint_14_2", "content": "渔夫的目击证词很重要。", "cost": 1 },
+    { "id": "hint_14_3", "content": "县官受贿必有证据，搜查县衙可能找到收据。", "cost": 1 }
+  ]
+}

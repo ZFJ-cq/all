@@ -1,0 +1,191 @@
+{
+  "id": "case_013",
+  "title": "栽赃",
+  "subtitle": "第十三案",
+  "difficulty": 2,
+  "description": "恶人栽赃陷害善良，包拯明镜高悬，识破栽赃阴谋！",
+  "background": "有恶徒设下毒计，将赃物暗藏于善良人家中，企图栽赃陷害。包拯明察秋毫，识破恶人诡计，还好人清白。",
+  "stages": {
+    "report": {
+      "id": "report",
+      "name": "报案",
+      "dialogues": [
+        {
+          "speaker": "系统",
+          "speakerTitle": "旁白",
+          "content": "一日，开封府来了一群衙役，押着一个衣衫褴褛的妇人，说是从她家中搜出了赃物。",
+          "emotion": "narrator"
+        },
+        {
+          "speaker": "妇人",
+          "speakerTitle": "告状人",
+          "content": "大人冤枉啊！我家从未见过这些赃物，是有人栽赃陷害我！",
+          "emotion": "cry"
+        },
+        {
+          "speaker": "衙役",
+          "speakerTitle": "证人",
+          "content": "大人，这些金银珠宝是从她家灶台里搜出来的！",
+          "emotion": "defensive"
+        },
+        {
+          "speaker": "包拯",
+          "speakerTitle": "包青天",
+          "content": "哦？竟有此事？你家中几口人？平日以何为生？",
+          "emotion": "serious"
+        },
+        {
+          "speaker": "妇人",
+          "speakerTitle": "告状人",
+          "content": "民妇寡居多年，与儿子相依为命，靠给人浆洗为生，哪里来的这些金银？",
+          "emotion": "cry"
+        },
+        {
+          "speaker": "包拯",
+          "speakerTitle": "包青天",
+          "content": "本官自有明断，你且稍安勿躁。",
+          "emotion": "thinking"
+        }
+      ]
+    },
+    "investigation": {
+      "id": "investigation",
+      "name": "取证",
+      "scenes": [
+        {
+          "id": "womans_house",
+          "name": "妇人住处",
+          "description": "妇人简陋的住所，家徒四壁。",
+          "searchHints": ["检查灶台", "观察屋内陈设", "寻找破绽"]
+        },
+        {
+          "id": "neighborhood",
+          "name": "邻里",
+          "description": "妇人居住的街巷，邻居们议论纷纷。",
+          "searchHints": ["询问邻里", "调查妇人品行", "寻找嫌疑人"]
+        }
+      ],
+      "evidences": [
+        {
+          "id": "ev_1301",
+          "name": "赃物",
+          "icon": "money",
+          "description": "从妇人灶台中搜出的金银珠宝。",
+          "sceneId": "womans_house",
+          "isKey": true,
+          "clue": "妇人家贫，灶台破旧，藏这么多赃物不合常理。"
+        },
+        {
+          "id": "ev_1302",
+          "name": "邻里证词",
+          "icon": "witness",
+          "description": "邻里证明妇人素来清白，从不做昧心事。",
+          "sceneId": "neighborhood",
+          "isKey": true,
+          "clue": "妇人口碑极好，不可能偷东西。"
+        },
+        {
+          "id": "ev_1303",
+          "name": "灶台痕迹",
+          "icon": "wheel",
+          "description": "灶台上有新土痕迹，似被人动过。",
+          "sceneId": "womans_house",
+          "isKey": true,
+          "clue": "灶台被动过，说明有人栽赃。"
+        },
+        {
+          "id": "ev_1304",
+          "name": "可疑脚印",
+          "icon": "wheel",
+          "description": "妇人门外有陌生脚印，来路不明。",
+          "sceneId": "womans_house",
+          "isKey": false,
+          "clue": "脚印非妇人所有，栽赃者留下的。"
+        }
+      ]
+    },
+    "interrogation": {
+      "id": "interrogation",
+      "name": "审讯",
+      "suspects": [
+        {
+          "id": "sus_1301",
+          "name": "妇人",
+          "role": "嫌疑人",
+          "description": "被栽赃的寡居妇人，清白无辜。",
+          "dialogues": [
+            {
+              "speaker": "妇人",
+              "speakerTitle": "嫌疑人",
+              "content": "大人，民妇真的是被冤枉的！",
+              "emotion": "cry"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "本官知道你是冤枉的。",
+              "emotion": "kind"
+            }
+          ],
+          "isGuilty": false,
+          "hint": "妇人是无辜受害者"
+        },
+        {
+          "id": "sus_1302",
+          "name": "王二",
+          "role": "恶徒",
+          "description": "地痞流氓，与妇人有隙，栽赃报复。",
+          "dialogues": [
+            {
+              "speaker": "王二",
+              "speakerTitle": "嫌疑人",
+              "content": "大人，是我举报的这妇人！她是贼！",
+              "emotion": "defensive"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "哦？是你带衙役来搜的？你如何知道她家藏有赃物？",
+              "emotion": "serious"
+            },
+            {
+              "speaker": "王二",
+              "speakerTitle": "嫌疑人",
+              "content": "我……我路过看见的……",
+              "emotion": "nervous"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "路过？你家与她素无往来，怎知她家灶台有蹊跷？还敢狡辩！",
+              "emotion": "angry"
+            },
+            {
+              "speaker": "王二",
+              "speakerTitle": "嫌疑人",
+              "content": "大人饶命……是我与她有仇，故意栽赃报复……",
+              "emotion": "surrender"
+            }
+          ],
+          "isGuilty": true
+        }
+      ]
+    },
+    "judgment": {
+      "id": "judgment",
+      "name": "断案",
+      "correctSuspectId": "sus_1302",
+      "requiredEvidenceIds": ["ev_1301", "ev_1302", "ev_1303"],
+      "judgmentText": {
+        "correct": "经查明，王二与妇人有隙，怀恨在心，夜间潜入妇人家中，将赃物埋于灶台之下，企图栽赃陷害。妇人家徒四壁，素来清白，岂是偷盗之人？判王二栽赃陷害，反坐其罪，杖责一百，徒三年。妇人无罪开释。此案彰显包拯明察秋毫，不冤枉好人！",
+        "wrong": "证据不足，需继续调查。",
+        "partial": "已掌握部分证据，需深挖。"
+      }
+    }
+  },
+  "hints": [
+    { "id": "hint_13_1", "content": "妇人贫困，不可能藏有这么多金银。", "cost": 1 },
+    { "id": "hint_13_2", "content": "灶台有被动过的痕迹，说明有人栽赃。", "cost": 1 },
+    { "id": "hint_13_3", "content": "举报人王二与妇人有仇，值得怀疑。", "cost": 1 }
+  ]
+}

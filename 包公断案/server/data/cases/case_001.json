@@ -1,0 +1,239 @@
+{
+  "id": "case_001",
+  "title": "乌盆记",
+  "subtitle": "第一案",
+  "difficulty": 1,
+  "description": "南阳商人刘世昌在回家途中遇害，化作冤魂寄于乌盆之中。包拯路经定远县，乌盆拦路鸣冤……",
+  "background": "北宋年间，南阳商人刘世昌携银返乡，途中借宿窑户赵大家。赵大见财起意，将刘世昌杀害，并将其骨灰混入泥土烧制成乌盆。刘世昌冤魂不散，附于乌盆之中。",
+  "stages": {
+    "report": {
+      "id": "report",
+      "name": "报案",
+      "dialogues": [
+        {
+          "speaker": "系统",
+          "speakerTitle": "旁白",
+          "content": "一日，包拯率随从路经定远县，途中忽见一乌盆拦在路中央。",
+          "emotion": "narrator"
+        },
+        {
+          "speaker": "包拯",
+          "speakerTitle": "包青天",
+          "content": "此盆何以拦路？张龙赵虎，上前查看！",
+          "emotion": "serious"
+        },
+        {
+          "speaker": "张龙",
+          "speakerTitle": "护卫",
+          "content": "大人，只是一个普通乌盆，并无特别之处。",
+          "emotion": "confused"
+        },
+        {
+          "speaker": "系统",
+          "speakerTitle": "旁白",
+          "content": "忽然，乌盆中传来哭泣之声——原是冤魂刘世昌附于盆中，向包拯诉说冤情。",
+          "emotion": "narrator"
+        },
+        {
+          "speaker": "刘世昌（冤魂）",
+          "speakerTitle": "冤魂",
+          "content": "包大人！小民刘世昌，南阳人氏，被窑户赵大所害，尸骨被烧成此盆。求大人为小民申冤！",
+          "emotion": "cry"
+        },
+        {
+          "speaker": "包拯",
+          "speakerTitle": "包青天",
+          "content": "竟有此事！你且细细说来，那赵大为何害你？",
+          "emotion": "angry"
+        },
+        {
+          "speaker": "刘世昌（冤魂）",
+          "speakerTitle": "冤魂",
+          "content": "那日我携银两返乡，投宿赵大家中。他见我银两，起了歹心，趁我熟睡之际将我杀害，夺走银两。又将我尸骨烧成灰烬，与泥土混合烧成此盆……",
+          "emotion": "cry"
+        },
+        {
+          "speaker": "包拯",
+          "speakerTitle": "包青天",
+          "content": "好个赵大！杀人劫财，毁尸灭迹，天理难容！张龙赵虎，随本官前去赵大家查案！",
+          "emotion": "angry"
+        }
+      ]
+    },
+    "investigation": {
+      "id": "investigation",
+      "name": "取证",
+      "scenes": [
+        {
+          "id": "zhao_home",
+          "name": "赵大家",
+          "description": "赵大的窑户作坊，房屋简陋，四处堆满陶器。",
+          "searchHints": ["仔细检查陶器堆", "查看赵大的卧房", "注意地上的痕迹"]
+        },
+        {
+          "id": "kiln",
+          "name": "烧窑处",
+          "description": "赵大烧制陶器的窑炉，炉火正旺，周围散落着各种陶土和工具。",
+          "searchHints": ["检查窑炉附近", "看看未烧制的陶土", "寻找可疑的遗留物"]
+        }
+      ],
+      "evidences": [
+        {
+          "id": "ev_001",
+          "name": "带血的衣物碎片",
+          "icon": "cloth",
+          "description": "在赵大卧房床底发现一件带有暗红色血迹的衣物碎片，被匆忙藏匿。",
+          "sceneId": "zhao_home",
+          "isKey": true,
+          "clue": "血迹虽已干涸，但仍可辨认——这很可能就是被害人遇害时所穿衣物。"
+        },
+        {
+          "id": "ev_002",
+          "name": "失踪银两的包裹布",
+          "icon": "package",
+          "description": "在赵大柜中发现一块绣有'南阳刘记'字样的包裹布，原用于包裹银两。",
+          "sceneId": "zhao_home",
+          "isKey": true,
+          "clue": "包裹布上绣有'南阳刘记'字样，与刘世昌的商人身份吻合，证明银两确为刘世昌所有。"
+        },
+        {
+          "id": "ev_003",
+          "name": "赵大的供词矛盾记录",
+          "icon": "note",
+          "description": "赵大先说刘世昌早已离开，后又说从未见过此人，前后矛盾。",
+          "sceneId": "zhao_home",
+          "isKey": false,
+          "clue": "供词前后不一，必有隐情。"
+        },
+        {
+          "id": "ev_004",
+          "name": "乌盆中的骨殖残片",
+          "icon": "bone",
+          "description": "打破乌盆后发现盆壁内嵌有细小的骨殖残片，与陶土融合在一起。",
+          "sceneId": "kiln",
+          "isKey": true,
+          "clue": "骨殖残片与陶土混为一体，证实了冤魂所言——被害人的尸骨被混入陶土烧成乌盆。"
+        },
+        {
+          "id": "ev_005",
+          "name": "杀人刀具",
+          "icon": "knife",
+          "description": "在窑炉灰烬中发现一把被烧过的刀具，刀刃上仍有可疑痕迹。",
+          "sceneId": "kiln",
+          "isKey": true,
+          "clue": "刀具虽经焚烧，但刀柄处残留的血迹仍可检验，正是作案凶器。"
+        },
+        {
+          "id": "ev_006",
+          "name": "邻居的证词",
+          "icon": "witness",
+          "description": "邻居张婆称，那夜曾听到赵大家传出呼救声，次日见赵大神色慌张地烧窑。",
+          "sceneId": "zhao_home",
+          "isKey": false,
+          "clue": "邻居的证词佐证了案发时间与赵大的异常行为。"
+        }
+      ]
+    },
+    "interrogation": {
+      "id": "interrogation",
+      "name": "审讯",
+      "suspects": [
+        {
+          "id": "sus_001",
+          "name": "赵大",
+          "role": "窑户",
+          "description": "定远县窑户，以烧制陶器为生。神色慌张，言辞闪烁。",
+          "dialogues": [
+            {
+              "speaker": "赵大",
+              "speakerTitle": "嫌疑人",
+              "content": "大人冤枉啊！小人只是个烧窑的，从未见过什么刘世昌！",
+              "emotion": "fear"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "大胆赵大！那你柜中这块绣着'南阳刘记'的包裹布从何而来？",
+              "emotion": "angry"
+            },
+            {
+              "speaker": "赵大",
+              "speakerTitle": "嫌疑人",
+              "content": "这……这是我捡来的！对，在路边捡的！",
+              "emotion": "panic"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "还敢狡辩！来人，将刀具和衣物碎片呈上来！",
+              "emotion": "angry"
+            },
+            {
+              "speaker": "系统",
+              "speakerTitle": "旁白",
+              "content": "衙役将证据一一呈上。赵大看到带血的衣物和刀具，双腿发软，瘫倒在地。",
+              "emotion": "narrator"
+            },
+            {
+              "speaker": "赵大",
+              "speakerTitle": "嫌疑人",
+              "content": "大人饶命！小人……小人认罪！那日见刘世昌包裹中有不少银两，便起了贪念……",
+              "emotion": "surrender"
+            }
+          ],
+          "isGuilty": true
+        },
+        {
+          "id": "sus_002",
+          "name": "赵妻李氏",
+          "role": "赵大之妻",
+          "description": "赵大的妻子，面对官府询问时眼神躲闪，似有隐情。",
+          "dialogues": [
+            {
+              "speaker": "李氏",
+              "speakerTitle": "嫌疑人",
+              "content": "大人明鉴，民妇什么都不知道啊！",
+              "emotion": "fear"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "案发当夜你在何处？可曾听见什么动静？",
+              "emotion": "serious"
+            },
+            {
+              "speaker": "李氏",
+              "speakerTitle": "嫌疑人",
+              "content": "民妇……民妇当夜回娘家去了，不在家中……",
+              "emotion": "nervous"
+            },
+            {
+              "speaker": "系统",
+              "speakerTitle": "旁白",
+              "content": "经查证，李氏案发当夜确实回了娘家，但她对丈夫的行为并非一无所知。",
+              "emotion": "narrator"
+            }
+          ],
+          "isGuilty": false,
+          "hint": "李氏虽对案情有所隐瞒，但并非直接凶手"
+        }
+      ]
+    },
+    "judgment": {
+      "id": "judgment",
+      "name": "断案",
+      "correctSuspectId": "sus_001",
+      "requiredEvidenceIds": ["ev_001", "ev_002", "ev_004", "ev_005"],
+      "judgmentText": {
+        "correct": "经查明，窑户赵大见财起意，杀害南阳商人刘世昌，劫其银两，并将尸骨烧成乌盆以毁尸灭迹。此等恶行，天理难容！判赵大斩立决，以正国法！李氏知情不报，杖责二十。查抄赵大家产，偿还刘世昌家属。刘世昌冤魂得以昭雪，魂归故里。",
+        "wrong": "本案证据尚不充分，大人还需仔细查证，切莫冤枉了好人。",
+        "partial": "大人所断有部分道理，但仍有关键证据未纳入考量，请重新审视所有证据。"
+      }
+    }
+  },
+  "hints": [
+    { "id": "hint_1", "content": "注意证据之间的关联性——血迹、刀具、包裹布和骨殖残片相互印证。", "cost": 1 },
+    { "id": "hint_2", "content": "赵大的供词前后矛盾，这是一个重要的突破口。", "cost": 1 },
+    { "id": "hint_3", "content": "乌盆本身就是一个重要证据——打破它看看里面有什么。", "cost": 1 }
+  ]
+}

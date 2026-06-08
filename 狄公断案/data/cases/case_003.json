@@ -1,0 +1,215 @@
+{
+  "id": "case_003",
+  "title": "铜镜奇案",
+  "subtitle": "第三案",
+  "difficulty": 3,
+  "description": "长安城铜镜匠人离奇死亡，死前留下半面铜镜。狄仁杰顺藤摸瓜，牵出一桩惊天大案……",
+  "background": "唐武则天时期，长安城著名铜镜匠人孙师傅被发现死于作坊中，手中紧握半面铜镜。孙师傅生前曾为宫中打造铜镜，其死因扑朔迷离。狄仁杰受命调查，发现这半面铜镜竟牵连着宫中一桩尘封多年的秘密。",
+  "stages": {
+    "report": {
+      "id": "report",
+      "name": "报案",
+      "dialogues": [
+        {
+          "speaker": "系统",
+          "speakerTitle": "旁白",
+          "content": "长安城东市，铜镜匠人孙师傅被发现死于自己的作坊中，面色青紫，疑似中毒身亡。",
+          "emotion": "narrator"
+        },
+        {
+          "speaker": "狄仁杰",
+          "speakerTitle": "同平章事",
+          "content": "孙师傅乃长安名匠，何人要取他性命？他手中这半面铜镜，定有蹊跷。",
+          "emotion": "serious"
+        },
+        {
+          "speaker": "系统",
+          "speakerTitle": "旁白",
+          "content": "狄仁杰仔细端详那半面铜镜，镜面光可鉴人，背面刻有精美的鸾凤纹样，但只完成了一半。",
+          "emotion": "narrator"
+        },
+        {
+          "speaker": "狄仁杰",
+          "speakerTitle": "同平章事",
+          "content": "这鸾凤纹样……是宫中御用之物！孙师傅之死，恐怕与宫中有关。来人，封锁作坊，传唤所有相关之人！",
+          "emotion": "serious"
+        }
+      ]
+    },
+    "investigation": {
+      "id": "investigation",
+      "name": "取证",
+      "scenes": [
+        {
+          "id": "workshop",
+          "name": "铜镜作坊",
+          "description": "孙师傅的铜镜作坊，炉火已熄，工作台上散落着铜镜半成品和工具。",
+          "searchHints": ["检查未完成的铜镜", "查看炉中的残留物", "翻阅订单簿册"]
+        },
+        {
+          "id": "market",
+          "name": "东市商铺",
+          "description": "东市是长安最繁华的集市，孙师傅的铜镜在此出售，多家商铺与他有生意往来。",
+          "searchHints": ["询问商铺掌柜", "查看近期交易记录", "寻找神秘买家线索"]
+        }
+      ],
+      "evidences": [
+        {
+          "id": "ev_001",
+          "name": "炉中的砒霜残渣",
+          "icon": "poison",
+          "description": "作坊熔铜炉中发现砒霜残渣，砒霜被混入铜料中，孙师傅在熔铜时吸入毒气而亡。",
+          "sceneId": "workshop",
+          "isKey": true,
+          "clue": "砒霜被混入铜料，孙师傅是在熔铜时中毒身亡的！这是蓄意谋杀！"
+        },
+        {
+          "id": "ev_002",
+          "name": "半面铜镜的图纸",
+          "icon": "note",
+          "description": "工作台下藏着一张铜镜设计图纸，标注着'内府定制，鸾凤呈祥'字样。",
+          "sceneId": "workshop",
+          "isKey": true,
+          "clue": "铜镜是内府定制之物，孙师傅因知道铜镜秘密而被灭口！"
+        },
+        {
+          "id": "ev_003",
+          "name": "订单簿册中的异常",
+          "icon": "book",
+          "description": "订单簿册显示，近期有一笔匿名大单，要求打造与宫中御用铜镜一模一样的赝品。",
+          "sceneId": "workshop",
+          "isKey": true,
+          "clue": "有人要打造宫中铜镜的赝品，这恐怕是偷梁换柱之计！"
+        },
+        {
+          "id": "ev_004",
+          "name": "商铺掌柜的证词",
+          "icon": "witness",
+          "description": "东市商铺掌柜称，近日有一名自称宫中内侍的人来打听孙师傅的铜镜技艺。",
+          "sceneId": "market",
+          "isKey": true,
+          "clue": "宫中内侍来打听孙师傅，说明宫中有人盯上了孙师傅的铜镜技艺。"
+        },
+        {
+          "id": "ev_005",
+          "name": "铜料供应商的记录",
+          "icon": "package",
+          "description": "铜料供应商记录显示，案发前一日，有人额外送来一批铜料，送货人自称是孙师傅的弟子。",
+          "sceneId": "market",
+          "isKey": false,
+          "clue": "那批额外的铜料中混入了砒霜，送货人就是凶手！"
+        },
+        {
+          "id": "ev_006",
+          "name": "孙师傅弟子的证词",
+          "icon": "witness",
+          "description": "孙师傅的弟子称，师傅近日神色紧张，曾说'那面铜镜不能完成，否则大祸临头'。",
+          "sceneId": "market",
+          "isKey": false,
+          "clue": "孙师傅知道铜镜背后的秘密，因此招来杀身之祸。"
+        }
+      ]
+    },
+    "interrogation": {
+      "id": "interrogation",
+      "name": "审讯",
+      "suspects": [
+        {
+          "id": "sus_001",
+          "name": "钱太监",
+          "role": "内府太监",
+          "description": "宫中内府太监，负责管理宫中器物采办，与孙师傅有业务往来。",
+          "dialogues": [
+            {
+              "speaker": "钱太监",
+              "speakerTitle": "嫌疑人",
+              "content": "大人，奴才只是奉命采办宫中器物，与孙师傅之死毫无关系！",
+              "emotion": "fear"
+            },
+            {
+              "speaker": "狄仁杰",
+              "speakerTitle": "同平章事",
+              "content": "那东市商铺的人说，是你去打听孙师傅的铜镜技艺？",
+              "emotion": "serious"
+            },
+            {
+              "speaker": "钱太监",
+              "speakerTitle": "嫌疑人",
+              "content": "那……那只是为了采办之事，例行了解工匠情况！",
+              "emotion": "nervous"
+            },
+            {
+              "speaker": "狄仁杰",
+              "speakerTitle": "同平章事",
+              "content": "孙师傅的订单簿上，那笔匿名赝品大单，是你下的吧？你让孙师傅打造宫中铜镜的赝品，用假货替换真品！",
+              "emotion": "angry"
+            },
+            {
+              "speaker": "钱太监",
+              "speakerTitle": "嫌疑人",
+              "content": "大人饶命！奴才……奴才确实想用赝品换出宫中铜镜，但……但奴才没有杀人！是那铜料里被人下了毒！",
+              "emotion": "surrender"
+            }
+          ],
+          "isGuilty": true
+        },
+        {
+          "id": "sus_002",
+          "name": "孙小妹",
+          "role": "孙师傅之女",
+          "description": "孙师傅的独女，精通铜镜制作技艺，父亲死后继承作坊。",
+          "dialogues": [
+            {
+              "speaker": "孙小妹",
+              "speakerTitle": "嫌疑人",
+              "content": "大人，家父一生勤勉，从不与人结怨，不知为何遭此毒手！",
+              "emotion": "cry"
+            },
+            {
+              "speaker": "狄仁杰",
+              "speakerTitle": "同平章事",
+              "content": "你父亲近日是否有什么异常？可曾提过什么人？",
+              "emotion": "serious"
+            },
+            {
+              "speaker": "孙小妹",
+              "speakerTitle": "嫌疑人",
+              "content": "家父近日确实心事重重，常说'那面铜镜不能完成'……但他不肯告诉小女子更多。",
+              "emotion": "nervous"
+            },
+            {
+              "speaker": "狄仁杰",
+              "speakerTitle": "同平章事",
+              "content": "你可知那半面铜镜的另一半在哪里？",
+              "emotion": "serious"
+            },
+            {
+              "speaker": "孙小妹",
+              "speakerTitle": "嫌疑人",
+              "content": "小女子不知……家父从不让小女子碰那面铜镜。",
+              "emotion": "cry"
+            }
+          ],
+          "isGuilty": false,
+          "hint": "孙小妹是无辜的，她只是想为父亲申冤"
+        }
+      ]
+    },
+    "judgment": {
+      "id": "judgment",
+      "name": "断案",
+      "correctSuspectId": "sus_001",
+      "requiredEvidenceIds": ["ev_001", "ev_002", "ev_003", "ev_004"],
+      "judgmentText": {
+        "correct": "经查明，内府太监钱太监监守自盗，命孙师傅打造宫中铜镜赝品，欲以假换真偷出宫中珍宝。孙师傅识破其计，拒绝完成赝品并欲上报，钱太监遂在铜料中混入砒霜，将孙师傅毒杀灭口。判钱太监斩立决！宫中被盗铜镜已追回，孙师傅之冤得雪。此案彰显狄公洞察秋毫之明！",
+        "wrong": "本案证据尚不充分，大人还需仔细查证，切莫冤枉了好人。",
+        "partial": "大人所断有部分道理，但仍有关键证据未纳入考量，请重新审视所有证据。"
+      }
+    }
+  },
+  "hints": [
+    { "id": "hint_1", "content": "孙师傅是中毒身亡——检查他工作时接触的材料。", "cost": 1 },
+    { "id": "hint_2", "content": "那半面铜镜不是普通商品，注意它的图纸和订单。", "cost": 1 },
+    { "id": "hint_3", "content": "有人要打造宫中铜镜的赝品——谁有动机和能力做这件事？", "cost": 1 }
+  ]
+}

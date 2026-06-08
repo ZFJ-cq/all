@@ -1,0 +1,154 @@
+{
+  "id": "case_008",
+  "title": "智审石头案",
+  "subtitle": "第八案",
+  "difficulty": 1,
+  "description": "卖糍粑孩童铜钱被偷，包拯巧审石头，用科学方法找出小偷！",
+  "background": "卖糍粑的小男孩被偷了铜钱，包拯假装审问石头，用油脂吸附原理找出了真正的小偷。",
+  "stages": {
+    "report": {
+      "id": "report",
+      "name": "报案",
+      "dialogues": [
+        {
+          "speaker": "系统",
+          "speakerTitle": "旁白",
+          "content": "一个卖糍粑的小男孩蹲在路边哭泣，包拯路过，上前询问缘由。",
+          "emotion": "narrator"
+        },
+        {
+          "speaker": "小男孩",
+          "speakerTitle": "告状人",
+          "content": "呜呜……有人偷了我的铜钱……那是我一天的收入……",
+          "emotion": "cry"
+        },
+        {
+          "speaker": "包拯",
+          "speakerTitle": "包青天",
+          "content": "孩子莫哭，告诉本官，是谁偷了你的钱？",
+          "emotion": "kind"
+        },
+        {
+          "speaker": "小男孩",
+          "speakerTitle": "告状人",
+          "content": "不知道……我刚才在石头上休息，醒来钱就不见了……",
+          "emotion": "cry"
+        },
+        {
+          "speaker": "包拯",
+          "speakerTitle": "包青天",
+          "content": "哦？这块石头偷了你的钱？来人，把石头抬回县衙！本官要审问这块石头！",
+          "emotion": "thinking"
+        }
+      ]
+    },
+    "investigation": {
+      "id": "investigation",
+      "name": "取证",
+      "scenes": [
+        {
+          "id": "street",
+          "name": "街头",
+          "description": "小男孩卖糍粑的地方，有一块大石头。",
+          "searchHints": ["检查石头", "询问围观者", "寻找线索"]
+        },
+        {
+          "id": "court",
+          "name": "县衙",
+          "description": "县衙大堂，包拯准备'审问'石头。",
+          "searchHints": ["观察人群", "收集铜钱", "寻找破绽"]
+        }
+      ],
+      "evidences": [
+        {
+          "id": "ev_701",
+          "name": "沾满油的铜钱",
+          "icon": "money",
+          "description": "小男孩的铜钱因为装在糍粑油袋里，都沾满了油。",
+          "sceneId": "street",
+          "isKey": true,
+          "clue": "铜钱上的油是关键线索。"
+        },
+        {
+          "id": "ev_702",
+          "name": "水桶中的油花",
+          "icon": "grain",
+          "description": "有人投钱入水后，水面浮起一层油花。",
+          "sceneId": "court",
+          "isKey": true,
+          "clue": "钱上有油，说明此人就是小偷。"
+        },
+        {
+          "id": "ev_703",
+          "name": "围观者证词",
+          "icon": "witness",
+          "description": "围观者证实看到张三在小男孩休息时靠近过。",
+          "sceneId": "street",
+          "isKey": true,
+          "clue": "张三有作案时间和机会。"
+        }
+      ]
+    },
+    "interrogation": {
+      "id": "interrogation",
+      "name": "审讯",
+      "suspects": [
+        {
+          "id": "sus_701",
+          "name": "张三",
+          "role": "路人",
+          "description": "形迹可疑的路人，被怀疑偷了小男孩的钱。",
+          "dialogues": [
+            {
+              "speaker": "张三",
+              "speakerTitle": "嫌疑人",
+              "content": "大人！小民冤枉！我只是路过而已！",
+              "emotion": "fear"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "哦？那你投进水里的钱为什么会浮起油花？",
+              "emotion": "serious"
+            },
+            {
+              "speaker": "张三",
+              "speakerTitle": "嫌疑人",
+              "content": "我……我不知道……",
+              "emotion": "nervous"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "还敢狡辩！这钱是从小男孩的油袋里偷的，上面沾满了糍粑油！",
+              "emotion": "angry"
+            },
+            {
+              "speaker": "张三",
+              "speakerTitle": "嫌疑人",
+              "content": "大人饶命！是小民一时糊涂……",
+              "emotion": "surrender"
+            }
+          ],
+          "isGuilty": true
+        }
+      ]
+    },
+    "judgment": {
+      "id": "judgment",
+      "name": "断案",
+      "correctSuspectId": "sus_701",
+      "requiredEvidenceIds": ["ev_701", "ev_702", "ev_703"],
+      "judgmentText": {
+        "correct": "经查明，张三趁小男孩在石头上休息时，偷走了他装在油袋里的铜钱。包拯巧审石头，让围观者每人投钱入水，张三的钱因沾有糍粑油而浮出水面，真相大白！判张三杖责三十，归还铜钱，并罚银五两给小男孩。此案体现包拯运用科学原理断案的智慧！",
+        "wrong": "证据不足，请继续调查。",
+        "partial": "已掌握部分证据，但还需进一步查证。"
+      }
+    }
+  },
+  "hints": [
+    { "id": "hint_8_1", "content": "铜钱上可能沾有糍粑油，这是关键线索。", "cost": 1 },
+    { "id": "hint_8_2", "content": "让众人投钱入水，油会浮在水面上。", "cost": 1 },
+    { "id": "hint_8_3", "content": "观察谁的钱会让水面浮起油花。", "cost": 1 }
+  ]
+}

@@ -1,0 +1,84 @@
+<div class="section active">
+  <h2 class="section-title">游戏平衡性配置</h2>
+  <div class="status-message" id="settingsMessage"></div>
+  <form id="settingsForm">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+      <div class="form-group">
+        <label>游戏版本</label>
+        <input type="text" id="gameVersion" value="1.0.0">
+      </div>
+      <div class="form-group">
+        <label>服务器状态</label>
+        <select id="serverStatus">
+          <option value="online">在线</option>
+          <option value="maintenance">维护中</option>
+          <option value="offline">离线</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>修炼速度倍率</label>
+        <input type="number" id="cultivationSpeed" value="1" step="0.1" min="0.1">
+      </div>
+      <div class="form-group">
+        <label>物品掉落率</label>
+        <input type="number" id="dropRate" value="1" step="0.1" min="0.1">
+      </div>
+      <div class="form-group">
+        <label>突破成功率</label>
+        <input type="number" id="breakthroughSuccessRate" value="0.8" step="0.05" max="1">
+      </div>
+      <div class="form-group">
+        <label>最大背包容量</label>
+        <input type="number" id="maxInventorySize" value="50">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>欢迎公告</label>
+      <textarea id="welcomeMessage" rows="3">欢迎来到灵月仙途！大道三千，唯吾独尊。</textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">保存配置</button>
+  </form>
+</div>
+
+<script>
+  // 初始化设置管理
+  function initSettings() {
+    loadSettings();
+    bindSettingsFormEvents();
+  }
+
+  // 加载设置
+  function loadSettings() {
+    // 模拟加载设置
+    console.log('加载设置');
+  }
+
+  // 绑定设置表单事件
+  function bindSettingsFormEvents() {
+    document.getElementById('settingsForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      saveSettings();
+    });
+  }
+
+  // 保存设置
+  function saveSettings() {
+    const settings = {
+      gameVersion: document.getElementById('gameVersion').value,
+      serverStatus: document.getElementById('serverStatus').value,
+      cultivationSpeed: parseFloat(document.getElementById('cultivationSpeed').value),
+      dropRate: parseFloat(document.getElementById('dropRate').value),
+      breakthroughSuccessRate: parseFloat(document.getElementById('breakthroughSuccessRate').value),
+      maxInventorySize: parseInt(document.getElementById('maxInventorySize').value),
+      welcomeMessage: document.getElementById('welcomeMessage').value
+    };
+    
+    console.log('保存设置:', settings);
+    showMessage('settingsMessage', '配置保存成功', 'success');
+  }
+
+  // 页面加载完成后初始化
+  if (typeof window.initSettings === 'undefined') {
+    window.initSettings = initSettings;
+  }
+</script>

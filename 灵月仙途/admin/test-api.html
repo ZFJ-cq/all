@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API 测试</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    h1, h2 {
+      color: #333;
+    }
+    .test-section {
+      margin: 20px 0;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    .result {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 4px;
+      margin-top: 10px;
+      max-height: 400px;
+      overflow: auto;
+      white-space: pre-wrap;
+    }
+    .success {
+      color: #28a745;
+    }
+    .error {
+      color: #dc3545;
+    }
+  </style>
+</head>
+<body>
+  <h1>API 测试页面</h1>
+  
+  <div class="test-section">
+    <h2>1. 测试统计数据</h2>
+    <button onclick="testStats()">获取统计数据</button>
+    <div id="stats-result" class="result"></div>
+  </div>
+  
+  <div class="test-section">
+    <h2>2. 测试游戏用户</h2>
+    <button onclick="testGameUsers()">获取游戏用户</button>
+    <div id="users-result" class="result"></div>
+  </div>
+  
+  <div class="test-section">
+    <h2>3. 测试资产类型</h2>
+    <button onclick="testAssetTypes()">获取资产类型</button>
+    <div id="assets-result" class="result"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>4. 测试初始化数据</h2>
+    <button onclick="testInitData()">初始化测试数据</button>
+    <div id="init-result" class="result"></div>
+  </div>
+
+  <script>
+    const API_BASE_URL = 'http://localhost:8088/api';
+
+    function showResult(elementId, data, isError = false) {
+      const el = document.getElementById(elementId);
+      el.className = 'result ' + (isError ? 'error' : 'success');
+      if (typeof data === 'object') {
+        el.textContent = JSON.stringify(data, null, 2);
+      } else {
+        el.textContent = data;
+      }
+    }
+
+    async function testStats() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/stats`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        showResult('stats-result', data);
+      } catch (error) {
+        showResult('stats-result', '错误: ' + error.message, true);
+        console.error(error);
+      }
+    }
+
+    async function testGameUsers() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/game/user`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        showResult('users-result', data);
+      } catch (error) {
+        showResult('users-result', '错误: ' + error.message, true);
+        console.error(error);
+      }
+    }
+
+    async function testAssetTypes() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/asset-type/list`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        showResult('assets-result', data);
+      } catch (error) {
+        showResult('assets-result', '错误: ' + error.message, true);
+        console.error(error);
+      }
+    }
+
+    async function testInitData() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/test-data/init-all`, {
+          method: 'POST'
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.text();
+        showResult('init-result', data);
+      } catch (error) {
+        showResult('init-result', '错误: ' + error.message, true);
+        console.error(error);
+      }
+    }
+  </script>
+</body>
+</html>

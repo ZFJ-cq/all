@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>修为管理</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <div class="module-content">
+        <h2>修为管理</h2>
+        <div class="module-description">
+            管理玩家的修为数据和境界突破
+        </div>
+        
+        <div class="search-bar">
+            <input type="text" id="searchKeyword" placeholder="搜索玩家...">
+            <button onclick="searchPlayers()">搜索</button>
+        </div>
+        
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>玩家ID</th>
+                        <th>玩家名称</th>
+                        <th>当前境界</th>
+                        <th>修为值</th>
+                        <th>突破次数</th>
+                        <th>上次突破时间</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="cultivationTableBody">
+                    <!-- 数据将通过JS动态加载 -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="pagination" id="pagination">
+            <!-- 分页将通过JS动态生成 -->
+        </div>
+    </div>
+    
+    <script>
+        function initCultivation() {
+            console.log('初始化修为管理模块');
+            loadCultivationData();
+        }
+        
+        function loadCultivationData(page = 1) {
+            const tableBody = document.getElementById('cultivationTableBody');
+            tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px;">加载中...</td></tr>';
+            
+            // 模拟数据加载
+            setTimeout(() => {
+                tableBody.innerHTML = '';
+                for (let i = 1; i <= 10; i++) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${(page - 1) * 10 + i}</td>
+                        <td>100${i}</td>
+                        <td>玩家${i}</td>
+                        <td>${['练气境', '筑基境', '金丹境', '元婴境', '化神境'][Math.floor(Math.random() * 5)]}</td>
+                        <td>${Math.floor(Math.random() * 10000) + 1000}</td>
+                        <td>${Math.floor(Math.random() * 10) + 1}</td>
+                        <td>2024-01-${i.toString().padStart(2, '0')} 10:00:00</td>
+                        <td>
+                            <button onclick="editCultivation(${i})">编辑</button>
+                            <button onclick="resetCultivation(${i})">重置</button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                }
+                
+                // 生成分页
+                generatePagination(page, 5);
+            }, 1000);
+        }
+        
+        function searchPlayers() {
+            const keyword = document.getElementById('searchKeyword').value;
+            console.log('搜索玩家:', keyword);
+            loadCultivationData();
+        }
+        
+        function editCultivation(id) {
+            console.log('编辑修为数据:', id);
+            alert('编辑修为数据功能开发中');
+        }
+        
+        function resetCultivation(id) {
+            if (confirm('确定要重置修为数据吗？')) {
+                console.log('重置修为数据:', id);
+                alert('重置成功');
+            }
+        }
+        
+        function generatePagination(currentPage, totalPages) {
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+            
+            for (let i = 1; i <= totalPages; i++) {
+                const button = document.createElement('button');
+                button.textContent = i;
+                button.className = i === currentPage ? 'active' : '';
+                button.onclick = () => loadCultivationData(i);
+                pagination.appendChild(button);
+            }
+        }
+    </script>
+</body>
+</html>

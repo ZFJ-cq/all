@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>灵月仙途 - 后台管理</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+
+  <header class="admin-header">
+    <h1 class="admin-title">灵月仙途 - 后台管理系统</h1>
+  </header>
+  
+  <div class="container">
+    <!-- 侧边栏导航 -->
+    <div class="sidebar">
+      <h2>功能菜单</h2>
+      <ul>
+        <li><a href="#dashboard" class="nav-link" data-module="dashboard">数据统计</a></li>
+        <li><a href="#users" class="nav-link" data-module="users">玩家管理</a></li>
+        <li><a href="#configs" class="nav-link" data-module="configs">游戏配置</a></li>
+        <li><a href="#realmBreak" class="nav-link" data-module="realmBreak">境界突破</a></li>
+        <!-- 资产管理下拉菜单 -->
+        <li class="dropdown">
+          <a href="#" onclick="toggleDropdown('assetDropdown')">资产管理 ▾</a>
+          <ul id="assetDropdown" class="dropdown-menu">
+            <li><a href="asset-type-config.html" target="_blank">资产类型配置</a></li>
+            <li><a href="#assetTypes" class="nav-link" data-module="assetTypes" onclick="event.stopPropagation()">资产管理</a></li>
+            <li><a href="#roleAssets" class="nav-link" data-module="roleAssets" onclick="event.stopPropagation()">角色资产</a></li>
+            <li><a href="#assetRecords" class="nav-link" data-module="assetRecords" onclick="event.stopPropagation()">资产记录</a></li>
+          </ul>
+        </li>
+        <!-- 角色管理下拉菜单 -->
+        <li class="dropdown">
+          <a href="#" onclick="toggleDropdown('roleDropdown'); return false;">角色管理 ▾</a>
+          <ul class="dropdown-menu" id="roleDropdown">
+            <li><a href="#bodyCultivation" class="nav-link" data-module="bodyCultivation" onclick="event.stopPropagation()">体修管理</a></li>
+            <li><a href="#checkin" class="nav-link" data-module="checkin" onclick="event.stopPropagation()">签到管理</a></li>
+            <li><a href="#cultivation" class="nav-link" data-module="cultivation" onclick="event.stopPropagation()">修为管理</a></li>
+            <li><a href="#equipment" class="nav-link" data-module="equipment" onclick="event.stopPropagation()">装备管理</a></li>
+            <li><a href="#inventory" class="nav-link" data-module="inventory" onclick="event.stopPropagation()">背包管理</a></li>
+            <li><a href="#items" class="nav-link" data-module="items" onclick="event.stopPropagation()">物品管理</a></li>
+          </ul>
+        </li>
+        <!-- 系统管理下拉菜单 -->
+        <li class="dropdown">
+          <a href="#" onclick="toggleDropdown('systemDropdown'); return false;">系统管理 ▾</a>
+          <ul class="dropdown-menu" id="systemDropdown">
+            <li><a href="#newbieGift" class="nav-link" data-module="newbieGift" onclick="event.stopPropagation()">新手礼包</a></li>
+            <li><a href="#resources" class="nav-link" data-module="resources" onclick="event.stopPropagation()">资源管理</a></li>
+            <li><a href="#rewards" class="nav-link" data-module="rewards" onclick="event.stopPropagation()">奖励管理</a></li>
+            <li><a href="#tasks" class="nav-link" data-module="tasks" onclick="event.stopPropagation()">任务管理</a></li>
+            <li><a href="#trade" class="nav-link" data-module="trade" onclick="event.stopPropagation()">交易管理</a></li>
+          </ul>
+        </li>
+        <li><a href="#sysUsers" class="nav-link" data-module="sysUsers">系统用户</a></li>
+        <li><a href="#sysRoles" class="nav-link" data-module="sysRoles">系统角色</a></li>
+        <li><a href="clan-management.html" target="_blank">宗门管理</a></li>
+        <li><a href="#sysMenus" class="nav-link" data-module="sysMenus">公共菜单</a></li>
+        <li><a href="#permissions" class="nav-link" data-module="permissions">权限管理</a></li>
+        <li class="dropdown">
+          <a href="#" onclick="toggleDropdown('skillDropdown'); return false;">技能管理 ▾</a>
+          <ul class="dropdown-menu" id="skillDropdown">
+            <li><a href="#skills" class="nav-link" data-module="skills" onclick="event.stopPropagation()">技能列表</a></li>
+            <li><a href="#roleSkills" class="nav-link" data-module="roleSkills" onclick="event.stopPropagation()">角色技能</a></li>
+          </ul>
+        </li>
+        <li class="dropdown">
+          <a href="#" onclick="toggleDropdown('mapDropdown'); return false;">地图管理 ▾</a>
+          <ul class="dropdown-menu" id="mapDropdown">
+            <li><a href="#maps" class="nav-link" data-module="maps" onclick="event.stopPropagation()">地图列表</a></li>
+          </ul>
+        </li>
+        <li><a href="#leaderboard" class="nav-link" data-module="leaderboard">排行榜</a></li>
+        <li><a href="#background" class="nav-link" data-module="background">背景设置</a></li>
+        <li><a href="#settings" class="nav-link" data-module="settings">参数配置</a></li>
+        <li><a href="#mail" class="nav-link" data-module="mail">邮件管理</a></li>
+        <li><a href="#activities" class="nav-link" data-module="activities">活动管理</a></li>
+        <li><a href="#achievements" class="nav-link" data-module="achievements">成就管理</a></li>
+        <li><a href="#logs" class="nav-link" data-module="logs">系统日志</a></li>
+      </ul>
+    </div>
+    
+    <!-- 主内容区 -->
+    <div class="main-content">
+      <div class="header-bar">
+        <h1 id="page-title">数据统计</h1>
+        <div class="search-add">
+          <input type="text" id="globalSearch" class="search-input" placeholder="搜索..." onkeyup="searchData()">
+          <button class="logout-btn" onclick="logout()">退出登录</button>
+        </div>
+      </div>
+      
+      <!-- 内容区域 -->
+      <div id="content-area">
+        <!-- 模块内容将通过JS动态加载 -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 模态框容器 -->
+  <div id="modal-container">
+    <!-- 模态框将通过JS动态加载 -->
+  </div>
+
+  <script src="../js/routes.js"></script>
+  <script src="../js/common.js"></script>
+</body>
+</html>

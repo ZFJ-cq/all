@@ -1,0 +1,680 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>算法对决：顺序查找 vs 二分查找 | 动态可视化与耗时对比</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #f0f2f5;
+            font-family: 'Segoe UI', 'Roboto', 'Noto Sans', system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 24px 20px;
+            color: #1e293b;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* 控制面板卡片 */
+        .control-panel {
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            padding: 20px 28px;
+            margin-bottom: 28px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            gap: 20px;
+            justify-content: space-between;
+            transition: all 0.2s;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .control-group label {
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #475569;
+        }
+
+        select, input, button {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 40px;
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        button {
+            background: #3b82f6;
+            border: none;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        button:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #1e293b;
+            border: 1px solid #cbd5e1;
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+            transform: none;
+        }
+
+        .badge {
+            background: #eef2ff;
+            padding: 6px 14px;
+            border-radius: 60px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #1e40af;
+        }
+
+        /* 双栏布局 */
+        .algorithms-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 28px;
+            margin-bottom: 24px;
+        }
+
+        .algo-card {
+            flex: 1;
+            min-width: 320px;
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+            overflow: hidden;
+            transition: all 0.2s;
+            backdrop-filter: blur(0px);
+        }
+
+        .algo-header {
+            background: #ffffff;
+            padding: 20px 24px 12px 24px;
+            border-bottom: 2px solid #eef2ff;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .algo-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+
+        .algo-title span {
+            background: #e0f2fe;
+            padding: 2px 12px;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-left: 10px;
+            color: #0369a1;
+        }
+
+        .stats {
+            display: flex;
+            gap: 18px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .stat {
+            background: #f1f5f9;
+            padding: 4px 12px;
+            border-radius: 36px;
+        }
+
+        .array-visualization {
+            padding: 20px 20px 16px 20px;
+            overflow-x: auto;
+            white-space: nowrap;
+            background: #fefefe;
+            border-bottom: 1px solid #e9eef3;
+            min-height: 140px;
+        }
+
+        .array-items {
+            display: inline-flex;
+            gap: 6px;
+            align-items: flex-end;
+        }
+
+        .array-cell {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 52px;
+            height: 52px;
+            background: #f1f5f9;
+            border-radius: 16px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #0f172a;
+            transition: all 0.1s ease;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+        }
+
+        /* 高亮样式 */
+        .array-cell.compare {
+            background: #facc15;
+            color: #0f172a;
+            border-color: #eab308;
+            transform: scale(1.02);
+            box-shadow: 0 4px 10px rgba(250,204,21,0.3);
+        }
+
+        .array-cell.found {
+            background: #22c55e;
+            color: white;
+            border-color: #16a34a;
+            box-shadow: 0 4px 12px rgba(34,197,94,0.3);
+        }
+
+        .array-cell.mid-highlight {
+            background: #8b5cf6;
+            color: white;
+            border-color: #7c3aed;
+        }
+
+        .array-cell.left-marker, .array-cell.right-marker {
+            background: #cbd5e1;
+            color: #1e293b;
+            border-style: dashed;
+        }
+
+        .pointer-info {
+            padding: 12px 20px 20px 20px;
+            font-size: 0.85rem;
+            background: #fafcff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            color: #334155;
+        }
+
+        .step-control {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .info-message {
+            font-family: monospace;
+            background: #f1f5f9;
+            padding: 6px 12px;
+            border-radius: 32px;
+        }
+
+        footer {
+            text-align: center;
+            color: #64748b;
+            font-size: 0.75rem;
+            margin-top: 48px;
+        }
+
+        @media (max-width: 850px) {
+            .array-cell { width: 38px; height: 38px; font-size: 0.7rem; }
+            .control-panel { flex-direction: column; align-items: stretch; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="control-panel">
+        <div class="control-group">
+            <label>📊 数据规模</label>
+            <select id="sizeSelect">
+                <option value="10">10 个元素</option>
+                <option value="20" selected>20 个元素</option>
+                <option value="40">40 个元素</option>
+                <option value="80">80 个元素</option>
+                <option value="120">120 个元素</option>
+            </select>
+        </div>
+        <div class="control-group">
+            <label>🎯 查找目标 (数值)</label>
+            <div style="display: flex; gap: 8px;">
+                <input type="number" id="targetValue" value="42" step="1" style="width: 110px;">
+                <button id="randomTargetBtn" class="btn-secondary" type="button">🎲 随机</button>
+            </div>
+        </div>
+        <div class="control-group">
+            <label>⚙️ 操作</label>
+            <div style="display: flex; gap: 10px;">
+                <button id="generateBtn">🔄 生成随机有序数组</button>
+                <button id="startSearchBtn">🚀 开始查找对比</button>
+            </div>
+        </div>
+        <div class="badge">
+            💡 顺序：逐个扫描 &nbsp;&nbsp;|&nbsp;&nbsp;⚡ 二分：折半查找
+        </div>
+    </div>
+
+    <div class="algorithms-row">
+        <!-- 顺序查找卡片 -->
+        <div class="algo-card" id="sequentialCard">
+            <div class="algo-header">
+                <div class="algo-title">🔍 顺序查找 <span>Linear Search</span></div>
+                <div class="stats">
+                    <div class="stat">📌 比较次数: <span id="seqComparisons">0</span></div>
+                    <div class="stat">⏱️ 耗时: <span id="seqTime">0.00</span> ms</div>
+                </div>
+            </div>
+            <div class="array-visualization" id="seqArrayContainer">
+                <div class="array-items" id="seqArrayItems"></div>
+            </div>
+            <div class="pointer-info">
+                <div>📍 当前检查索引: <strong id="seqCurrentIdx">—</strong></div>
+                <div class="info-message" id="seqStatusMsg">⚡ 等待开始</div>
+            </div>
+        </div>
+
+        <!-- 二分查找卡片 -->
+        <div class="algo-card" id="binaryCard">
+            <div class="algo-header">
+                <div class="algo-title">⚡ 二分查找 <span>Binary Search</span></div>
+                <div class="stats">
+                    <div class="stat">📌 比较次数: <span id="binComparisons">0</span></div>
+                    <div class="stat">⏱️ 耗时: <span id="binTime">0.00</span> ms</div>
+                </div>
+            </div>
+            <div class="array-visualization" id="binArrayContainer">
+                <div class="array-items" id="binArrayItems"></div>
+            </div>
+            <div class="pointer-info">
+                <div>🎯 查找范围: <strong id="binRange">-</strong></div>
+                <div class="info-message" id="binStatusMsg">⚡ 等待开始</div>
+            </div>
+        </div>
+    </div>
+    <footer>
+        ⚡ 演示动画逐步展示查找过程 | 耗时统计为实际算法执行时间(不含动画) | 二分查找要求数组有序(已自动升序)
+    </footer>
+</div>
+
+<script>
+    // DOM 元素
+    const sizeSelect = document.getElementById('sizeSelect');
+    const targetInput = document.getElementById('targetValue');
+    const randomTargetBtn = document.getElementById('randomTargetBtn');
+    const generateBtn = document.getElementById('generateBtn');
+    const startSearchBtn = document.getElementById('startSearchBtn');
+
+    // 显示区域
+    const seqContainer = document.getElementById('seqArrayItems');
+    const binContainer = document.getElementById('binArrayItems');
+    const seqComparisonsSpan = document.getElementById('seqComparisons');
+    const binComparisonsSpan = document.getElementById('binComparisons');
+    const seqTimeSpan = document.getElementById('seqTime');
+    const binTimeSpan = document.getElementById('binTime');
+    const seqCurrentIdxSpan = document.getElementById('seqCurrentIdx');
+    const seqStatusMsgSpan = document.getElementById('seqStatusMsg');
+    const binRangeSpan = document.getElementById('binRange');
+    const binStatusMsgSpan = document.getElementById('binStatusMsg');
+
+    // 核心数据
+    let currentArray = [];    // 升序数组
+    let targetValue = 42;
+    let currentSize = 20;
+
+    // 存储动画步骤的数据
+    let seqSteps = [];        // 顺序查找每一步的 index
+    let seqFoundIndex = -1;
+    let binSteps = [];        // 二分查找每一步 {left, right, mid, found}
+    let binFoundIndex = -1;
+    let seqAnimationTimer = null;
+    let binAnimationTimer = null;
+    let isAnimating = false;
+
+    // 辅助函数: 生成随机有序数组 (不重复，确保视觉差异)
+    function generateSortedArray(size) {
+        const arr = [];
+        let base = 10;
+        for (let i = 0; i < size; i++) {
+            // 生成递增序列，间隔3-11 模拟真实场景
+            let increment = Math.floor(Math.random() * 12) + 3;
+            base = i === 0 ? Math.floor(Math.random() * 30) + 10 : base + increment;
+            arr.push(base);
+        }
+        // 确保严格升序 (已经保证)
+        return [...arr];
+    }
+
+    // 根据当前size重新生成数组
+    function regenerateArray() {
+        currentSize = parseInt(sizeSelect.value, 10);
+        currentArray = generateSortedArray(currentSize);
+        renderArrays();
+    }
+
+    // 渲染两侧数组 (无高亮状态)
+    function renderArrays() {
+        renderArrayToContainer(currentArray, seqContainer);
+        renderArrayToContainer(currentArray, binContainer);
+        // 重置高亮信息
+        clearHighlights();
+        resetStatsDisplay();
+    }
+
+    // 渲染具体容器
+    function renderArrayToContainer(arr, container) {
+        container.innerHTML = '';
+        arr.forEach((val, idx) => {
+            const cell = document.createElement('div');
+            cell.className = 'array-cell';
+            cell.textContent = val;
+            cell.setAttribute('data-idx', idx);
+            container.appendChild(cell);
+        });
+    }
+
+    // 清除所有高亮类（顺序+二分）
+    function clearHighlights() {
+        const seqCells = document.querySelectorAll('#seqArrayItems .array-cell');
+        const binCells = document.querySelectorAll('#binArrayItems .array-cell');
+        seqCells.forEach(cell => {
+            cell.classList.remove('compare', 'found', 'mid-highlight', 'left-marker', 'right-marker');
+        });
+        binCells.forEach(cell => {
+            cell.classList.remove('compare', 'found', 'mid-highlight', 'left-marker', 'right-marker');
+        });
+    }
+
+    function resetStatsDisplay() {
+        seqComparisonsSpan.innerText = '0';
+        binComparisonsSpan.innerText = '0';
+        seqTimeSpan.innerText = '0.00';
+        binTimeSpan.innerText = '0.00';
+        seqCurrentIdxSpan.innerText = '—';
+        seqStatusMsgSpan.innerText = '⚡ 等待开始';
+        binRangeSpan.innerText = '-';
+        binStatusMsgSpan.innerText = '⚡ 等待开始';
+        if (seqAnimationTimer) clearTimeout(seqAnimationTimer);
+        if (binAnimationTimer) clearTimeout(binAnimationTimer);
+        isAnimating = false;
+    }
+
+    // 实际执行顺序查找（返回比较次数，匹配索引，耗时ms，以及步骤数组）
+    function runSequentialSearch(arr, target) {
+        const steps = [];
+        let comparisons = 0;
+        let foundIdx = -1;
+        const start = performance.now();
+        for (let i = 0; i < arr.length; i++) {
+            comparisons++;
+            steps.push(i);   // 记录比较索引
+            if (arr[i] === target) {
+                foundIdx = i;
+                break;
+            }
+        }
+        const end = performance.now();
+        return { comparisons, foundIdx, time: end - start, steps };
+    }
+
+    // 实际执行二分查找（返回比较次数，匹配索引，耗时ms，步骤记录）
+    function runBinarySearch(arr, target) {
+        let left = 0;
+        let right = arr.length - 1;
+        let comparisons = 0;
+        let foundIdx = -1;
+        const steps = []; // 存储每一步 {left, right, mid, found?}
+        const start = performance.now();
+        while (left <= right) {
+            const mid = Math.floor((left + right) / 2);
+            comparisons++;
+            const stepRecord = { left, right, mid, found: false };
+            if (arr[mid] === target) {
+                foundIdx = mid;
+                stepRecord.found = true;
+                steps.push(stepRecord);
+                break;
+            } else if (arr[mid] < target) {
+                steps.push(stepRecord);
+                left = mid + 1;
+            } else {
+                steps.push(stepRecord);
+                right = mid - 1;
+            }
+        }
+        const end = performance.now();
+        return { comparisons, foundIdx, time: end - start, steps };
+    }
+
+    // 顺序查找动画执行（逐步高亮）
+    function animateSequential(steps, foundIndex, arrLength, target) {
+        const cells = document.querySelectorAll('#seqArrayItems .array-cell');
+        // 清除之前高亮
+        cells.forEach(cell => cell.classList.remove('compare', 'found'));
+        let stepIdx = 0;
+        seqStatusMsgSpan.innerText = `🔍 顺序查找进行中...`;
+        seqCurrentIdxSpan.innerText = '-';
+        if (seqAnimationTimer) clearTimeout(seqAnimationTimer);
+        function nextStep() {
+            if (stepIdx >= steps.length) {
+                // 动画结束
+                if (foundIndex !== -1) {
+                    seqStatusMsgSpan.innerText = `✅ 找到目标值 ${target}，索引 ${foundIndex}`;
+                    const foundCell = cells[foundIndex];
+                    if (foundCell) foundCell.classList.add('found');
+                    seqCurrentIdxSpan.innerText = foundIndex;
+                } else {
+                    seqStatusMsgSpan.innerText = `❌ 未找到目标值 ${target}`;
+                }
+                isAnimating = false;
+                return;
+            }
+            const currentCompareIdx = steps[stepIdx];
+            // 清除之前的compare样式
+            cells.forEach(cell => cell.classList.remove('compare'));
+            if (currentCompareIdx < cells.length) {
+                cells[currentCompareIdx].classList.add('compare');
+                seqCurrentIdxSpan.innerText = currentCompareIdx;
+            }
+            stepIdx++;
+            seqAnimationTimer = setTimeout(nextStep, 120);
+        }
+        isAnimating = true;
+        nextStep();
+    }
+
+    // 二分查找动画（高亮left/right/mid区域）
+    function animateBinary(steps, foundIndex, arrLength, target) {
+        const cells = document.querySelectorAll('#binArrayItems .array-cell');
+        cells.forEach(cell => cell.classList.remove('compare', 'found', 'mid-highlight', 'left-marker', 'right-marker'));
+        let stepIdx = 0;
+        binStatusMsgSpan.innerText = `⚡ 二分逼近中...`;
+        binRangeSpan.innerText = '-';
+        if (binAnimationTimer) clearTimeout(binAnimationTimer);
+        function nextStep() {
+            if (stepIdx >= steps.length) {
+                if (foundIndex !== -1) {
+                    binStatusMsgSpan.innerText = `✅ 找到目标值 ${target}，索引 ${foundIndex}`;
+                    const foundCell = cells[foundIndex];
+                    if (foundCell) foundCell.classList.add('found');
+                    binRangeSpan.innerText = `目标索引 ${foundIndex}`;
+                } else {
+                    binStatusMsgSpan.innerText = `❌ 未找到目标值 ${target}`;
+                }
+                isAnimating = false;
+                return;
+            }
+            const step = steps[stepIdx];
+            const { left, right, mid } = step;
+            // 清除之前样式，但保留found不要误删
+            cells.forEach(cell => {
+                if (!cell.classList.contains('found')) {
+                    cell.classList.remove('compare', 'mid-highlight', 'left-marker', 'right-marker');
+                }
+            });
+            // 高亮范围：边界加不同样式（浅灰虚线边框）
+            for (let i = left; i <= right; i++) {
+                if (i >= 0 && i < cells.length && !cells[i].classList.contains('found')) {
+                    cells[i].classList.add('left-marker');  // 范围标记
+                }
+            }
+            // 高亮mid
+            if (mid >= 0 && mid < cells.length) {
+                cells[mid].classList.add('mid-highlight');
+            }
+            binRangeSpan.innerText = `[${left}, ${right}]  mid=${mid}`;
+            if (step.found) {
+                binStatusMsgSpan.innerText = `🎉 命中！中间值 arr[${mid}] = ${currentArray[mid]} = 目标值`;
+            } else {
+                const relationship = currentArray[mid] < target ? '小于' : '大于';
+                binStatusMsgSpan.innerText = `⚖️ 比较 arr[${mid}]=${currentArray[mid]} ${relationship} ${target}，缩小范围`;
+            }
+            stepIdx++;
+            binAnimationTimer = setTimeout(nextStep, 200);
+        }
+        isAnimating = true;
+        nextStep();
+    }
+
+    // 停止任何进行中的动画
+    function stopAnimations() {
+        if (seqAnimationTimer) clearTimeout(seqAnimationTimer);
+        if (binAnimationTimer) clearTimeout(binAnimationTimer);
+        isAnimating = false;
+    }
+
+    // 主流程：生成数组-> 目标校验 –> 分别实际计算（耗时统计）-> 动画播放
+    function startFullComparison() {
+        if (isAnimating) {
+            alert('动画演示中，请稍后或等待完成再开始新查找');
+            return;
+        }
+        // 获取目标值
+        let target = parseInt(targetInput.value, 10);
+        if (isNaN(target)) target = 42;
+        targetValue = target;
+        targetInput.value = targetValue;
+        // 确保数组是最新数据
+        regenerateArray();  // 重新渲染数组(清除高亮)
+        // 短暂延迟确保DOM更新
+        setTimeout(() => {
+            // 实际运行算法获取性能数据
+            const seqResult = runSequentialSearch(currentArray, targetValue);
+            const binResult = runBinarySearch(currentArray, targetValue);
+            // 更新统计面板
+            seqComparisonsSpan.innerText = seqResult.comparisons;
+            binComparisonsSpan.innerText = binResult.comparisons;
+            seqTimeSpan.innerText = seqResult.time.toFixed(3);
+            binTimeSpan.innerText = binResult.time.toFixed(3);
+            // 存储步骤供动画
+            const seqStepsArr = seqResult.steps;
+            const binStepsArr = binResult.steps;
+            // 重置高亮
+            clearHighlights();
+            stopAnimations();
+            // 先重置消息
+            seqStatusMsgSpan.innerText = `⏳ 顺序查找：已计算，开始演示...`;
+            binStatusMsgSpan.innerText = `⏳ 二分查找：已计算，开始演示...`;
+            seqCurrentIdxSpan.innerText = '-';
+            binRangeSpan.innerText = '-';
+            // 启动动画（如果查找过程中目标不在数组，同样能用）
+            animateSequential(seqStepsArr, seqResult.foundIdx, currentArray.length, targetValue);
+            animateBinary(binStepsArr, binResult.foundIdx, currentArray.length, targetValue);
+        }, 20);
+    }
+
+    // 随机目标值（在数组范围内外均衡）
+    function randomTarget() {
+        if (!currentArray.length) regenerateArray();
+        const arr = currentArray;
+        // 以70%概率选取数组中存在的元素，30%生成随机值
+        const existChance = Math.random() < 0.7;
+        let randVal;
+        if (existChance && arr.length > 0) {
+            const randomIndex = Math.floor(Math.random() * arr.length);
+            randVal = arr[randomIndex];
+        } else {
+            const minVal = arr[0] - 15 > 0 ? arr[0] - 15 : 5;
+            const maxVal = arr[arr.length - 1] + 15;
+            randVal = Math.floor(Math.random() * (maxVal - minVal + 1) + minVal);
+        }
+        targetInput.value = randVal;
+        targetValue = randVal;
+    }
+
+    // 监听生成按钮，重新生成数组并重置统计/高亮
+    function handleGenerate() {
+        if (isAnimating) {
+            alert('请等待当前动画结束');
+            return;
+        }
+        regenerateArray();
+        resetStatsDisplay();
+        clearHighlights();
+        // 如果存在随机目标基于新数组
+        randomTarget();  // 顺带更新目标值
+        targetValue = parseInt(targetInput.value, 10);
+    }
+
+    // 监听尺寸变化，重新生成数组
+    function handleSizeChange() {
+        if (isAnimating) {
+            alert('动画运行时无法更改尺寸，请稍后');
+            return;
+        }
+        regenerateArray();
+        resetStatsDisplay();
+        clearHighlights();
+        randomTarget();
+        targetValue = parseInt(targetInput.value, 10);
+    }
+
+    // 绑定事件
+    sizeSelect.addEventListener('change', handleSizeChange);
+    generateBtn.addEventListener('click', handleGenerate);
+    startSearchBtn.addEventListener('click', startFullComparison);
+    randomTargetBtn.addEventListener('click', () => {
+        if (currentArray.length) randomTarget();
+        else regenerateArray();
+    });
+
+    // 初始加载
+    function init() {
+        regenerateArray();
+        randomTarget();
+        resetStatsDisplay();
+        clearHighlights();
+    }
+    init();
+</script>
+</body>
+</html>

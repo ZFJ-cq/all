@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="../js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="../css/mobile-adapt.css">
+  <title>灵月仙途 - 锻体修炼</title>
+  <style>
+    :root {
+      --gold: #d4af37;
+      --gold-light: #f4e4bc;
+      --gold-dim: #b8962f;
+      --text-dim: #8b7355;
+      --text-bright: #f4e4bc;
+      --panel-bg: rgba(20, 12, 6, 0.92);
+      --panel-border: rgba(212, 175, 55, 0.5);
+      --success: #7bc96f;
+      --danger: #e85d5d;
+      --warning: #f0a830;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
+
+    body {
+      font-family: 'Microsoft YaHei', 'PingFang SC', serif;
+      background: linear-gradient(180deg, #0d0704 0%, #1a0f08 40%, #0d0704 100%);
+      min-height: 100vh;
+      width: 100vw;
+      overflow-y: auto;
+      overflow-x: hidden;
+      color: var(--gold-light);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background:
+        radial-gradient(ellipse at 50% 0%, rgba(212,175,55,0.12) 0%, transparent 50%),
+        radial-gradient(ellipse at 20% 80%, rgba(180,120,60,0.06) 0%, transparent 40%),
+        radial-gradient(ellipse at 80% 90%, rgba(180,120,60,0.06) 0%, transparent 40%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .back-btn {
+      position: fixed;
+      top: 12px; left: 12px;
+      z-index: 100;
+      background: linear-gradient(135deg, rgba(212,175,55,0.25), rgba(184,150,47,0.15));
+      border: 1px solid var(--gold-dim);
+      color: var(--gold-light);
+      padding: 7px 16px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      transition: all 0.2s;
+    }
+    .back-btn:hover { background: linear-gradient(135deg, rgba(212,175,55,0.35), rgba(184,150,47,0.25)); }
+    .back-btn:active { transform: scale(0.95); }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 420px;
+      margin: 0 auto;
+      padding: 52px 16px 80px;
+      width: 100%;
+    }
+
+    .page-title {
+      text-align: center;
+      font-size: 1.5rem;
+      color: var(--gold);
+      letter-spacing: 8px;
+      margin-bottom: 18px;
+      text-shadow: 0 0 20px rgba(212,175,55,0.4), 0 2px 4px rgba(0,0,0,0.5);
+      font-weight: 700;
+    }
+
+    .panel {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 14px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+
+    .panel-title {
+      font-size: 0.9rem;
+      color: var(--gold);
+      letter-spacing: 4px;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(212,175,55,0.25);
+      font-weight: 600;
+      text-shadow: 0 0 8px rgba(212,175,55,0.3);
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+      font-size: 0.85rem;
+    }
+    .info-label { color: var(--text-dim); font-weight: 500; }
+    .info-value { color: var(--gold-light); font-weight: 700; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
+
+    .status-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+    .status-normal { background: rgba(123,201,111,0.2); color: var(--success); border: 1px solid rgba(123,201,111,0.4); }
+    .status-injured { background: rgba(232,93,93,0.2); color: var(--danger); border: 1px solid rgba(232,93,93,0.4); animation: pulse-danger 1.5s infinite; }
+
+    @keyframes pulse-danger {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 10px;
+      background: rgba(0,0,0,0.5);
+      border-radius: 5px;
+      overflow: hidden;
+      margin: 8px 0;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.4);
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold-dim), var(--gold), #f4e4bc);
+      border-radius: 5px;
+      transition: width 0.4s ease;
+      box-shadow: 0 0 8px rgba(212,175,55,0.3);
+    }
+    .progress-text {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      text-align: right;
+      margin-top: 2px;
+    }
+
+    .part-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .part-card {
+      background: linear-gradient(135deg, rgba(30,20,12,0.8), rgba(20,12,6,0.9));
+      border: 2px solid rgba(212,175,55,0.2);
+      border-radius: 10px;
+      padding: 10px 6px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      text-align: center;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+    }
+    .part-card.selected {
+      border-color: var(--gold);
+      background: linear-gradient(135deg, rgba(212,175,55,0.2), rgba(184,150,47,0.1));
+      box-shadow: 0 0 20px rgba(212,175,55,0.3), 0 4px 16px rgba(0,0,0,0.4);
+      transform: translateY(-2px);
+    }
+    .part-card.locked {
+      opacity: 0.4;
+      cursor: not-allowed;
+      border-color: rgba(100,100,100,0.3);
+    }
+    .part-card.locked .part-icon { filter: grayscale(1) drop-shadow(none); }
+    .part-card:hover:not(.selected):not(.locked) {
+      border-color: rgba(212,175,55,0.4);
+      background: linear-gradient(135deg, rgba(40,28,16,0.8), rgba(30,18,10,0.9));
+    }
+    .part-card:active:not(.locked) { transform: scale(0.96); }
+
+    .part-icon { font-size: 1.6rem; margin-bottom: 4px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
+    .part-name { font-size: 0.78rem; color: var(--gold-light); font-weight: 700; letter-spacing: 1px; }
+    .part-level { font-size: 0.68rem; color: var(--text-dim); margin-top: 2px; font-weight: 600; }
+    .part-progress { font-size: 0.68rem; color: var(--gold); margin-top: 3px; font-weight: 600; }
+
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 12px;
+      border-radius: 10px;
+      border: 2px solid var(--gold-dim);
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      text-align: center;
+      letter-spacing: 3px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+    }
+    .btn:active { transform: scale(0.96); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--gold-dim), var(--gold));
+      color: #1a0f08;
+      text-shadow: 0 1px 2px rgba(255,255,255,0.2);
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: linear-gradient(135deg, var(--gold), #f4e4bc);
+      box-shadow: 0 0 16px rgba(212,175,55,0.4);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, rgba(212,175,55,0.15), rgba(184,150,47,0.08));
+      color: var(--gold-light);
+    }
+    .btn-secondary:hover:not(:disabled) {
+      background: linear-gradient(135deg, rgba(212,175,55,0.25), rgba(184,150,47,0.15));
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    .log-area {
+      max-height: 140px;
+      overflow-y: auto;
+      font-size: 0.78rem;
+      line-height: 1.7;
+      color: var(--text-dim);
+      padding: 10px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 8px;
+      border: 1px solid rgba(212,175,55,0.1);
+    }
+    .log-area::-webkit-scrollbar { width: 4px; }
+    .log-area::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 4px; }
+    .log-success { color: var(--success); font-weight: 600; }
+    .log-warning { color: var(--warning); font-weight: 600; }
+    .log-error { color: var(--danger); font-weight: 600; }
+
+    .toast {
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%) scale(0.8);
+      background: linear-gradient(135deg, rgba(20,12,6,0.97), rgba(30,18,10,0.97));
+      color: var(--gold-light);
+      padding: 14px 28px;
+      border-radius: 10px;
+      border: 2px solid var(--gold-dim);
+      font-size: 0.9rem;
+      font-weight: 600;
+      z-index: 1000;
+      opacity: 0;
+      transition: all 0.3s ease;
+      pointer-events: none;
+      text-align: center;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 0 20px rgba(212,175,55,0.2);
+      letter-spacing: 1px;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0; left: 0; width: 100%;
+      display: flex;
+      background: linear-gradient(180deg, rgba(13,7,4,0.95), rgba(13,7,4,0.98));
+      border-top: 2px solid rgba(212,175,55,0.3);
+      z-index: 100;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 -4px 16px rgba(0,0,0,0.4);
+    }
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px 0;
+      color: var(--text-dim);
+      font-size: 0.7rem;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: 600;
+    }
+    .nav-item.active { color: var(--gold); text-shadow: 0 0 8px rgba(212,175,55,0.4); }
+    .nav-item:hover:not(.active) { color: var(--text-bright); }
+    .nav-icon { font-size: 1.3rem; margin-bottom: 3px; }
+
+    .mutation-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, rgba(212,175,55,0.25), rgba(184,150,47,0.15));
+      border: 1px solid var(--gold-dim);
+      border-radius: 6px;
+      padding: 3px 10px;
+      font-size: 0.78rem;
+      color: var(--gold);
+      font-weight: 700;
+    }
+
+    .realm-display {
+      text-align: center;
+      padding: 10px 0;
+    }
+    .realm-name {
+      font-size: 1.25rem;
+      color: var(--gold);
+      font-weight: 800;
+      letter-spacing: 6px;
+      text-shadow: 0 0 16px rgba(212,175,55,0.5), 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    .loading-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(13,7,4,0.9);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+      transition: opacity 0.3s;
+    }
+    .loading-overlay.hidden { opacity: 0; pointer-events: none; }
+    .loading-text {
+      color: var(--gold);
+      font-size: 1rem;
+      letter-spacing: 4px;
+      animation: loading-pulse 1.5s infinite;
+    }
+    @keyframes loading-pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+  </style>
+</head>
+<body>
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-text">加载中...</div>
+  </div>
+
+  <button class="back-btn" onclick="location.href='../index.html'">← 返回</button>
+
+  <div class="container">
+    <div class="page-title">锻 体 修 炼</div>
+
+    <div class="panel">
+      <div class="realm-display">
+        <div class="realm-name" id="realmName">锻体境</div>
+      </div>
+      <div class="info-row">
+        <span class="info-label">角色</span>
+        <span class="info-value" id="playerName">加载中...</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">状态</span>
+        <span id="statusBadge" class="status-badge status-normal">正常</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">体修经验</span>
+        <span class="info-value" id="bodyExp">0</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="expBar" style="width:0%"></div>
+      </div>
+      <div class="progress-text" id="expText">0 / 1000</div>
+      <div class="info-row">
+        <span class="info-label">痛苦值</span>
+        <span class="info-value" id="painValue">0/100</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="painBar" style="width:0%;background:linear-gradient(90deg,#c94444,#ff6b6b)"></div>
+      </div>
+      <div class="info-row">
+        <span class="info-label">耐受度</span>
+        <span class="info-value" id="tolerance">0</span>
+      </div>
+      <div id="mutationInfo" style="display:none;margin-top:8px">
+        <span class="info-label">异变：</span>
+        <span class="mutation-badge" id="mutationName">-</span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">选 择 部 位</div>
+      <div class="part-grid" id="partGrid"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">修 炼 操 作</div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="cultivateBtn" onclick="performCultivation()">⚔️ 锻体修炼</button>
+        <button class="btn btn-secondary" id="breakthroughBtn" onclick="performBreakthrough()">🌟 境界突破</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">修 炼 日 志</div>
+      <div class="log-area" id="logArea"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <nav class="bottom-nav">
+    <a class="nav-item" href="../index.html"><span class="nav-icon">🏠</span>首页</a>
+    <a class="nav-item" href="../cultivation.html"><span class="nav-icon">🧘</span>修炼</a>
+    <a class="nav-item active"><span class="nav-icon">💪</span>锻体</a>
+    <a class="nav-item" href="../inventory/inventory.html"><span class="nav-icon">🎒</span>背包</a>
+  </nav>
+
+  <script src="../js/token-manager.js"></script>
+  <script src="../js/api-service.js?v=20250113"></script>
+  <script src="../js/config.js"></script>
+
+  <script>
+    const gameState = {
+      bodyCultivation: null,
+      bodyParts: [],
+      selectedPartIndex: 0,
+      currentRoleId: null
+    };
+
+    const PART_ICONS = {
+      'LIMBS': '🦾', 'ORGANS': '❤️‍🔥', 'HEAD': '🧠', 'TORSO': '🫁',
+      'SKIN': '🛡️', 'BONES': '🦴', 'MERIDIAN': '⚡', 'DANTIAN': '🔮',
+      'SENSE': '👁️', 'HEART': '💎'
+    };
+
+    const API_BASE = typeof window.getApiBaseUrl === 'function' ? window.getApiBaseUrl() : 'http://localhost:8088/api';
+
+    function getRoleId() {
+      if (window.AuthService && typeof window.AuthService.getCurrentRoleId === 'function') {
+        const id = window.AuthService.getCurrentRoleId();
+        if (id && id !== 'undefined' && id !== 'null') return id;
+      }
+      if (window.RoleValidator && typeof window.RoleValidator.getRoleId === 'function') {
+        const id = window.RoleValidator.getRoleId();
+        if (id && id !== 'undefined' && id !== 'null') return id;
+      }
+      const fromConfig = window.APP_CONFIG ? window.APP_CONFIG.currentRoleId : null;
+      if (fromConfig && fromConfig !== 'undefined' && fromConfig !== 'null') return fromConfig;
+      const fromStorage = localStorage.getItem('currentRoleId') || localStorage.getItem('roleId') || localStorage.getItem('selectedCharacterId');
+      if (fromStorage && fromStorage !== 'undefined' && fromStorage !== 'null') return fromStorage;
+      return null;
+    }
+
+    function getAuthToken() {
+      if (window.TokenUtils && typeof window.TokenUtils.get === 'function') {
+        const token = window.TokenUtils.get();
+        if (token) return token;
+      }
+      if (window.TokenManager && typeof window.TokenManager.getToken === 'function') {
+        const token = window.TokenManager.getToken();
+        if (token) return token;
+      }
+      return localStorage.getItem('token') || '';
+    }
+
+    async function apiGet(url) {
+      const token = getAuthToken();
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const resp = await fetch(API_BASE + url, {
+        method: 'GET',
+        headers,
+        credentials: 'include',
+        mode: 'cors'
+      });
+
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const result = await resp.json();
+      if (result.code !== 200) throw new Error(result.message || '业务错误');
+      return result.data;
+    }
+
+    async function apiPost(url, data = {}) {
+      const token = getAuthToken();
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const resp = await fetch(API_BASE + url, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(data),
+        credentials: 'include',
+        mode: 'cors'
+      });
+
+      if (!resp.ok) {
+        const errData = await resp.json().catch(() => ({}));
+        throw new Error(errData.message || `HTTP ${resp.status}`);
+      }
+      const result = await resp.json();
+      if (result.code !== 200) throw new Error(result.message || '业务错误');
+      return result.data;
+    }
+
+    function hideLoading() {
+      const overlay = document.getElementById('loadingOverlay');
+      if (overlay) overlay.classList.add('hidden');
+    }
+
+    async function init() {
+      if (window.APP_CONFIG && typeof window.APP_CONFIG.init === 'function' && !window.APP_CONFIG._initialized) {
+        await window.APP_CONFIG.init();
+      }
+
+      const roleId = getRoleId();
+      if (!roleId) {
+        document.getElementById('playerName').textContent = '未选择角色';
+        addLog('未检测到角色信息，请先登录或选择角色', 'error');
+        hideLoading();
+        return;
+      }
+
+      gameState.currentRoleId = roleId;
+
+      try {
+        const role = await apiGet(`/role/${roleId}`);
+        document.getElementById('playerName').textContent = role.roleName || role.name || '未知';
+      } catch (e) {
+        console.error('获取角色信息失败:', e);
+        document.getElementById('playerName').textContent = '加载失败';
+      }
+
+      await loadBodyData(roleId);
+      hideLoading();
+    }
+
+    async function loadBodyData(roleId) {
+      try {
+        const data = await apiGet(`/body-cultivation/role/${roleId}`);
+        if (!data) { addLog('加载锻体数据失败', 'error'); return; }
+
+        gameState.bodyCultivation = data;
+
+        document.getElementById('realmName').textContent = data.realmName || '锻体境';
+        document.getElementById('bodyExp').textContent = data.bodyExp || 0;
+        document.getElementById('tolerance').textContent = data.tolerance || 0;
+
+        const statusBadge = document.getElementById('statusBadge');
+        if (data.status === 0) {
+          statusBadge.textContent = '重伤';
+          statusBadge.className = 'status-badge status-injured';
+        } else {
+          statusBadge.textContent = '正常';
+          statusBadge.className = 'status-badge status-normal';
+        }
+
+        const pain = parseFloat(data.painValue) || 0;
+        const painPercent = Math.min(pain, 100);
+        const painLevel = pain >= 300 ? '极度痛苦' : pain >= 200 ? '剧痛' : pain >= 100 ? '疼痛' : '轻微';
+        document.getElementById('painValue').textContent = `${Math.floor(pain)} (${painLevel})`;
+        document.getElementById('painBar').style.width = painPercent + '%';
+
+        const maxExp = data.requiredExp || 1000;
+        const curExp = data.bodyExp || 0;
+        const expPercent = maxExp > 0 ? Math.min((curExp / maxExp) * 100, 100) : 0;
+        document.getElementById('expBar').style.width = expPercent + '%';
+        document.getElementById('expText').textContent = `${curExp} / ${maxExp}`;
+
+        if (data.mutation && data.mutation.mutationName) {
+          document.getElementById('mutationInfo').style.display = 'block';
+          document.getElementById('mutationName').textContent = data.mutation.mutationName;
+        } else {
+          document.getElementById('mutationInfo').style.display = 'none';
+        }
+
+        if (data.partProgressList && data.partProgressList.length > 0) {
+          gameState.bodyParts = data.partProgressList.map(p => ({
+            partId: p.partId,
+            partName: p.partName,
+            partCode: p.partCode || '',
+            level: p.level || 1,
+            exp: p.exp || 0,
+            requiredExp: p.requiredExp || 100,
+            isLocked: p.isLocked || false
+          }));
+        }
+
+        renderParts();
+      } catch (e) {
+        console.error('加载锻体数据失败:', e);
+        addLog('加载锻体数据失败: ' + e.message, 'error');
+      }
+    }
+
+    function renderParts() {
+      const grid = document.getElementById('partGrid');
+      grid.innerHTML = '';
+
+      const parts = gameState.bodyParts.length > 0 ? gameState.bodyParts : [
+        { partName: '四肢', partCode: 'LIMBS', level: 1, exp: 0, requiredExp: 100, isLocked: false },
+        { partName: '五脏', partCode: 'ORGANS', level: 1, exp: 0, requiredExp: 100, isLocked: false }
+      ];
+
+      parts.forEach((part, i) => {
+        const progress = part.requiredExp > 0 ? Math.floor((part.exp / part.requiredExp) * 100) : 0;
+        const icon = PART_ICONS[part.partCode] || '💪';
+        const card = document.createElement('div');
+        const isSelected = gameState.selectedPartIndex === i;
+        const isLocked = part.isLocked;
+        card.className = 'part-card' + (isSelected ? ' selected' : '') + (isLocked ? ' locked' : '');
+        card.onclick = () => {
+          if (isLocked) { showToast('该部位尚未解锁'); return; }
+          gameState.selectedPartIndex = i;
+          renderParts();
+        };
+        card.innerHTML = `
+          <div class="part-icon">${icon}</div>
+          <div class="part-name">${part.partName}</div>
+          <div class="part-level">Lv.${part.level}</div>
+          <div class="part-progress">${isLocked ? '🔒' : progress + '%'}</div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    async function performCultivation() {
+      const roleId = gameState.currentRoleId || getRoleId();
+      if (!roleId) { showToast('请先选择角色'); return; }
+
+      const part = gameState.bodyParts[gameState.selectedPartIndex];
+      if (!part) { showToast('请先选择部位'); return; }
+      if (part.isLocked) { showToast('该部位尚未解锁'); return; }
+
+      const btn = document.getElementById('cultivateBtn');
+      btn.disabled = true;
+      btn.textContent = '修炼中...';
+
+      try {
+        const partId = part.partId;
+        const qteScore = Math.floor(60 + Math.random() * 40);
+
+        const result = await apiPost(`/body-cultivation/role/${roleId}/cultivate?partId=${partId}&qteScore=${qteScore}`, {});
+
+        if (result && result.success) {
+          let msg = `修炼成功！获得 ${result.expGained || 0} 经验`;
+          if (result.partLevelUp && result.partLevelUp > 0) {
+            msg += `，${part.partName}升级 +${result.partLevelUp}`;
+          }
+          showToast(msg);
+          addLog(`锻炼${part.partName}，获得 ${result.expGained || 0} 经验，痛苦 +${result.painIncrease || 0}`, 'success');
+          await loadBodyData(roleId);
+        } else {
+          showToast(result?.message || '修炼失败');
+          addLog('修炼失败: ' + (result?.message || '未知原因'), 'warning');
+        }
+      } catch (error) {
+        console.error('修炼异常:', error);
+        showToast('修炼失败: ' + (error.message || '未知错误'));
+        addLog('修炼异常: ' + (error.message || '未知错误'), 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '⚔️ 锻体修炼';
+      }
+    }
+
+    async function performBreakthrough() {
+      const roleId = gameState.currentRoleId || getRoleId();
+      if (!roleId) { showToast('请先选择角色'); return; }
+
+      const btn = document.getElementById('breakthroughBtn');
+      btn.disabled = true;
+      btn.textContent = '突破中...';
+
+      try {
+        const result = await apiPost(`/body-cultivation/role/${roleId}/breakthrough?useMedicine=false`, {});
+
+        if (result && result.success) {
+          let msg = `突破成功！晋升至${result.newRealmName || '新境界'}`;
+          if (result.hpBonus) msg += `，生命 +${result.hpBonus}`;
+          if (result.defenseBonus) msg += `，防御 +${result.defenseBonus}`;
+          if (result.strengthBonus) msg += `，力量 +${result.strengthBonus}`;
+          if (result.mutationAwakened && result.mutationName) {
+            msg += `，觉醒异变[${result.mutationName}]！`;
+          }
+          showToast(msg);
+          addLog(`突破成功！${result.oldRealmName || ''} → ${result.newRealmName || '新境界'}`, 'success');
+          await loadBodyData(roleId);
+        } else {
+          let failMsg = result?.message || '突破失败';
+          if (result?.failurePenalty === 'INJURY') failMsg += '（受到重伤！）';
+          else if (result?.failurePenalty === 'ATTR_DECAY') failMsg += '（经验损失！）';
+          showToast(failMsg);
+          addLog('突破失败: ' + (result?.message || '条件未满足'), 'warning');
+          await loadBodyData(roleId);
+        }
+      } catch (error) {
+        console.error('突破异常:', error);
+        showToast('突破失败: ' + (error.message || '连接服务器失败'));
+        addLog('突破异常: ' + (error.message || '网络或服务器错误'), 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '🌟 境界突破';
+      }
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2500);
+    }
+
+    function addLog(msg, type) {
+      const area = document.getElementById('logArea');
+      const div = document.createElement('div');
+      div.className = 'log-' + (type || '');
+      const time = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      div.textContent = `[${time}] ${msg}`;
+      area.appendChild(div);
+      area.scrollTop = area.scrollHeight;
+    }
+
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

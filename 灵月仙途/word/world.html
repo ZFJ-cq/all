@@ -1,0 +1,1651 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="../js/viewport-adapt.js"></script>
+  <script src="../js/config.js"></script>
+  <link rel="stylesheet" href="../css/mobile-adapt.css">
+  <title>灵月仙途 - 世界</title>
+  <style>
+    /* 全局样式重置与基础设置 */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: "STKaiti", "KaiTi", "Microsoft Yahei", sans-serif;
+      background: linear-gradient(to bottom, #0a0a2a, #1a1a3a, #0a0a2a);
+      color: #e0e0ff;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+    
+    /* 背景星空效果 */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(2px 2px at 20px 30px, #eee, transparent),
+        radial-gradient(2px 2px at 40px 70px, #fff, transparent),
+        radial-gradient(1px 1px at 90px 40px, #ddd, transparent),
+        radial-gradient(1px 1px at 130px 80px, #fff, transparent),
+        radial-gradient(2px 2px at 160px 120px, #eee, transparent);
+      background-size: 200px 200px;
+      z-index: -1;
+      opacity: 0.3;
+    }
+    
+    /* 游戏主容器 */
+    .game-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px 15px 80px;
+      min-height: 100vh;
+      position: relative;
+    }
+    
+    /* 顶部标题区域 */
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+      position: relative;
+      padding: 15px 0;
+      border-bottom: 1px solid rgba(100, 150, 255, 0.2);
+    }
+    
+    header h1 {
+      font-size: 2.5rem;
+      color: #aaccff;
+      text-shadow: 0 0 10px rgba(100, 150, 255, 0.5);
+      letter-spacing: 5px;
+      margin-bottom: 5px;
+      background: linear-gradient(to right, #aaccff, #88aaff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .subtitle {
+      font-size: 1.2rem;
+      color: #88aaff;
+      letter-spacing: 3px;
+      font-style: italic;
+    }
+    
+    /* 状态栏 */
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      background: rgba(20, 30, 60, 0.7);
+      border-radius: 12px;
+      padding: 12px 15px;
+      margin-bottom: 25px;
+      border: 1px solid rgba(100, 150, 255, 0.3);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(5px);
+    }
+    
+    .status-item {
+      text-align: center;
+      flex: 1;
+      position: relative;
+    }
+    
+    .status-item:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 10%;
+      height: 80%;
+      width: 1px;
+      background: rgba(100, 150, 255, 0.3);
+    }
+    
+    .status-value {
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: #aaccff;
+      margin-bottom: 5px;
+      text-shadow: 0 0 5px rgba(100, 150, 255, 0.5);
+    }
+    
+    .status-label {
+      font-size: 0.9rem;
+      color: #88aaff;
+      opacity: 0.8;
+    }
+    
+    /* 主内容区域 */
+    .game-content {
+      background: rgba(20, 30, 60, 0.7);
+      border-radius: 15px;
+      padding: 25px 20px;
+      border: 1px solid rgba(100, 150, 255, 0.3);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(5px);
+      margin-bottom: 30px;
+    }
+    
+    .main-content {
+      position: relative;
+    }
+    
+    .section {
+      display: block;
+    }
+    
+    .section-title {
+      font-size: 1.8rem;
+      color: #aaccff;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(100, 150, 255, 0.3);
+      text-align: center;
+      letter-spacing: 3px;
+    }
+    
+    .section p {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      margin-bottom: 15px;
+      color: #ccddff;
+    }
+    
+    .section strong {
+      color: #aaccff;
+      font-weight: normal;
+      text-shadow: 0 0 5px rgba(100, 150, 255, 0.5);
+    }
+    
+    /* 地点按钮区域 */
+    .action-buttons {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      margin-top: 25px;
+    }
+    
+    .location-card {
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+      border: 2px solid rgba(100, 150, 255, 0.3);
+      aspect-ratio: 4/3;
+    }
+    
+    .location-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.7));
+      z-index: 1;
+    }
+    
+    .location-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(100, 150, 255, 0.4);
+      border-color: rgba(150, 200, 255, 0.6);
+    }
+    
+    .location-image {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      transition: transform 0.3s ease;
+    }
+    
+    .location-card:hover .location-image {
+      transform: scale(1.05);
+    }
+    
+    .location-info {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      padding: 15px 12px;
+      z-index: 2;
+      text-align: center;
+    }
+    
+    .location-name {
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: #ffffff;
+      margin-bottom: 5px;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+      letter-spacing: 2px;
+    }
+    
+    .location-desc {
+      font-size: 0.85rem;
+      color: #ccddff;
+      opacity: 0.9;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+      line-height: 1.3;
+    }
+    
+    /* 地点样式 */
+    .location-card[data-action="酒楼"] .location-image {
+      background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%238B4513" width="100" height="100"/><text x="50" y="60" font-size="40" text-anchor="middle" fill="%23D2691E">🏮</text></svg>');
+    }
+    
+    .location-card[data-action="交易行"] .location-image {
+      background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%23556B2F" width="100" height="100"/><text x="50" y="60" font-size="40" text-anchor="middle" fill="%236B8E23">💰</text></svg>');
+    }
+    
+    .location-card[data-action="副本"] .location-image {
+      background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%234B0082" width="100" height="100"/><text x="50" y="60" font-size="40" text-anchor="middle" fill="%239370DB">⚔️</text></svg>');
+    }
+    
+    .location-card[data-action="兽岛"] .location-image {
+      background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%232E8B57" width="100" height="100"/><text x="50" y="60" font-size="40" text-anchor="middle" fill="%233CB371">🐉</text></svg>');
+    }
+    
+    .location-card[data-action="炼丹室"] .location-image {
+      background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%238B0000" width="100" height="100"/><text x="50" y="60" font-size="40" text-anchor="middle" fill="%23DC143C">🔥</text></svg>');
+    }
+    
+    .location-card[data-action="锻器室"] .location-image {
+      background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%23483D8B" width="100" height="100"/><text x="50" y="60" font-size="40" text-anchor="middle" fill="%236A5ACD">🔨</text></svg>');
+    }
+    
+    .location-card[data-action="修仙洞府"] .location-image {
+      background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%23006400" width="100" height="100"/><text x="50" y="60" font-size="40" text-anchor="middle" fill="%2300FA9A">🏔️</text></svg>');
+    }
+    
+    .location-card[data-action="拍卖行"] .location-image {
+      background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%23800080" width="100" height="100"/><text x="50" y="60" font-size="40" text-anchor="middle" fill="%23BA55D3">💎</text></svg>');
+    }
+    
+    .location-card[data-action="道侣"] .location-image {
+      background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%23C71585" width="100" height="100"/><text x="50" y="60" font-size="40" text-anchor="middle" fill="%23FF69B4">💕</text></svg>');
+    }
+
+    .location-card.locked {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    .location-card.locked:hover {
+      transform: none;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+      border-color: rgba(100, 150, 255, 0.3);
+    }
+    
+    /* 页脚 */
+    .footer {
+      text-align: center;
+      padding: 15px;
+      color: #88aaff;
+      font-size: 0.9rem;
+      opacity: 0.7;
+      border-top: 1px solid rgba(100, 150, 255, 0.2);
+    }
+    
+    /* 底部导航栏 */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(20, 30, 60, 0.95);
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0;
+      border-top: 1px solid rgba(100, 150, 255, 0.3);
+      backdrop-filter: blur(10px);
+      z-index: 1000;
+    }
+    
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-decoration: none;
+      padding: 8px 5px;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      width: 20%;
+      opacity: 0.7;
+    }
+    
+    .nav-item.active {
+      opacity: 1;
+      background: rgba(100, 150, 255, 0.2);
+      transform: translateY(-5px);
+    }
+    
+    .nav-item.active .nav-icon {
+      transform: scale(1.2);
+      text-shadow: 0 0 10px rgba(100, 150, 255, 0.8);
+    }
+    
+    .nav-item.active .nav-text {
+      color: #aaccff;
+      font-weight: bold;
+    }
+    
+    .nav-icon {
+      font-size: 1.8rem;
+      margin-bottom: 5px;
+      transition: all 0.3s ease;
+    }
+    
+    .nav-text {
+      font-size: 0.8rem;
+      color: #ccddff;
+      transition: all 0.3s ease;
+    }
+    
+    .nav-item:hover:not(.active) {
+      opacity: 0.9;
+      transform: translateY(-2px);
+    }
+    
+    /* 提示信息 */
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(20, 40, 80, 0.9);
+      color: #ccddff;
+      padding: 12px 20px;
+      border-radius: 8px;
+      border: 1px solid rgba(100, 150, 255, 0.4);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+      transform: translateX(120%);
+      transition: transform 0.3s ease;
+      z-index: 1001;
+      backdrop-filter: blur(5px);
+      max-width: 300px;
+    }
+    
+    .notification.show {
+      transform: translateX(0);
+    }
+    
+    /* 响应式设计 */
+    @media (max-width: 600px) {
+      .game-container {
+        padding: 15px 10px 80px;
+      }
+      
+      header h1 {
+        font-size: 2rem;
+      }
+      
+      .subtitle {
+        font-size: 1rem;
+      }
+      
+      .status-bar {
+        padding: 10px 8px;
+      }
+      
+      .status-value {
+        font-size: 1.2rem;
+      }
+      
+      .status-label {
+        font-size: 0.8rem;
+      }
+      
+      .game-content {
+        padding: 20px 15px;
+      }
+      
+      .section-title {
+        font-size: 1.5rem;
+      }
+      
+      .action-buttons {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+      }
+      
+      .location-name {
+        font-size: 1.1rem;
+      }
+      
+      .location-desc {
+        font-size: 0.75rem;
+      }
+      
+      .bottom-nav {
+        padding: 8px 0;
+      }
+      
+      .nav-icon {
+        font-size: 1.5rem;
+      }
+      
+      .nav-text {
+        font-size: 0.7rem;
+      }
+    }
+    
+    @media (max-width: 400px) {
+      .status-bar {
+        flex-wrap: wrap;
+      }
+      
+      .status-item {
+        flex: 0 0 50%;
+        margin-bottom: 10px;
+      }
+      
+      .status-item:nth-child(2n)::after {
+        display: none;
+      }
+      
+      .status-item:nth-child(-n+2) {
+        margin-bottom: 15px;
+      }
+    }
+
+    /* 底部导航栏 */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 70px;
+      background: linear-gradient(to top, rgba(15, 20, 35, 0.98), rgba(15, 20, 35, 0.8));
+      border-top: 2px solid #aaccff;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 100;
+      box-shadow: 0 -5px 30px rgba(100, 150, 255, 0.4);
+      backdrop-filter: blur(15px);
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      color: #88aaff;
+      text-decoration: none;
+      padding: 8px 20px;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      position: relative;
+      min-width: 70px;
+    }
+
+    .nav-item:hover {
+      color: #aaccff;
+      background: rgba(100, 150, 255, 0.2);
+      transform: translateY(-3px);
+    }
+
+    .nav-item.active {
+      color: #aaccff;
+      background: rgba(100, 150, 255, 0.3);
+      box-shadow: 0 0 15px rgba(100, 150, 255, 0.5);
+    }
+
+    .nav-item.active::after {
+      content: '';
+      position: absolute;
+      top: -8px;
+      width: 25px;
+      height: 4px;
+      background: #aaccff;
+      border-radius: 0 0 4px 4px;
+      box-shadow: 0 0 15px #aaccff;
+    }
+
+    .nav-icon {
+      font-size: 1.6rem;
+      text-shadow: 0 0 10px rgba(100, 150, 255, 0.3);
+    }
+
+    .nav-text {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-shadow: 0 0 5px rgba(100, 150, 255, 0.3);
+    }
+
+    .nav-item.active .nav-icon {
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { text-shadow: 0 0 10px rgba(100, 150, 255, 0.3); }
+      50% { text-shadow: 0 0 20px rgba(100, 150, 255, 0.8); }
+      100% { text-shadow: 0 0 10px rgba(100, 150, 255, 0.3); }
+    }
+    
+    /* 拍卖行模态框 */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 2000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(5px);
+    }
+    
+    .modal-content {
+      background: rgba(20, 30, 60, 0.95);
+      border: 2px solid #aaccff;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 800px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 0 30px rgba(100, 150, 255, 0.5);
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      border-bottom: 1px solid rgba(100, 150, 255, 0.3);
+      background: linear-gradient(to right, rgba(40, 60, 120, 0.9), rgba(20, 40, 80, 0.9));
+      border-radius: 13px 13px 0 0;
+    }
+    
+    .modal-header h2 {
+      color: #aaccff;
+      font-size: 1.8rem;
+      text-shadow: 0 0 10px rgba(100, 150, 255, 0.5);
+      margin: 0;
+    }
+    
+    .close {
+      color: #aaccff;
+      font-size: 2rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .close:hover {
+      color: #ffffff;
+      text-shadow: 0 0 15px rgba(100, 150, 255, 0.8);
+    }
+    
+    .modal-body {
+      padding: 20px;
+    }
+    
+    /* 拍卖场次标签 */
+    .auction-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid rgba(100, 150, 255, 0.3);
+      padding-bottom: 10px;
+    }
+    
+    .tab-btn {
+      flex: 1;
+      padding: 12px;
+      background: rgba(40, 60, 120, 0.7);
+      border: 1px solid rgba(100, 150, 255, 0.3);
+      border-radius: 8px;
+      color: #ccddff;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .tab-btn:hover {
+      background: rgba(60, 80, 140, 0.8);
+      border-color: rgba(150, 200, 255, 0.6);
+    }
+    
+    .tab-btn.active {
+      background: rgba(100, 150, 255, 0.3);
+      border-color: #aaccff;
+      color: #aaccff;
+      box-shadow: 0 0 15px rgba(100, 150, 255, 0.5);
+    }
+    
+    /* 拍卖物品列表 */
+    .auction-content {
+      margin-bottom: 30px;
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    .auction-items {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    
+    .auction-item {
+      background: rgba(30, 40, 80, 0.8);
+      border: 1px solid rgba(100, 150, 255, 0.3);
+      border-radius: 10px;
+      padding: 15px;
+      transition: all 0.3s ease;
+    }
+    
+    .auction-item:hover {
+      border-color: rgba(150, 200, 255, 0.6);
+      box-shadow: 0 0 15px rgba(100, 150, 255, 0.3);
+    }
+    
+    .item-info {
+      margin-bottom: 10px;
+    }
+    
+    .item-name {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #aaccff;
+      margin-bottom: 5px;
+      text-shadow: 0 0 5px rgba(100, 150, 255, 0.5);
+    }
+    
+    .item-desc {
+      font-size: 0.9rem;
+      color: #88aaff;
+      opacity: 0.8;
+    }
+    
+    .item-price {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      padding: 10px;
+      background: rgba(20, 30, 60, 0.6);
+      border-radius: 8px;
+    }
+    
+    .current-price {
+      font-size: 1.1rem;
+      color: #ffcc00;
+      font-weight: bold;
+    }
+    
+    .end-time {
+      font-size: 1rem;
+      color: #ff6666;
+      font-weight: bold;
+    }
+    
+    .item-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    
+    .bid-input {
+      flex: 1;
+      padding: 10px;
+      background: rgba(20, 30, 60, 0.6);
+      border: 1px solid rgba(100, 150, 255, 0.3);
+      border-radius: 6px;
+      color: #ccddff;
+      font-size: 1rem;
+    }
+    
+    .bid-input:focus {
+      outline: none;
+      border-color: #aaccff;
+      box-shadow: 0 0 10px rgba(100, 150, 255, 0.5);
+    }
+    
+    .bid-btn {
+      padding: 10px 20px;
+      background: linear-gradient(to bottom, rgba(60, 100, 160, 0.9), rgba(40, 80, 140, 0.9));
+      border: 1px solid rgba(100, 150, 255, 0.4);
+      border-radius: 6px;
+      color: #ccddff;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .bid-btn:hover {
+      background: linear-gradient(to bottom, rgba(80, 120, 180, 0.9), rgba(60, 100, 160, 0.9));
+      border-color: #aaccff;
+      box-shadow: 0 0 15px rgba(100, 150, 255, 0.5);
+    }
+    
+    .buyout-btn {
+      padding: 10px 15px;
+      background: linear-gradient(to bottom, rgba(160, 60, 60, 0.9), rgba(140, 40, 40, 0.9));
+      border: 1px solid rgba(255, 100, 100, 0.4);
+      border-radius: 6px;
+      color: #ffdddd;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .buyout-btn:hover {
+      background: linear-gradient(to bottom, rgba(180, 80, 80, 0.9), rgba(160, 60, 60, 0.9));
+      border-color: #ff8888;
+      box-shadow: 0 0 15px rgba(255, 100, 100, 0.5);
+    }
+    
+    /* 豪掷榜 */
+    .leaderboard-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .leaderboard-item {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      background: rgba(30, 40, 80, 0.8);
+      border: 1px solid rgba(100, 150, 255, 0.3);
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+    
+    .leaderboard-item:hover {
+      border-color: rgba(150, 200, 255, 0.6);
+      box-shadow: 0 0 15px rgba(100, 150, 255, 0.3);
+    }
+    
+    .leaderboard-item.top {
+      background: linear-gradient(to right, rgba(120, 80, 40, 0.9), rgba(100, 60, 20, 0.9));
+      border-color: #ffcc00;
+      box-shadow: 0 0 20px rgba(255, 200, 0, 0.5);
+    }
+    
+    .rank {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(100, 150, 255, 0.3);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #aaccff;
+      margin-right: 15px;
+    }
+    
+    .leaderboard-item.top .rank {
+      background: rgba(255, 200, 0, 0.8);
+      color: #333333;
+    }
+    
+    .player-info {
+      flex: 1;
+    }
+    
+    .player-name {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: #aaccff;
+      margin-bottom: 3px;
+    }
+    
+    .player-amount {
+      font-size: 0.9rem;
+      color: #ffcc00;
+    }
+    
+    .player-title {
+      background: rgba(255, 200, 0, 0.3);
+      color: #ffcc00;
+      padding: 5px 10px;
+      border-radius: 15px;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+    
+    /* 围观互动区域 */
+    .spectator-area {
+      margin-top: 30px;
+      border-top: 1px solid rgba(100, 150, 255, 0.3);
+      padding-top: 20px;
+    }
+    
+    .spectator-area h3 {
+      color: #aaccff;
+      margin-bottom: 15px;
+      font-size: 1.2rem;
+    }
+    
+    .chat-messages {
+      background: rgba(20, 30, 60, 0.6);
+      border: 1px solid rgba(100, 150, 255, 0.3);
+      border-radius: 8px;
+      padding: 15px;
+      max-height: 200px;
+      overflow-y: auto;
+      margin-bottom: 15px;
+    }
+    
+    .chat-message {
+      margin-bottom: 10px;
+      line-height: 1.4;
+    }
+    
+    .chat-user {
+      font-weight: bold;
+      color: #aaccff;
+      margin-right: 10px;
+    }
+    
+    .chat-content {
+      color: #ccddff;
+    }
+    
+    .chat-input-area {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .chat-input {
+      flex: 1;
+      padding: 10px;
+      background: rgba(20, 30, 60, 0.6);
+      border: 1px solid rgba(100, 150, 255, 0.3);
+      border-radius: 6px;
+      color: #ccddff;
+      font-size: 1rem;
+    }
+    
+    .chat-input:focus {
+      outline: none;
+      border-color: #aaccff;
+      box-shadow: 0 0 10px rgba(100, 150, 255, 0.5);
+    }
+    
+    .send-btn {
+      padding: 10px 20px;
+      background: linear-gradient(to bottom, rgba(60, 100, 160, 0.9), rgba(40, 80, 140, 0.9));
+      border: 1px solid rgba(100, 150, 255, 0.4);
+      border-radius: 6px;
+      color: #ccddff;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .send-btn:hover {
+      background: linear-gradient(to bottom, rgba(80, 120, 180, 0.9), rgba(60, 100, 160, 0.9));
+      border-color: #aaccff;
+      box-shadow: 0 0 15px rgba(100, 150, 255, 0.5);
+    }
+    
+    /* 全服广播 */
+    .server-broadcast {
+      position: fixed;
+      top: 10%;
+      left: 0;
+      width: 100%;
+      z-index: 1500;
+      pointer-events: none;
+    }
+    
+    .broadcast-content {
+      background: linear-gradient(90deg, transparent, rgba(255, 200, 0, 0.9), transparent);
+      color: #333333;
+      padding: 15px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 1.1rem;
+      animation: broadcastMove 10s linear infinite;
+    }
+    
+    @keyframes broadcastMove {
+      0% {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      90% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateX(-100%);
+        opacity: 0;
+      }
+    }
+    
+    /* 响应式设计 */
+    @media (max-width: 600px) {
+      .modal-content {
+        width: 95%;
+        max-height: 85vh;
+      }
+      
+      .modal-header h2 {
+        font-size: 1.5rem;
+      }
+      
+      .auction-tabs {
+        flex-direction: column;
+      }
+      
+      .item-actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .bid-input {
+        width: 100%;
+      }
+      
+      .bid-btn,
+      .buyout-btn {
+        width: 100%;
+        text-align: center;
+      }
+      
+      .leaderboard-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+      
+      .rank {
+        margin-right: 0;
+      }
+    }
+  </style>
+
+  </head>
+<body>
+  <div class="game-container">
+    <header>
+      <h1>灵月仙途</h1>
+      <div class="subtitle">世界地图</div>
+    </header>
+    
+    <!-- 状态栏 -->
+   <!--<div class="status-bar">
+      <div class="status-item">
+        <div class="status-value" id="realm">炼气·初期</div>
+        <div class="status-label">境界</div>
+      </div>
+      <div class="status-item">
+        <div class="status-value" id="spiritStones">0</div>
+        <div class="status-label">灵石</div>
+      </div>
+      <div class="status-item">
+        <div class="status-value" id="health">100/100</div>
+        <div class="status-label">气血</div>
+      </div>
+      <div class="status-item">
+        <div class="status-value" id="mana">80/80</div>
+        <div class="status-label">灵力</div>
+      </div>
+    </div>
+  -->
+    <!-- 主内容区域 -->
+    <div class="game-content">
+      <div class="main-content">
+        <div class="section" style="display:block;">
+          <h2 class="section-title">世界</h2>
+         <!--<p>当前位置：<strong>青云宗 · 外门弟子居所</strong></p>
+          <p>周边区域：后山灵田、藏经阁、演武场、坊市</p>
+        -->
+          <!-- 地点按钮 - 由 API 动态加载 -->
+          <div class="action-buttons" id="locationGrid" style="margin-top:20px;">
+            <div class="loading-placeholder" style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #8899bb;">
+              <div style="font-size: 2rem; margin-bottom: 10px;">⏳</div>
+              <div>正在加载世界地图...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 拍卖行模态框 -->
+    <div id="auctionModal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>拍卖行</h2>
+          <span class="close">&times;</span>
+        </div>
+        <div class="modal-body">
+          <!-- 拍卖场次标签 -->
+          <div class="auction-tabs">
+            <button class="tab-btn active" data-tab="treasure">法宝场</button>
+            <button class="tab-btn" data-tab="beast">灵兽场</button>
+            <button class="tab-btn" data-tab="material">材料场</button>
+            <button class="tab-btn" data-tab="leaderboard">豪掷榜</button>
+          </div>
+          
+          <!-- 拍卖物品列表 -->
+          <div class="auction-content">
+            <!-- 法宝场 -->
+            <div id="treasure" class="tab-content active">
+              <div class="auction-items">
+                <div class="auction-item">
+                  <div class="item-info">
+                    <div class="item-name">渡劫神器·九霄剑</div>
+                    <div class="item-desc">传说级法宝，拥有毁天灭地之力</div>
+                  </div>
+                  <div class="item-price">
+                    <div class="current-price">当前价：100000 元宝</div>
+                    <div class="end-time">剩余时间：00:02:30</div>
+                  </div>
+                  <div class="item-actions">
+                    <input type="number" class="bid-input" placeholder="输入出价">
+                    <button class="bid-btn">出价</button>
+                    <button class="buyout-btn">一口价 (150000)</button>
+                  </div>
+                </div>
+                
+                <div class="auction-item">
+                  <div class="item-info">
+                    <div class="item-name">灵宝·紫霄环</div>
+                    <div class="item-desc">上品灵宝，可困敌于环中</div>
+                  </div>
+                  <div class="item-price">
+                    <div class="current-price">当前价：50000 元宝</div>
+                    <div class="end-time">剩余时间：00:05:15</div>
+                  </div>
+                  <div class="item-actions">
+                    <input type="number" class="bid-input" placeholder="输入出价">
+                    <button class="bid-btn">出价</button>
+                    <button class="buyout-btn">一口价 (80000)</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- 灵兽场 -->
+            <div id="beast" class="tab-content">
+              <div class="auction-items">
+                <div class="auction-item">
+                  <div class="item-info">
+                    <div class="item-name">绝版灵兽蛋·凤凰</div>
+                    <div class="item-desc">传说级灵兽，可涅槃重生</div>
+                  </div>
+                  <div class="item-price">
+                    <div class="current-price">当前价：80000 元宝</div>
+                    <div class="end-time">剩余时间：00:01:45</div>
+                  </div>
+                  <div class="item-actions">
+                    <input type="number" class="bid-input" placeholder="输入出价">
+                    <button class="bid-btn">出价</button>
+                    <button class="buyout-btn">一口价 (120000)</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- 材料场 -->
+            <div id="material" class="tab-content">
+              <div class="auction-items">
+                <div class="auction-item">
+                  <div class="item-info">
+                    <div class="item-name">宗门驻地令牌</div>
+                    <div class="item-desc">稀有物品，可建立专属宗门驻地</div>
+                  </div>
+                  <div class="item-price">
+                    <div class="current-price">当前价：120000 元宝</div>
+                    <div class="end-time">剩余时间：00:03:20</div>
+                  </div>
+                  <div class="item-actions">
+                    <input type="number" class="bid-input" placeholder="输入出价">
+                    <button class="bid-btn">出价</button>
+                    <button class="buyout-btn">一口价 (180000)</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- 豪掷榜 -->
+            <div id="leaderboard" class="tab-content">
+              <div class="leaderboard-list">
+                <div class="leaderboard-item top">
+                  <div class="rank">1</div>
+                  <div class="player-info">
+                    <div class="player-name">仙尊</div>
+                    <div class="player-amount">500000 元宝</div>
+                  </div>
+                  <div class="player-title">富甲一方</div>
+                </div>
+                <div class="leaderboard-item">
+                  <div class="rank">2</div>
+                  <div class="player-info">
+                    <div class="player-name">剑圣</div>
+                    <div class="player-amount">350000 元宝</div>
+                  </div>
+                </div>
+                <div class="leaderboard-item">
+                  <div class="rank">3</div>
+                  <div class="player-info">
+                    <div class="player-name">妖帝</div>
+                    <div class="player-amount">280000 元宝</div>
+                  </div>
+                </div>
+                <div class="leaderboard-item">
+                  <div class="rank">4</div>
+                  <div class="player-info">
+                    <div class="player-name">道君</div>
+                    <div class="player-amount">200000 元宝</div>
+                  </div>
+                </div>
+                <div class="leaderboard-item">
+                  <div class="rank">5</div>
+                  <div class="player-info">
+                    <div class="player-name">魔皇</div>
+                    <div class="player-amount">150000 元宝</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 围观互动区域 -->
+          <div class="spectator-area">
+            <h3>围观互动</h3>
+            <div class="chat-messages">
+              <div class="chat-message">
+                <span class="chat-user">仙尊：</span>
+                <span class="chat-content">这把九霄剑我势在必得！</span>
+              </div>
+              <div class="chat-message">
+                <span class="chat-user">剑圣：</span>
+                <span class="chat-content">呵呵，未必！</span>
+              </div>
+            </div>
+            <div class="chat-input-area">
+              <input type="text" class="chat-input" placeholder="输入消息...">
+              <button class="send-btn">发送</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 全服广播 -->
+    <div class="server-broadcast">
+      <div class="broadcast-content">
+        <span class="broadcast-text">恭喜玩家 仙尊 以 150000 元宝拍得 渡劫神器·九霄剑！</span>
+      </div>
+    </div>
+    
+    <!-- 页脚 -->
+    
+    <!-- 页脚 -->
+    <div class="footer">© 2026 灵月仙途</div>
+  </div>
+
+  <!-- 底部导航栏 -->
+  <nav class="bottom-nav" role="navigation" aria-label="主导航">
+    <a href="../index.html" class="nav-item" aria-label="修炼页面">
+      <div class="nav-icon">🧘</div>
+      <div class="nav-text">修炼</div>
+    </a>
+    <a href="../skills/skills.html" class="nav-item" aria-label="功法页面">
+      <div class="nav-icon">📜</div>
+      <div class="nav-text">功法</div>
+    </a>
+    <a href="javascript:void(0)" onclick="window.pageUtils.navigateToGuildPage()" class="nav-item" aria-label="宗门页面">
+      <div class="nav-icon">🏯</div>
+      <div class="nav-text">宗门</div>
+    </a>
+    <a href="world.html" class="nav-item active" aria-label="仙途页面" aria-current="page">
+      <div class="nav-icon">🌌</div>
+      <div class="nav-text">仙途</div>
+    </a>
+    <a href="../map/map.html" class="nav-item" aria-label="云游页面">
+      <div class="nav-icon">🗺️</div>
+      <div class="nav-text">云游</div>
+    </a>
+  </nav>
+
+  <!-- 提示信息 -->
+  <div class="notification" id="notification">提示信息</div>
+
+  <script>
+    // 获取角色ID
+    function getRoleId() {
+      return window.AuthService ? window.AuthService.getCurrentRoleId() : (localStorage.getItem('currentRoleId') || localStorage.getItem('roleId'));
+    }
+    
+    // 处理API响应
+    function handleResponse(response) {
+      if (!response.ok) {
+        throw new Error(`HTTP错误，状态码: ${response.status}`);
+      }
+      return response.json();
+    }
+
+    // 显示通知函数
+    function showNotification(message, duration = 3000) {
+      const notification = document.getElementById('notification');
+      notification.textContent = message;
+      notification.classList.add('show');
+      
+      setTimeout(() => {
+        notification.classList.remove('show');
+      }, duration);
+    }
+
+    // 加载角色信息 - 使用 AuthService
+    async function loadRoleInfo() {
+      try {
+        const role = await window.AuthService.loadUserInfo();
+        
+        if (!role) {
+          console.warn('loadRoleInfo: 未能获取角色信息');
+          return;
+        }
+        
+        const realmElement = document.getElementById("realm");
+        const spiritStonesElement = document.getElementById("spiritStones");
+        const healthElement = document.getElementById("health");
+        const manaElement = document.getElementById("mana");
+        
+        if (realmElement) realmElement.textContent = role.realm || "炼气·初期";
+        if (spiritStonesElement) spiritStonesElement.textContent = role.spiritStones || 0;
+        if (healthElement) healthElement.textContent = `${role.hp || 100}/${role.hp || 100}`;
+        if (manaElement) manaElement.textContent = `${role.mp || 80}/${role.mp || 80}`;
+      } catch (error) {
+        console.error('获取角色信息失败:', error);
+      }
+    }
+
+    // ==========================================
+    // 世界地点 API 数据加载
+    // ==========================================
+    
+    const API_BASE = typeof window.getApiBaseUrl === 'function' ? window.getApiBaseUrl() : 'http://localhost:8088/api';
+    let worldLocations = [];
+    let locationUrlMap = {};
+
+    async function loadWorldLocations() {
+      const grid = document.getElementById('locationGrid');
+      if (!grid) return;
+      
+      try {
+        const roleId = getRoleId();
+        let url = `${API_BASE}/world/locations`;
+        if (roleId) url += `?roleId=${roleId}`;
+        
+        const response = await window.AuthService.get(url);
+        
+        if (!response || !response.ok) {
+          throw new Error('获取地点数据失败');
+        }
+        
+        const result = await response.json();
+        
+        if (result.code === 200 && result.data) {
+          worldLocations = result.data;
+          renderLocationCards(worldLocations);
+        } else {
+          throw new Error(result.message || '获取地点数据失败');
+        }
+      } catch (error) {
+        console.error('加载世界地点失败:', error);
+        grid.innerHTML = `
+          <div class="loading-placeholder" style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #ff8888;">
+            <div style="font-size: 2rem; margin-bottom: 10px;">⚠️</div>
+            <div>加载世界地图失败，请刷新重试</div>
+            <button onclick="loadWorldLocations()" style="margin-top: 15px; padding: 8px 20px; background: rgba(100,150,255,0.3); border: 1px solid rgba(100,150,255,0.5); color: #ccddff; border-radius: 6px; cursor: pointer;">重新加载</button>
+          </div>`;
+      }
+    }
+
+    function renderLocationCards(locations) {
+      const grid = document.getElementById('locationGrid');
+      if (!grid) return;
+      
+      grid.innerHTML = '';
+      
+      locations.forEach(loc => {
+        locationUrlMap[loc.name] = loc.pageUrl || '';
+        
+        const card = document.createElement('div');
+        card.className = 'location-card';
+        card.setAttribute('data-action', loc.name);
+        card.setAttribute('data-location-id', loc.id);
+        card.setAttribute('data-page-url', loc.pageUrl || '');
+        
+        if (!loc.canEnter && loc.canEnter !== undefined) {
+          card.classList.add('locked');
+        }
+        
+        const bgColor = loc.bgColor || 'rgba(40, 60, 120, 0.9)';
+        const icon = loc.icon || '📍';
+        const name = loc.name;
+        const desc = loc.description || '';
+        
+        let lockOverlay = '';
+        if (!loc.canEnter && loc.canEnter !== undefined) {
+          let reason = '';
+          if (loc.requiredLevel) reason += `需要等级 ${loc.requiredLevel} `;
+          if (loc.requiredRealm) reason += `需要境界 ${loc.requiredRealm}`;
+          lockOverlay = `<div class="lock-overlay" style="position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:3;display:flex;align-items:center;justify-content:center;flex-direction:column;border-radius:12px;">
+            <div style="font-size:2rem;">🔒</div>
+            <div style="font-size:0.8rem;color:#ff9999;margin-top:5px;">${reason}</div>
+          </div>`;
+        }
+        
+        let featuresHtml = '';
+        if (loc.features && loc.features.length > 0) {
+          featuresHtml = `<div class="location-features" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;justify-content:center;">
+            ${loc.features.slice(0, 3).map(f => `<span style="font-size:0.7rem;background:rgba(255,255,255,0.15);padding:2px 6px;border-radius:4px;color:#aabbdd;">${f.featureIcon || ''} ${f.featureName}</span>`).join('')}
+          </div>`;
+        }
+        
+        card.innerHTML = `
+          <div class="location-image" style="background-image: url('data:image/svg+xml,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; viewBox=&quot;0 0 100 100&quot;><rect fill=&quot;${encodeURIComponent(bgColor)}&quot; width=&quot;100&quot; height=&quot;100&quot;/><text x=&quot;50&quot; y=&quot;60&quot; font-size=&quot;40&quot; text-anchor=&quot;middle&quot;>${icon}</text></svg>');"></div>
+          <div class="location-info">
+            <div class="location-name">${name}</div>
+            <div class="location-desc">${desc}</div>
+            ${featuresHtml}
+          </div>
+          ${lockOverlay}
+        `;
+        
+        card.addEventListener('click', () => handleLocationClick(card, loc));
+        
+        grid.appendChild(card);
+      });
+    }
+
+    async function handleLocationClick(card, loc) {
+      if (!loc.canEnter && loc.canEnter !== undefined) {
+        showNotification(`条件不足，无法进入${loc.name}`, 2000);
+        return;
+      }
+      
+      const roleId = getRoleId();
+      
+      if (loc.pageUrl) {
+        showNotification(`正在前往${loc.name}...`);
+        
+        if (roleId && loc.id) {
+          try {
+            await window.AuthService.post(`${API_BASE}/world/visit/${loc.id}?roleId=${roleId}`);
+          } catch (e) {
+            console.warn('记录访问失败:', e);
+          }
+        }
+        
+        setTimeout(() => {
+          window.location.href = loc.pageUrl;
+        }, 500);
+        return;
+      }
+      
+      showNotification(`正在前往${loc.name}...`);
+      
+      const originalTransform = card.style.transform;
+      card.style.transform = 'scale(0.95)';
+      
+      setTimeout(() => {
+        card.style.transform = originalTransform;
+        showNotification(`已到达${loc.name}，开始探索此地...`, 2000);
+      }, 1500);
+    }
+
+    // 拍卖行功能
+    class AuctionHouse {
+      constructor() {
+        this.modal = document.getElementById('auctionModal');
+        if (!this.modal) return;
+        this.closeBtn = this.modal.querySelector('.close');
+        this.tabBtns = this.modal.querySelectorAll('.tab-btn');
+        this.tabContents = this.modal.querySelectorAll('.tab-content');
+        this.bidBtns = this.modal.querySelectorAll('.bid-btn');
+        this.buyoutBtns = this.modal.querySelectorAll('.buyout-btn');
+        this.sendBtn = document.querySelector('.send-btn');
+        this.chatInput = document.querySelector('.chat-input');
+        this.chatMessages = document.querySelector('.chat-messages');
+        this.init();
+      }
+      
+      init() {
+        this.bindEvents();
+        this.startCountdowns();
+      }
+      
+      bindEvents() {
+        const auctionCard = document.querySelector('[data-action="拍卖行"]');
+        if (auctionCard) {
+          auctionCard.addEventListener('click', () => {
+            this.modal.style.display = 'flex';
+          });
+        }
+        
+        if (this.closeBtn) {
+          this.closeBtn.addEventListener('click', () => {
+            this.modal.style.display = 'none';
+          });
+        }
+        
+        if (this.modal) {
+          this.modal.addEventListener('click', (e) => {
+            if (e.target === this.modal) {
+              this.modal.style.display = 'none';
+            }
+          });
+        }
+        
+        if (this.tabBtns) {
+          this.tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+              const tab = btn.getAttribute('data-tab');
+              this.switchTab(tab);
+            });
+          });
+        }
+        
+        if (this.bidBtns) {
+          this.bidBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+              const item = e.target.closest('.auction-item');
+              const input = item.querySelector('.bid-input');
+              const bidAmount = parseInt(input.value);
+              if (bidAmount) {
+                this.placeBid(item, bidAmount);
+              } else {
+                showNotification('请输入出价金额');
+              }
+            });
+          });
+        }
+        
+        if (this.buyoutBtns) {
+          this.buyoutBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+              const item = e.target.closest('.auction-item');
+              const itemName = item.querySelector('.item-name').textContent;
+              const buyoutPrice = btn.textContent.match(/\d+/)[0];
+              this.buyoutItem(item, itemName, buyoutPrice);
+            });
+          });
+        }
+        
+        // 发送消息
+        this.sendBtn.addEventListener('click', () => {
+          this.sendMessage();
+        });
+        
+        // 回车键发送消息
+        this.chatInput.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            this.sendMessage();
+          }
+        });
+      }
+      
+      switchTab(tab) {
+        // 移除所有标签的active类
+        this.tabBtns.forEach(btn => btn.classList.remove('active'));
+        this.tabContents.forEach(content => content.classList.remove('active'));
+        
+        // 添加当前标签的active类
+        document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+        document.getElementById(tab).classList.add('active');
+      }
+      
+      placeBid(item, bidAmount) {
+        const currentPriceElement = item.querySelector('.current-price');
+        const currentPrice = parseInt(currentPriceElement.textContent.match(/\d+/)[0]);
+        
+        if (bidAmount <= currentPrice) {
+          showNotification('出价必须高于当前价格');
+          return;
+        }
+        
+        if (bidAmount - currentPrice < 1000) {
+          showNotification('最小加价幅度为1000元宝');
+          return;
+        }
+        
+        // 更新价格
+        currentPriceElement.textContent = `当前价：${bidAmount} 元宝`;
+        
+        // 重置倒计时（模拟延时结拍）
+        const endTimeElement = item.querySelector('.end-time');
+        endTimeElement.textContent = '剩余时间：00:02:00';
+        
+        showNotification('出价成功！');
+        
+        // 模拟全服广播
+        if (bidAmount >= 100000) {
+          this.showBroadcast(`玩家 仙尊 出价 ${bidAmount} 元宝竞拍 九霄剑！`);
+        }
+      }
+      
+      buyoutItem(item, itemName, buyoutPrice) {
+        showConfirm(`确定以 ${buyoutPrice} 元宝购买 ${itemName} 吗？`, () => {
+          showNotification(`成功购买 ${itemName}！`);
+          
+          // 模拟全服广播
+          this.showBroadcast(`恭喜玩家 仙尊 以 ${buyoutPrice} 元宝拍得 ${itemName}！`);
+          
+          // 移除物品
+          item.style.animation = 'fadeOut 1s ease';
+          setTimeout(() => {
+            item.remove();
+          }, 1000);
+        });
+      }
+      
+      sendMessage() {
+        const message = this.chatInput.value.trim();
+        if (message) {
+          const messageElement = document.createElement('div');
+          messageElement.className = 'chat-message';
+          messageElement.innerHTML = `<span class="chat-user">我：</span><span class="chat-content">${message}</span>`;
+          this.chatMessages.appendChild(messageElement);
+          this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+          this.chatInput.value = '';
+        }
+      }
+      
+      startCountdowns() {
+        const endTimeElements = document.querySelectorAll('.end-time');
+        endTimeElements.forEach(element => {
+          this.startCountdown(element);
+        });
+      }
+      
+      startCountdown(element) {
+        let time = element.textContent.match(/(\d+):(\d+):(\d+)/);
+        if (time) {
+          let hours = parseInt(time[1]);
+          let minutes = parseInt(time[2]);
+          let seconds = parseInt(time[3]);
+          
+          const interval = setInterval(() => {
+            seconds--;
+            if (seconds < 0) {
+              seconds = 59;
+              minutes--;
+              if (minutes < 0) {
+                minutes = 59;
+                hours--;
+                if (hours < 0) {
+                  clearInterval(interval);
+                  element.textContent = '已结束';
+                  return;
+                }
+              }
+            }
+            element.textContent = `剩余时间：${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+          }, 1000);
+        }
+      }
+      
+      showBroadcast(message) {
+        const broadcast = document.querySelector('.server-broadcast');
+        const broadcastText = broadcast.querySelector('.broadcast-text');
+        broadcastText.textContent = message;
+        
+        // 重新触发动画
+        broadcast.style.display = 'none';
+        setTimeout(() => {
+          broadcast.style.display = 'block';
+        }, 10);
+      }
+    }
+    
+    // 页面加载完成后的初始化
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.AuthService) {
+        window.AuthService.init({ requireAuth: false, autoRefresh: true });
+      }
+      
+      loadRoleInfo();
+      loadWorldLocations();
+      
+      setTimeout(() => {
+        showNotification("欢迎来到灵月仙途世界！", 2000);
+      }, 500);
+      
+      new AuctionHouse();
+    });
+  </script>
+
+
+  <script src="../js/token-manager.js"></script>
+  <script src="../js/role-sync.js"></script>
+  <script src="../js/auth-service.js"></script>
+  <script src="../js/character-store.js"></script>
+  <script src="../js/character-service.js"></script>
+  <script src="../js/common.js"></script>
+  <script src="../js/ui-components.js"></script>
+</body>
+</html>

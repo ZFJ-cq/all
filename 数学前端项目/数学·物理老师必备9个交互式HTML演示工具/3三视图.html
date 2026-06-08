@@ -1,0 +1,585 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>通用技术3D建模软件 - 三维建模 | 参数化设计 | 零件库装配 | 运动仿真</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', 'PingFang SC', Roboto, 'Microsoft YaHei', sans-serif;
+        }
+        /* UI 面板 */
+        .ui-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(30, 30, 45, 0.9);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            padding: 16px 20px;
+            color: white;
+            width: 280px;
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            z-index: 10;
+            pointer-events: auto;
+        }
+        .ui-panel h3 {
+            margin: 0 0 12px 0;
+            font-size: 1.2rem;
+            border-left: 4px solid #ff9800;
+            padding-left: 12px;
+        }
+        .part-buttons {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .part-btn {
+            background: #2c3e66;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 40px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .part-btn:hover {
+            background: #3b5a8c;
+            transform: scale(1.02);
+        }
+        .param-group {
+            margin-bottom: 18px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            padding-top: 12px;
+        }
+        .param-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.8rem;
+            color: #ccc;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 12px;
+            border: none;
+            background: #2d2d3a;
+            color: white;
+            font-size: 0.9rem;
+        }
+        button {
+            background: #3b82f6;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 30px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 8px;
+            width: 100%;
+            transition: 0.2s;
+        }
+        button:hover {
+            background: #2563eb;
+        }
+        .delete-btn {
+            background: #dc2626;
+        }
+        .delete-btn:hover {
+            background: #b91c1c;
+        }
+        .simulation-btn {
+            background: #ff9800;
+            color: #1e1e2a;
+        }
+        .info-text {
+            font-size: 0.7rem;
+            text-align: center;
+            margin-top: 15px;
+            color: #aaa;
+        }
+        .status {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.6);
+            padding: 6px 12px;
+            border-radius: 20px;
+            color: #ffaa44;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 10;
+        }
+        @media (max-width: 600px) {
+            .ui-panel { width: 240px; padding: 12px; top: 10px; left: 10px; }
+            .part-btn { padding: 5px 10px; font-size: 12px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="ui-panel">
+        <h3>🧩 零件库 & 智能装配</h3>
+        <div class="part-buttons">
+            <button class="part-btn" data-type="box">📦 立方体</button>
+            <button class="part-btn" data-type="cylinder">🔘 圆柱体</button>
+            <button class="part-btn" data-type="sphere">⚽ 球体</button>
+        </div>
+        <div class="param-group">
+            <label>📐 参数化编辑 (选中物体后调节)</label>
+            <div id="param-inputs">
+                <input type="number" id="param1" placeholder="尺寸1 (长/半径)" step="0.1" disabled>
+                <input type="number" id="param2" placeholder="尺寸2 (宽/高度)" step="0.1" disabled>
+                <input type="number" id="param3" placeholder="尺寸3 (高)" step="0.1" disabled>
+            </div>
+            <button id="apply-params">✏️ 应用尺寸</button>
+            <button id="delete-object" class="delete-btn">🗑️ 删除选中物体</button>
+        </div>
+        <div class="param-group">
+            <label>⚙️ 运动仿真 (可让选中物体动画)</label>
+            <button id="start-simulate" class="simulation-btn">🔄 开始旋转运动</button>
+            <button id="stop-simulate" class="simulation-btn" style="background:#6b7280;">⏹️ 停止仿真</button>
+        </div>
+        <div class="info-text">
+            💡 提示：点击物体可选中 (高亮橙色边框)。<br>
+            🧲 使用TransformControls拖拽/旋转/缩放 (直接建模)。<br>
+            🔧 修改参数后点击“应用尺寸”即时更新模型。<br>
+            🎞️ “运动仿真”让选中物体绕Y轴持续旋转。
+        </div>
+    </div>
+    <div class="status" id="statusMsg">✨ 就绪 | 选中: 无</div>
+
+    <!-- 引入Three.js核心库及扩展 -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { TransformControls } from 'three/addons/controls/TransformControls.js';
+
+        // --- 初始化场景、相机、渲染器 ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x111122);
+        scene.fog = new THREE.FogExp2(0x111122, 0.008);
+        
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(5, 4, 6);
+        camera.lookAt(0, 1, 0);
+        
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.setPixelRatio(window.devicePixelRatio);
+        document.body.appendChild(renderer.domElement);
+        
+        // 轨道控制
+        const orbitControls = new OrbitControls(camera, renderer.domElement);
+        orbitControls.enableDamping = true;
+        orbitControls.dampingFactor = 0.05;
+        orbitControls.zoomSpeed = 1.2;
+        orbitControls.rotateSpeed = 1.0;
+        orbitControls.target.set(0, 1.2, 0);
+        
+        // --- 光照系统 ---
+        const ambientLight = new THREE.AmbientLight(0x404060);
+        scene.add(ambientLight);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+        dirLight.position.set(3, 8, 2);
+        dirLight.castShadow = true;
+        dirLight.receiveShadow = false;
+        scene.add(dirLight);
+        const backLight = new THREE.PointLight(0x4466cc, 0.5);
+        backLight.position.set(-2, 2, -3);
+        scene.add(backLight);
+        const fillLight = new THREE.PointLight(0xffaa66, 0.4);
+        fillLight.position.set(2, 1, 3);
+        scene.add(fillLight);
+        
+        // 辅助地面网格 (视觉参考)
+        const gridHelper = new THREE.GridHelper(12, 20, 0x88aaff, 0x335588);
+        gridHelper.position.y = -0.1;
+        scene.add(gridHelper);
+        
+        // 辅助轴线 (可选)
+        const axesHelper = new THREE.AxesHelper(4);
+        axesHelper.visible = false;
+        scene.add(axesHelper);
+        
+        // --- 数据模型: 所有物体列表 ---
+        let objectsList = [];      // 存储 { mesh, type, params, originalColor }
+        let selectedObject = null;
+        
+        // 高亮效果: 使用边缘几何体或简单改变材质发光，使用辅助线框更轻量
+        function highlightObject(obj, enable) {
+            if (!obj) return;
+            if (enable) {
+                // 保存原有材质并添加发光边缘 (简单改变 emissive)
+                if (obj.material) {
+                    if (!obj.userData.oldEmissive) obj.userData.oldEmissive = obj.material.emissive ? obj.material.emissive.getHex() : 0x000000;
+                    obj.material.emissive = new THREE.Color(0xff6600);
+                    obj.material.emissiveIntensity = 0.6;
+                }
+            } else {
+                if (obj.material && obj.userData.oldEmissive !== undefined) {
+                    obj.material.emissive = new THREE.Color(obj.userData.oldEmissive);
+                    obj.material.emissiveIntensity = 0;
+                }
+            }
+        }
+        
+        function setSelected(obj) {
+            if (selectedObject === obj) return;
+            // 清除之前的选中高亮
+            if (selectedObject) highlightObject(selectedObject, false);
+            selectedObject = obj;
+            if (selectedObject) {
+                highlightObject(selectedObject, true);
+                updateParamInputsFromObject(selectedObject);
+                document.getElementById('statusMsg').innerHTML = `✨ 选中: ${selectedObject.userData.typeName} | 可拖拽/参数编辑`;
+            } else {
+                document.getElementById('statusMsg').innerHTML = `✨ 就绪 | 选中: 无`;
+                disableParamInputs(true);
+            }
+        }
+        
+        // --- 生成几何体函数 (带材质和阴影)---
+        function createBox(width, height, depth, color = 0x3a86ff) {
+            const geo = new THREE.BoxGeometry(width, height, depth);
+            const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.3, metalness: 0.2 });
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.castShadow = true;
+            mesh.receiveShadow = false;
+            return mesh;
+        }
+        
+        function createCylinder(radiusTop, radiusBottom, height, radialSegments = 32, color = 0x38b000) {
+            const geo = new THREE.CylinderGeometry(radiusTop, radiusBottom, height, radialSegments);
+            const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.4 });
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.castShadow = true;
+            return mesh;
+        }
+        
+        function createSphere(radius, color = 0x9c27b0) {
+            const geo = new THREE.SphereGeometry(radius, 32, 32);
+            const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.3, metalness: 0.1 });
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.castShadow = true;
+            return mesh;
+        }
+        
+        // 添加物体到场景
+        function addObject(type, x = 0, z = 0, customParams = null) {
+            let mesh, params, typeName;
+            const randomColor = Math.floor(Math.random() * 0x88aaff) + 0x3377aa;
+            if (type === 'box') {
+                const w = customParams?.w ?? 0.8;
+                const h = customParams?.h ?? 0.8;
+                const d = customParams?.d ?? 0.8;
+                mesh = createBox(w, h, d, randomColor);
+                params = { w, h, d };
+                typeName = '立方体';
+            } else if (type === 'cylinder') {
+                const r = customParams?.r ?? 0.6;
+                const h = customParams?.h ?? 1.0;
+                mesh = createCylinder(r, r, h, 32, randomColor);
+                params = { r, h };
+                typeName = '圆柱体';
+            } else if (type === 'sphere') {
+                const r = customParams?.r ?? 0.7;
+                mesh = createSphere(r, randomColor);
+                params = { r };
+                typeName = '球体';
+            } else {
+                return null;
+            }
+            // 计算合适的高度偏移让物体落在地面上
+            let yOffset = 0;
+            if (type === 'box') yOffset = params.h / 2;
+            if (type === 'cylinder') yOffset = params.h / 2;
+            if (type === 'sphere') yOffset = params.r;
+            mesh.position.set(x, yOffset, z);
+            mesh.userData = { type, params, originalColor: randomColor, typeName };
+            scene.add(mesh);
+            objectsList.push({ mesh, type, params, originalColor: randomColor, typeName });
+            return mesh;
+        }
+        
+        // 删除物体
+        function deleteObject(obj) {
+            if (!obj) return;
+            const index = objectsList.findIndex(item => item.mesh === obj);
+            if (index !== -1) {
+                scene.remove(obj);
+                objectsList.splice(index, 1);
+                if (selectedObject === obj) {
+                    setSelected(null);
+                }
+                // 同时需要从transformControls中移除
+                if (transformControls.object === obj) transformControls.detach();
+            }
+        }
+        
+        // 更新参数输入框
+        function updateParamInputsFromObject(obj) {
+            if (!obj) return;
+            const data = objectsList.find(item => item.mesh === obj);
+            if (!data) return;
+            const params = data.params;
+            const type = data.type;
+            const input1 = document.getElementById('param1');
+            const input2 = document.getElementById('param2');
+            const input3 = document.getElementById('param3');
+            input1.disabled = false;
+            input2.disabled = false;
+            input3.disabled = false;
+            
+            if (type === 'box') {
+                input1.placeholder = '长 (X)';
+                input2.placeholder = '高 (Y)';
+                input3.placeholder = '宽 (Z)';
+                input1.value = params.w;
+                input2.value = params.h;
+                input3.value = params.d;
+            } else if (type === 'cylinder') {
+                input1.placeholder = '半径';
+                input2.placeholder = '高度';
+                input3.placeholder = '—';
+                input1.value = params.r;
+                input2.value = params.h;
+                input3.disabled = true;
+                input3.value = '';
+            } else if (type === 'sphere') {
+                input1.placeholder = '半径';
+                input2.placeholder = '—';
+                input3.placeholder = '—';
+                input1.value = params.r;
+                input2.disabled = true;
+                input3.disabled = true;
+                input2.value = '';
+                input3.value = '';
+            }
+        }
+        
+        function disableParamInputs(disabled) {
+            const inputs = ['param1', 'param2', 'param3'];
+            inputs.forEach(id => {
+                const el = document.getElementById(id);
+                if (disabled) el.disabled = true;
+                else el.disabled = false;
+            });
+        }
+        
+        // 应用尺寸修改 (重新生成模型，保持位置、旋转、缩放)
+        function applyNewSize(obj) {
+            if (!obj) return;
+            const data = objectsList.find(item => item.mesh === obj);
+            if (!data) return;
+            const oldPos = obj.position.clone();
+            const oldRot = obj.rotation.clone();
+            const oldScale = obj.scale.clone();
+            const oldUserData = { ...obj.userData };
+            const type = data.type;
+            let newMesh;
+            let newParams;
+            if (type === 'box') {
+                const w = parseFloat(document.getElementById('param1').value);
+                const h = parseFloat(document.getElementById('param2').value);
+                const d = parseFloat(document.getElementById('param3').value);
+                if (isNaN(w) || isNaN(h) || isNaN(d)) return;
+                newParams = { w, h, d };
+                newMesh = createBox(w, h, d, data.originalColor);
+            } else if (type === 'cylinder') {
+                const r = parseFloat(document.getElementById('param1').value);
+                const h = parseFloat(document.getElementById('param2').value);
+                if (isNaN(r) || isNaN(h)) return;
+                newParams = { r, h };
+                newMesh = createCylinder(r, r, h, 32, data.originalColor);
+            } else if (type === 'sphere') {
+                const r = parseFloat(document.getElementById('param1').value);
+                if (isNaN(r)) return;
+                newParams = { r };
+                newMesh = createSphere(r, data.originalColor);
+            } else { return; }
+            
+            newMesh.position.copy(oldPos);
+            newMesh.rotation.copy(oldRot);
+            newMesh.scale.copy(oldScale);
+            newMesh.userData = { type, params: newParams, originalColor: data.originalColor, typeName: data.typeName };
+            scene.remove(obj);
+            scene.add(newMesh);
+            
+            // 更新列表
+            const idx = objectsList.findIndex(item => item.mesh === obj);
+            if (idx !== -1) {
+                objectsList[idx].mesh = newMesh;
+                objectsList[idx].params = newParams;
+            }
+            if (selectedObject === obj) {
+                setSelected(null);
+                setSelected(newMesh);
+            }
+            // 如果transformControls附着在旧物体上，重新附着
+            if (transformControls.object === obj) {
+                transformControls.detach();
+                transformControls.attach(newMesh);
+            }
+        }
+        
+        // --- TransformControls 实现直接拖拽/旋转/缩放 (直接建模)---
+        const transformControls = new TransformControls(camera, renderer.domElement);
+        transformControls.addEventListener('dragging-changed', function (event) {
+            // 拖拽时禁用轨道控制
+            orbitControls.enabled = !event.value;
+        });
+        transformControls.addEventListener('objectChanged', () => {
+            // 当物体位置/旋转/缩放被改变后，可以同步任意额外逻辑(无特别需要)
+        });
+        scene.add(transformControls);
+        
+        // 点击选中: 使用Raycaster
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        renderer.domElement.addEventListener('click', (event) => {
+            // 如果正在拖拽控件，避免干扰
+            if (transformControls.dragging) return;
+            const rect = renderer.domElement.getBoundingClientRect();
+            mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(objectsList.map(item => item.mesh));
+            if (intersects.length > 0) {
+                const hit = intersects[0].object;
+                setSelected(hit);
+                transformControls.attach(hit);
+            } else {
+                setSelected(null);
+                transformControls.detach();
+            }
+        });
+        
+        // --- 初始化示例零件 (演示装配效果)---
+        addObject('box', -1.2, -1, { w: 1.0, h: 0.6, d: 1.2 });
+        addObject('cylinder', 1.4, 0.8, { r: 0.5, h: 0.9 });
+        addObject('sphere', 0, 1.6, { r: 0.6 });
+        
+        // 再加一个高一些的立柱
+        const pillar = addObject('cylinder', -1.5, 1.2, { r: 0.4, h: 1.2 });
+        if (pillar) pillar.position.y = 0.6;
+        
+        // --- UI 事件绑定 ---
+        document.querySelectorAll('.part-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const type = btn.getAttribute('data-type');
+                // 随机位置放置 (网格范围内)
+                const x = (Math.random() - 0.5) * 3.5;
+                const z = (Math.random() - 0.5) * 3;
+                addObject(type, x, z);
+            });
+        });
+        
+        document.getElementById('apply-params').addEventListener('click', () => {
+            if (selectedObject) {
+                applyNewSize(selectedObject);
+            } else {
+                alert('请先点击选中一个物体');
+            }
+        });
+        
+        document.getElementById('delete-object').addEventListener('click', () => {
+            if (selectedObject) {
+                deleteObject(selectedObject);
+                setSelected(null);
+            } else {
+                alert('无选中物体');
+            }
+        });
+        
+        // --- 运动仿真 (旋转动画)---
+        let simulationActive = false;
+        let simAngle = 0;
+        let simObject = null;
+        let originalRot = null;
+        
+        function startSimulation() {
+            if (!selectedObject) {
+                alert('请先选中一个物体进行运动仿真');
+                return;
+            }
+            if (simulationActive) {
+                stopSimulation();
+            }
+            simObject = selectedObject;
+            originalRot = simObject.rotation.y;
+            simulationActive = true;
+            document.getElementById('statusMsg').innerHTML = `🎬 运动仿真进行中: ${simObject.userData.typeName} 旋转中...`;
+        }
+        
+        function stopSimulation() {
+            if (simulationActive && simObject) {
+                simObject.rotation.y = originalRot;
+                simulationActive = false;
+                simObject = null;
+                document.getElementById('statusMsg').innerHTML = `⏹️ 运动停止 | 选中: ${selectedObject ? selectedObject.userData.typeName : '无'}`;
+            } else {
+                simulationActive = false;
+                simObject = null;
+            }
+        }
+        
+        document.getElementById('start-simulate').addEventListener('click', startSimulation);
+        document.getElementById('stop-simulate').addEventListener('click', stopSimulation);
+        
+        // 如果选中物体改变，且仿真正在运行，自动停止旧物体的仿真
+        // 监听选中变化后停止仿真
+        const originalSetSelected = setSelected;
+        window.setSelected = setSelected;
+        setSelected = function(obj) {
+            if (simulationActive) {
+                stopSimulation();
+            }
+            originalSetSelected(obj);
+        };
+        window.setSelected = setSelected;
+        
+        // 动画循环: 运动仿真更新 + 常规渲染
+        function animate() {
+            requestAnimationFrame(animate);
+            if (simulationActive && simObject && simObject.parent) {
+                simObject.rotation.y += 0.02;
+            }
+            orbitControls.update(); // 支持轨道控制
+            renderer.render(scene, camera);
+        }
+        animate();
+        
+        // 窗口自适应
+        window.addEventListener('resize', onWindowResize, false);
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+        
+        // 初始化参数面板状态
+        disableParamInputs(true);
+        
+        // 控制台输出说明
+        console.log('3D编辑器已启动 | 支持零件库、参数化建模、TransformControls直接拖拽/旋转/缩放、运动仿真');
+    </script>
+</body>
+</html>

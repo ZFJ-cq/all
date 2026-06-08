@@ -1,0 +1,95 @@
+<script src="../js/api-service.js"></script>
+<div class="section active">
+  <div class="status-message" id="realmBreakMessage"></div>
+  <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+    <h2 class="section-title">境界突破记录</h2>
+    <button class="btn btn-primary" onclick="openAddRealmBreakModal()">新增突破记录</button>
+  </div>
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>玩家ID</th>
+        <th>玩家名称</th>
+        <th>原境界</th>
+        <th>新境界</th>
+        <th>是否成功</th>
+        <th>消耗灵石</th>
+        <th>突破时间</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody id="realmBreakTableBody">
+      <!-- JS 生成 -->
+    </tbody>
+  </table>
+  <div id="realmBreakPagination"></div>
+</div>
+
+<script>
+  // 初始化境界突破管理
+  function initRealmBreak() {
+    loadRealmBreakRecords();
+  }
+
+  // 加载境界突破记录
+  async function loadRealmBreakRecords() {
+    const tableBody = document.getElementById('realmBreakTableBody');
+    tableBody.innerHTML = '<tr><td colspan="9" style="text-align:center; color:#999;">加载中...</td></tr>';
+    
+    try {
+      const records = await apiService.get('/realm/break');
+      
+      tableBody.innerHTML = '';
+      if (records && records.length > 0) {
+        records.forEach(record => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${record.id}</td>
+            <td>${record.roleId || '-'}</td>
+            <td>${record.roleName || '-'}</td>
+            <td>${record.fromRealm || '-'}</td>
+            <td>${record.toRealm || '-'}</td>
+            <td>${record.success ? '成功' : '失败'}</td>
+            <td>${record.costSpiritStones || '-'}</td>
+            <td>${record.breakTime || '-'}</td>
+            <td>
+              <button class="btn btn-primary" onclick="editRealmBreak(${record.id})">编辑</button>
+              <button class="btn btn-danger" onclick="deleteRealmBreak(${record.id})">删除</button>
+            </td>
+          `;
+          tableBody.appendChild(row);
+        });
+      } else {
+        tableBody.innerHTML = '<tr><td colspan="9" style="text-align:center; color:#999;">暂无数据</td></tr>';
+      }
+    } catch (error) {
+      console.error('加载境界突破记录失败:', error);
+      tableBody.innerHTML = '<tr><td colspan="9" style="text-align:center; color:#e74c3c;">加载失败</td></tr>';
+    }
+  }
+
+  // 打开新增突破记录模态框
+  function openAddRealmBreakModal() {
+    console.log('打开新增突破记录模态框');
+  }
+
+  // 编辑突破记录
+  function editRealmBreak(id) {
+    console.log('编辑突破记录:', id);
+  }
+
+  // 删除突破记录
+  function deleteRealmBreak(id) {
+    if (confirm('确定要删除这个突破记录吗？')) {
+      console.log('删除突破记录:', id);
+      showMessage('realmBreakMessage', '删除成功', 'success');
+      loadRealmBreakRecords();
+    }
+  }
+
+  // 页面加载完成后初始化
+  if (typeof window.initRealmBreak === 'undefined') {
+    window.initRealmBreak = initRealmBreak;
+  }
+</script>

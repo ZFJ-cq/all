@@ -1,0 +1,16 @@
+package com.lingyue.service;
+
+import com.lingyue.dto.*;
+
+import java.util.List;
+
+public interface EnhancedTaskService {
+    List<TaskDTO> getDailyTasks();
+    List<RoleTaskDTO> getRoleTasks(Long roleId);
+    RoleTaskDTO acceptTask(TaskAcceptRequest request);
+    RoleTaskDTO updateTaskProgress(TaskProgressRequest request);
+    TaskRewardDTO claimTaskReward(Long roleId, Long taskId);
+    ActivityDTO getActivityInfo(Long roleId);
+    TaskRewardDTO claimActivityReward(Long roleId, Long rewardId);
+    void refreshDailyTasks(Long roleId);
+}

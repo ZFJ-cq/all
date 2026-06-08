@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>资源管理</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <div class="module-content">
+        <h2>资源管理</h2>
+        <div class="module-description">
+            管理游戏中的资源类型和配置
+        </div>
+        
+        <div class="search-bar">
+            <input type="text" id="searchKeyword" placeholder="搜索资源...">
+            <button onclick="searchResources()">搜索</button>
+        </div>
+        
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>资源名称</th>
+                        <th>类型</th>
+                        <th>单位</th>
+                        <th>初始值</th>
+                        <th>最大值</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="resourcesTableBody">
+                    <!-- 数据将通过JS动态加载 -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="pagination" id="pagination">
+            <!-- 分页将通过JS动态生成 -->
+        </div>
+    </div>
+    
+    <script>
+        function initResources() {
+            console.log('初始化资源管理模块');
+            loadResourceData();
+        }
+        
+        function loadResourceData(page = 1) {
+            const tableBody = document.getElementById('resourcesTableBody');
+            tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px;">加载中...</td></tr>';
+            
+            // 模拟数据加载
+            setTimeout(() => {
+                tableBody.innerHTML = '';
+                for (let i = 1; i <= 10; i++) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${(page - 1) * 10 + i}</td>
+                        <td>${['灵石', '修为', '经验', '声望', '贡献'][Math.floor(Math.random() * 5)]}</td>
+                        <td>${['基础资源', '高级资源', '特殊资源'][Math.floor(Math.random() * 3)]}</td>
+                        <td>${['个', '点', '点', '点', '点'][Math.floor(Math.random() * 5)]}</td>
+                        <td>${Math.floor(Math.random() * 1000) + 100}</td>
+                        <td>${Math.floor(Math.random() * 10000) + 1000}</td>
+                        <td>
+                            <button onclick="editResource(${i})">编辑</button>
+                            <button onclick="deleteResource(${i})">删除</button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                }
+                
+                // 生成分页
+                generatePagination(page, 5);
+            }, 1000);
+        }
+        
+        function searchResources() {
+            const keyword = document.getElementById('searchKeyword').value;
+            console.log('搜索资源:', keyword);
+            loadResourceData();
+        }
+        
+        function editResource(id) {
+            console.log('编辑资源:', id);
+            alert('编辑资源功能开发中');
+        }
+        
+        function deleteResource(id) {
+            if (confirm('确定要删除资源吗？')) {
+                console.log('删除资源:', id);
+                alert('删除成功');
+            }
+        }
+        
+        function generatePagination(currentPage, totalPages) {
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+            
+            for (let i = 1; i <= totalPages; i++) {
+                const button = document.createElement('button');
+                button.textContent = i;
+                button.className = i === currentPage ? 'active' : '';
+                button.onclick = () => loadResourceData(i);
+                pagination.appendChild(button);
+            }
+        }
+    </script>
+</body>
+</html>

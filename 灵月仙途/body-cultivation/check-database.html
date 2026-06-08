@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="../js/viewport-adapt.js"></script>
+  <script src="../js/config.js"></script>
+  <link rel="stylesheet" href="../css/mobile-adapt.css">
+  <title>数据库检查和修复</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #1a1a1a;
+      color: #fff;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    h1 {
+      color: #ffd700;
+      border-bottom: 2px solid #ffd700;
+      padding-bottom: 10px;
+    }
+    .section {
+      background: rgba(255,255,255,0.1);
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 8px;
+    }
+    .success { color: #4CAF50; }
+    .error { color: #ff4444; }
+    .warning { color: #ff9800; }
+    button {
+      background: #ffd700;
+      color: #000;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 10px 5px;
+    }
+    button:hover {
+      background: #ffed4e;
+    }
+    pre {
+      background: rgba(0,0,0,0.3);
+      padding: 10px;
+      border-radius: 5px;
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0;
+    }
+    th, td {
+      border: 1px solid rgba(255,255,255,0.3);
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background: rgba(255,215,0,0.3);
+    }
+  </style>
+
+  </head>
+<body>
+  <div class="container">
+    <h1>🔍 锻体修炼系统 - 数据库检查和修复</h1>
+    
+    <div class="section">
+      <h2>步骤说明</h2>
+      <ol>
+        <li>点击"检查数据库状态"按钮，查看当前数据库状态</li>
+        <li>如果显示表或数据缺失，点击"修复数据库"按钮</li>
+        <li>修复完成后，刷新锻体修炼页面测试</li>
+      </ol>
+    </div>
+
+    <div class="section">
+      <h2>操作按钮</h2>
+      <button onclick="checkDatabase()">🔍 检查数据库状态</button>
+      <button onclick="fixDatabase()">🔧 修复数据库</button>
+      <button onclick="clearCache()">🗑️ 清除缓存</button>
+    </div>
+
+    <div class="section" id="result" style="display:none;">
+      <h2>检查结果</h2>
+      <div id="resultContent"></div>
+    </div>
+
+    <div class="section">
+      <h2>快速修复（手动执行）</h2>
+      <p>如果自动修复失败，请在 MySQL 中手动执行以下 SQL：</p>
+      <pre id="sqlCommands"></pre>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = typeof window.getApiBaseUrl === 'function' ? window.getApiBaseUrl() : 'http://localhost:8088/api';
+
+    async function checkDatabase() {
+      const resultDiv = document.getElementById('result');
+      const resultContent = document.getElementById('resultContent');
+      resultDiv.style.display = 'block';
+      resultContent.innerHTML = '<p>正在检查数据库...</p>';
+
+      try {
+        // 检查各个表
+        const checks = await Promise.all([
+          checkTable('body_cultivation_realm'),
+          checkTable('body_part'),
+          checkTable('role_body_cultivation'),
+          checkTable('role_body_part_progress'),
+          checkRole45Data()
+        ]);
+
+        let html = '<h3>检查结果：</h3><table>';
+        html += '<tr><th>检查项</th><th>状态</th><th>详情</th></tr>';
+        
+        html += `<tr>
+          <td>body_cultivation_realm</td>
+          <td class="${checks[0].count > 0 ? 'success' : 'error'}">
+            ${checks[0].count > 0 ? '✅' : '❌'} ${checks[0].count > 0 ? '存在' : '缺失'}
+          </td>
+          <td>${checks[0].count} 条记录</td>
+        </tr>`;
+
+        html += `<tr>
+          <td>body_part</td>
+          <td class="${checks[1].count > 0 ? 'success' : 'error'}">
+            ${checks[1].count > 0 ? '✅' : '❌'} ${checks[1].count > 0 ? '存在' : '缺失'}
+          </td>
+          <td>${checks[1].count} 条记录</td>
+        </tr>`;
+
+        html += `<tr>
+          <td>role_body_cultivation</td>
+          <td class="${checks[2].count > 0 ? 'success' : 'error'}">
+            ${checks[2].count > 0 ? '✅' : '❌'} ${checks[2].count > 0 ? '存在' : '缺失'}
+          </td>
+          <td>${checks[2].count} 条记录</td>
+        </tr>`;
+
+        html += `<tr>
+          <td>role_body_part_progress</td>
+          <td class="${checks[3].count > 0 ? 'success' : 'error'}">
+            ${checks[3].count > 0 ? '✅' : '❌'} ${checks[3].count > 0 ? '存在' : '缺失'}
+          </td>
+          <td>${checks[3].count} 条记录</td>
+        </tr>`;
+
+        html += `<tr>
+          <td>角色 45 数据</td>
+          <td class="${checks[4].exists ? 'success' : 'warning'}">
+            ${checks[4].exists ? '✅' : '⚠️'} ${checks[4].exists ? '已初始化' : '未初始化'}
+          </td>
+          <td>${checks[4].message}</td>
+        </tr>`;
+
+        html += '</table>';
+
+        if (checks.some(c => !c.exists && c.count === undefined)) {
+          html += '<p class="warning">⚠️ 需要修复！请点击"修复数据库"按钮</p>';
+        } else {
+          html += '<p class="success">✅ 数据库状态正常！</p>';
+        }
+
+        resultContent.innerHTML = html;
+
+      } catch (error) {
+        resultContent.innerHTML = `<p class="error">❌ 检查失败：${error.message}</p>`;
+      }
+    }
+
+    async function checkTable(tableName) {
+      try {
+        const response = await fetch(`${API_BASE}/debug/count/${tableName}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          return { count: data.count || 0, exists: true };
+        }
+        return { count: 0, exists: false };
+      } catch (error) {
+        return { count: 0, exists: false };
+      }
+    }
+
+    async function checkRole45Data() {
+      try {
+        const response = await fetch(`${API_BASE}/body-cultivation/role/45`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        if (response.ok) {
+          return { exists: true, message: '角色 45 锻体数据已存在' };
+        }
+        return { exists: false, message: '角色 45 锻体数据不存在' };
+      } catch (error) {
+        return { exists: false, message: error.message };
+      }
+    }
+
+    async function fixDatabase() {
+      const resultDiv = document.getElementById('result');
+      const resultContent = document.getElementById('resultContent');
+      resultDiv.style.display = 'block';
+      resultContent.innerHTML = '<p>正在修复数据库...</p>';
+
+      try {
+        const response = await fetch(`${API_BASE}/debug/fix-body-cultivation`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+          resultContent.innerHTML = `
+            <h3 class="success">✅ 修复成功！</h3>
+            <p>${data.message}</p>
+            <p>请刷新锻体修炼页面测试功能。</p>
+          `;
+        } else {
+          resultContent.innerHTML = `
+            <h3 class="error">❌ 修复失败</h3>
+            <p>${data.message || '未知错误'}</p>
+            <p>请手动执行 SQL 命令（见下方）</p>
+          `;
+        }
+      } catch (error) {
+        resultContent.innerHTML = `
+          <h3 class="error">❌ 修复失败</h3>
+          <p>${error.message}</p>
+          <p>请手动执行 SQL 命令（见下方）</p>
+        `;
+      }
+    }
+
+    function clearCache() {
+      localStorage.clear();
+      sessionStorage.clear();
+      alert('缓存已清除！请刷新页面。');
+    }
+
+    // 显示 SQL 命令
+    document.getElementById('sqlCommands').textContent = `-- 在 MySQL 中执行：
+USE lingyuexiantu;
+
+INSERT INTO body_cultivation_realm (id, realm_name, realm_order, description, base_hp_bonus, base_defense_bonus, base_strength_bonus, breakthrough_success_rate, required_exp, pain_growth_rate, mutation_probability, failure_penalty, status)
+VALUES (1, '锻体境', 1, '锻体初境，打磨肉身', 10, 5, 3, 90.00, 1000, 1.00, 0.00, 'NONE', 1)
+ON DUPLICATE KEY UPDATE realm_name = realm_name;
+
+INSERT INTO body_part (id, part_name, part_code, description, primary_attr, secondary_attr, base_exp_requirement, exp_growth_rate, max_level, status)
+VALUES 
+(1, '四肢', 'limbs', '手臂与腿部力量锤炼', '力量', '敏捷', 100, 1.2, 50, 1),
+(2, '五脏', 'organs', '心肝脾肺肾内脏淬炼', '气血', '防御', 150, 1.25, 50, 1)
+ON DUPLICATE KEY UPDATE part_name = part_name;
+
+INSERT INTO role_body_cultivation (role_id, realm_id, body_exp, pain_value, tolerance, status, total_cultivate_count, total_breakthrough_count, failed_breakthrough_count)
+VALUES (45, 1, 0, 0.00, 0, 1, 0, 0, 0)
+ON DUPLICATE KEY UPDATE role_id = role_id;
+
+INSERT INTO role_body_part_progress (role_id, part_id, level, exp, cultivate_count, is_locked)
+VALUES 
+(45, 1, 1, 0, 0, 0),
+(45, 2, 1, 0, 0, 0)
+ON DUPLICATE KEY UPDATE role_id = role_id;`;
+  </script>
+</body>
+</html>

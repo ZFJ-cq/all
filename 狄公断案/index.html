@@ -1,0 +1,1480 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>狄公断案 - 明察秋毫，铁面无私</title>
+    <style>
+        :root {
+            --gold: #c9a96e;
+            --gold-light: rgba(201, 169, 110, 0.6);
+            --gold-dim: rgba(201, 169, 110, 0.15);
+            --gold-bg: rgba(201, 169, 110, 0.08);
+            --text: #e0d5c1;
+            --text-dim: rgba(224, 213, 193, 0.5);
+            --text-muted: rgba(224, 213, 193, 0.3);
+            --green: #48c78e;
+            --green-bg: rgba(72, 199, 142, 0.08);
+            --red: #f08080;
+            --red-bg: rgba(240, 128, 128, 0.08);
+            --bg-dark: rgba(0, 0, 0, 0.3);
+            --bg-card: rgba(201, 169, 110, 0.04);
+            --border: rgba(201, 169, 110, 0.12);
+            --border-hover: rgba(201, 169, 110, 0.35);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: var(--text);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .app { max-width: 640px; margin: 0 auto; padding: 16px; min-height: 100vh; }
+
+        /* ===== Buttons ===== */
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 12px 24px;
+            border: 1px solid var(--gold); border-radius: 10px;
+            background: var(--gold-dim); color: var(--gold);
+            font-size: 15px; font-family: inherit; cursor: pointer;
+            transition: all 0.25s ease; user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .btn:hover { background: rgba(201, 169, 110, 0.25); transform: translateY(-1px); }
+        .btn:active { transform: translateY(0); }
+        .btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+
+        .btn-primary {
+            background: rgba(201, 169, 110, 0.2);
+            font-size: 17px; padding: 14px 32px;
+            font-weight: 600;
+        }
+        .btn-primary:hover { background: rgba(201, 169, 110, 0.35); }
+
+        .btn-ghost {
+            border-color: rgba(201, 169, 110, 0.25);
+            background: transparent; color: var(--text-dim);
+            font-size: 13px; padding: 8px 16px;
+        }
+        .btn-ghost:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-bg); }
+
+        .btn-danger { border-color: rgba(240, 128, 128, 0.4); color: var(--red); background: var(--red-bg); }
+        .btn-danger:hover { background: rgba(240, 128, 128, 0.2); }
+
+        .btn-block { width: 100%; }
+
+        /* ===== Stage Indicator ===== */
+        .stage-bar {
+            display: flex; align-items: center; justify-content: center;
+            padding: 14px 0; margin-bottom: 16px; position: relative;
+        }
+        .stage-bar::before {
+            content: ''; position: absolute; top: 22px;
+            left: 50%; transform: translateX(-50%);
+            width: 200px; height: 1px;
+            background: rgba(201, 169, 110, 0.12);
+        }
+        .stage-step {
+            display: flex; flex-direction: column; align-items: center; gap: 6px;
+            padding: 0 18px; position: relative; z-index: 1; cursor: default;
+        }
+        .stage-step.clickable { cursor: pointer; }
+        .stage-step .dot {
+            width: 14px; height: 14px; border-radius: 50%;
+            background: rgba(201, 169, 110, 0.15);
+            border: 2px solid rgba(201, 169, 110, 0.25);
+            transition: all 0.3s;
+        }
+        .stage-step.active .dot {
+            background: var(--gold); border-color: var(--gold);
+            box-shadow: 0 0 10px rgba(201, 169, 110, 0.5);
+        }
+        .stage-step.done .dot { background: var(--green); border-color: var(--green); }
+        .stage-step .step-label {
+            font-size: 11px; color: var(--text-muted); white-space: nowrap;
+            transition: color 0.3s;
+        }
+        .stage-step.active .step-label { color: var(--gold); font-weight: 600; }
+        .stage-step.done .step-label { color: var(--green); }
+
+        /* ===== Cards ===== */
+        .card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 12px; padding: 16px;
+            transition: all 0.2s;
+        }
+        .card:hover { border-color: var(--border-hover); }
+        .card-clickable { cursor: pointer; }
+        .card-clickable:hover { background: var(--gold-bg); }
+        .card-collected {
+            border-color: rgba(72, 199, 142, 0.2);
+            background: var(--green-bg);
+        }
+        .card-collected:hover { background: rgba(72, 199, 142, 0.12); }
+
+        /* ===== Section Title ===== */
+        .sec-title {
+            font-size: 18px; color: var(--gold); margin-bottom: 14px;
+            display: flex; align-items: center; gap: 8px;
+        }
+
+        /* ===== Home Page ===== */
+        .home { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; text-align: center; padding: 40px 20px; position: relative; }
+        .home::before {
+            content: ''; position: absolute; top: 60px; left: 50%; transform: translateX(-50%);
+            width: 160px; height: 160px;
+            background: radial-gradient(circle, rgba(201, 169, 110, 0.2) 0%, transparent 70%);
+            border-radius: 50%; animation: pulse 4s ease-in-out infinite;
+        }
+        .home-title {
+            font-size: 52px; font-weight: 800; color: var(--gold);
+            text-shadow: 0 2px 30px rgba(201, 169, 110, 0.4);
+            letter-spacing: 10px; margin-bottom: 6px; position: relative;
+        }
+        .home-sub { color: var(--gold-light); font-size: 14px; letter-spacing: 6px; margin-bottom: 32px; }
+        .home-desc { color: rgba(224, 213, 193, 0.65); line-height: 2; margin-bottom: 48px; font-size: 15px; }
+        .home-menu { display: flex; flex-direction: column; gap: 14px; width: 260px; }
+        .home-stats {
+            display: flex; gap: 32px; margin-top: 48px;
+            color: var(--text-muted); font-size: 13px;
+        }
+        .home-stats span { color: var(--gold); font-weight: 600; }
+
+        /* ===== Case Select ===== */
+        .case-card {
+            padding: 18px; cursor: pointer; position: relative; overflow: hidden;
+        }
+        .case-card::after {
+            content: ''; position: absolute; top: 0; right: 0;
+            width: 60px; height: 60px;
+            background: radial-gradient(circle at top right, rgba(201, 169, 110, 0.08) 0%, transparent 70%);
+        }
+        .case-title { font-size: 17px; color: var(--text); margin-bottom: 4px; font-weight: 600; }
+        .case-desc { font-size: 13px; color: var(--text-dim); line-height: 1.6; }
+        .case-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+        .case-diff { font-size: 12px; letter-spacing: 2px; }
+        .case-badge {
+            font-size: 12px; padding: 3px 10px; border-radius: 10px;
+        }
+        .case-badge.done { background: var(--green-bg); color: var(--green); border: 1px solid rgba(72, 199, 142, 0.2); }
+        .case-badge.progress { background: var(--gold-bg); color: var(--gold); border: 1px solid rgba(201, 169, 110, 0.2); }
+
+        /* ===== Dialogue ===== */
+        .dlg-speaker {
+            padding: 10px 16px;
+            background: rgba(201, 169, 110, 0.05);
+            border: 1px solid var(--border); border-bottom: none;
+            border-radius: 10px 10px 0 0;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .dlg-name { color: var(--gold); font-weight: 700; font-size: 15px; }
+        .dlg-title {
+            font-size: 11px; color: var(--text-muted);
+            background: rgba(201, 169, 110, 0.08);
+            padding: 2px 8px; border-radius: 4px;
+        }
+        .dlg-body {
+            padding: 20px 16px; min-height: 140px;
+            background: var(--bg-dark);
+            border: 1px solid var(--border); border-top: none;
+            border-radius: 0 0 10px 10px;
+        }
+        .dlg-text { font-size: 16px; line-height: 2; color: var(--text); }
+        .dlg-cursor {
+            display: inline-block; width: 2px; height: 18px;
+            background: var(--gold); margin-left: 2px;
+            animation: blink 0.8s infinite;
+            vertical-align: text-bottom;
+        }
+        .dlg-progress { font-size: 12px; color: var(--text-muted); margin-top: 8px; text-align: right; }
+
+        /* ===== Investigation ===== */
+        .scene-tabs { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+        .scene-tab {
+            padding: 8px 18px; border: 1px solid var(--border); border-radius: 8px;
+            background: transparent; color: var(--text-dim); font-size: 13px;
+            font-family: inherit; cursor: pointer; transition: all 0.2s;
+        }
+        .scene-tab.active { background: var(--gold-dim); border-color: var(--gold); color: var(--gold); }
+        .scene-tab:hover:not(.active) { border-color: var(--border-hover); }
+
+        .scene-desc {
+            padding: 12px 16px; background: var(--bg-dark); border-radius: 8px;
+            margin-bottom: 14px; font-size: 13px; color: var(--text-dim); line-height: 1.8;
+        }
+        .scene-hints { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+        .scene-hint-tag {
+            font-size: 11px; padding: 3px 10px;
+            background: var(--gold-bg); border: 1px solid var(--border);
+            border-radius: 10px; color: var(--text-muted);
+        }
+
+        .ev-item { display: flex; align-items: center; gap: 12px; padding: 14px; }
+        .ev-icon { font-size: 26px; flex-shrink: 0; }
+        .ev-info { flex: 1; min-width: 0; }
+        .ev-name { font-size: 14px; color: var(--text); font-weight: 500; }
+        .ev-clue { font-size: 12px; color: var(--green); line-height: 1.6; margin-top: 2px; }
+        .ev-hint { font-size: 12px; color: var(--text-muted); }
+        .ev-badge { font-size: 12px; flex-shrink: 0; }
+        .ev-badge.done { color: var(--green); }
+        .ev-badge.todo { color: var(--text-muted); font-size: 16px; }
+        .ev-key { border-left: 3px solid rgba(201, 169, 110, 0.4); }
+
+        .inv-counter {
+            font-size: 13px; color: var(--text-dim);
+            background: var(--gold-bg); padding: 5px 14px; border-radius: 16px;
+        }
+
+        /* ===== Interrogation ===== */
+        .sus-item { display: flex; align-items: center; gap: 14px; padding: 16px; }
+        .sus-avatar { font-size: 36px; flex-shrink: 0; }
+        .sus-info { flex: 1; min-width: 0; }
+        .sus-name { font-size: 15px; color: var(--text); font-weight: 600; }
+        .sus-role { font-size: 12px; color: var(--gold-light); margin-top: 2px; }
+        .sus-desc { font-size: 12px; color: var(--text-dim); margin-top: 4px; line-height: 1.5; }
+        .sus-status { font-size: 12px; flex-shrink: 0; }
+        .sus-status.done { color: var(--green); }
+        .sus-status.todo { color: var(--text-muted); }
+
+        .dlg-line {
+            padding: 10px 14px; background: var(--bg-dark); border-radius: 8px;
+            margin-bottom: 8px; border-left: 3px solid rgba(201, 169, 110, 0.25);
+            line-height: 1.8; font-size: 14px;
+        }
+        .dlg-line .speaker { color: var(--gold); font-weight: 700; }
+        .dlg-line.fear, .dlg-line.nervous, .dlg-line.panic { border-left-color: rgba(220, 180, 80, 0.5); }
+        .dlg-line.angry { border-left-color: rgba(220, 80, 80, 0.5); }
+        .dlg-line.surrender, .dlg-line.defeated { border-left-color: rgba(72, 199, 142, 0.5); }
+
+        .sus-hint-box {
+            padding: 12px 16px; background: var(--gold-bg);
+            border: 1px solid var(--border); border-radius: 8px;
+            color: var(--gold); font-size: 13px; line-height: 1.8;
+        }
+
+        /* ===== Chat ===== */
+        .chat-container {
+            display: flex; flex-direction: column; height: calc(100vh - 200px);
+            min-height: 400px; max-height: 600px;
+        }
+        .chat-messages {
+            flex: 1; overflow-y: auto; padding: 12px 0;
+            display: flex; flex-direction: column; gap: 10px;
+            scrollbar-width: thin; scrollbar-color: rgba(201,169,110,0.2) transparent;
+        }
+        .chat-messages::-webkit-scrollbar { width: 4px; }
+        .chat-messages::-webkit-scrollbar-thumb { background: rgba(201,169,110,0.2); border-radius: 2px; }
+        .chat-msg {
+            max-width: 85%; padding: 10px 14px; border-radius: 12px;
+            font-size: 14px; line-height: 1.8; word-break: break-word;
+            animation: slideUp 0.3s ease;
+        }
+        .chat-msg.user {
+            align-self: flex-end; background: rgba(201,169,110,0.15);
+            border: 1px solid rgba(201,169,110,0.25); color: var(--text);
+            border-bottom-right-radius: 4px;
+        }
+        .chat-msg.ai {
+            align-self: flex-start; background: var(--bg-dark);
+            border: 1px solid var(--border); color: var(--text);
+            border-bottom-left-radius: 4px;
+        }
+        .chat-msg .msg-speaker {
+            font-size: 11px; color: var(--gold); font-weight: 600; margin-bottom: 4px;
+        }
+        .chat-msg.ai .msg-speaker { color: var(--gold-light); }
+        .chat-msg .msg-text { font-size: 14px; }
+        .chat-msg .msg-action {
+            color: var(--text-muted); font-style: italic; font-size: 12px;
+        }
+        .chat-input-area {
+            display: flex; gap: 8px; padding-top: 12px;
+            border-top: 1px solid var(--border); margin-top: 8px;
+        }
+        .chat-input {
+            flex: 1; padding: 10px 14px; border-radius: 10px;
+            border: 1px solid var(--border); background: var(--bg-dark);
+            color: var(--text); font-size: 14px; font-family: inherit;
+            outline: none; transition: border-color 0.2s;
+        }
+        .chat-input:focus { border-color: var(--gold); }
+        .chat-input::placeholder { color: var(--text-muted); }
+        .chat-send {
+            padding: 10px 18px; border-radius: 10px; border: 1px solid var(--gold);
+            background: var(--gold-dim); color: var(--gold); font-size: 14px;
+            font-family: inherit; cursor: pointer; transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .chat-send:hover { background: rgba(201,169,110,0.25); }
+        .chat-send:disabled { opacity: 0.4; cursor: not-allowed; }
+        .chat-typing {
+            align-self: flex-start; padding: 10px 14px; border-radius: 12px;
+            background: var(--bg-dark); border: 1px solid var(--border);
+            color: var(--text-muted); font-size: 13px;
+            animation: slideUp 0.3s ease;
+        }
+        .chat-typing-dots span {
+            display: inline-block; width: 6px; height: 6px;
+            background: var(--gold); border-radius: 50%; margin: 0 2px;
+            animation: blink 1s infinite;
+        }
+        .chat-typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .chat-typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+        .chat-mode-toggle {
+            display: flex; gap: 6px; margin-bottom: 12px;
+        }
+        .chat-mode-btn {
+            padding: 6px 14px; border-radius: 8px; border: 1px solid var(--border);
+            background: transparent; color: var(--text-dim); font-size: 12px;
+            font-family: inherit; cursor: pointer; transition: all 0.2s;
+        }
+        .chat-mode-btn.active {
+            background: var(--gold-dim); border-color: var(--gold); color: var(--gold);
+        }
+        .quick-questions {
+            display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px;
+        }
+        .quick-q {
+            padding: 5px 12px; border-radius: 16px; border: 1px solid var(--border);
+            background: transparent; color: var(--text-dim); font-size: 12px;
+            font-family: inherit; cursor: pointer; transition: all 0.2s;
+        }
+        .quick-q:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-bg); }
+        .evidence-chip {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 4px 10px; border-radius: 14px; font-size: 11px;
+            background: var(--gold-bg); border: 1px solid rgba(201,169,110,0.2);
+            color: var(--gold); cursor: pointer; transition: all 0.2s;
+        }
+        .evidence-chip:hover { background: rgba(201,169,110,0.15); }
+        .evidence-chip.used { opacity: 0.5; }
+        .chat-source-tag {
+            font-size: 10px; color: var(--text-muted); margin-top: 4px; text-align: right;
+        }
+
+        /* ===== Judgment ===== */
+        .judge-option {
+            display: flex; align-items: center; gap: 14px; padding: 14px 16px;
+        }
+        .judge-option:hover { background: var(--gold-bg); }
+        .radio-outer {
+            width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
+            border: 2px solid rgba(201, 169, 110, 0.3); position: relative;
+            transition: all 0.2s;
+        }
+        .radio-outer.checked { border-color: var(--gold); }
+        .radio-outer.checked::after {
+            content: ''; position: absolute; top: 3px; left: 3px;
+            width: 10px; height: 10px; border-radius: 50%;
+            background: var(--gold);
+        }
+        .judge-name { font-size: 15px; color: var(--text); }
+        .judge-role { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+
+        .ev-tag {
+            display: inline-block; padding: 5px 12px; border-radius: 16px;
+            font-size: 12px; margin: 3px;
+        }
+        .ev-tag.key { background: var(--gold-bg); border: 1px solid rgba(201, 169, 110, 0.25); color: var(--gold); }
+        .ev-tag.normal { background: var(--green-bg); border: 1px solid rgba(72, 199, 142, 0.2); color: var(--green); }
+
+        /* ===== Overlay ===== */
+        .overlay {
+            position: fixed; inset: 0; background: rgba(0, 0, 0, 0.75);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 200; animation: fadeIn 0.3s ease;
+            padding: 20px;
+        }
+        .overlay-card {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 2px solid var(--gold); border-radius: 20px;
+            padding: 32px 24px; max-width: 420px; width: 100%;
+            text-align: center; animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative; overflow: hidden;
+        }
+        .overlay-card::before {
+            content: ''; position: absolute; inset: -4px;
+            border-radius: 22px; z-index: -1;
+            background: linear-gradient(135deg, var(--gold), #e0c88e, var(--gold));
+            opacity: 0.15; filter: blur(8px);
+        }
+        .overlay-icon { font-size: 52px; margin-bottom: 12px; }
+        .overlay-title { font-size: 22px; margin-bottom: 12px; }
+        .overlay-title.correct { color: var(--green); }
+        .overlay-title.partial { color: var(--gold); }
+        .overlay-title.wrong { color: var(--red); }
+        .overlay-msg { font-size: 14px; color: var(--text-dim); line-height: 2; margin-bottom: 20px; }
+
+        /* ===== Toast ===== */
+        .toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 300; }
+        .toast {
+            background: rgba(0, 0, 0, 0.9); border: 1px solid var(--gold);
+            border-radius: 12px; padding: 14px 24px; max-width: 360px;
+            color: var(--text); font-size: 14px; line-height: 1.8;
+            animation: slideDown 0.3s ease; text-align: center;
+        }
+        .toast.hint { border-color: rgba(201, 169, 110, 0.5); }
+
+        /* ===== Settings ===== */
+        .setting-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 0; border-bottom: 1px solid var(--border);
+        }
+        .setting-row:last-child { border-bottom: none; }
+        .setting-label { font-size: 14px; color: var(--text); }
+        .toggle {
+            width: 48px; height: 26px; border-radius: 13px;
+            background: rgba(201, 169, 110, 0.15); border: 1px solid var(--border);
+            cursor: pointer; position: relative; transition: all 0.2s;
+        }
+        .toggle.on { background: var(--gold-dim); border-color: var(--gold); }
+        .toggle::after {
+            content: ''; position: absolute; top: 2px; left: 2px;
+            width: 20px; height: 20px; border-radius: 50%;
+            background: var(--text-dim); transition: all 0.2s;
+        }
+        .toggle.on::after { left: 24px; background: var(--gold); }
+
+        /* ===== Achievement ===== */
+        .ach-item { display: flex; align-items: center; gap: 14px; padding: 16px; }
+        .ach-icon { font-size: 32px; flex-shrink: 0; }
+        .ach-name { font-size: 14px; font-weight: 600; }
+        .ach-name.unlocked { color: var(--gold); }
+        .ach-name.locked { color: var(--text-muted); }
+        .ach-desc { font-size: 12px; margin-top: 3px; }
+        .ach-desc.unlocked { color: var(--text-dim); }
+        .ach-desc.locked { color: var(--text-muted); }
+
+        .ach-progress {
+            text-align: center; margin-top: 20px; padding: 16px;
+            background: var(--gold-bg); border-radius: 10px;
+            color: var(--gold); font-size: 14px;
+        }
+
+        /* ===== Loading ===== */
+        .loading {
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; padding: 60px 20px;
+            color: var(--gold-light); gap: 16px;
+        }
+        .loading-spinner {
+            width: 32px; height: 32px; border: 3px solid var(--border);
+            border-top-color: var(--gold); border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        /* ===== Animations ===== */
+        @keyframes pulse {
+            0%, 100% { transform: translateX(-50%) scale(1); opacity: 0.4; }
+            50% { transform: translateX(-50%) scale(1.15); opacity: 0.7; }
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes popIn {
+            0% { transform: scale(0.6); opacity: 0; }
+            70% { transform: scale(1.03); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in { animation: fadeIn 0.3s ease; }
+        .slide-up { animation: slideUp 0.35s ease; }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 400px) {
+            .home-title { font-size: 40px; letter-spacing: 6px; }
+            .stage-step { padding: 0 12px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="app" class="app"></div>
+    <div id="toast-container" class="toast-container"></div>
+
+    <script>
+    (function() {
+        'use strict';
+
+        const API = '/api';
+        const SP = 'digong_';
+
+        let state = {
+            caseId: null,
+            config: null,
+            stage: 'report',
+            evidences: [],
+            evDetails: {},
+            suspects: [],
+            susDetails: {},
+            hintsUsed: 0,
+            hints: [],
+            completed: {},
+            dlgIdx: 0,
+            verdict: null,
+            selectedSus: null,
+            activeScene: null,
+            startTime: null,
+            chatHistories: {},
+            chatMode: 'ai',
+            aiConfigured: false
+        };
+
+        let typingTimer = null;
+        let isTyping = false;
+        const preloadCache = {};
+        const debounceTimers = {};
+
+        function debounce(key, fn, delay) {
+            if (debounceTimers[key]) clearTimeout(debounceTimers[key]);
+            debounceTimers[key] = setTimeout(() => { fn(); delete debounceTimers[key]; }, delay || 500);
+        }
+
+        function save(key, val) {
+            try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
+        }
+
+        function load(key) {
+            try { const r = localStorage.getItem(key); return r ? JSON.parse(r) : null; } catch { return null; }
+        }
+
+        function saveDebounced(key, val) { debounce('save_' + key, () => save(key, val)); }
+
+        function flushDebounced() {
+            Object.keys(debounceTimers).forEach(k => {
+                clearTimeout(debounceTimers[k]);
+                delete debounceTimers[k];
+            });
+        }
+
+        async function api(url, opts) {
+            try {
+                const res = await fetch(API + url, opts);
+                return await res.json();
+            } catch(e) {
+                console.error('API Error:', e);
+                return { success: false, message: '网络请求失败' };
+            }
+        }
+
+        const ICONS = {
+            cloth:'👕', package:'📦', note:'📝', bone:'🦴', knife:'🔪',
+            witness:'👤', seal:'🔖', grain:'🌾', book:'📖', money:'💰',
+            wheel:'🛞', warehouse:'🏭', letter:'✉️', map:'🗺️', medicine:'💊',
+            poison:'☠️', shoe:'👞', hairpin:'钗', teacup:'🍵', candle:'🕯️'
+        };
+        const AVATARS = {
+            '窑户':'🧑‍🏭','赵大之妻':'👩','钦差大臣':'👲','粮商':'💰','仓管':'🧑‍💼',
+            '太后':'👑','总管太监':'🧑','老太监':'👴','妃子':'👸','商人':'🧑‍💼',
+            '县令':'👨‍💼','书生':'📖','和尚':'🧑‍🦲','道士':'🧙','衙役':'💂'
+        };
+
+        function evIcon(i) { return ICONS[i] || '📌'; }
+        function susAvatar(r) { return AVATARS[r] || '👤'; }
+
+        const $ = (sel) => document.querySelector(sel);
+        const app = () => document.getElementById('app');
+
+        function render(html) {
+            stopTyping();
+            app().innerHTML = html;
+            window.scrollTo(0, 0);
+        }
+
+        function toast(msg, type, duration) {
+            const c = document.getElementById('toast-container');
+            const t = document.createElement('div');
+            t.className = 'toast' + (type ? ' ' + type : '');
+            t.textContent = msg;
+            c.appendChild(t);
+            setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 0.3s'; setTimeout(() => t.remove(), 300); }, duration || 2500);
+        }
+
+        function persist() {
+            if (!state.caseId) return;
+            const p = {
+                stage: state.stage,
+                evidences: state.evidences,
+                evDetails: state.evDetails,
+                suspects: state.suspects,
+                susDetails: state.susDetails,
+                hintsUsed: state.hintsUsed,
+                dlgIdx: state.dlgIdx,
+                completed: state.completed,
+                startTime: state.startTime,
+                activeScene: state.activeScene
+            };
+            const all = load(SP + 'progress') || {};
+            all[state.caseId] = { ...p, updatedAt: new Date().toISOString() };
+            saveDebounced(SP + 'progress', all);
+        }
+
+        function persistNow() {
+            flushDebounced();
+            if (!state.caseId) return;
+            const p = {
+                stage: state.stage, evidences: state.evidences, evDetails: state.evDetails,
+                suspects: state.suspects, susDetails: state.susDetails, hintsUsed: state.hintsUsed,
+                dlgIdx: state.dlgIdx, completed: state.completed, startTime: state.startTime,
+                activeScene: state.activeScene
+            };
+            const all = load(SP + 'progress') || {};
+            all[state.caseId] = { ...p, updatedAt: new Date().toISOString() };
+            save(SP + 'progress', all);
+        }
+
+        function getStats() { return load(SP + 'stats') || { totalCasesCompleted:0, totalEvidenceCollected:0, totalHintsUsed:0 }; }
+        function updateStats(u) { const s = getStats(); Object.assign(s, u); saveDebounced(SP + 'stats', s); }
+
+        function preloadNext() {
+            if (!state.caseId) return;
+            const m = state.caseId.match(/case_(\d+)/);
+            if (!m) return;
+            const next = 'case_' + String(parseInt(m[1]) + 1).padStart(3, '0');
+            if (!preloadCache[next]) api('/cases/' + next).then(d => { if (d.success) preloadCache[next] = d.data; }).catch(() => {});
+        }
+
+        // ==================== HOME ====================
+        function showHome() {
+            persistNow();
+            state.caseId = null; state.config = null;
+            const stats = getStats();
+            const achConfigs = load(SP + 'ach_configs') || [];
+            const achUnlocked = load(SP + 'achievements') || {};
+
+            render(`
+                <div class="home fade-in">
+                    <h1 class="home-title">狄公断案</h1>
+                    <p class="home-sub">—— 神探狄公，明察秋毫 ——</p>
+                    <p class="home-desc">大唐盛世，化身狄仁杰，亲历千古奇案<br>搜集证据、审讯嫌犯、还原真相！</p>
+                    <div class="home-menu">
+                        <button class="btn btn-primary" onclick="DG.goCases()">⚖️ 开始断案</button>
+                        <button class="btn" onclick="DG.goAch()">🏆 成就殿堂 (${Object.keys(achUnlocked).length}/${achConfigs.length})</button>
+                        <button class="btn btn-ghost" onclick="DG.goSettings()">⚙️ 游戏设置</button>
+                    </div>
+                    <div class="home-stats">
+                        <div>已破案 <span>${stats.totalCasesCompleted}</span></div>
+                        <div>收集证据 <span>${stats.totalEvidenceCollected}</span></div>
+                    </div>
+                </div>
+            `);
+        }
+
+        // ==================== CASE SELECT ====================
+        async function goCases() {
+            render('<div class="loading"><div class="loading-spinner"></div><div>正在加载案件列表...</div></div>');
+            const res = await api('/cases');
+            if (!res.success) { toast('加载失败，请重试'); showHome(); return; }
+            const cases = res.data;
+
+            const achRes = await api('/achievements');
+            if (achRes.success) save(SP + 'ach_configs', achRes.data.achievements);
+
+            const progress = load(SP + 'progress') || {};
+
+            const list = cases.map(c => {
+                const p = progress[c.id];
+                const done = p?.completed?.judgment;
+                const hasProgress = p && !done;
+                return `
+                    <div class="card card-clickable case-card slide-up" onclick="DG.startGame('${c.id}')">
+                        <div class="case-title">${c.subtitle} ${c.title}</div>
+                        <div class="case-desc">${c.description}</div>
+                        <div class="case-meta">
+                            <div class="case-diff">${'⭐'.repeat(c.difficulty)}</div>
+                            ${done ? '<div class="case-badge done">✅ 已破案</div>' : hasProgress ? '<div class="case-badge progress">📝 进行中</div>' : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            render(`
+                <div class="fade-in">
+                    <button class="btn btn-ghost" onclick="DG.goHome()" style="margin-bottom:16px">← 返回首页</button>
+                    <div class="sec-title">📜 选择案件</div>
+                    <div style="display:flex;flex-direction:column;gap:10px">${list}</div>
+                </div>
+            `);
+        }
+
+        // ==================== START GAME ====================
+        async function startGame(caseId) {
+            state = {
+                caseId, config: null, stage: 'report',
+                evidences: [], evDetails: {}, suspects: [], susDetails: {},
+                hintsUsed: 0, hints: [], completed: {}, dlgIdx: 0,
+                verdict: null, selectedSus: null, activeScene: null, startTime: Date.now()
+            };
+
+            const saved = load(SP + 'progress')?.[caseId];
+            if (saved) {
+                state.stage = saved.stage || 'report';
+                state.evidences = saved.evidences || [];
+                state.evDetails = saved.evDetails || {};
+                state.suspects = saved.suspects || [];
+                state.susDetails = saved.susDetails || {};
+                state.hintsUsed = saved.hintsUsed || 0;
+                state.completed = saved.completed || {};
+                state.dlgIdx = saved.dlgIdx || 0;
+                state.startTime = saved.startTime || Date.now();
+                state.activeScene = saved.activeScene || null;
+            }
+
+            render('<div class="loading"><div class="loading-spinner"></div><div>正在调阅卷宗...</div></div>');
+
+            const res = await api('/cases/' + caseId);
+            if (!res.success) { toast('案件加载失败'); showHome(); return; }
+            state.config = res.data;
+            state.hints = res.data.hints || [];
+
+            const aiRes = await api('/ai-status');
+            if (aiRes.success) state.aiConfigured = aiRes.data.configured;
+
+            if (!state.activeScene && state.config.stages.investigation?.scenes?.length) {
+                state.activeScene = state.config.stages.investigation.scenes[0].id;
+            }
+
+            preloadNext();
+            renderGame();
+        }
+
+        // ==================== GAME RENDER ====================
+        function renderGame() {
+            const steps = [
+                { id:'report', name:'报案', icon:'📜' },
+                { id:'investigation', name:'取证', icon:'🔎' },
+                { id:'interrogation', name:'审讯', icon:'🏛️' },
+                { id:'judgment', name:'断案', icon:'⚖️' }
+            ];
+
+            const bar = steps.map(s => {
+                const cls = state.stage === s.id ? 'active' : state.completed[s.id] ? 'done' : '';
+                const click = state.completed[s.id] ? ` onclick="DG.loadStage('${s.id}')"` : '';
+                return `<div class="stage-step ${cls} ${state.completed[s.id] ? 'clickable' : ''}" ${click}>
+                    <div class="dot"></div><div class="step-label">${s.icon} ${s.name}</div></div>`;
+            }).join('');
+
+            let content = '';
+            switch(state.stage) {
+                case 'report': content = renderReport(); break;
+                case 'investigation': content = renderInvestigation(); break;
+                case 'interrogation': content = renderInterrogation(); break;
+                case 'judgment': content = renderJudgment(); break;
+            }
+
+            render(`
+                <div class="fade-in">
+                    <button class="btn btn-ghost" onclick="DG.confirmLeave()" style="margin-bottom:12px">← 返回</button>
+                    <div class="stage-bar">${bar}</div>
+                    <div class="slide-up">${content}</div>
+                </div>
+            `);
+
+            if (state.stage === 'report') startTyping();
+        }
+
+        // ==================== REPORT ====================
+        function renderReport() {
+            const dlgs = state.config.stages.report?.dialogues || [];
+            if (state.dlgIdx >= dlgs.length) {
+                return `<div style="text-align:center;padding:40px 0">
+                    <p style="color:var(--text-dim);margin-bottom:24px">案情已了解清楚，可以开始取证调查了。</p>
+                    <button class="btn btn-primary" onclick="DG.finishStage('report')">开始取证</button></div>`;
+            }
+            const d = dlgs[state.dlgIdx];
+            return `
+                <div style="margin-bottom:16px">
+                    <div class="dlg-speaker">
+                        <span class="dlg-name">${d.speaker}</span>
+                        <span class="dlg-title">${d.speakerTitle}</span>
+                    </div>
+                    <div class="dlg-body">
+                        <div class="dlg-text" id="dlg-text"></div>
+                        <div class="dlg-cursor" id="dlg-cursor" style="display:none"></div>
+                    </div>
+                    <div class="dlg-progress">${state.dlgIdx + 1} / ${dlgs.length}</div>
+                </div>
+                <div style="text-align:center">
+                    <button class="btn" id="dlg-btn" onclick="DG.nextDlg()" style="display:none">
+                        ${state.dlgIdx < dlgs.length - 1 ? '继续 ▸' : '开始取证 ▸'}</button>
+                    <button class="btn btn-ghost" id="dlg-skip" onclick="DG.skipTyping()" style="display:none">跳过</button>
+                </div>`;
+        }
+
+        function startTyping() {
+            stopTyping();
+            const dlgs = state.config.stages.report?.dialogues || [];
+            if (state.dlgIdx >= dlgs.length) return;
+            const text = dlgs[state.dlgIdx].content;
+            const el = document.getElementById('dlg-text');
+            const cursor = document.getElementById('dlg-cursor');
+            const btn = document.getElementById('dlg-btn');
+            const skip = document.getElementById('dlg-skip');
+            if (!el) return;
+
+            isTyping = true;
+            if (cursor) cursor.style.display = 'inline-block';
+            if (btn) btn.style.display = 'none';
+            if (skip) skip.style.display = 'inline-flex';
+
+            let i = 0;
+            const settings = load(SP + 'settings') || {};
+            const speed = { slow: 60, normal: 35, fast: 12 }[settings.textSpeed || 'normal'] || 35;
+
+            function type() {
+                if (i < text.length) {
+                    el.textContent = text.substring(0, i + 1);
+                    i++;
+                    typingTimer = setTimeout(type, speed);
+                } else {
+                    finishTyping();
+                }
+            }
+            type();
+        }
+
+        function finishTyping() {
+            isTyping = false;
+            if (typingTimer) { clearTimeout(typingTimer); typingTimer = null; }
+            const cursor = document.getElementById('dlg-cursor');
+            const btn = document.getElementById('dlg-btn');
+            const skip = document.getElementById('dlg-skip');
+            if (cursor) cursor.style.display = 'none';
+            if (btn) btn.style.display = 'inline-flex';
+            if (skip) skip.style.display = 'none';
+        }
+
+        function stopTyping() {
+            if (typingTimer) { clearTimeout(typingTimer); typingTimer = null; }
+            isTyping = false;
+        }
+
+        function nextDlg() {
+            const dlgs = state.config.stages.report?.dialogues || [];
+            if (state.dlgIdx < dlgs.length - 1) {
+                state.dlgIdx++;
+                persist();
+                renderGame();
+            } else {
+                finishStage('report');
+            }
+        }
+
+        function skipTyping() {
+            stopTyping();
+            const dlgs = state.config.stages.report?.dialogues || [];
+            if (state.dlgIdx < dlgs.length) {
+                const el = document.getElementById('dlg-text');
+                if (el) el.textContent = dlgs[state.dlgIdx].content;
+            }
+            finishTyping();
+        }
+
+        // ==================== INVESTIGATION ====================
+        function renderInvestigation() {
+            const inv = state.config.stages.investigation;
+            if (!inv) return '<div class="loading">无取证数据</div>';
+            const scenes = inv.scenes || [];
+            const evidences = inv.evidences || [];
+            const activeId = state.activeScene || (scenes[0]?.id);
+            const scene = scenes.find(s => s.id === activeId) || scenes[0];
+            const sceneEvs = evidences.filter(e => e.sceneId === activeId);
+
+            return `
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+                    <div class="sec-title" style="margin-bottom:0">🔎 取证调查</div>
+                    <div class="inv-counter">已收集 ${state.evidences.length}/${evidences.length}</div>
+                </div>
+                <div class="scene-tabs">
+                    ${scenes.map(s => `<button class="scene-tab ${s.id === activeId ? 'active' : ''}" onclick="DG.switchScene('${s.id}')">${s.name}</button>`).join('')}
+                </div>
+                ${scene ? `
+                    <div class="scene-desc">${scene.description}</div>
+                    ${scene.searchHints?.length ? `<div class="scene-hints">${scene.searchHints.map(h => `<span class="scene-hint-tag">${h}</span>`).join('')}</div>` : ''}
+                ` : ''}
+                <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px">
+                    ${sceneEvs.map(ev => {
+                        const collected = state.evidences.includes(ev.id);
+                        return `<div class="card card-clickable ev-item ${collected ? 'card-collected' : ''} ${ev.isKey ? 'ev-key' : ''}" onclick="DG.collectEv('${ev.id}')">
+                            <div class="ev-icon">${evIcon(ev.icon)}</div>
+                            <div class="ev-info">
+                                <div class="ev-name">${ev.name}${ev.isKey ? ' 🔑' : ''}</div>
+                                <div class="${collected ? 'ev-clue' : 'ev-hint'}">${collected ? (state.evDetails[ev.id]?.clue || '已收集') : '点击调查'}</div>
+                            </div>
+                            <div class="ev-badge ${collected ? 'done' : 'todo'}">${collected ? '✓' : '?'}</div>
+                        </div>`;
+                    }).join('')}
+                    ${sceneEvs.length === 0 ? '<div style="text-align:center;padding:20px;color:var(--text-muted)">此场景暂无证据</div>' : ''}
+                </div>
+                <div style="display:flex;gap:10px;justify-content:center">
+                    <button class="btn btn-ghost" onclick="DG.useHint()" ${state.hintsUsed >= state.hints.length ? 'disabled' : ''}>💡 提示 (${state.hints.length - state.hintsUsed})</button>
+                    <button class="btn btn-primary" onclick="DG.finishStage('investigation')">完成取证 ▸</button>
+                </div>`;
+        }
+
+        function switchScene(sceneId) {
+            state.activeScene = sceneId;
+            persist();
+            renderGame();
+        }
+
+        function collectEv(evId) {
+            if (state.evidences.includes(evId)) {
+                const ev = state.config.stages.investigation.evidences.find(e => e.id === evId);
+                if (ev) toast(ev.description, '', 3000);
+                return;
+            }
+            state.evidences.push(evId);
+            const ev = state.config.stages.investigation.evidences.find(e => e.id === evId);
+            if (ev) state.evDetails[evId] = ev;
+
+            updateStats({ totalEvidenceCollected: (getStats().totalEvidenceCollected || 0) + 1 });
+            persist();
+            renderGame();
+
+            checkAchievements({
+                evidenceCollected: state.evidences.length,
+                totalEvidence: state.config.stages.investigation.evidences.length
+            });
+        }
+
+        function useHint() {
+            if (state.hintsUsed >= state.hints.length) return;
+            const hint = state.hints[state.hintsUsed];
+            state.hintsUsed++;
+            updateStats({ totalHintsUsed: (getStats().totalHintsUsed || 0) + 1 });
+            persist();
+            toast('💡 ' + hint.content, 'hint', 4000);
+            renderGame();
+        }
+
+        // ==================== INTERROGATION ====================
+        function renderInterrogation() {
+            const sus = state.config.stages.interrogation?.suspects || [];
+            return `
+                <div class="sec-title">🏛️ 审讯嫌犯</div>
+                <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
+                    ${sus.map(s => {
+                        const done = state.suspects.includes(s.id);
+                        return `<div class="card card-clickable sus-item ${done ? 'card-collected' : ''}" onclick="DG.interrogate('${s.id}')">
+                            <div class="sus-avatar">${susAvatar(s.role)}</div>
+                            <div class="sus-info">
+                                <div class="sus-name">${s.name}</div>
+                                <div class="sus-role">${s.role}</div>
+                                <div class="sus-desc">${s.description}</div>
+                            </div>
+                            <div class="sus-status ${done ? 'done' : 'todo'}">${done ? '✓ 已审讯' : '点击审讯'}</div>
+                        </div>`;
+                    }).join('')}
+                </div>
+                <div style="text-align:center">
+                    <button class="btn btn-primary" onclick="DG.finishStage('interrogation')">完成审讯，前往断案 ▸</button>
+                </div>`;
+        }
+
+        function interrogate(susId) {
+            if (state.suspects.includes(susId)) { showSusDetail(susId); return; }
+            state.suspects.push(susId);
+            const s = state.config.stages.interrogation.suspects.find(x => x.id === susId);
+            if (s) state.susDetails[susId] = s;
+            persist();
+            showSusDetail(susId);
+        }
+
+        function showSusDetail(susId) {
+            const s = state.susDetails[susId];
+            if (!s) return;
+
+            if (!state.chatHistories[susId]) state.chatHistories[susId] = [];
+
+            const isAI = state.chatMode === 'ai' && state.aiConfigured;
+            const dlgs = (s.dialogues || []).map(d => `
+                <div class="dlg-line ${d.emotion || ''}">
+                    <span class="speaker">${d.speaker}：</span>${d.content}
+                </div>`).join('');
+
+            const evs = state.config.stages.investigation?.evidences || [];
+            const collectedEvs = evs.filter(e => state.evidences.includes(e.id));
+            const evidenceChips = collectedEvs.map(e =>
+                `<span class="evidence-chip" onclick="DG.useEvidence('${susId}','${e.id}','${e.name}')">${evIcon(e.icon)} ${e.name}</span>`
+            ).join('');
+
+            const quickQs = [
+                { label: '案发时你在哪？', q: `案发之时你身在何处？可有人证？` },
+                { label: '你认识死者吗？', q: `你与被害人之间是何关系？可有往来？` },
+                { label: '你有何不满？', q: `你对被害人可有什么不满或怨恨？` },
+                { label: '谁知道内情？', q: `你可知道还有谁了解此案的内情？` }
+            ];
+
+            const chatHistory = state.chatHistories[susId] || [];
+            const chatMsgs = chatHistory.map(m => {
+                if (m.role === 'user') {
+                    return `<div class="chat-msg user"><div class="msg-speaker">狄公</div><div class="msg-text">${m.content}</div></div>`;
+                } else {
+                    const actionMatch = m.content.match(/^（[^）]+）/);
+                    const action = actionMatch ? actionMatch[0] : '';
+                    const text = actionMatch ? m.content.substring(action.length) : m.content;
+                    return `<div class="chat-msg ai"><div class="msg-speaker">${s.name}</div>${action ? `<div class="msg-action">${action}</div>` : ''}<div class="msg-text">${text}</div></div>`;
+                }
+            }).join('');
+
+            render(`
+                <div class="fade-in">
+                    <button class="btn btn-ghost" onclick="DG.renderGame()" style="margin-bottom:16px">← 返回嫌犯列表</button>
+                    <div style="text-align:center;margin-bottom:16px">
+                        <div style="font-size:52px">${susAvatar(s.role)}</div>
+                        <h3 style="color:var(--text);margin-top:8px;font-size:18px">${s.name}</h3>
+                        <p style="color:var(--gold-light);font-size:13px">${s.role}</p>
+                    </div>
+
+                    <div class="chat-mode-toggle">
+                        <button class="chat-mode-btn ${state.chatMode === 'ai' ? 'active' : ''}" onclick="DG.switchChatMode('ai')">🤖 自由审讯</button>
+                        <button class="chat-mode-btn ${state.chatMode === 'script' ? 'active' : ''}" onclick="DG.switchChatMode('script')">📜 预设对话</button>
+                    </div>
+
+                    ${state.chatMode === 'ai' ? `
+                        <div class="chat-container">
+                            <div class="chat-messages" id="chat-messages">
+                                ${chatMsgs || `<div style="text-align:center;color:var(--text-muted);padding:20px;font-size:13px">开始审讯${s.name}，用你的智慧找出真相！</div>`}
+                            </div>
+                            ${collectedEvs.length > 0 ? `
+                                <div style="margin-bottom:8px">
+                                    <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">出示证据质问：</div>
+                                    <div style="display:flex;flex-wrap:wrap;gap:4px">${evidenceChips}</div>
+                                </div>` : ''}
+                            <div class="quick-questions">
+                                ${quickQs.map(q => `<button class="quick-q" onclick="DG.quickAsk('${susId}','${q.q}')">${q.label}</button>`).join('')}
+                            </div>
+                            <div class="chat-input-area">
+                                <input class="chat-input" id="chat-input" placeholder="输入你的审讯问题..." onkeydown="if(event.key==='Enter')DG.sendChat('${susId}')">
+                                <button class="chat-send" id="chat-send" onclick="DG.sendChat('${susId}')">审问</button>
+                            </div>
+                        </div>
+                    ` : `
+                        <div style="margin-bottom:16px" class="slide-up">${dlgs}</div>
+                        ${s.hint ? `<div class="sus-hint-box">💡 ${s.hint}</div>` : ''}
+                    `}
+
+                    ${s.isGuilty !== undefined && state.chatMode !== 'ai' ? `<div style="margin-top:12px;padding:10px 14px;border-radius:8px;font-size:13px;${s.isGuilty ? 'background:rgba(240,160,96,0.1);color:#f0a060;border:1px solid rgba(240,160,96,0.2)' : 'background:var(--green-bg);color:var(--green);border:1px solid rgba(72,199,142,0.2)'}">${s.isGuilty ? '⚠️ 此人嫌疑重大！' : '✅ 此人似乎并非主谋'}</div>` : ''}
+                </div>
+            `);
+
+            const chatInput = document.getElementById('chat-input');
+            if (chatInput) chatInput.focus();
+            scrollChatToBottom();
+        }
+
+        function scrollChatToBottom() {
+            setTimeout(() => {
+                const el = document.getElementById('chat-messages');
+                if (el) el.scrollTop = el.scrollHeight;
+            }, 50);
+        }
+
+        function switchChatMode(mode) {
+            state.chatMode = mode;
+            const currentSus = state.suspects.length > 0 ? state.suspects[state.suspects.length - 1] : null;
+            if (currentSus) showSusDetail(currentSus);
+        }
+
+        function useEvidence(susId, evId, evName) {
+            const ev = state.config.stages.investigation?.evidences?.find(e => e.id === evId);
+            const question = `本官已掌握证据——"${evName}"${ev?.description ? '：' + ev.description : ''}。你作何解释？`;
+            sendChatMessage(susId, question);
+        }
+
+        function quickAsk(susId, question) {
+            sendChatMessage(susId, question);
+        }
+
+        async function sendChat(susId) {
+            const input = document.getElementById('chat-input');
+            if (!input) return;
+            const msg = input.value.trim();
+            if (!msg) return;
+            input.value = '';
+            await sendChatMessage(susId, msg);
+        }
+
+        async function sendChatMessage(susId, message) {
+            if (!state.chatHistories[susId]) state.chatHistories[susId] = [];
+            state.chatHistories[susId].push({ role: 'user', content: message });
+
+            const s = state.susDetails[susId];
+            const chatHistory = state.chatHistories[susId] || [];
+            const chatMsgs = chatHistory.map(m => {
+                if (m.role === 'user') {
+                    return `<div class="chat-msg user"><div class="msg-speaker">狄公</div><div class="msg-text">${m.content}</div></div>`;
+                } else {
+                    const actionMatch = m.content.match(/^（[^）]+）/);
+                    const action = actionMatch ? actionMatch[0] : '';
+                    const text = actionMatch ? m.content.substring(action.length) : m.content;
+                    return `<div class="chat-msg ai"><div class="msg-speaker">${s?.name || '嫌疑人'}</div>${action ? `<div class="msg-action">${action}</div>` : ''}<div class="msg-text">${text}</div></div>`;
+                }
+            }).join('');
+
+            const messagesEl = document.getElementById('chat-messages');
+            if (messagesEl) {
+                messagesEl.innerHTML = chatMsgs + `<div class="chat-typing" id="chat-typing"><div class="chat-typing-dots"><span></span><span></span><span></span></div> 正在思考...</div>`;
+                messagesEl.scrollTop = messagesEl.scrollHeight;
+            }
+
+            const sendBtn = document.getElementById('chat-send');
+            if (sendBtn) sendBtn.disabled = true;
+
+            try {
+                const res = await api('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        caseId: state.caseId,
+                        suspectId: susId,
+                        message,
+                        history: chatHistory.slice(0, -1),
+                        collectedEvidences: state.evidences
+                    })
+                });
+
+                if (res.success && res.data?.reply) {
+                    state.chatHistories[susId].push({ role: 'assistant', content: res.data.reply });
+                } else {
+                    state.chatHistories[susId].push({ role: 'assistant', content: '（沉默不语）大人……小人一时不知从何说起。' });
+                }
+            } catch (e) {
+                state.chatHistories[susId].push({ role: 'assistant', content: '（低头不语）……' });
+            }
+
+            if (sendBtn) sendBtn.disabled = false;
+            showSusDetail(susId);
+        }
+
+        // ==================== JUDGMENT ====================
+        function renderJudgment() {
+            const sus = state.config.stages.interrogation?.suspects || [];
+            const evs = state.config.stages.investigation?.evidences || [];
+
+            if (state.verdict) {
+                const v = state.verdict;
+                const icon = v.verdict === 'correct' ? '🎉' : v.verdict === 'partial' ? '🤔' : '❌';
+                return `
+                    <div class="overlay" onclick="event.stopPropagation()">
+                        <div class="overlay-card">
+                            <div class="overlay-icon">${icon}</div>
+                            <h2 class="overlay-title ${v.verdict}">${v.verdict === 'correct' ? '铁面无私，断案如神！' : v.verdict === 'partial' ? '证据不足，尚需查证' : '断案有误！'}</h2>
+                            <p class="overlay-msg">${v.message}</p>
+                            <button class="btn btn-primary" onclick="DG.finishGame()">${v.verdict === 'correct' ? '结案归档' : '重新审理'}</button>
+                        </div>
+                    </div>`;
+            }
+
+            return `
+                <div class="sec-title">⚖️ 升堂断案</div>
+                <p style="color:var(--text-dim);font-size:13px;margin-bottom:18px">请根据已收集的证据，指认真凶。</p>
+                <div style="margin-bottom:20px">
+                    <div style="font-size:14px;color:var(--gold);margin-bottom:10px;font-weight:600">选择真凶</div>
+                    <div style="display:flex;flex-direction:column;gap:8px">
+                        ${sus.map(s => `
+                            <div class="card card-clickable judge-option" onclick="DG.selectSus('${s.id}')">
+                                <div class="radio-outer ${state.selectedSus === s.id ? 'checked' : ''}"></div>
+                                <div>
+                                    <div class="judge-name">${s.name}</div>
+                                    <div class="judge-role">${s.role}</div>
+                                </div>
+                            </div>`).join('')}
+                    </div>
+                </div>
+                <div style="margin-bottom:20px">
+                    <div style="font-size:14px;color:var(--gold);margin-bottom:10px;font-weight:600">已收集的证据</div>
+                    ${state.evidences.length > 0 ? `<div>${state.evidences.map(id => {
+                        const ev = evs.find(e => e.id === id);
+                        return `<span class="ev-tag ${ev?.isKey ? 'key' : 'normal'}">${evIcon(ev?.icon)} ${ev?.name || id}</span>`;
+                    }).join('')}</div>` : '<div style="color:var(--text-muted);font-size:13px;padding:12px">尚未收集任何证据，请先返回取证阶段</div>'}
+                </div>
+                <div style="text-align:center">
+                    <button class="btn btn-primary" onclick="DG.submitCase()" ${!state.selectedSus ? 'disabled' : ''}>✋ 惊堂木一拍——升堂！</button>
+                </div>`;
+        }
+
+        function selectSus(id) { state.selectedSus = id; renderGame(); }
+
+        async function submitCase() {
+            if (!state.selectedSus) return;
+            render('<div class="loading"><div class="loading-spinner"></div><div>正在审理...</div></div>');
+
+            const res = await api('/cases/' + state.caseId + '/judge', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ suspectId: state.selectedSus, evidenceIds: state.evidences })
+            });
+
+            if (!res.success) { toast('提交失败，请重试'); renderGame(); return; }
+            state.verdict = res.data;
+
+            if (state.verdict.verdict === 'correct') {
+                state.completed.judgment = true;
+                updateStats({ totalCasesCompleted: (getStats().totalCasesCompleted || 0) + 1 });
+                checkAchievements({ caseCompleted: true, firstTryCorrect: true, noHintsUsed: state.hintsUsed === 0 });
+                preloadNext();
+            }
+
+            persist();
+            renderGame();
+        }
+
+        function finishGame() {
+            if (state.verdict?.verdict === 'correct') {
+                toast('案件已结案！', '', 2000);
+                showHome();
+            } else {
+                state.verdict = null;
+                state.selectedSus = null;
+                renderGame();
+            }
+        }
+
+        // ==================== STAGE NAV ====================
+        function finishStage(stageId) {
+            state.completed[stageId] = true;
+            const order = ['report', 'investigation', 'interrogation', 'judgment'];
+            const idx = order.indexOf(stageId);
+            if (idx < order.length - 1) {
+                state.stage = order[idx + 1];
+                state.dlgIdx = 0;
+                if (state.stage === 'investigation' && !state.activeScene) {
+                    state.activeScene = state.config.stages.investigation?.scenes?.[0]?.id || null;
+                }
+            }
+            persist();
+            renderGame();
+        }
+
+        function loadStage(stageId) {
+            state.stage = stageId;
+            state.dlgIdx = 0;
+            persist();
+            renderGame();
+        }
+
+        function confirmLeave() {
+            if (state.caseId) {
+                persistNow();
+                goCases();
+            } else {
+                showHome();
+            }
+        }
+
+        // ==================== ACHIEVEMENTS ====================
+        function checkAchievements(cond) {
+            const configs = load(SP + 'ach_configs') || [];
+            const unlocked = load(SP + 'achievements') || {};
+            const stats = getStats();
+            const newly = [];
+
+            configs.forEach(a => {
+                if (unlocked[a.id]) return;
+                let ok = false;
+                const c = a.condition;
+                switch(c.type) {
+                    case 'caseCompleted': ok = (stats.totalCasesCompleted || 0) >= c.count; break;
+                    case 'allEvidenceCollected': ok = cond.evidenceCollected >= cond.totalEvidence; break;
+                    case 'correctJudgmentFirstTry': ok = !!cond.firstTryCorrect; break;
+                    case 'noHintCompleted': ok = !!(cond.noHintsUsed && cond.caseCompleted); break;
+                    case 'totalEvidenceCollected': ok = (stats.totalEvidenceCollected || 0) >= c.count; break;
+                    case 'allCasesCompleted': ok = (stats.totalCasesCompleted || 0) >= c.count; break;
+                    case 'speedRun': ok = cond.caseCompleted && state.startTime && (Date.now() - state.startTime) / 1000 <= c.timeLimit; break;
+                }
+                if (ok) {
+                    unlocked[a.id] = { unlockedAt: new Date().toISOString() };
+                    newly.push(a);
+                }
+            });
+
+            if (newly.length) {
+                save(SP + 'achievements', unlocked);
+                showAchPopup(newly[0]);
+            }
+        }
+
+        function showAchPopup(ach) {
+            const el = document.createElement('div');
+            el.className = 'overlay';
+            el.onclick = () => el.remove();
+            el.innerHTML = `
+                <div class="overlay-card" onclick="event.stopPropagation()">
+                    <div class="overlay-icon">🏆</div>
+                    <div style="color:var(--gold-light);font-size:11px;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px">成就解锁</div>
+                    <h3 style="color:var(--gold);font-size:20px;margin-bottom:6px">${ach.name}</h3>
+                    <p style="color:var(--text-dim);font-size:13px">${ach.description}</p>
+                </div>`;
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 3500);
+        }
+
+        function goAch() {
+            const configs = load(SP + 'ach_configs') || [];
+            const unlocked = load(SP + 'achievements') || {};
+            const total = configs.length;
+            const done = Object.keys(unlocked).length;
+
+            render(`
+                <div class="fade-in">
+                    <button class="btn btn-ghost" onclick="DG.goHome()" style="margin-bottom:16px">← 返回首页</button>
+                    <div class="sec-title">🏆 成就殿堂</div>
+                    <div style="display:flex;flex-direction:column;gap:8px">
+                        ${configs.map(a => {
+                            const u = unlocked[a.id];
+                            return `<div class="card ach-item ${u ? 'card-collected' : ''}">
+                                <div class="ach-icon">${u ? '🏆' : '🔒'}</div>
+                                <div>
+                                    <div class="ach-name ${u ? 'unlocked' : 'locked'}">${a.name}</div>
+                                    <div class="ach-desc ${u ? 'unlocked' : 'locked'}">${a.description}</div>
+                                </div>
+                            </div>`;
+                        }).join('')}
+                    </div>
+                    <div class="ach-progress">已解锁 ${done} / ${total}</div>
+                </div>`);
+        }
+
+        // ==================== SETTINGS ====================
+        function goSettings() {
+            const s = load(SP + 'settings') || { soundEnabled: true, textSpeed: 'normal' };
+            render(`
+                <div class="fade-in">
+                    <button class="btn btn-ghost" onclick="DG.goHome()" style="margin-bottom:16px">← 返回首页</button>
+                    <div class="sec-title">⚙️ 游戏设置</div>
+                    <div class="card" style="margin-bottom:16px">
+                        <div class="setting-row">
+                            <span class="setting-label">音效</span>
+                            <div class="toggle ${s.soundEnabled ? 'on' : ''}" onclick="DG.toggleSound()"></div>
+                        </div>
+                        <div class="setting-row">
+                            <span class="setting-label">文字速度</span>
+                            <select onchange="DG.setTextSpeed(this.value)" style="padding:6px 12px;border:1px solid var(--border);border-radius:6px;background:#1a1a2e;color:var(--text);font-family:inherit;font-size:13px">
+                                <option value="slow" ${s.textSpeed==='slow'?'selected':''}>慢</option>
+                                <option value="normal" ${s.textSpeed==='normal'?'selected':''}>正常</option>
+                                <option value="fast" ${s.textSpeed==='fast'?'selected':''}>快</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:8px">
+                        <button class="btn btn-block" onclick="DG.exportData()">📤 导出存档</button>
+                        <button class="btn btn-block" onclick="DG.importData()">📥 导入存档</button>
+                        <button class="btn btn-danger btn-block" onclick="DG.clearData()">🗑️ 清除数据</button>
+                    </div>
+                    <input type="file" id="import-file" accept=".json" style="display:none" onchange="DG.handleImport(event)">
+                </div>`);
+        }
+
+        function toggleSound() {
+            const s = load(SP + 'settings') || {};
+            s.soundEnabled = !s.soundEnabled;
+            save(SP + 'settings', s);
+            goSettings();
+        }
+
+        function setTextSpeed(v) {
+            const s = load(SP + 'settings') || {};
+            s.textSpeed = v;
+            save(SP + 'settings', s);
+        }
+
+        function exportData() {
+            flushDebounced();
+            const data = {
+                progress: load(SP + 'progress') || {},
+                achievements: load(SP + 'achievements') || {},
+                stats: load(SP + 'stats') || {},
+                settings: load(SP + 'settings') || {},
+                exportedAt: new Date().toISOString(), version: '1.0'
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = `狄公断案存档_${new Date().toISOString().slice(0,10)}.json`;
+            a.click(); URL.revokeObjectURL(url);
+            toast('存档已导出');
+        }
+
+        function importData() { document.getElementById('import-file')?.click(); }
+
+        function handleImport(e) {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                try {
+                    const d = JSON.parse(ev.target.result);
+                    if (!d.version) { toast('存档格式无效'); return; }
+                    if (d.progress) save(SP + 'progress', d.progress);
+                    if (d.achievements) save(SP + 'achievements', d.achievements);
+                    if (d.stats) save(SP + 'stats', d.stats);
+                    if (d.settings) save(SP + 'settings', d.settings);
+                    toast('存档导入成功！');
+                } catch { toast('存档文件解析失败'); }
+            };
+            reader.readAsText(file);
+        }
+
+        function clearData() {
+            if (!confirm('确定要清除所有游戏数据吗？此操作不可恢复！')) return;
+            ['progress','achievements','stats','settings','ach_configs'].forEach(k => localStorage.removeItem(SP + k));
+            toast('数据已清除');
+            showHome();
+        }
+
+        // ==================== GLOBAL EXPOSE ====================
+        window.DG = {
+            goHome: showHome,
+            goCases,
+            goAch,
+            goSettings,
+            startGame,
+            renderGame,
+            nextDlg,
+            skipTyping,
+            switchScene,
+            collectEv,
+            useHint,
+            interrogate,
+            selectSus,
+            submitCase,
+            finishStage,
+            loadStage,
+            finishGame,
+            confirmLeave,
+            toggleSound,
+            setTextSpeed,
+            exportData,
+            importData,
+            handleImport,
+            clearData,
+            switchChatMode,
+            useEvidence,
+            quickAsk,
+            sendChat
+        };
+
+        window.addEventListener('beforeunload', persistNow);
+
+        showHome();
+    })();
+    </script>
+</body>
+</html>

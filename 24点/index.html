@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="description" content="数理试炼 - 趣味数学游戏，支持加减法、四则运算、24点，可单人练习或多人对战">
+<meta name="theme-color" content="#6c5ce7">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧮</text></svg>">
+<title>数理试炼 - 趣味数学</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+
+<div id="home-page" class="page active">
+  <div class="nav-bar"><div class="nav-placeholder"></div><div class="nav-title">数理试炼</div><div class="nav-placeholder"></div></div>
+  <div class="page-body">
+    <div class="home-banner">
+      <div class="title">🧮 数理试炼</div>
+      <div class="subtitle">循序渐进，快乐学习 · 适合3岁以上</div>
+    </div>
+    <div class="quick-actions">
+      <div class="quick-btn" onclick="G24.showPage('story-page');G24.renderStoryPage()"><div class="icon">📖</div><div class="label">剧情模式</div></div>
+      <div class="quick-btn" onclick="G24.showPage('room-page')"><div class="icon">🏠</div><div class="label">房间模式</div></div>
+      <div class="quick-btn" onclick="G24.showPage('race-page')"><div class="icon">⚡</div><div class="label">竞速模式</div></div>
+    </div>
+    <div class="section-header"><div class="section-title"><span class="level-badge level-1">初级</span>加减法</div></div>
+    <div class="cards-grid">
+      <div class="exercise-card" onclick="G24.showCountSelect('easy',20)"><div class="card-nums"><div class="num-box add">2</div><div class="card-op">＋</div><div class="num-box add">6</div></div><div class="card-label">20以内加减</div></div>
+      <div class="exercise-card" onclick="G24.showCountSelect('easy',50)"><div class="card-nums"><div class="num-box sub">35</div><div class="card-op">－</div><div class="num-box sub">12</div></div><div class="card-label">50以内加减</div></div>
+      <div class="exercise-card" onclick="G24.showCountSelect('easy',100)"><div class="card-nums"><div class="num-box mix">47</div><div class="card-op">＋</div><div class="num-box mix">28</div></div><div class="card-label">100以内加减</div></div>
+    </div>
+    <div class="section-header"><div class="section-title"><span class="level-badge level-3">中级</span>四则运算</div></div>
+    <div class="cards-grid">
+      <div class="exercise-card" onclick="G24.showCountSelect('medium',20)"><div class="card-nums"><div class="num-box mul">3</div><div class="card-op">×</div><div class="num-box mul">7</div></div><div class="card-label">20以内四则</div></div>
+      <div class="exercise-card" onclick="G24.showCountSelect('medium',50)"><div class="card-nums"><div class="num-box div">36</div><div class="card-op">÷</div><div class="num-box div">6</div></div><div class="card-label">50以内四则</div></div>
+      <div class="exercise-card" onclick="G24.showCountSelect('medium',100)"><div class="card-nums"><div class="num-box mix">48</div><div class="card-op">÷</div><div class="num-box mix">8</div></div><div class="card-label">100以内四则</div></div>
+    </div>
+    <div class="section-header"><div class="section-title"><span class="level-badge level-5">高级</span>24点</div></div>
+    <div class="cards-grid">
+      <div class="exercise-card" onclick="G24.showCountSelect('hard',0)"><div class="card-nums"><div class="num-box hard">3</div><div class="num-box hard">4</div><div class="num-box hard">5</div><div class="num-box hard">6</div></div><div class="card-label">经典24点</div></div>
+    </div>
+    <div style="height:20px"></div>
+  </div>
+</div>
+
+<div id="sp-math-page" class="page">
+  <div class="nav-bar"><div class="nav-btn" onclick="G24.confirmExitSP()">← 退出</div><div class="nav-title" id="sp-math-title">练习中</div><div class="nav-btn" id="sp-timer-display">0.0s</div></div>
+  <div class="page-body">
+    <div class="game-stats">
+      <div class="stat-item"><div class="stat-num" id="sp-current">1</div><div class="stat-label">当前</div></div>
+      <div class="stat-item"><div class="stat-num" id="sp-total">10</div><div class="stat-label">总数</div></div>
+      <div class="stat-item"><div class="stat-num" style="color:var(--green)" id="sp-correct">0</div><div class="stat-label">正确</div></div>
+      <div class="stat-item"><div class="stat-num" style="color:var(--orange)" id="sp-streak">0</div><div class="stat-label">🔥连击</div></div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="sp-progress" style="width:0%"></div></div>
+    <div class="question-card" id="sp-question-card">
+      <div class="question-expr" id="sp-question-expr"></div>
+      <input type="number" class="answer-input" id="sp-answer" placeholder="输入答案" inputmode="numeric" onkeydown="if(event.key==='Enter')G24.submitSPAnswer()">
+    </div>
+    <div class="feedback" id="sp-feedback" style="display:none"></div>
+  </div>
+  <div class="action-bar">
+    <button class="btn btn-warning" onclick="G24.skipSPQuestion()">⏭ 跳过</button>
+    <button class="btn btn-primary" onclick="G24.submitSPAnswer()">✅ 提交</button>
+  </div>
+</div>
+
+<div id="sp24-page" class="page">
+  <div class="nav-bar"><div class="nav-btn" onclick="G24.confirmExitSP()">← 退出</div><div class="nav-title">24点练习</div><div class="nav-btn" onclick="G24.toggleRules()">📖 规则</div></div>
+  <div class="page-body">
+    <div class="game-stats">
+      <div class="stat-item"><div class="stat-num" id="sp24-current">1</div><div class="stat-label">当前</div></div>
+      <div class="stat-item"><div class="stat-num" id="sp24-total">10</div><div class="stat-label">总数</div></div>
+      <div class="stat-item"><div class="stat-num" style="color:var(--green)" id="sp24-correct">0</div><div class="stat-label">正确</div></div>
+      <div class="stat-item"><div class="stat-num" style="color:var(--orange)" id="sp24-streak">0</div><div class="stat-label">🔥连击</div></div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="sp24-progress" style="width:0%"></div></div>
+    <div class="cards-24" id="sp24-cards"></div>
+    <div class="ops-row" id="sp24-ops">
+      <button class="op-btn plus" onclick="G24.pickSP24Op('+')">＋</button>
+      <button class="op-btn minus" onclick="G24.pickSP24Op('-')">－</button>
+      <button class="op-btn multiply" onclick="G24.pickSP24Op('*')">×</button>
+      <button class="op-btn divide" onclick="G24.pickSP24Op('/')">÷</button>
+    </div>
+    <div class="step-log" id="sp24-hint">① 选择一个数字卡片</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:8px">
+      <button class="btn btn-secondary" onclick="G24.undoSP24()" style="flex:1;min-width:70px">↩ 撤销</button>
+      <button class="btn btn-secondary" onclick="G24.hintSP24()" style="flex:1;min-width:70px">💡 提示</button>
+      <button class="btn btn-secondary" onclick="G24.resetSP24()" style="flex:1;min-width:70px">🔄 重置</button>
+      <button class="btn btn-warning" onclick="G24.skipSP24()" style="flex:1;min-width:70px">⏭ 跳过</button>
+    </div>
+    <div id="sp24-hint-box" class="hint-box" style="display:none"></div>
+  </div>
+</div>
+
+<div id="sp-result-page" class="page">
+  <div class="nav-bar"><div class="nav-placeholder"></div><div class="nav-title">练习完成</div><div class="nav-placeholder"></div></div>
+  <div class="page-body" style="text-align:center;padding-top:30px">
+    <div style="font-size:64px;margin-bottom:12px" id="sp-result-icon">🎉</div>
+    <h2 style="font-size:22px;font-weight:700;color:var(--text);margin-bottom:6px">练习完成！</h2>
+    <p id="sp-result-sub" style="font-size:14px;color:var(--sub);margin-bottom:16px"></p>
+    <div style="background:#f5f5f5;border-radius:var(--r);padding:16px;margin-bottom:16px">
+      <div style="font-size:40px;font-weight:700;color:var(--purple)" id="sp-result-score"></div>
+      <div style="font-size:13px;color:var(--sub)">正确率</div>
+    </div>
+    <div id="sp-result-stats" style="text-align:left;margin-bottom:16px"></div>
+    <div id="sp-new-record" style="font-size:16px;font-weight:700;color:var(--orange);margin-bottom:12px;display:none">🎉 新纪录！</div>
+    <div id="sp-review-section" style="display:none;text-align:left;margin-bottom:16px">
+      <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:8px">📋 错题回顾</div>
+      <div id="sp-review-list"></div>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-secondary" style="flex:1" onclick="G24.showPage('home-page')">🏠 首页</button>
+      <button class="btn btn-primary" style="flex:1" onclick="G24.restartSP()">🔄 再来</button>
+    </div>
+  </div>
+</div>
+
+<div id="story-page" class="page">
+  <div class="nav-bar"><div class="nav-btn" onclick="G24.showPage('home-page')">← 首页</div><div class="nav-title">📖 葫芦娃救爷爷</div><div class="nav-btn" onclick="G24.resetStoryProgress()" style="text-align:right;font-size:12px">🔄 重置</div></div>
+  <div class="page-body" style="padding:8px 12px">
+    <div class="story-banner">
+      <div class="story-banner-title">🏔️ 葫芦娃救爷爷</div>
+      <div class="story-banner-sub">七个葫芦娃，逐关闯妖洞，救出爷爷！</div>
+    </div>
+    <div id="story-map-container"></div>
+  </div>
+</div>
+
+<div id="story-level-page" class="page">
+  <div class="nav-bar"><div class="nav-btn" onclick="G24.showPage('story-page');G24.renderStoryPage()">← 返回</div><div class="nav-title">关卡详情</div><div class="nav-placeholder"></div></div>
+  <div class="page-body" style="text-align:center;padding-top:20px">
+    <div style="font-size:64px;margin-bottom:8px" id="story-level-emoji">💪</div>
+    <h2 style="font-size:20px;font-weight:700;color:var(--text)" id="story-level-name">大娃 · 力大无穷</h2>
+    <p style="font-size:13px;color:var(--sub);margin:8px 0 16px" id="story-level-desc"></p>
+    <div class="story-level-badge" id="story-level-diff-badge">🌱 加减法</div>
+    <div class="card" style="text-align:left;margin:12px 0">
+      <div style="font-size:13px;color:var(--sub);line-height:1.8;margin-bottom:8px" id="story-level-story"></div>
+      <div class="settings-row"><span>🧌 守关BOSS</span><span class="settings-val" id="story-level-boss"></span></div>
+      <div class="settings-row"><span>📊 题目类型</span><span class="settings-val" id="story-level-diff"></span></div>
+      <div class="settings-row"><span>🎯 过关条件</span><span class="settings-val" id="story-level-count"></span></div>
+      <div id="story-level-best" style="display:none;text-align:center;font-size:13px;color:var(--orange);font-weight:600;margin-top:4px"></div>
+    </div>
+    <button class="btn btn-primary" onclick="G24.startStoryLevel()" style="font-size:16px;padding:14px">⚔️ 开始挑战</button>
+  </div>
+</div>
+
+<div id="story-math-page" class="page">
+  <div class="nav-bar"><div class="nav-btn" onclick="G24.confirmExitStory()">← 退出</div><div class="nav-title" id="story-math-title">关卡</div><div class="nav-btn" id="story-timer-display">0.0s</div></div>
+  <div class="page-body">
+    <div class="story-boss-bar">
+      <div class="story-boss-label">🧌 BOSS</div>
+      <div class="story-boss-hp-bar"><div class="story-boss-hp-fill" id="story-boss-hp" style="width:100%"></div></div>
+    </div>
+    <div class="game-stats">
+      <div class="stat-item"><div class="stat-num" id="story-current">1</div><div class="stat-label">当前</div></div>
+      <div class="stat-item"><div class="stat-num" id="story-total">5</div><div class="stat-label">总数</div></div>
+      <div class="stat-item"><div class="stat-num" style="color:var(--green)" id="story-correct">0</div><div class="stat-label">正确</div></div>
+      <div class="stat-item"><div class="stat-num" style="color:var(--orange)" id="story-streak">0</div><div class="stat-label">🔥连击</div></div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="story-progress" style="width:0%"></div></div>
+    <div class="question-card" id="story-question-card">
+      <div class="question-expr" id="story-question-expr"></div>
+      <input type="number" class="answer-input" id="story-answer" placeholder="输入答案" inputmode="numeric" onkeydown="if(event.key==='Enter')G24.submitStoryAnswer()">
+    </div>
+    <div class="feedback" id="story-feedback" style="display:none"></div>
+  </div>
+  <div class="action-bar">
+    <button class="btn btn-warning" onclick="G24.skipStoryQuestion()">⏭ 跳过</button>
+    <button class="btn btn-primary" onclick="G24.submitStoryAnswer()">✅ 提交</button>
+  </div>
+</div>
+
+<div id="story24-page" class="page">
+  <div class="nav-bar"><div class="nav-btn" onclick="G24.confirmExitStory()">← 退出</div><div class="nav-title" id="story24-title">24点关卡</div><div class="nav-btn" id="story24-timer-display">0.0s</div></div>
+  <div class="page-body">
+    <div class="story-boss-bar">
+      <div class="story-boss-label">🧌 BOSS</div>
+      <div class="story-boss-hp-bar"><div class="story-boss-hp-fill" id="story24-boss-hp" style="width:100%"></div></div>
+    </div>
+    <div class="game-stats">
+      <div class="stat-item"><div class="stat-num" id="story24-current">1</div><div class="stat-label">当前</div></div>
+      <div class="stat-item"><div class="stat-num" id="story24-total">5</div><div class="stat-label">总数</div></div>
+      <div class="stat-item"><div class="stat-num" style="color:var(--green)" id="story24-correct">0</div><div class="stat-label">正确</div></div>
+      <div class="stat-item"><div class="stat-num" style="color:var(--orange)" id="story24-streak">0</div><div class="stat-label">🔥连击</div></div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="story24-progress" style="width:0%"></div></div>
+    <div class="cards-24" id="story24-cards"></div>
+    <div class="ops-row" id="story24-ops">
+      <button class="op-btn plus" onclick="G24.pickStory24Op('+')">＋</button>
+      <button class="op-btn minus" onclick="G24.pickStory24Op('-')">－</button>
+      <button class="op-btn multiply" onclick="G24.pickStory24Op('*')">×</button>
+      <button class="op-btn divide" onclick="G24.pickStory24Op('/')">÷</button>
+    </div>
+    <div class="step-log" id="story24-hint">① 选择一个数字卡片</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:8px">
+      <button class="btn btn-secondary" onclick="G24.undoStory24()" style="flex:1;min-width:70px">↩ 撤销</button>
+      <button class="btn btn-secondary" onclick="G24.hintStory24()" style="flex:1;min-width:70px">💡 提示</button>
+      <button class="btn btn-secondary" onclick="G24.resetStory24()" style="flex:1;min-width:70px">🔄 重置</button>
+      <button class="btn btn-warning" onclick="G24.skipStory24()" style="flex:1;min-width:70px">⏭ 跳过</button>
+    </div>
+    <div id="story24-hint-box" class="hint-box" style="display:none"></div>
+  </div>
+</div>
+
+<div id="story-result-page" class="page">
+  <div class="nav-bar"><div class="nav-btn" onclick="G24.showPage('story-page');G24.renderStoryPage()">← 返回</div><div class="nav-title">关卡结果</div><div class="nav-placeholder"></div></div>
+  <div class="page-body" style="text-align:center;padding-top:20px">
+    <div style="font-size:48px;margin-bottom:4px" id="story-result-emoji">💪</div>
+    <div style="font-size:64px;margin-bottom:8px" id="story-result-icon">🎉</div>
+    <h2 style="font-size:22px;font-weight:700;color:var(--text)" id="story-result-title">过关成功！</h2>
+    <div id="story-result-stars" style="font-size:28px;margin:8px 0"></div>
+    <div id="story-result-newrecord" style="display:none;font-size:16px;font-weight:700;color:var(--orange);margin-bottom:8px"></div>
+    <p style="font-size:13px;color:var(--sub);line-height:1.8;margin-bottom:16px" id="story-result-story"></p>
+    <div class="card" style="padding:12px">
+      <div class="settings-row"><span>✅ 正确</span><span class="settings-val" style="color:var(--green)" id="story-result-correct">0</span></div>
+      <div class="settings-row"><span>❌ 错误</span><span class="settings-val" style="color:var(--danger)" id="story-result-wrong">0</span></div>
+      <div class="settings-row"><span>📊 总题数</span><span class="settings-val" id="story-result-total">0</span></div>
+      <div class="settings-row"><span>📈 正确率</span><span class="settings-val" style="color:var(--purple)" id="story-result-rate">0%</span></div>
+      <div class="settings-row"><span>⏱ 总用时</span><span class="settings-val" id="story-result-time">0s</span></div>
+      <div class="settings-row"><span>⚡ 平均用时</span><span class="settings-val" id="story-result-avg">0s</span></div>
+      <div class="settings-row"><span>🏆 得分</span><span class="settings-val" style="color:var(--orange);font-weight:700" id="story-result-score">0</span></div>
+      <div class="settings-row"><span>🔥 最大连击</span><span class="settings-val" style="color:var(--orange)" id="story-result-maxstreak">0</span></div>
+    </div>
+    <div id="story-result-review" style="display:none;text-align:left;margin-top:12px"></div>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn btn-warning" style="flex:1" onclick="G24.retryStoryLevel()">🔄 再试一次</button>
+      <button class="btn btn-primary" style="flex:1" id="story-next-level-btn" onclick="G24.enterStoryLevel(G24._story.currentLevel+1)">➡️ 下一关</button>
+    </div>
+  </div>
+</div>
+
+<div id="story-finale-page" class="page">
+  <div class="nav-bar"><div class="nav-btn" onclick="G24.showPage('story-page');G24.renderStoryPage()">← 返回</div><div class="nav-title">🎊 最终结局</div><div class="nav-placeholder"></div></div>
+  <div class="page-body" style="text-align:center;padding-top:20px">
+    <div style="font-size:64px;margin-bottom:8px">👴</div>
+    <h2 style="font-size:22px;font-weight:700;color:var(--text)">🎉 爷爷得救了！</h2>
+    <p style="font-size:13px;color:var(--sub);line-height:1.8;margin:8px 0 16px">七个葫芦娃齐心协力，终于打败了蛇精，救出了爷爷！葫芦山又恢复了往日的安宁！</p>
+    <div class="card" style="padding:12px;margin-bottom:12px">
+      <div class="settings-row"><span>⭐ 总星数</span><span class="settings-val" style="color:var(--orange);font-weight:700" id="finale-stars">0/21</span></div>
+      <div class="settings-row"><span>🏆 总得分</span><span class="settings-val" style="color:var(--purple);font-weight:700" id="finale-score">0</span></div>
+    </div>
+    <div id="finale-heroes" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px"></div>
+    <button class="btn btn-primary" style="width:100%" onclick="G24.showPage('story-page');G24.renderStoryPage()">📖 返回关卡地图</button>
+  </div>
+</div>
+
+<div id="race-page" class="page">
+  <div class="nav-bar"><div class="nav-btn" onclick="G24.showPage('home-page')">← 首页</div><div class="nav-title">⚡ 竞速模式</div><div class="nav-placeholder"></div></div>
+  <div class="page-body">
+    <div class="card" style="margin-bottom:12px">
+      <h3>⚡ 竞速对战</h3>
+      <p style="color:var(--sub);font-size:13px;margin-bottom:12px">匹配对手，限时3分钟，比拼速度与精准！</p>
+      <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px">选择难度</div>
+      <div class="config-row" id="race-diff-row">
+        <div class="config-opt active" data-v="easy" onclick="G24.pickOpt(this,'race-diff-row')">🌱 加减</div>
+        <div class="config-opt" data-v="medium" onclick="G24.pickOpt(this,'race-diff-row')">⚡ 四则</div>
+        <div class="config-opt" data-v="mix" onclick="G24.pickOpt(this,'race-diff-row')">🎯 混合</div>
+        <div class="config-opt" data-v="hard" onclick="G24.pickOpt(this,'race-diff-row')">🏆 24点</div>
+      </div>
+      <div style="font-size:12px;color:var(--sub);text-align:center;margin-bottom:12px">⏱ 限时3分钟，答对越多分越高</div>
+      <button class="btn btn-primary" onclick="G24.startRaceMatching()" id="race-start-btn">🔍 开始匹配</button>
+    </div>
+    <div id="race-matching" style="display:none" class="card">
+      <div class="matching-animation">🔄</div>
+      <div style="text-align:center;margin-top:12px">
+        <div style="font-size:16px;font-weight:700;color:var(--text)" id="race-matching-text">正在匹配对手...</div>
+        <div style="font-size:12px;color:var(--sub);margin-top:4px" id="race-matching-time">匹配中... 0s</div>
+      </div>
+      <button class="btn btn-secondary" style="width:100%;margin-top:16px" onclick="G24.cancelMatching()">❌ 取消匹配</button>
+    </div>
+    <div id="race-history" class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h3>📊 对战记录</h3>
+        <button class="btn btn-xs btn-secondary" onclick="G24.clearRaceHistory()" style="font-size:12px">🗑️ 清空</button>
+      </div>
+      <div id="race-history-list" style="max-height:200px;overflow-y:auto">
+        <div style="text-align:center;color:var(--sub);padding:20px">暂无对战记录</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="race-battle-page" class="page">
+  <div class="nav-bar"><div class="nav-btn" onclick="G24.confirmLeaveRace()">🚪 退出</div><div class="nav-title">⚡ 竞速对战</div><div id="race-timer" style="font-weight:700;color:var(--danger)">03:00</div></div>
+  <div class="page-body" style="padding:8px;display:flex;flex-direction:column;height:calc(100vh - 50px);gap:12px">
+    <div class="race-progress-bar"><div class="race-progress-fill" id="race-progress-fill"></div></div>
+    <div class="race-top-row">
+      <div class="race-player-card me">
+        <div class="race-player-header">
+          <div class="race-player-avatar" style="background:var(--green)">我</div>
+          <div class="race-player-info"><div class="race-player-name">我</div><div class="race-player-score" id="my-score">0分</div></div>
+        </div>
+        <div class="race-streak" id="my-streak"></div>
+        <div class="race-stats">
+          <div class="race-stat-item"><span class="stat-label">已答</span><span class="stat-value" id="my-answered">0</span></div>
+          <div class="race-stat-item"><span class="stat-label">正确</span><span class="stat-value correct" id="my-correct">0</span></div>
+          <div class="race-stat-item"><span class="stat-label">错误</span><span class="stat-value wrong" id="my-wrong">0</span></div>
+        </div>
+      </div>
+      <div class="race-player-card opponent">
+        <div class="race-player-header">
+          <div class="race-player-avatar" style="background:var(--danger)">对</div>
+          <div class="race-player-info"><div class="race-player-name" id="opponent-name">对手</div><div class="race-player-score" id="opponent-score">0分</div></div>
+        </div>
+        <div class="race-streak" id="opponent-streak"></div>
+        <div class="race-stats">
+          <div class="race-stat-item"><span class="stat-label">已答</span><span class="stat-value" id="opponent-answered">0</span></div>
+          <div class="race-stat-item"><span class="stat-label">正确</span><span class="stat-value correct" id="opponent-correct">0</span></div>
+          <div class="race-stat-item"><span class="stat-label">错误</span><span class="stat-value wrong" id="opponent-wrong">0</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="race-answer-section" style="flex:1;display:flex;flex-direction:column">
+      <div id="race-question" style="font-size:28px;font-weight:700;text-align:center;padding:20px;background:rgba(245,245,245,1);border-radius:12px;margin-bottom:12px"></div>
+      <input type="number" class="input" id="race-answer" placeholder="输入答案" onkeyup="G24.checkRaceAnswer(event)" style="font-size:20px;padding:16px">
+      <div id="race-wrong-hint" style="display:none;text-align:center;padding:8px;color:var(--danger);font-weight:600"></div>
+      <div class="race-actions" style="display:flex;gap:8px;margin-top:12px">
+        <button class="btn btn-primary" onclick="G24.submitRaceAnswer()" id="race-submit-btn" style="flex:1">提交答案</button>
+        <button class="btn btn-secondary" onclick="G24.skipRaceQuestion()" id="race-skip-btn" style="flex:1">跳过</button>
+        <button class="btn btn-warning" onclick="G24.nextRaceQuestion()" id="race-next-btn" style="display:none;flex:1">下一题 ➡️</button>
+      </div>
+      <div id="opponent-current" style="text-align:center;padding:12px;color:var(--sub);font-size:14px;margin-top:auto">等待对手...</div>
+    </div>
+  </div>
+</div>
+
+<div id="race24-page" class="page">
+  <div class="nav-bar"><div class="nav-btn" onclick="G24.confirmLeaveRace()">🚪 退出</div><div class="nav-title">⚡ 24点竞速</div><div id="race24-timer" style="font-weight:700;color:var(--danger)">05:00</div></div>
+  <div class="page-body" style="padding:12px">
+    <div class="race-progress-bar"><div class="race-progress-fill" id="race24-progress-fill"></div></div>
+    <div class="race24-top">
+      <div class="race24-player me">
+        <div class="race24-p-header">
+          <div class="race24-p-avatar" style="background:var(--green)">我</div>
+          <div class="race24-p-info"><div class="race24-p-name">我</div><div class="race24-p-score" id="race24-my-score">0分</div></div>
+        </div>
+        <div class="race24-p-stats">
+          <span class="race24-stat correct">✓<span id="race24-my-correct">0</span></span>
+          <span class="race24-stat wrong">✗<span id="race24-my-wrong">0</span></span>
+          <span class="race24-stat total">答<span id="race24-my-answered">0</span></span>
+        </div>
+      </div>
+      <div class="race24-player opponent">
+        <div class="race24-p-header">
+          <div class="race24-p-avatar" style="background:var(--danger)">对</div>
+          <div class="race24-p-info"><div class="race24-p-name" id="race24-opponent-name">对手</div><div class="race24-p-score" id="race24-opponent-score">0分</div></div>
+        </div>
+        <div class="race24-p-stats">
+          <span class="race24-stat correct">✓<span id="race24-opponent-correct">0</span></span>
+          <span class="race24-stat wrong">✗<span id="race24-opponent-wrong">0</span></span>
+          <span class="race24-stat total">答<span id="race24-opponent-answered">0</span></span>
+        </div>
+      </div>
+    </div>
+    <div class="cards-24" id="race24-cards"></div>
+    <div class="ops-row" id="race24-ops">
+      <button class="op-btn plus" onclick="G24.pickRace24Op('+')">＋</button>
+      <button class="op-btn minus" onclick="G24.pickRace24Op('-')">－</button>
+      <button class="op-btn multiply" onclick="G24.pickRace24Op('*')">×</button>
+      <button class="op-btn divide" onclick="G24.pickRace24Op('/')">÷</button>
+    </div>
+    <div class="step-log" id="race24-hint">① 选择一个数字卡片</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:8px">
+      <button class="btn btn-secondary" onclick="G24.undoRace24()" style="flex:1;min-width:70px">↩ 撤销</button>
+      <button class="btn btn-secondary" onclick="G24.resetRace24()" style="flex:1;min-width:70px">🔄 重置</button>
+      <button class="btn btn-warning" onclick="G24.skipRace24()" style="flex:1;min-width:70px">⏭ 跳过</button>
+    </div>
+    <div id="race24-hint-box" class="hint-box" style="display:none"></div>
+  </div>
+</div>
+
+<div id="race-result-page" class="page">
+  <div class="nav-bar"><div class="nav-btn" onclick="G24.showPage('race-page')">← 返回</div><div class="nav-title">对战结果</div><div class="nav-placeholder"></div></div>
+  <div class="page-body" style="text-align:center;padding-top:20px">
+    <div class="winner-crown" id="race-result-crown">👑</div>
+    <h2 id="race-result-title" style="font-size:24px;font-weight:700;color:var(--text);margin:12px 0"></h2>
+    <p id="race-result-sub" style="font-size:14px;color:var(--sub);margin-bottom:20px"></p>
+    <div class="result-stats">
+      <div class="result-stat-card"><div class="stat-big">🏆</div><div class="stat-name">最终得分</div><div class="stat-value" id="result-score">0</div></div>
+      <div class="result-stat-card"><div class="stat-big">⏱️</div><div class="stat-name">总用时</div><div class="stat-value" id="result-time">0秒</div></div>
+      <div class="result-stat-card"><div class="stat-big">📈</div><div class="stat-name">正确率</div><div class="stat-value" id="result-accuracy">0%</div></div>
+      <div class="result-stat-card"><div class="stat-big">🔥</div><div class="stat-name">最高连对</div><div class="stat-value" id="result-streak">0</div></div>
+    </div>
+    <div id="race-comparison" class="card" style="margin-top:16px">
+      <h3>📊 对战对比</h3>
+      <div class="comparison-row">
+        <div class="comparison-item">
+          <div class="comp-avatar" style="background:var(--green)">我</div>
+          <div class="comp-name">我</div><div class="comp-score" id="my-final-score">0分</div>
+        </div>
+        <div class="vs">VS</div>
+        <div class="comparison-item">
+          <div class="comp-avatar" style="background:var(--danger)">对</div>
+          <div class="comp-name" id="opponent-final-name">对手</div><div class="comp-score" id="opponent-final-score">0分</div>
+        </div>
+      </div>
+    </div>
+    <div id="race-wrong-list" class="card" style="margin-top:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <h3>❌ 错题回顾</h3>
+        <button class="btn btn-secondary btn-sm" onclick="G24.toggleWrongList()">展开</button>
+      </div>
+      <div id="wrong-list-content" style="display:none"><div style="text-align:center;color:var(--sub)">暂无错题</div></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:20px">
+      <button class="btn btn-success" style="flex:1" onclick="G24.startRaceMatching()">🔄 再来一局</button>
+      <button class="btn btn-secondary" style="flex:1" onclick="G24.showPage('race-page')">🏠 返回</button>
+    </div>
+  </div>
+</div>
+
+<div id="room-page" class="page">
+  <div class="nav-bar"><div class="nav-btn" onclick="G24.showPage('home-page')">← 首页</div><div class="nav-title">房间模式</div><div class="nav-placeholder"></div></div>
+  <div class="page-body">
+    <div id="lan-info" style="text-align:center;padding:10px;font-size:12px;color:var(--sub);margin-bottom:12px"></div>
+    <div id="multi-main" style="display:block">
+      <div style="text-align:center;margin-bottom:16px">
+        <div style="font-size:15px;color:var(--text);font-weight:600">创建房间邀请朋友</div>
+        <div style="font-size:12px;color:var(--sub);margin-top:2px">或输入房间号加入对战！</div>
+      </div>
+      <div style="padding:0 16px">
+        <div class="multi-card" onclick="G24.showCreatePanel()">
+          <div class="multi-icon">🏠</div><div class="multi-info"><div class="multi-title">创建房间</div><div class="multi-desc">设置难度和轮数，邀请朋友加入</div></div>
+        </div>
+        <div class="multi-card" onclick="G24.showJoinPanel()">
+          <div class="multi-icon">🚪</div><div class="multi-info"><div class="multi-title">加入房间</div><div class="multi-desc">输入房间号，和朋友一起PK</div></div>
+        </div>
+      </div>
+    </div>
+    <div id="create-panel" style="display:none">
+      <div class="card" style="margin-bottom:12px">
+        <div class="back-row" onclick="G24.showMainPanel()">
+          <span class="back-arrow">←</span><span class="back-text">返回选择</span>
+        </div>
+        <h3>🏠 创建房间</h3>
+        <input type="text" class="input" id="cr-name" placeholder="你的昵称" maxlength="10">
+        <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px">游戏模式</div>
+        <div class="config-row" id="cr-game-mode">
+          <div class="config-opt active" data-v="normal" onclick="G24.pickOpt(this,'cr-game-mode');G24.updateRoomMode()">🎯 普通对战</div>
+          <div class="config-opt" data-v="race" onclick="G24.pickOpt(this,'cr-game-mode');G24.updateRoomMode()">⚡ 竞速模式</div>
+        </div>
+        <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px">难度</div>
+        <div class="config-row" id="cr-diff-row">
+          <div class="config-opt active" data-v="easy" onclick="G24.onCRDiffChange(this)">🌱 加减</div>
+          <div class="config-opt" data-v="medium" onclick="G24.onCRDiffChange(this)">⚡ 四则</div>
+          <div class="config-opt" data-v="hard" onclick="G24.onCRDiffChange(this)">🏆 24点</div>
+        </div>
+        <div id="cr-range-section">
+          <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px">范围</div>
+          <div class="config-row" id="cr-range-row">
+            <div class="config-opt active" data-v="20" onclick="G24.pickOpt(this,'cr-range-row')">20</div>
+            <div class="config-opt" data-v="50" onclick="G24.pickOpt(this,'cr-range-row')">50</div>
+            <div class="config-opt" data-v="100" onclick="G24.pickOpt(this,'cr-range-row')">100</div>
+          </div>
+        </div>
+        <div id="cr-rounds-section">
+          <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px">轮数</div>
+          <div class="config-row" id="cr-rounds-row">
+            <div class="config-opt active" data-v="5" onclick="G24.pickOpt(this,'cr-rounds-row')">5轮</div>
+            <div class="config-opt" data-v="10" onclick="G24.pickOpt(this,'cr-rounds-row')">10轮</div>
+            <div class="config-opt" data-v="20" onclick="G24.pickOpt(this,'cr-rounds-row')">20轮</div>
+          </div>
+        </div>
+        <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px">每题限时</div>
+        <div class="config-row" id="cr-time-row">
+          <div class="config-opt" data-v="10" onclick="G24.pickOpt(this,'cr-time-row')">10秒</div>
+          <div class="config-opt active" data-v="20" onclick="G24.pickOpt(this,'cr-time-row')">20秒</div>
+          <div class="config-opt" data-v="30" onclick="G24.pickOpt(this,'cr-time-row')">30秒</div>
+          <div class="config-opt" data-v="60" onclick="G24.pickOpt(this,'cr-time-row')">60秒</div>
+          <div class="config-opt" data-v="90" onclick="G24.pickOpt(this,'cr-time-row')">90秒</div>
+          <div class="config-opt" data-v="120" onclick="G24.pickOpt(this,'cr-time-row')">120秒</div>
+        </div>
+        <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px">整局时长</div>
+        <div class="config-row" id="cr-total-time-row">
+          <div class="config-opt" data-v="300" onclick="G24.pickOpt(this,'cr-total-time-row')">5分钟</div>
+          <div class="config-opt active" data-v="600" onclick="G24.pickOpt(this,'cr-total-time-row')">10分钟</div>
+          <div class="config-opt" data-v="900" onclick="G24.pickOpt(this,'cr-total-time-row')">15分钟</div>
+          <div class="config-opt" data-v="1200" onclick="G24.pickOpt(this,'cr-total-time-row')">20分钟</div>
+        </div>
+        <input type="text" class="input" id="cr-password" placeholder="房间密码（留空无密码）" maxlength="6" inputmode="numeric">
+        <button class="btn btn-primary" onclick="G24.createRoom()">🏠 创建房间</button>
+      </div>
+    </div>
+    <div id="join-panel" style="display:none">
+      <div class="card">
+        <div class="back-row" onclick="G24.showMainPanel()">
+          <span class="back-arrow">←</span><span class="back-text">返回选择</span>
+        </div>
+        <h3>🚪 加入房间</h3>
+        <input type="text" class="input" id="jn-roomid" placeholder="6位房间号" maxlength="6" inputmode="numeric">
+        <input type="text" class="input" id="jn-name" placeholder="你的昵称" maxlength="10">
+        <input type="text" class="input" id="jn-password" placeholder="房间密码（如有）" maxlength="6" inputmode="numeric">
+        <button class="btn btn-primary" onclick="G24.joinRoom()">🚪 加入房间</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="wait-page" class="page">
+  <div class="nav-bar"><div class="nav-btn" onclick="G24.confirmLeave()">← 离开</div><div class="nav-title">等待房间</div><div class="nav-placeholder"></div></div>
+  <div class="page-body">
+    <div class="room-id-box">
+      <div class="room-id-label">房间号（点击复制）</div>
+      <div class="room-id" id="wait-roomid" onclick="G24.copyRoomId()">000000</div>
+      <button class="btn btn-secondary" style="margin-top:8px" onclick="G24.copyRoomId()">📋 复制分享</button>
+    </div>
+    <div id="wait-settings" class="card" style="padding:12px"></div>
+    <div style="font-size:14px;font-weight:600;color:var(--text);margin:12px 0 8px">在线玩家 <span id="wait-count">0</span></div>
+    <div id="wait-players"></div>
+    <button class="btn btn-warning" style="margin-top:12px" id="wait-ready-btn" onclick="G24.toggleRoomReady()">✅ 已准备（点击取消准备）</button>
+    <button class="btn btn-primary" style="margin-top:16px" id="start-game-btn" onclick="G24.startGame()" disabled>▶️ 开始游戏（至少2人）</button>
+    <div class="quick-chat-bar" id="wait-chat-bar">
+      <span style="font-size:11px;color:var(--sub);margin-right:4px">💬</span>
+      <button class="chat-tag" onclick="G24.sendQuickChat('大家好🙋')">大家好🙋</button>
+      <button class="chat-tag" onclick="G24.sendQuickChat('准备啦✅')">准备啦✅</button>
+      <button class="chat-tag" onclick="G24.sendQuickChat('开始吧🚀')">开始吧🚀</button>
+      <button class="chat-tag" onclick="G24.sendQuickChat('等等我⏳')">等等我⏳</button>
+      <button class="chat-tag" onclick="G24.sendQuickChat('加油💪')">加油💪</button>
+      <button class="chat-tag" onclick="G24.sendQuickChat('厉害👍')">厉害👍</button>
+    </div>
+    <div id="wait-chat-log" style="margin-top:8px;max-height:120px;overflow-y:auto;background:var(--bg);border-radius:10px;padding:8px 12px;font-size:12px;line-height:1.6;color:var(--text)"></div>
+  </div>
+</div>
+
+<div id="countdown-page" class="page" style="justify-content:center;align-items:center">
+  <div class="countdown-display" id="countdown-num">3</div>
+</div>
+
+<div id="play-page" class="page">
+  <div class="nav-bar"><div class="nav-placeholder"></div><div class="nav-title" id="play-title">对战中</div><div class="nav-btn" onclick="G24.showExitConfirm()">🚪 退出</div></div>
+  <div class="page-body">
+    <div class="game-stats">
+      <div class="stat-item"><div class="stat-num" id="play-round">1/5</div><div class="stat-label">轮次</div></div>
+      <div class="stat-item"><div class="stat-num" id="play-timer">0.0s</div><div class="stat-label">用时</div></div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="play-progress" style="width:0%"></div></div>
+    <div class="question-card" id="play-question-card">
+      <div class="question-expr" id="play-question-expr"></div>
+      <input type="number" class="answer-input" id="play-answer" placeholder="输入答案" inputmode="numeric" onkeydown="if(event.key==='Enter')G24.submitMathAnswer()">
+    </div>
+    <div class="emoji-bar">
+      <button class="emoji-btn" onclick="G24.sendEmoji('👍')">👍</button>
+      <button class="emoji-btn" onclick="G24.sendEmoji('🎉')">🎉</button>
+      <button class="emoji-btn" onclick="G24.sendEmoji('💪')">💪</button>
+      <button class="emoji-btn" onclick="G24.sendEmoji('😅')">😅</button>
+      <button class="emoji-btn" onclick="G24.sendEmoji('🤔')">🤔</button>
+      <button class="emoji-btn" onclick="G24.sendEmoji('❤️')">❤️</button>
+    </div>
+    <div id="play-players" style="margin-top:8px"></div>
+  </div>
+  <div class="action-bar">
+    <button class="btn btn-primary" onclick="G24.submitMathAnswer()">✅ 提交</button>
+  </div>
+</div>
+
+<div id="play24-page" class="page">
+  <div class="nav-bar"><div class="nav-placeholder"></div><div class="nav-title">24点对战</div><div class="nav-btn" onclick="G24.showExitConfirm()">🚪 退出</div></div>
+  <div class="page-body">
+    <div class="game-stats">
+      <div class="stat-item"><div class="stat-num" id="play24-round">1/5</div><div class="stat-label">轮次</div></div>
+      <div class="stat-item"><div class="stat-num" id="play24-timer">0.0s</div><div class="stat-label">用时</div></div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="play24-progress" style="width:0%"></div></div>
+    <div class="cards-24" id="play24-cards"></div>
+    <div class="ops-row" id="play24-ops">
+      <button class="op-btn plus" onclick="G24._pick24Op('+')">＋</button>
+      <button class="op-btn minus" onclick="G24._pick24Op('-')">－</button>
+      <button class="op-btn multiply" onclick="G24._pick24Op('*')">×</button>
+      <button class="op-btn divide" onclick="G24._pick24Op('/')">÷</button>
+    </div>
+    <div class="step-log" id="play24-hint">① 选择一个数字卡片</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:8px">
+      <button class="btn btn-secondary" onclick="G24._undo24()" style="flex:1;min-width:60px">↩ 撤销</button>
+      <button class="btn btn-secondary" onclick="G24._reset24()" style="flex:1;min-width:60px">🔄 重置</button>
+    </div>
+    <div class="emoji-bar">
+      <button class="emoji-btn" onclick="G24.sendEmoji('👍')">👍</button>
+      <button class="emoji-btn" onclick="G24.sendEmoji('🎉')">🎉</button>
+      <button class="emoji-btn" onclick="G24.sendEmoji('💪')">💪</button>
+      <button class="emoji-btn" onclick="G24.sendEmoji('😅')">😅</button>
+      <button class="emoji-btn" onclick="G24.sendEmoji('🤔')">🤔</button>
+      <button class="emoji-btn" onclick="G24.sendEmoji('❤️')">❤️</button>
+    </div>
+    <div id="play24-players" style="margin-top:8px"></div>
+  </div>
+</div>
+
+<div id="round-result-page" class="page">
+  <div class="nav-bar"><div class="nav-btn" onclick="G24.confirmLeaveRoom()">🚪 退出</div><div class="nav-title">轮次结果</div><div class="nav-placeholder"></div></div>
+  <div class="page-body">
+    <div id="round-result-content"></div>
+    <div id="round-ready-info" style="text-align:center;padding:8px;font-size:13px;color:var(--sub)"></div>
+    <button class="btn btn-primary" id="next-round-btn" onclick="G24.nextRound()" style="width:100%;display:none">➡️ 下一轮</button>
+    <button class="btn btn-warning" id="ready-btn" onclick="G24.toggleReady()" style="width:100%;display:none">✋ 举手准备</button>
+  </div>
+</div>
+
+<div id="result-page" class="page">
+  <div class="nav-bar"><div class="nav-placeholder"></div><div class="nav-title">对战结果</div><div class="nav-placeholder"></div></div>
+  <div class="page-body" style="text-align:center;padding-top:20px">
+    <div class="winner-crown" id="result-crown">👑</div>
+    <h2 id="result-title" style="font-size:22px;font-weight:700;color:var(--text);margin:8px 0"></h2>
+    <p id="result-sub" style="font-size:14px;color:var(--sub);margin-bottom:16px"></p>
+    <div id="result-ranking" style="text-align:left;margin-bottom:16px"></div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-success" style="flex:1" onclick="G24.restartGame()">🔄 再来一局</button>
+      <button class="btn btn-danger" style="flex:1" onclick="G24.dissolveRoom()">🗑 解散</button>
+    </div>
+  </div>
+</div>
+
+<div id="count-select-modal" class="modal" style="display:none">
+  <div class="modal-box">
+    <h3 id="count-select-title">选择题目数量</h3>
+    <p style="color:var(--sub);margin-bottom:12px">选择你想练习的题目数量</p>
+    <div class="config-row" id="count-select-row" style="margin-bottom:12px">
+      <div class="config-opt active" data-v="5" onclick="G24.pickOpt(this,'count-select-row')">5题</div>
+      <div class="config-opt" data-v="10" onclick="G24.pickOpt(this,'count-select-row')">10题</div>
+      <div class="config-opt" data-v="15" onclick="G24.pickOpt(this,'count-select-row')">15题</div>
+      <div class="config-opt" data-v="20" onclick="G24.pickOpt(this,'count-select-row')">20题</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="G24.hideCountSelect()">取消</button>
+      <button class="btn btn-primary" onclick="G24.confirmStart()">开始练习</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div id="global-loading" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.3);z-index:9998;align-items:center;justify-content:center"><div style="background:#fff;border-radius:12px;padding:24px 32px;font-size:15px;font-weight:600;color:var(--text);box-shadow:0 4px 20px rgba(0,0,0,.15)">⏳ 加载中...</div></div>
+</div>
+
+<script src="config.js"></script>
+<script src="utils.js"></script>
+<script src="solver.js"></script>
+<script src="storage.js"></script>
+<script src="game-sp.js"></script>
+<script src="game-story.js"></script>
+<script src="game-race.js"></script>
+<script src="game-room.js"></script>
+<script src="ui.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

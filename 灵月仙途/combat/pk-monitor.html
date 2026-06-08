@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="../js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="../css/mobile-adapt.css">
+  <title>灵月仙途 - 正在进行的PK</title>
+  <style>
+    /* 全局样式重置 */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Microsoft YaHei", "SimSun", serif;
+    }
+
+    :root {
+      --primary: #4a6fa5;
+      --secondary: #d9b17a;
+      --danger: #e74c3c;
+      --success: #27ae60;
+      --bg-dark: #1a202c;
+      --text-light: #f8f9fa;
+      --boss-color: #9b59b6;
+      --pk-color: #3498db;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: var(--text-light);
+      min-height: 100vh;
+      overflow-x: hidden;
+      padding: 20px;
+    }
+
+    .game-container {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    /* 头部导航 */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(217, 177, 122, 0.3);
+    }
+
+    .header-title {
+      color: var(--secondary);
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, var(--secondary), #c89e68);
+      color: #1a202c;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 3px 10px rgba(217, 177, 122, 0.4);
+    }
+
+    .btn-boss {
+      background: linear-gradient(135deg, #9b59b6, #8e44ad);
+      color: white;
+    }
+
+    /* 标签切换 */
+    .tab-container {
+      display: flex;
+      margin-bottom: 20px;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: bold;
+      border-bottom: 3px solid transparent;
+    }
+
+    .tab-btn.active {
+      background: rgba(255, 255, 255, 0.1);
+      border-bottom-color: var(--secondary);
+      color: var(--secondary);
+    }
+
+    .tab-btn:hover:not(.active) {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    /* PK列表容器 */
+    .pk-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    /* PK卡片 */
+    .pk-card {
+      background: rgba(0, 0, 0, 0.6);
+      border-radius: 8px;
+      border: 1px solid rgba(217, 177, 122, 0.3);
+      padding: 15px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .pk-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+      border-color: var(--secondary);
+    }
+
+    /* 卡片类型标识 */
+    .pk-card-type {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: bold;
+    }
+
+    .type-1v1 {
+      background: var(--pk-color);
+      color: white;
+    }
+
+    .type-team {
+      background: #e67e22;
+      color: white;
+    }
+
+    .type-boss {
+      background: var(--boss-color);
+      color: white;
+    }
+
+    /* 战斗标题 */
+    .pk-card-title {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: var(--secondary);
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* 对战双方 */
+    .pk-opponents {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .pk-side {
+      flex: 1;
+      text-align: center;
+    }
+
+    .pk-side.attacker {
+      padding-right: 10px;
+      border-right: 1px dashed rgba(255, 255, 255, 0.2);
+    }
+
+    .pk-side.defender {
+      padding-left: 10px;
+    }
+
+    .pk-vs {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: var(--danger);
+      margin: 0 10px;
+    }
+
+    .pk-player-list {
+      font-size: 0.85rem;
+      line-height: 1.4;
+    }
+
+    .pk-player {
+      margin-bottom: 4px;
+    }
+
+    .pk-player.leader {
+      font-weight: bold;
+      color: var(--secondary);
+    }
+
+    /* 战斗状态 */
+    .pk-status {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      font-size: 0.8rem;
+    }
+
+    .pk-time {
+      color: #95a5a6;
+    }
+
+    .pk-progress {
+      color: var(--success);
+      font-weight: bold;
+    }
+
+    /* 血条概览 */
+    .pk-health-overview {
+      height: 8px;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 4px;
+      margin-bottom: 12px;
+      overflow: hidden;
+      display: flex;
+    }
+
+    .health-bar-atk {
+      height: 100%;
+      background: var(--pk-color);
+      transition: width 0.5s ease;
+    }
+
+    .health-bar-def {
+      height: 100%;
+      background: var(--danger);
+      transition: width 0.5s ease;
+    }
+
+    /* 卡片操作按钮 */
+    .pk-card-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .pk-btn {
+      flex: 1;
+      padding: 8px 0;
+      border-radius: 4px;
+      border: none;
+      font-size: 0.8rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+      text-decoration: none;
+    }
+
+    .btn-watch {
+      background: linear-gradient(135deg, #3498db, #2980b9);
+      color: white;
+    }
+
+    .btn-join {
+      background: linear-gradient(135deg, #27ae60, #219653);
+      color: white;
+    }
+
+    .btn-detail {
+      background: linear-gradient(135deg, #9b59b6, #8e44ad);
+      color: white;
+    }
+
+    .pk-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .pk-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* 空状态 */
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: #7f8c8d;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    .empty-icon {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    /* 观战弹窗 */
+    .watch-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 1000;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .modal-content {
+      background: #1a202c;
+      border-radius: 8px;
+      border: 2px solid var(--secondary);
+      width: 100%;
+      max-width: 800px;
+      max-height: 90vh;
+      overflow-y: auto;
+      animation: modalPopIn 0.4s ease-out forwards;
+    }
+
+    @keyframes modalPopIn {
+      0% { transform: scale(0.8); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-header {
+      padding: 15px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title {
+      color: var(--secondary);
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+
+    .close-modal {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-body {
+      padding: 20px;
+    }
+
+    /* 观战战斗场景 */
+    .watch-arena {
+      height: 300px;
+      background: url('https://picsum.photos/id/1074/1000/500') center/cover no-repeat;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .watch-arena::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+    }
+
+    .watch-team {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 10;
+      display: flex;
+      gap: 10px;
+    }
+
+    .watch-team.attack {
+      left: 50px;
+    }
+
+    .watch-team.defense {
+      right: 50px;
+    }
+
+    .watch-char {
+      width: 70px;
+      height: 100px;
+      border-radius: 4px;
+      background-size: cover;
+      background-position: center;
+      border: 2px solid;
+    }
+
+    .char-atk {
+      border-color: var(--pk-color);
+      box-shadow: 0 0 8px var(--pk-color);
+    }
+
+    .char-def {
+      border-color: var(--danger);
+      box-shadow: 0 0 8px var(--danger);
+    }
+
+    .char-boss {
+      border-color: var(--boss-color);
+      box-shadow: 0 0 10px var(--boss-color);
+      width: 90px;
+      height: 120px;
+    }
+
+    /* 观战日志 */
+    .watch-log {
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 6px;
+      padding: 10px;
+      height: 200px;
+      overflow-y: auto;
+      font-size: 0.85rem;
+      margin-bottom: 15px;
+    }
+
+    .log-item {
+      margin-bottom: 4px;
+      padding: 2px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .log-atk { color: var(--pk-color); }
+    .log-def { color: var(--danger); }
+    .log-boss { color: var(--boss-color); }
+    .log-damage { color: #e74c3c; font-weight: bold; }
+    .log-heal { color: #2ecc71; font-weight: bold; }
+    .log-system { color: var(--secondary); }
+
+    /* 响应式适配 */
+    @media (max-width: 768px) {
+      .pk-list {
+        grid-template-columns: 1fr;
+      }
+      
+      .watch-arena {
+        height: 200px;
+      }
+      
+      .watch-char {
+        width: 50px;
+        height: 80px;
+      }
+      
+      .char-boss {
+        width: 70px;
+        height: 100px;
+      }
+    }
+  </style>
+
+  </head>
+<body>
+  <div class="game-container">
+    <!-- 头部导航 -->
+    <div class="header">
+      <h1 class="header-title">正在进行的PK/战斗</h1>
+      <div>
+        <a href="boos-conbat.html" class="btn btn-boss">挑战BOSS</a>
+        <a href="../index.html" class="btn" style="margin-left: 10px;">返回首页</a>
+      </div>
+    </div>
+
+    <!-- 标签切换 -->
+    <div class="tab-container">
+      <div class="tab-btn active" data-tab="all">全部战斗</div>
+      <div class="tab-btn" data-tab="1v1">1v1单挑</div>
+      <div class="tab-btn" data-tab="team">团队PK</div>
+      <div class="tab-btn" data-tab="boss">BOSS挑战</div>
+    </div>
+
+    <!-- PK列表 -->
+    <div class="pk-list" id="pkList">
+      <!-- 1v1 PK卡片 -->
+      <div class="pk-card" data-type="1v1">
+        <div class="pk-card-type type-1v1">1v1单挑</div>
+        <h3 class="pk-card-title">华山之巅 - 巅峰对决</h3>
+        
+        <div class="pk-opponents">
+          <div class="pk-side attacker">
+            <div class="pk-player-list">
+              <div class="pk-player leader">逍遥剑客 (你)</div>
+              <div class="pk-player">战力: 8500</div>
+              <div class="pk-player">等级: 88</div>
+            </div>
+          </div>
+          <div class="pk-vs">VS</div>
+          <div class="pk-side defender">
+            <div class="pk-player-list">
+              <div class="pk-player leader">独孤求败</div>
+              <div class="pk-player">战力: 9200</div>
+              <div class="pk-player">等级: 90</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="pk-status">
+          <div class="pk-time">战斗时长: 08:45</div>
+          <div class="pk-progress">进行中 (52%)</div>
+        </div>
+        
+        <div class="pk-health-overview">
+          <div class="health-bar-atk" style="width: 52%;"></div>
+          <div class="health-bar-def" style="width: 48%;"></div>
+        </div>
+        
+        <div class="pk-card-actions">
+          <button class="pk-btn btn-watch" onclick="watchBattle(1)">观战</button>
+          <button class="pk-btn btn-detail" onclick="showBattleDetail(1)">详情</button>
+          <button class="pk-btn btn-join" disabled>已参战</button>
+        </div>
+      </div>
+
+      <!-- 团队PK卡片 -->
+      <div class="pk-card" data-type="team">
+        <div class="pk-card-type type-team">3v3团队</div>
+        <h3 class="pk-card-title">紫禁之巅 - 帮派大战</h3>
+        
+        <div class="pk-opponents">
+          <div class="pk-side attacker">
+            <div class="pk-player-list">
+              <div class="pk-player leader">风云盟主</div>
+              <div class="pk-player">烈火法师</div>
+              <div class="pk-player">妙手神医</div>
+            </div>
+          </div>
+          <div class="pk-vs">VS</div>
+          <div class="pk-side defender">
+            <div class="pk-player-list">
+              <div class="pk-player leader">暗影魔尊</div>
+              <div class="pk-player">幽冥刺客</div>
+              <div class="pk-player">雷霆战将</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="pk-status">
+          <div class="pk-time">战斗时长: 15:20</div>
+          <div class="pk-progress">进行中 (38%)</div>
+        </div>
+        
+        <div class="pk-health-overview">
+          <div class="health-bar-atk" style="width: 38%;"></div>
+          <div class="health-bar-def" style="width: 62%;"></div>
+        </div>
+        
+        <div class="pk-card-actions">
+          <button class="pk-btn btn-watch" onclick="watchBattle(2)">观战</button>
+          <button class="pk-btn btn-detail" onclick="showBattleDetail(2)">详情</button>
+          <button class="pk-btn btn-join" onclick="joinBattle(2)">加入战斗</button>
+        </div>
+      </div>
+
+      <!-- BOSS挑战卡片 -->
+      <div class="pk-card" data-type="boss">
+        <div class="pk-card-type type-boss">多人打BOSS</div>
+        <h3 class="pk-card-title">九幽魔窟 - 围攻魔尊</h3>
+        
+        <div class="pk-opponents">
+          <div class="pk-side attacker">
+            <div class="pk-player-list">
+              <div class="pk-player leader">逍遥剑客 (队长)</div>
+              <div class="pk-player">烈火法师</div>
+              <div class="pk-player">妙手神医</div>
+            </div>
+          </div>
+          <div class="pk-vs">VS</div>
+          <div class="pk-side defender">
+            <div class="pk-player-list">
+              <div class="pk-player leader">九幽魔尊 (BOSS)</div>
+              <div class="pk-player">血量: 10000</div>
+              <div class="pk-player">难度: 炼狱</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="pk-status">
+          <div class="pk-time">战斗时长: 12:15</div>
+          <div class="pk-progress">进行中 (78%)</div>
+        </div>
+        
+        <div class="pk-health-overview">
+          <div class="health-bar-atk" style="width: 85%;"></div>
+          <div class="health-bar-def" style="width: 22%;"></div>
+        </div>
+        
+        <div class="pk-card-actions">
+          <button class="pk-btn btn-watch" onclick="watchBattle(3)">观战</button>
+          <button class="pk-btn btn-detail" onclick="showBattleDetail(3)">详情</button>
+          <button class="pk-btn btn-join" onclick="joinBossBattle()">加入围攻</button>
+        </div>
+      </div>
+
+      <!-- 另一个1v1卡片 -->
+      <div class="pk-card" data-type="1v1">
+        <div class="pk-card-type type-1v1">1v1单挑</div>
+        <h3 class="pk-card-title">唐门密室 - 暗器对决</h3>
+        
+        <div class="pk-opponents">
+          <div class="pk-side attacker">
+            <div class="pk-player-list">
+              <div class="pk-player leader">唐门少主</div>
+              <div class="pk-player">战力: 7800</div>
+              <div class="pk-player">等级: 85</div>
+            </div>
+          </div>
+          <div class="pk-vs">VS</div>
+          <div class="pk-side defender">
+            <div class="pk-player-list">
+              <div class="pk-player leader">武当道长</div>
+              <div class="pk-player">战力: 8100</div>
+              <div class="pk-player">等级: 87</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="pk-status">
+          <div class="pk-time">战斗时长: 05:30</div>
+          <div class="pk-progress">进行中 (45%)</div>
+        </div>
+        
+        <div class="pk-health-overview">
+          <div class="health-bar-atk" style="width: 45%;"></div>
+          <div class="health-bar-def" style="width: 55%;"></div>
+        </div>
+        
+        <div class="pk-card-actions">
+          <button class="pk-btn btn-watch" onclick="watchBattle(4)">观战</button>
+          <button class="pk-btn btn-detail" onclick="showBattleDetail(4)">详情</button>
+          <button class="pk-btn btn-join" onclick="joinBattle(4)">加入战斗</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 空状态（默认隐藏） -->
+    <div class="empty-state" id="emptyState" style="display: none;">
+      <div class="empty-icon">⚔️</div>
+      <h3>暂无正在进行的战斗</h3>
+      <p>快去发起一场精彩的对决吧！</p>
+    </div>
+  </div>
+
+  <!-- 观战弹窗 -->
+  <div class="watch-modal" id="watchModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modalBattleTitle">华山之巅 - 巅峰对决</h2>
+        <button class="close-modal" onclick="closeWatchModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <!-- 观战战斗场景 -->
+        <div class="watch-arena" id="watchArena">
+          <!-- 攻击方团队 -->
+          <div class="watch-team attack" id="attackTeam">
+            <div class="watch-char char-atk" style="background-image: url('https://picsum.photos/id/1005/70/100');"></div>
+          </div>
+          
+          <!-- 防守方/BOSS -->
+          <div class="watch-team defense" id="defenseTeam">
+            <div class="watch-char char-def" style="background-image: url('https://picsum.photos/id/1012/70/100');"></div>
+          </div>
+        </div>
+        
+        <!-- 观战日志 -->
+        <div class="watch-log" id="watchLog">
+          <div class="log-item log-system">=== 战斗日志 ===</div>
+          <div class="log-item log-system">正在观战：华山之巅 - 巅峰对决</div>
+          <div class="log-item log-atk">逍遥剑客 使用御剑术，对独孤求败造成了128点伤害！</div>
+          <div class="log-item log-def">独孤求败 反击，使用独孤九剑造成了156点伤害！</div>
+          <div class="log-item log-atk">逍遥剑客 使用治愈术，恢复了120点气血！</div>
+          <div class="log-item log-def">独孤求败 释放大招，造成了280点暴击伤害！</div>
+        </div>
+        
+        <!-- 操作按钮 -->
+        <div style="display: flex; gap: 10px;">
+          <button class="btn" style="flex: 1;" onclick="closeWatchModal()">退出观战</button>
+          <button class="btn btn-boss" style="flex: 1;" id="joinWatchBtn">加入战斗</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 战斗数据模拟
+    const battleData = {
+      1: {
+        id: 1,
+        title: "华山之巅 - 巅峰对决",
+        type: "1v1",
+        attacker: {
+          leader: "逍遥剑客",
+          members: ["逍遥剑客"],
+          health: 52,
+          chars: ["https://picsum.photos/id/1005/70/100"]
+        },
+        defender: {
+          leader: "独孤求败",
+          members: ["独孤求败"],
+          health: 48,
+          chars: ["https://picsum.photos/id/1012/70/100"]
+        },
+        log: [
+          "逍遥剑客 使用御剑术，对独孤求败造成了128点伤害！",
+          "独孤求败 反击，使用独孤九剑造成了156点伤害！",
+          "逍遥剑客 使用治愈术，恢复了120点气血！",
+          "独孤求败 释放大招，造成了280点暴击伤害！"
+        ],
+        time: "08:45"
+      },
+      2: {
+        id: 2,
+        title: "紫禁之巅 - 帮派大战",
+        type: "team",
+        attacker: {
+          leader: "风云盟主",
+          members: ["风云盟主", "烈火法师", "妙手神医"],
+          health: 38,
+          chars: [
+            "https://picsum.photos/id/1005/70/100",
+            "https://picsum.photos/id/1012/70/100",
+            "https://picsum.photos/id/1025/70/100"
+          ]
+        },
+        defender: {
+          leader: "暗影魔尊",
+          members: ["暗影魔尊", "幽冥刺客", "雷霆战将"],
+          health: 62,
+          chars: [
+            "https://picsum.photos/id/1074/70/100",
+            "https://picsum.photos/id/1062/70/100",
+            "https://picsum.photos/id/1079/70/100"
+          ]
+        },
+        log: [
+          "风云盟主 发起冲锋，对暗影魔尊造成了98点伤害！",
+          "烈火法师 释放烈火焚天，群体伤害150点！",
+          "妙手神医 群体治疗，恢复80点气血！",
+          "暗影魔尊 释放暗影突袭，造成200点伤害！"
+        ],
+        time: "15:20"
+      },
+      3: {
+        id: 3,
+        title: "九幽魔窟 - 围攻魔尊",
+        type: "boss",
+        attacker: {
+          leader: "逍遥剑客",
+          members: ["逍遥剑客", "烈火法师", "妙手神医"],
+          health: 85,
+          chars: [
+            "https://picsum.photos/id/1005/70/100",
+            "https://picsum.photos/id/1012/70/100",
+            "https://picsum.photos/id/1025/70/100"
+          ]
+        },
+        defender: {
+          leader: "九幽魔尊",
+          members: ["九幽魔尊 (BOSS)"],
+          health: 22,
+          chars: ["https://picsum.photos/id/1074/90/120"]
+        },
+        log: [
+          "逍遥剑客 万剑归宗，对九幽魔尊造成了280点伤害！",
+          "烈火法师 炎爆术，造成210点伤害！",
+          "九幽魔尊 释放九幽魔焰，对全队造成300点伤害！",
+          "妙手神医 群体治疗，恢复120点气血！"
+        ],
+        time: "12:15"
+      },
+      4: {
+        id: 4,
+        title: "唐门密室 - 暗器对决",
+        type: "1v1",
+        attacker: {
+          leader: "唐门少主",
+          members: ["唐门少主"],
+          health: 45,
+          chars: ["https://picsum.photos/id/1066/70/100"]
+        },
+        defender: {
+          leader: "武当道长",
+          members: ["武当道长"],
+          health: 55,
+          chars: ["https://picsum.photos/id/1069/70/100"]
+        },
+        log: [
+          "唐门少主 发射暴雨梨花针，造成110点伤害！",
+          "武当道长 太极拳化解攻击，反震50点伤害！",
+          "唐门少主 使用毒镖，造成持续伤害！",
+          "武当道长 纯阳无极功，恢复90点气血！"
+        ],
+        time: "05:30"
+      }
+    };
+
+    // 页面初始化
+    window.onload = function() {
+      // 初始化标签切换
+      initTabSwitch();
+      
+      // 模拟战斗状态更新
+      simulateBattleUpdates();
+    };
+
+    // 初始化标签切换
+    function initTabSwitch() {
+      const tabBtns = document.querySelectorAll('.tab-btn');
+      const pkCards = document.querySelectorAll('.pk-card');
+      const pkList = document.getElementById('pkList');
+      const emptyState = document.getElementById('emptyState');
+      
+      tabBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+          // 切换激活状态
+          tabBtns.forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          
+          const tabType = this.dataset.tab;
+          let visibleCount = 0;
+          
+          // 筛选卡片
+          pkCards.forEach(card => {
+            if (tabType === 'all' || card.dataset.type === tabType) {
+              card.style.display = 'block';
+              visibleCount++;
+            } else {
+              card.style.display = 'none';
+            }
+          });
+          
+          // 显示/隐藏空状态
+          if (visibleCount === 0) {
+            pkList.style.display = 'none';
+            emptyState.style.display = 'block';
+          } else {
+            pkList.style.display = 'grid';
+            emptyState.style.display = 'none';
+          }
+        });
+      });
+    }
+
+    // 模拟战斗状态更新
+    function simulateBattleUpdates() {
+      setInterval(() => {
+        const healthBars = document.querySelectorAll('.health-bar-atk');
+        
+        healthBars.forEach(bar => {
+          // 随机小幅变动血条
+          const currentWidth = parseFloat(bar.style.width);
+          const newWidth = Math.max(0, Math.min(100, currentWidth + (Math.random() * 4 - 2)));
+          bar.style.width = `${newWidth}%`;
+          
+          // 更新对应防守方血条
+          const defBar = bar.nextElementSibling;
+          if (defBar) {
+            defBar.style.width = `${100 - newWidth}%`;
+          }
+          
+          // 更新进度文本
+          const card = bar.closest('.pk-card');
+          const progressText = card.querySelector('.pk-progress');
+          if (progressText) {
+            progressText.textContent = `进行中 (${Math.round(newWidth)}%)`;
+          }
+        });
+      }, 3000);
+    }
+
+    // 观战战斗
+    function watchBattle(battleId) {
+      const battle = battleData[battleId];
+      if (!battle) return;
+      
+      // 更新弹窗标题
+      document.getElementById('modalBattleTitle').textContent = battle.title;
+      
+      // 清空并重建观战场景
+      const attackTeam = document.getElementById('attackTeam');
+      const defenseTeam = document.getElementById('defenseTeam');
+      
+      // 清空队伍
+      attackTeam.innerHTML = '';
+      defenseTeam.innerHTML = '';
+      
+      // 构建攻击方角色
+      battle.attacker.chars.forEach((charUrl, index) => {
+        const char = document.createElement('div');
+        char.className = `watch-char char-atk ${battle.type === 'boss' ? '' : ''}`;
+        char.style.backgroundImage = `url('${charUrl}')`;
+        attackTeam.appendChild(char);
+      });
+      
+      // 构建防守方/BOSS角色
+      battle.defender.chars.forEach((charUrl, index) => {
+        const char = document.createElement('div');
+        char.className = `watch-char ${battle.type === 'boss' ? 'char-boss' : 'char-def'}`;
+        char.style.backgroundImage = `url('${charUrl}')`;
+        defenseTeam.appendChild(char);
+      });
+      
+      // 更新观战日志
+      const watchLog = document.getElementById('watchLog');
+      watchLog.innerHTML = `
+        <div class="log-item log-system">=== 战斗日志 ===</div>
+        <div class="log-item log-system">正在观战：${battle.title}</div>
+      `;
+      
+      // 添加战斗日志
+      battle.log.forEach((logItem, index) => {
+        const logDiv = document.createElement('div');
+        logDiv.className = `log-item ${index % 2 === 0 ? 'log-atk' : 'log-def'}`;
+        logDiv.textContent = logItem;
+        watchLog.appendChild(logDiv);
+      });
+      
+      // 显示弹窗
+      document.getElementById('watchModal').style.display = 'flex';
+      
+      // 模拟实时日志更新
+      startLogSimulation(battleId);
+    }
+
+    // 模拟实时日志更新
+    function startLogSimulation(battleId) {
+      const battle = battleData[battleId];
+      const watchLog = document.getElementById('watchLog');
+      
+      // 清除之前的定时器
+      if (window.logTimer) clearInterval(window.logTimer);
+      
+      // 随机生成日志
+      window.logTimer = setInterval(() => {
+        const logTexts = battle.log;
+        const randomLog = logTexts[Math.floor(Math.random() * logTexts.length)];
+        
+        const logDiv = document.createElement('div');
+        logDiv.className = `log-item ${Math.random() > 0.5 ? 'log-atk' : 'log-def'}`;
+        logDiv.textContent = randomLog;
+        
+        watchLog.appendChild(logDiv);
+        watchLog.scrollTop = watchLog.scrollHeight;
+      }, 4000);
+    }
+
+    // 关闭观战弹窗
+    function closeWatchModal() {
+      document.getElementById('watchModal').style.display = 'none';
+      
+      // 清除日志定时器
+      if (window.logTimer) {
+        clearInterval(window.logTimer);
+        window.logTimer = null;
+      }
+    }
+
+    // 显示战斗详情
+    function showBattleDetail(battleId) {
+      const battle = battleData[battleId];
+      if (!battle) return;
+      
+      showToast(`战斗详情：${battle.title}`);
+    }
+
+    // 加入战斗
+    function joinBattle(battleId) {
+      const battle = battleData[battleId];
+      if (!battle) return;
+      
+      showConfirm(`确定要加入【${battle.title}】的战斗吗？`, () => {
+        showToast(`已成功加入【${battle.title}】的战斗！正在加载战斗场景...`);
+        // 实际项目中这里会跳转到对应的战斗页面
+      });
+    }
+
+    // 加入BOSS战斗
+    function joinBossBattle() {
+      showConfirm('确定要加入九幽魔尊的围攻战斗吗？', () => {
+        window.location.href = 'boos-conbat.html';
+      });
+    }
+
+    // 页面关闭时清理定时器
+    window.onbeforeunload = function() {
+      if (window.logTimer) {
+        clearInterval(window.logTimer);
+      }
+    };
+  </script>
+  <script src="js/ui-components.js"></script>
+</body>
+</html>

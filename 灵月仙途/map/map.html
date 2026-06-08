@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="../js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="../css/mobile-adapt.css">
+  <title>灵月仙途 - 云游地图</title>
+  <style>
+    :root {
+      --gold-primary: #e6c749;
+      --gold-light: #f4d03f;
+      --gold-dim: #8a7525;
+      --text-main: #fdfbf7;
+      --text-dim: #d4c5a9;
+      --bg-dark: rgba(15, 20, 35, 0.95);
+      --bg-panel: rgba(20, 25, 45, 0.85);
+      --success: #4CAF50;
+      --danger: #ff4444;
+      --warning: #FF9800;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Microsoft YaHei', sans-serif;
+      background: linear-gradient(135deg, #0f1420 0%, #1a202c 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding-bottom: 80px;
+      overflow-x: hidden;
+    }
+
+    .particles {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      background-image: radial-gradient(rgba(230, 199, 73, 0.3) 1px, transparent 1px);
+      background-size: 50px 50px;
+      animation: particleFloat 30s linear infinite;
+    }
+
+    @keyframes particleFloat {
+      from { background-position: 0 0; }
+      to { background-position: 0 1000px; }
+    }
+
+    .main-container {
+      position: relative;
+      z-index: 10;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 15px;
+    }
+
+    /* 顶部状态栏 */
+    .header {
+      text-align: center;
+      padding: 20px 0;
+      border-bottom: 2px solid rgba(230, 199, 73, 0.3);
+      margin-bottom: 20px;
+    }
+
+    .header h1 {
+      color: var(--gold-primary);
+      font-size: 24px;
+      text-shadow: 0 0 20px rgba(230, 199, 73, 0.5);
+      margin-bottom: 10px;
+    }
+
+    .player-location {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      font-size: 14px;
+      color: var(--text-dim);
+    }
+
+    .location-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* 地图区域 */
+    .map-container {
+      background: var(--bg-panel);
+      border: 2px solid rgba(230, 199, 73, 0.3);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 30px rgba(230, 199, 73, 0.2);
+    }
+
+    .region-selector {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .region-btn {
+      padding: 12px 8px;
+      background: rgba(230, 199, 73, 0.1);
+      border: 1px solid rgba(230, 199, 73, 0.3);
+      border-radius: 8px;
+      color: var(--text-main);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+    }
+
+    .region-btn:hover {
+      background: rgba(230, 199, 73, 0.2);
+      border-color: var(--gold-primary);
+    }
+
+    .region-btn.active {
+      background: linear-gradient(135deg, var(--gold-primary), var(--gold-dim));
+      color: #1a2530;
+      font-weight: bold;
+      box-shadow: 0 0 15px rgba(230, 199, 73, 0.5);
+    }
+
+    .region-btn .icon {
+      font-size: 20px;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    /* 场景列表 */
+    .scene-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .scene-card {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(230, 199, 73, 0.2);
+      border-radius: 10px;
+      padding: 15px;
+      cursor: pointer;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .scene-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: linear-gradient(to bottom, var(--gold-primary), var(--gold-dim));
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .scene-card:hover {
+      border-color: var(--gold-primary);
+      box-shadow: 0 0 20px rgba(230, 199, 73, 0.3);
+      transform: translateX(5px);
+    }
+
+    .scene-card:hover::before {
+      opacity: 1;
+    }
+
+    .scene-card.locked {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .scene-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .scene-name {
+      font-size: 16px;
+      font-weight: bold;
+      color: var(--gold-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .scene-level {
+      font-size: 12px;
+      padding: 2px 8px;
+      background: rgba(230, 199, 73, 0.2);
+      border-radius: 4px;
+      color: var(--gold-light);
+    }
+
+    .scene-info {
+      font-size: 13px;
+      color: var(--text-dim);
+      margin-bottom: 5px;
+    }
+
+    .scene-rewards {
+      display: flex;
+      gap: 10px;
+      font-size: 12px;
+      color: var(--success);
+    }
+
+    .scene-reward-item {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    /* 探索按钮 */
+    .explore-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--gold-primary), var(--gold-dim));
+      border: none;
+      border-radius: 10px;
+      color: #1a2530;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 15px;
+      box-shadow: 0 0 20px rgba(230, 199, 73, 0.3);
+    }
+
+    .explore-btn:hover {
+      box-shadow: 0 0 30px rgba(230, 199, 73, 0.5);
+      transform: translateY(-2px);
+    }
+
+    .explore-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* 探索进度 */
+    .explore-progress {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 15px;
+      display: none;
+    }
+
+    .explore-progress.active {
+      display: block;
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+
+    .progress-bar {
+      height: 8px;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold-primary), var(--gold-light));
+      transition: width 0.3s;
+      border-radius: 4px;
+    }
+
+    /* 探索结果 */
+    .explore-result {
+      background: rgba(76, 175, 80, 0.1);
+      border: 1px solid rgba(76, 175, 80, 0.3);
+      border-radius: 10px;
+      padding: 15px;
+      margin-top: 15px;
+      display: none;
+      animation: slideDown 0.3s ease;
+    }
+
+    .explore-result.active {
+      display: block;
+    }
+
+    .result-title {
+      font-size: 16px;
+      font-weight: bold;
+      color: var(--success);
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .result-items {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .result-item {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 10px;
+      border-radius: 6px;
+      text-align: center;
+    }
+
+    .result-icon {
+      font-size: 24px;
+      margin-bottom: 5px;
+    }
+
+    .result-name {
+      font-size: 13px;
+      color: var(--text-dim);
+    }
+
+    .result-value {
+      font-size: 15px;
+      font-weight: bold;
+      color: var(--gold-primary);
+    }
+
+    /* 底部导航 */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(10, 20, 30, 0.95);
+      border-top: 2px solid rgba(230, 199, 73, 0.3);
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0;
+      z-index: 1000;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: #aaa;
+      text-decoration: none;
+      font-size: 12px;
+      transition: all 0.3s;
+    }
+
+    .nav-item.active {
+      color: var(--gold-primary);
+    }
+
+    .nav-icon {
+      font-size: 20px;
+    }
+
+    /* 通知提示 */
+    .notification {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(76, 175, 80, 0.95);
+      color: white;
+      padding: 15px 30px;
+      border-radius: 10px;
+      border: 2px solid #4CAF50;
+      z-index: 2000;
+      display: none;
+      animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+      from {
+        transform: translate(-50%, -100px);
+        opacity: 0;
+      }
+      to {
+        transform: translate(-50%, 0);
+        opacity: 1;
+      }
+    }
+  </style>
+
+  </head>
+<body>
+  <div class="particles"></div>
+
+  <div class="main-container">
+    <div class="header">
+      <h1>🗺️ 云游地图</h1>
+      <div class="player-location">
+        <div class="location-item">
+          <span>📍</span>
+          <span id="currentLocation">青云宗</span>
+        </div>
+        <div class="location-item">
+          <span>⏱️</span>
+          <span id="exploreTime">今日剩余：3/3</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 地图容器 -->
+    <div class="map-container">
+      <!-- 区域选择 -->
+      <div class="region-selector">
+        <div class="region-btn active" data-region="yunzhou">
+          <span class="icon">☁️</span>
+          云州
+        </div>
+        <div class="region-btn" data-region="yanzhou">
+          <span class="icon">🔥</span>
+          炎州
+        </div>
+        <div class="region-btn" data-region="bingzhou">
+          <span class="icon">❄️</span>
+          冰州
+        </div>
+        <div class="region-btn" data-region="jianzhou">
+          <span class="icon">⚔️</span>
+          剑州
+        </div>
+        <div class="region-btn" data-region="yaoguang">
+          <span class="icon">🌟</span>
+          瑶光
+        </div>
+        <div class="region-btn" data-region="xuanji">
+          <span class="icon">🔮</span>
+          玄机
+        </div>
+      </div>
+
+      <!-- 场景列表 -->
+      <div class="scene-list" id="sceneList">
+        <!-- 场景将通过 JS 动态渲染 -->
+      </div>
+
+      <!-- 探索按钮 -->
+      <button class="explore-btn" id="exploreBtn" onclick="startExplore()">
+        🚀 开始探索
+      </button>
+
+      <!-- 探索进度 -->
+      <div class="explore-progress" id="exploreProgress">
+        <div class="progress-header">
+          <span>探索进度</span>
+          <span id="progressText">0/60</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- 探索结果 -->
+      <div class="explore-result" id="exploreResult">
+        <div class="result-title">✨ 探索收获</div>
+        <div class="result-items" id="resultItems">
+          <!-- 结果将通过 JS 动态渲染 -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 通知提示 -->
+  <div class="notification" id="notification"></div>
+
+  <!-- 底部导航 -->
+  <div class="bottom-nav">
+    <a href="../index.html" class="nav-item">
+      <div class="nav-icon">🧘</div>
+      <div class="nav-text">修炼</div>
+    </a>
+    <a href="../skills/skills.html" class="nav-item">
+      <div class="nav-icon">📜</div>
+      <div class="nav-text">功法</div>
+    </a>
+    <a href="javascript:void(0)" onclick="window.pageUtils.navigateToGuildPage()" class="nav-item">
+      <div class="nav-icon">🏯</div>
+      <div class="nav-text">宗门</div>
+    </a>
+     <a href="../word/world.html" class="nav-item" aria-label="仙途页面">
+      <div class="nav-icon">🌌</div>
+      <div class="nav-text">仙途</div>
+    </a>
+     <a href="map.html" class="nav-item active">
+      <div class="nav-icon">🗺️</div>
+      <div class="nav-text">云游</div>
+    </a>
+  </div>
+
+  <script src="../js/store.js"></script>
+  <script src="../js/api-service.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/auth-service.js"></script>
+  <script src="../js/common.js"></script>
+  <script src="../js/ui-components.js"></script>
+  <script>
+    const API_BASE_URL = window.APP_CONFIG?.apiBaseUrl || window.apiService?.baseURL || '/api';
+    let roleId = '';
+
+    const mapData = {
+      yunzhou: {
+        name: '云州',
+        scenes: [
+          { id: 1, name: '青云山', level: 10, icon: '⛰️', desc: '青云宗所在地，灵气充沛', rewards: ['修为', '灵石'], locked: false },
+          { id: 2, name: '迷雾森林', level: 15, icon: '🌲', desc: '常年被迷雾笼罩，妖兽出没', rewards: ['灵草', '妖丹'], locked: false },
+          { id: 3, name: '落霞镇', level: 5, icon: '🏘️', desc: '繁华的修仙者聚集地', rewards: ['灵石', '情报'], locked: false },
+          { id: 4, name: '古修洞府', level: 20, icon: '🕳️', desc: '上古修士的洞府，危机四伏', rewards: ['法宝', '功法'], locked: true }
+        ]
+      },
+      yanzhou: {
+        name: '炎州',
+        scenes: [
+          { id: 5, name: '火山群', level: 25, icon: '🌋', desc: '地火喷发，火属性灵物丰富', rewards: ['火精', '灵石'], locked: true },
+          { id: 6, name: '赤炼宗', level: 30, icon: '🏯', desc: '以火系功法闻名的宗门', rewards: ['功法', '修为'], locked: true },
+          { id: 7, name: '熔岩洞穴', level: 28, icon: '🔥', desc: '地底熔岩，孕育火灵', rewards: ['火灵', '矿石'], locked: true }
+        ]
+      },
+      bingzhou: {
+        name: '冰州',
+        scenes: [
+          { id: 8, name: '雪山', level: 35, icon: '🏔️', desc: '终年积雪，冰系妖兽栖息地', rewards: ['冰晶', '妖丹'], locked: true },
+          { id: 9, name: '寒冰潭', level: 40, icon: '💧', desc: '万年寒冰形成的深潭', rewards: ['寒髓', '灵草'], locked: true }
+        ]
+      },
+      jianzhou: {
+        name: '剑州',
+        scenes: [
+          { id: 10, name: '剑冢', level: 50, icon: '⚔️', desc: '古剑埋藏之地，剑气纵横', rewards: ['剑意', '古剑'], locked: true },
+          { id: 11, name: '天剑宗', level: 45, icon: '🏯', desc: '剑修圣地', rewards: ['剑法', '修为'], locked: true }
+        ]
+      },
+      yaoguang: {
+        name: '瑶光',
+        scenes: [
+          { id: 12, name: '瑶光秘境', level: 60, icon: '🌟', desc: '上古秘境，机缘与危险并存', rewards: ['仙缘', '重宝'], locked: true }
+        ]
+      },
+      xuanji: {
+        name: '玄机',
+        scenes: [
+          { id: 13, name: '天机阁', level: 70, icon: '🔮', desc: '推演天机，知晓天命', rewards: ['天机', '悟性'], locked: true }
+        ]
+      }
+    };
+
+    let currentRegion = 'yunzhou';
+    let selectedScene = null;
+    let exploreCount = 0;
+    const maxExploreCount = 3;
+
+    // 初始化
+    document.addEventListener('DOMContentLoaded', function() {
+      if (window.AuthService) {
+        window.AuthService.init({ requireAuth: false, autoRefresh: false });
+        roleId = window.getRoleId ? window.getRoleId() : window.AuthService.getCurrentRoleId();
+      }
+      loadMapData();
+      setupRegionSelector();
+      updateExploreCount();
+    });
+
+    // 加载地图数据
+    function loadMapData() {
+      renderScenes(mapData[currentRegion].scenes);
+    }
+
+    // 渲染场景列表
+    function renderScenes(scenes) {
+      const sceneList = document.getElementById('sceneList');
+      sceneList.innerHTML = '';
+
+      scenes.forEach(scene => {
+        const sceneCard = document.createElement('div');
+        sceneCard.className = `scene-card ${scene.locked ? 'locked' : ''}`;
+        sceneCard.onclick = () => selectScene(scene);
+
+        sceneCard.innerHTML = `
+          <div class="scene-header">
+            <div class="scene-name">
+              ${scene.icon} ${scene.name}
+              ${scene.locked ? '<span class="scene-level">🔒 未解锁</span>' : `<span class="scene-level">Lv.${scene.level}</span>`}
+            </div>
+          </div>
+          <div class="scene-info">${scene.desc}</div>
+          <div class="scene-rewards">
+            ${scene.rewards.map(r => `<span class="scene-reward-item">✨ ${r}</span>`).join('')}
+          </div>
+        `;
+
+        sceneList.appendChild(sceneCard);
+      });
+    }
+
+    // 设置区域选择
+    function setupRegionSelector() {
+      const regionBtns = document.querySelectorAll('.region-btn');
+      regionBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+          regionBtns.forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          currentRegion = this.dataset.region;
+          loadMapData();
+          hideExploreResult();
+        });
+      });
+    }
+
+    // 选择场景
+    function selectScene(scene) {
+      if (scene.locked) {
+        showToast(`需要达到 Lv.${scene.level} 才能解锁`, 'warning');
+        return;
+      }
+
+      selectedScene = scene;
+      showToast(`已选择：${scene.name}`, 'success');
+    }
+
+    // 开始探索
+    function startExplore() {
+      if (!selectedScene) {
+        showToast('请先选择一个场景', 'warning');
+        return;
+      }
+
+      if (exploreCount >= maxExploreCount) {
+        showToast('今日探索次数已用完', 'warning');
+        return;
+      }
+
+      // 显示进度
+      document.getElementById('exploreProgress').classList.add('active');
+      hideExploreResult();
+
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += 5;
+        updateProgress(progress);
+
+        if (progress >= 100) {
+          clearInterval(interval);
+          completeExplore();
+        }
+      }, 300); // 6 秒完成探索
+    }
+
+    // 更新进度
+    function updateProgress(progress) {
+      document.getElementById('progressFill').style.width = progress + '%';
+      document.getElementById('progressText').textContent = `${Math.floor(progress / 100 * 60)}/60`;
+    }
+
+    // 完成探索
+    function completeExplore() {
+      exploreCount++;
+      updateExploreCount();
+
+      // 生成奖励
+      const rewards = generateRewards();
+      showExploreResult(rewards);
+
+      // 隐藏进度
+      document.getElementById('exploreProgress').classList.remove('active');
+      document.getElementById('progressFill').style.width = '0%';
+
+      showToast('探索完成！', 'success');
+    }
+
+    // 生成奖励
+    function generateRewards() {
+      const baseRewards = {
+        '修为': Math.floor(Math.random() * 100) + 50,
+        '灵石': Math.floor(Math.random() * 50) + 20,
+        '灵草': Math.floor(Math.random() * 5) + 1,
+        '矿石': Math.floor(Math.random() * 3) + 1
+      };
+
+      return baseRewards;
+    }
+
+    // 显示探索结果
+    function showExploreResult(rewards) {
+      const resultDiv = document.getElementById('exploreResult');
+      const resultItems = document.getElementById('resultItems');
+
+      const rewardIcons = {
+        '修为': '✨',
+        '灵石': '💰',
+        '灵草': '🌿',
+        '矿石': '🪨'
+      };
+
+      resultItems.innerHTML = Object.entries(rewards).map(([name, value]) => `
+        <div class="result-item">
+          <div class="result-icon">${rewardIcons[name] || '✨'}</div>
+          <div class="result-name">${name}</div>
+          <div class="result-value">+${value}</div>
+        </div>
+      `).join('');
+
+      resultDiv.classList.add('active');
+    }
+
+    // 隐藏探索结果
+    function hideExploreResult() {
+      document.getElementById('exploreResult').classList.remove('active');
+    }
+
+    // 更新探索次数
+    function updateExploreCount() {
+      document.getElementById('exploreTime').textContent = `今日剩余：${maxExploreCount - exploreCount}/${maxExploreCount}`;
+    }
+
+    // 显示提示
+    function showToast(message, type = 'success') {
+      const notification = document.getElementById('notification');
+      notification.textContent = message;
+      notification.style.display = 'block';
+      notification.style.background = type === 'success' ? 'rgba(76, 175, 80, 0.95)' : 
+                                      type === 'warning' ? 'rgba(255, 152, 0, 0.95)' : 
+                                      'rgba(244, 67, 54, 0.95)';
+      notification.style.borderColor = type === 'success' ? '#4CAF50' : 
+                                       type === 'warning' ? '#FF9800' : '#f44336';
+
+      setTimeout(() => {
+        notification.style.display = 'none';
+      }, 3000);
+    }
+  </script>
+</body>
+</html>

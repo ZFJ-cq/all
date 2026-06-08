@@ -1,0 +1,68 @@
+package com.lingyue.controller;
+
+import org.springframework.web.bind.annotation.CrossOrigin;
+import com.lingyue.entity.RoleTask;
+import com.lingyue.service.RoleTaskService;
+
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+
+@RestController
+@CrossOrigin(originPatterns = "*", maxAge = 3600)
+@RequestMapping("/role/tasks")
+public class RoleTaskController {
+    
+    private final RoleTaskService roleTaskService;
+    
+    public RoleTaskController(RoleTaskService roleTaskService) {
+        this.roleTaskService = roleTaskService;
+    }
+
+    // 获取角色的所有任务
+    @GetMapping("/{roleId}")
+    public List<RoleTask> getRoleTasks(@PathVariable Long roleId) {
+        return roleTaskService.getRoleTasks(roleId);
+    }
+
+    // 获取角色的特定状态任务
+    @GetMapping("/{roleId}/status/{status}")
+    public List<RoleTask> getRoleTasksByStatus(@PathVariable Long roleId, @PathVariable String status) {
+        return roleTaskService.getRoleTasksByStatus(roleId, Integer.parseInt(status));
+    }
+
+    // 获取角色的单个任务
+    @GetMapping("/{roleId}/{taskId}")
+    public RoleTask getRoleTask(@PathVariable Long roleId, @PathVariable Long taskId) {
+        return roleTaskService.getRoleTask(roleId, taskId);
+    }
+
+    // 接受任务
+    @PostMapping("/{roleId}/{taskId}/accept")
+    public RoleTask acceptTask(@PathVariable Long roleId, @PathVariable Long taskId) {
+        return roleTaskService.acceptTask(roleId, taskId);
+    }
+
+    // 更新任务进度
+    @PutMapping("/{roleId}/{taskId}/progress")
+    public RoleTask updateTaskProgress(@PathVariable Long roleId, @PathVariable Long taskId, @RequestParam String progress) {
+        return roleTaskService.updateTaskProgress(roleId, taskId, Integer.parseInt(progress));
+    }
+
+    // 完成任务
+    @PutMapping("/{roleId}/{taskId}/complete")
+    public RoleTask completeTask(@PathVariable Long roleId, @PathVariable Long taskId) {
+        return roleTaskService.completeTask(roleId, taskId);
+    }
+
+    // 领取任务奖励
+    @PutMapping("/{roleId}/{taskId}/claim")
+    public RoleTask claimTaskReward(@PathVariable Long roleId, @PathVariable Long taskId) {
+        return roleTaskService.claimTaskReward(roleId, taskId);
+    }
+
+    // 放弃任务
+    @DeleteMapping("/{roleId}/{taskId}/abandon")
+    public void abandonTask(@PathVariable Long roleId, @PathVariable Long taskId) {
+        roleTaskService.abandonTask(roleId, taskId);
+    }
+}

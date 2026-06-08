@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="../js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="../css/mobile-adapt.css">
+  <title>灵月仙途 - 道侣</title>
+
+  <style>
+    :root {
+      --bg-dark: #0f1420;
+      --bg-panel: rgba(20, 25, 45, 0.85);
+      --gold: #e6c749;
+      --gold-dim: #8a7525;
+      --text-main: #fdfbf7;
+      --text-dim: #d4c5a9;
+      --border-glow: 0 0 10px rgba(230, 199, 73, 0.3);
+      --nav-height: 70px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: linear-gradient(to bottom, #0f1420, #1a202c);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding-bottom: calc(var(--nav-height) + 20px);
+      overflow-x: hidden;
+    }
+
+    /* 背景粒子效果 */
+    .particles {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      background-image: radial-gradient(var(--gold) 1px, transparent 1px);
+      background-size: 50px 50px;
+      opacity: 0.1;
+    }
+
+    .container {
+      position: relative;
+      z-index: 10;
+      padding: 15px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* 页面标题 */
+    .page-header {
+      text-align: center;
+      margin-bottom: 20px;
+      padding: 15px;
+      background: var(--bg-panel);
+      border-radius: 12px;
+      border: 1px solid rgba(230, 199, 73, 0.3);
+    }
+
+    .page-title {
+      font-size: 1.3rem;
+      color: var(--gold);
+      font-weight: bold;
+      text-shadow: 0 0 5px rgba(230, 199, 73, 0.5);
+    }
+
+    /* 当前道侣卡片 */
+    .current-partner-card {
+      background: var(--bg-panel);
+      border: 1px solid rgba(230, 199, 73, 0.3);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+
+    .partner-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: 2px solid var(--gold);
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      box-shadow: 0 0 15px rgba(230, 199, 73, 0.4);
+      margin: 0 auto 15px;
+    }
+
+    .partner-info {
+      text-align: center;
+    }
+
+    .partner-name {
+      font-size: 1.2rem;
+      color: var(--gold);
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .partner-level {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      margin-bottom: 10px;
+    }
+
+    .partner-affinity {
+      font-size: 0.85rem;
+      color: var(--gold-dim);
+    }
+
+    .affinity-bar {
+      width: 100%;
+      height: 6px;
+      background: rgba(0,0,0,0.5);
+      border-radius: 3px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+
+    .affinity-fill {
+      height: 100%;
+      background: linear-gradient(to right, var(--gold-dim), var(--gold));
+      transition: width 0.3s ease;
+    }
+
+    /* 潜在道侣列表 */
+    .partner-list {
+      background: var(--bg-panel);
+      border: 1px solid rgba(230, 199, 73, 0.3);
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      font-size: 1.1rem;
+      color: var(--gold);
+      font-weight: bold;
+      margin-bottom: 15px;
+      text-align: left;
+    }
+
+    .partner-item {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 12px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 8px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .partner-item:hover {
+      background: rgba(0,0,0,0.3);
+      transform: translateX(5px);
+    }
+
+    .partner-item-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      border: 1px solid var(--gold-dim);
+      flex-shrink: 0;
+    }
+
+    .partner-item-info {
+      flex: 1;
+    }
+
+    .partner-item-name {
+      font-weight: bold;
+      color: var(--gold);
+      margin-bottom: 3px;
+    }
+
+    .partner-item-level {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      margin-bottom: 5px;
+    }
+
+    .partner-item-affinity {
+      font-size: 0.75rem;
+      color: var(--gold-dim);
+    }
+
+    /* 按钮样式 */
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+      color: var(--bg-dark);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(230, 199, 73, 0.4);
+    }
+
+    .btn-secondary {
+      background: rgba(255,255,255,0.1);
+      color: var(--text-main);
+      border: 1px solid var(--gold-dim);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255,255,255,0.15);
+    }
+
+    /* 空状态 */
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-dim);
+    }
+
+    .empty-icon {
+      font-size: 3rem;
+      margin-bottom: 15px;
+      opacity: 0.5;
+    }
+
+    /* 弹窗样式 */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.8);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      padding: 20px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: var(--bg-panel);
+      border: 1px solid var(--gold);
+      border-radius: 12px;
+      padding: 20px;
+      max-width: 400px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .modal-title {
+      font-size: 1.2rem;
+      color: var(--gold);
+      font-weight: bold;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .modal-body {
+      margin-bottom: 20px;
+      line-height: 1.6;
+      color: var(--text-main);
+    }
+
+    .modal-btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+      width: 100%;
+    }
+
+    /* 底部导航 */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: var(--nav-height);
+      background: var(--bg-panel);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(230, 199, 73, 0.3);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 100;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 12px;
+      color: var(--text-dim);
+      text-decoration: none;
+      transition: all 0.2s;
+      border-radius: 8px;
+    }
+
+    .nav-item:hover {
+      background: rgba(230, 199, 73, 0.1);
+      color: var(--gold);
+    }
+
+    .nav-item.active {
+      color: var(--gold);
+    }
+
+    .nav-icon {
+      font-size: 1.5rem;
+    }
+
+    .nav-text {
+      font-size: 0.75rem;
+    }
+
+    /* 互动选项 */
+    .interact-options {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .interact-btn {
+      padding: 15px;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid var(--gold-dim);
+      border-radius: 8px;
+      color: var(--text-main);
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .interact-btn:hover {
+      background: rgba(230, 199, 73, 0.1);
+      border-color: var(--gold);
+    }
+
+    .interact-icon {
+      font-size: 1.5rem;
+      display: block;
+      margin-bottom: 5px;
+    }
+  </style>
+
+  </head>
+<body>
+
+  <div class="particles"></div>
+
+  <div class="container">
+    
+    <!-- 页面标题 -->
+    <div class="page-header">
+      <div class="page-title">💕 道侣系统</div>
+    </div>
+
+    <!-- 当前道侣 -->
+    <div id="currentPartnerSection">
+      <!-- 将通过 JavaScript 动态加载 -->
+    </div>
+
+    <!-- 潜在道侣列表 -->
+    <div class="partner-list">
+      <div class="section-title">🌸 潜在道侣</div>
+      <div id="potentialPartnersList">
+        <!-- 将通过 JavaScript 动态加载 -->
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 底部导航 -->
+  <div class="bottom-nav">
+    <a href="../index.html" class="nav-item">
+      <div class="nav-icon">🧘</div>
+      <div class="nav-text">修炼</div>
+    </a>
+    <a href="../character/character.html" class="nav-item">
+      <div class="nav-icon">👤</div>
+      <div class="nav-text">角色</div>
+    </a>
+    <a href="partner.html" class="nav-item active">
+      <div class="nav-icon">💕</div>
+      <div class="nav-text">道侣</div>
+    </a>
+    <a href="../skills/skills.html" class="nav-item">
+      <div class="nav-icon">📜</div>
+      <div class="nav-text">功法</div>
+    </a>
+    <a href="../word/world.html" class="nav-item">
+      <div class="nav-icon">🌌</div>
+      <div class="nav-text">仙途</div>
+    </a>
+  </div>
+
+  <!-- 道侣详情弹窗 -->
+  <div class="modal-overlay" id="partnerDetailModal" onclick="closeDetailModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div class="modal-title" id="detailTitle">道侣详情</div>
+      <div class="modal-body" id="detailBody">
+        <!-- 详情内容将通过 JavaScript 动态生成 -->
+      </div>
+      <button class="modal-btn btn-primary" onclick="closeDetailModalDirect()">关闭</button>
+    </div>
+  </div>
+
+  <!-- 互动弹窗 -->
+  <div class="modal-overlay" id="interactModal" onclick="closeInteractModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div class="modal-title" id="interactTitle">与道侣互动</div>
+      <div class="modal-body" id="interactBody">
+        <!-- 互动内容将通过 JavaScript 动态生成 -->
+      </div>
+      <button class="modal-btn btn-secondary" onclick="closeInteractModalDirect()">关闭</button>
+    </div>
+  </div>
+
+  <script src="../js/token-manager.js"></script>
+  <script src="../js/auth-service.js"></script>
+  <script src="../js/role-sync.js"></script>
+  <script src="../js/character-store.js"></script>
+  <script src="../js/character-service.js"></script>
+  <script src="../js/role-validator.js"></script>
+  <script src="../js/store.js"></script>
+  <script src="../js/api-service.js"></script>
+  <script>
+    const API_BASE_URL = window.APP_CONFIG?.apiBaseUrl || window.apiService?.baseURL || '/api';
+    let currentPartnerData = null;
+    let potentialPartnersData = [];
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      showLoading('正在加载道侣数据...');
+      
+      if (window.AuthService) {
+        window.AuthService.init({ requireAuth: true, autoRefresh: false });
+      }
+      
+      const roleId = window.getRoleId ? window.getRoleId() : (window.AuthService ? window.AuthService.getCurrentRoleId() :
+                    (localStorage.getItem('currentRoleId') || localStorage.getItem('roleId'));
+      
+      if (!roleId) {
+        hideLoading();
+        showToast('请先登录并选择角色');
+        return;
+      }
+      
+      await loadPartnerData(roleId);
+      hideLoading();
+    });
+
+    async function loadPartnerData(roleId) {
+      try {
+        const response = await window.AuthService.get(`${API_BASE_URL}/partner/list/${roleId}`);
+        if (!response || !response.ok) {
+          throw new Error('获取道侣数据失败');
+        }
+        const data = await response.json();
+        renderPartnerData(data);
+      } catch (error) {
+        console.error('加载道侣数据失败:', error);
+        showError('加载道侣数据失败，请稍后重试');
+        renderEmptyState();
+      }
+    }
+
+    // 渲染道侣数据
+    function renderPartnerData(data) {
+      const partnerData = data || {};
+      currentPartnerData = partnerData.currentPartner;
+      potentialPartnersData = partnerData.potentialPartners || [];
+      
+      renderCurrentPartner();
+      renderPotentialPartners();
+    }
+
+    // 渲染当前道侣
+    function renderCurrentPartner() {
+      const section = document.getElementById('currentPartnerSection');
+      
+      if (currentPartnerData) {
+        const affinityPercent = (currentPartnerData.affinity / 100) * 100;
+        section.innerHTML = `
+          <div class="current-partner-card">
+            <div class="partner-avatar">💑</div>
+            <div class="partner-info">
+              <div class="partner-name">${currentPartnerData.name}</div>
+              <div class="partner-level">${currentPartnerData.level}</div>
+              <div class="partner-affinity">
+                好感度：${currentPartnerData.affinity}/100
+                <div class="affinity-bar">
+                  <div class="affinity-fill" style="width: ${affinityPercent}%"></div>
+                </div>
+              </div>
+              <button class="btn btn-primary" onclick="showInteractOptions()">💞 互动</button>
+              <button class="btn btn-secondary" onclick="showPartnerDetail(currentPartnerData)">📖 详情</button>
+            </div>
+          </div>
+        `;
+      } else {
+        section.innerHTML = `
+          <div class="current-partner-card">
+            <div class="empty-state">
+              <div class="empty-icon">💔</div>
+              <div style="font-size: 1.1rem; margin-bottom: 10px;">你还没有道侣</div>
+              <div style="font-size: 0.85rem; color: var(--text-dim);">
+                通过任务、坊市、宗门或秘境结识潜在道侣
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // 渲染潜在道侣
+    function renderPotentialPartners() {
+      const list = document.getElementById('potentialPartnersList');
+      
+      if (potentialPartnersData.length > 0) {
+        list.innerHTML = potentialPartnersData.map(partner => `
+          <div class="partner-item" onclick="showPartnerDetail(${JSON.stringify(partner).replace(/"/g, '&quot;')})">
+            <div class="partner-item-avatar">👤</div>
+            <div class="partner-item-info">
+              <div class="partner-item-name">${partner.name}</div>
+              <div class="partner-item-level">${partner.level}</div>
+              <div class="partner-item-affinity">好感度：${partner.affinity}/100</div>
+            </div>
+          </div>
+        `).join('');
+      } else {
+        list.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">🌸</div>
+            <div>暂无潜在道侣</div>
+            <div style="font-size: 0.85rem; color: var(--text-dim); margin-top: 5px;">
+              多出去走走，也许会遇到有缘人
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // 渲染空状态
+    function renderEmptyState() {
+      document.getElementById('currentPartnerSection').innerHTML = `
+        <div class="current-partner-card">
+          <div class="empty-state">
+            <div class="empty-icon">❌</div>
+            <div>数据加载失败</div>
+          </div>
+        </div>
+      `;
+      document.getElementById('potentialPartnersList').innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">❌</div>
+          <div>数据加载失败</div>
+        </div>
+      `;
+    }
+
+    // 显示道侣详情
+    function showPartnerDetail(partner) {
+      const modal = document.getElementById('partnerDetailModal');
+      const title = document.getElementById('detailTitle');
+      const body = document.getElementById('detailBody');
+      
+      title.textContent = partner.name;
+      body.innerHTML = `
+        <div style="text-align: center; margin-bottom: 20px;">
+          <div style="font-size: 4rem; margin-bottom: 10px;">👤</div>
+          <div style="font-size: 1.2rem; color: var(--gold); font-weight: bold;">${partner.name}</div>
+          <div style="color: var(--text-dim); margin-top: 5px;">${partner.level}</div>
+        </div>
+        <div style="margin-bottom: 15px;">
+          <div style="color: var(--gold-dim); margin-bottom: 5px;">好感度</div>
+          <div style="font-size: 1.1rem;">${partner.affinity}/100</div>
+          <div class="affinity-bar">
+            <div class="affinity-fill" style="width: ${(partner.affinity / 100) * 100}%"></div>
+          </div>
+        </div>
+        <div style="margin-bottom: 20px;">
+          <div style="color: var(--gold-dim); margin-bottom: 5px;">简介</div>
+          <div style="line-height: 1.6;">${partner.description || '暂无描述'}</div>
+        </div>
+        ${!currentPartnerData ? `<button class="btn btn-primary invite-partner-btn" data-partner-name="${(partner.name || '').replace(/"/g, '&quot;')">💕 邀请成为道侣</button>` : ''}
+      `;
+      
+      modal.classList.add('active');
+    }
+
+    // 显示互动选项
+    function showInteractOptions() {
+      const modal = document.getElementById('interactModal');
+      const title = document.getElementById('interactTitle');
+      const body = document.getElementById('interactBody');
+      
+      title.textContent = `与 ${currentPartnerData.name} 互动`;
+      body.innerHTML = `
+        <div class="interact-options">
+          <div class="interact-btn" onclick="doInteract('chat', '聊天')">
+            <span class="interact-icon">💬</span>
+            聊天
+          </div>
+          <div class="interact-btn" onclick="doInteract('gift', '送礼')">
+            <span class="interact-icon">🎁</span>
+            送礼
+          </div>
+          <div class="interact-btn" onclick="doInteract('train', '双修')">
+            <span class="interact-icon">💞</span>
+            双修
+          </div>
+          <div class="interact-btn" onclick="doInteract('travel', '游历')">
+            <span class="interact-icon">🗺️</span>
+            游历
+          </div>
+        </div>
+      `;
+      
+      modal.classList.add('active');
+    }
+
+    // 执行互动
+    async function doInteract(type, actionName) {
+      const cooldownKey = 'partner_interact_' + type + '_' + new Date().toDateString();
+      const interactCount = parseInt(localStorage.getItem(cooldownKey) || '0');
+      if (interactCount >= 3) { window.showToast('今日该互动已达上限（3次）', 'warning'); return; }
+      localStorage.setItem(cooldownKey, String(interactCount + 1));
+      const roleId = window.getRoleId ? window.getRoleId() : (window.AuthService ? window.AuthService.getCurrentRoleId() :
+                    (localStorage.getItem('currentRoleId') || localStorage.getItem('roleId')));
+      
+      try {
+        showLoading(`正在${actionName}...`);
+        
+        const response = await window.AuthService.post(`${API_BASE_URL}/partner/interact`, {
+          roleId: parseInt(roleId),
+          partnerId: currentPartnerData.id,
+          type: type
+        });
+        
+        if (response && response.ok) {
+          const result = await response.json();
+          showToast(`${actionName}成功！好感度 +${result.affinityGain || 5}`);
+          closeInteractModalDirect();
+          await loadPartnerData(roleId);
+        } else {
+          throw new Error('互动失败');
+        }
+      } catch (error) {
+        console.error('互动失败:', error);
+        showToast(`${actionName}失败，请稍后重试`, 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // 邀请成为道侣
+    async function inviteAsPartner(partnerName) {
+      const roleId = window.AuthService ? window.AuthService.getCurrentRoleId() :
+                    (localStorage.getItem('currentRoleId') || localStorage.getItem('roleId'));
+      
+      if (!confirm(`确定要邀请 ${partnerName} 成为道侣吗？`)) {
+        return;
+      }
+      
+      try {
+        showLoading('正在发送邀请...');
+        
+        const response = await window.AuthService.post(`${API_BASE_URL}/partner/invite`, {
+          roleId: parseInt(roleId),
+          partnerName: partnerName
+        });
+        
+        if (response && response.ok) {
+          showToast('邀请成功！');
+          closeDetailModalDirect();
+          await loadPartnerData(roleId);
+        } else {
+          throw new Error('邀请失败');
+        }
+      } catch (error) {
+        console.error('邀请失败:', error);
+        showToast('邀请失败，请稍后重试', 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // 关闭弹窗
+    function closeDetailModal(e) {
+      if (e.target.id === 'partnerDetailModal') closeDetailModalDirect();
+    }
+
+    function closeDetailModalDirect() {
+      document.getElementById('partnerDetailModal').classList.remove('active');
+    }
+
+    function closeInteractModal(e) {
+      if (e.target.id === 'interactModal') closeInteractModalDirect();
+    }
+
+    function closeInteractModalDirect() {
+      document.getElementById('interactModal').classList.remove('active');
+    }
+
+    // 加载提示
+    function showLoading(message) {
+      let loadingElement = document.getElementById('loadingIndicator');
+      if (!loadingElement) {
+        loadingElement = document.createElement('div');
+        loadingElement.id = 'loadingIndicator';
+        loadingElement.style.cssText = `
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          background: rgba(15, 20, 32, 0.9);
+          padding: 20px;
+          border-radius: 10px;
+          border: 1px solid #e6c749;
+          z-index: 3000;
+          color: #e6c749;
+          text-align: center;
+        `;
+        document.body.appendChild(loadingElement);
+      }
+      loadingElement.innerHTML = `<div>${message || '加载中...'}</div>`;
+      loadingElement.style.display = 'block';
+    }
+
+    function hideLoading() {
+      const loadingElement = document.getElementById('loadingIndicator');
+      if (loadingElement) {
+        loadingElement.style.display = 'none';
+      }
+    }
+
+    // 显示提示消息
+    function showToast(message, type = 'info') {
+      let notificationElement = document.getElementById('notification');
+      if (!notificationElement) {
+        notificationElement = document.createElement('div');
+        notificationElement.id = 'notification';
+        notificationElement.style.cssText = `
+          position: fixed;
+          top: 20px;
+          left: 50%;
+          transform: translateX(-50%);
+          padding: 15px 25px;
+          border-radius: 25px;
+          z-index: 3000;
+          transition: all 0.3s ease;
+          font-size: 0.9rem;
+          font-weight: bold;
+        `;
+        document.body.appendChild(notificationElement);
+      }
+      
+      if (type === 'error') {
+        notificationElement.style.background = 'rgba(231, 76, 60, 0.9)';
+        notificationElement.style.color = '#fff';
+      } else {
+        notificationElement.style.background = 'rgba(52, 152, 219, 0.9)';
+        notificationElement.style.color = '#fff';
+      }
+      
+      notificationElement.textContent = message;
+      notificationElement.style.opacity = '1';
+      
+      setTimeout(() => {
+        notificationElement.style.opacity = '0';
+      }, 3000);
+    }
+
+    // 显示错误
+    function showError(message) {
+      showToast(message, 'error');
+    }
+
+    document.addEventListener('click', function(e) {
+      const btn = e.target.closest('.invite-partner-btn');
+      if (btn) {
+        const partnerName = btn.getAttribute('data-partner-name');
+        if (partnerName) inviteAsPartner(partnerName);
+      }
+    });
+  </script>
+</body>
+</html>

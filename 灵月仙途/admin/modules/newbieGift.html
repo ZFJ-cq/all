@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新手礼包</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <div class="module-content">
+        <h2>新手礼包管理</h2>
+        <div class="module-description">
+            管理游戏中的新手礼包配置
+        </div>
+        
+        <div class="search-bar">
+            <input type="text" id="searchKeyword" placeholder="搜索礼包...">
+            <button onclick="searchGifts()">搜索</button>
+        </div>
+        
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>礼包名称</th>
+                        <th>类型</th>
+                        <th>领取条件</th>
+                        <th>有效期</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="newbieGiftTableBody">
+                    <!-- 数据将通过JS动态加载 -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="pagination" id="pagination">
+            <!-- 分页将通过JS动态生成 -->
+        </div>
+    </div>
+    
+    <script>
+        function initNewbieGift() {
+            console.log('初始化新手礼包管理模块');
+            loadGiftData();
+        }
+        
+        function loadGiftData(page = 1) {
+            const tableBody = document.getElementById('newbieGiftTableBody');
+            tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px;">加载中...</td></tr>';
+            
+            // 模拟数据加载
+            setTimeout(() => {
+                tableBody.innerHTML = '';
+                for (let i = 1; i <= 10; i++) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${(page - 1) * 10 + i}</td>
+                        <td>新手礼包${i}</td>
+                        <td>${['等级礼包', '签到礼包', '首充礼包'][Math.floor(Math.random() * 3)]}</td>
+                        <td>等级达到 ${Math.floor(Math.random() * 10) + 1}</td>
+                        <td>永久</td>
+                        <td>${Math.random() > 0.5 ? '启用' : '禁用'}</td>
+                        <td>
+                            <button onclick="editGift(${i})">编辑</button>
+                            <button onclick="deleteGift(${i})">删除</button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                }
+                
+                // 生成分页
+                generatePagination(page, 5);
+            }, 1000);
+        }
+        
+        function searchGifts() {
+            const keyword = document.getElementById('searchKeyword').value;
+            console.log('搜索礼包:', keyword);
+            loadGiftData();
+        }
+        
+        function editGift(id) {
+            console.log('编辑礼包:', id);
+            alert('编辑礼包功能开发中');
+        }
+        
+        function deleteGift(id) {
+            if (confirm('确定要删除礼包吗？')) {
+                console.log('删除礼包:', id);
+                alert('删除成功');
+            }
+        }
+        
+        function generatePagination(currentPage, totalPages) {
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+            
+            for (let i = 1; i <= totalPages; i++) {
+                const button = document.createElement('button');
+                button.textContent = i;
+                button.className = i === currentPage ? 'active' : '';
+                button.onclick = () => loadGiftData(i);
+                pagination.appendChild(button);
+            }
+        }
+    </script>
+</body>
+</html>

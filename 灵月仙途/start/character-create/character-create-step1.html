@@ -1,0 +1,1486 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="../../js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="../../css/mobile-adapt.css">
+  <title>灵月仙途 - 凝气塑形</title>
+  <style>
+    :root {
+      --gold-primary: #e6c749;
+      --gold-glow: rgba(230, 199, 73, 0.6);
+      --text-main: #fdfbf7;
+      --text-dim: #a89f81;
+      --bg-overlay: rgba(15, 20, 30, 0.75);
+      --card-bg: rgba(30, 35, 50, 0.6);
+      --border-light: rgba(230, 199, 73, 0.3);
+      --danger: #e74c3c;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: 'Microsoft YaHei', 'SimSun', serif;
+      background: url('../../images/beijing.png') no-repeat center center fixed;
+      background-size: cover;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    .bg-overlay {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: radial-gradient(circle at center, transparent 0%, #0f1420 90%);
+      z-index: 0;
+    }
+
+    .particles {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 1;
+      background-image: radial-gradient(var(--gold-primary) 1px, transparent 1px);
+      background-size: 60px 60px;
+      opacity: 0.15;
+      animation: floatUp 20s linear infinite;
+    }
+    
+    .clouds {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 2;
+      overflow: hidden;
+    }
+    
+    .cloud {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      animation: floatCloud 30s linear infinite;
+    }
+    
+    .cloud:nth-child(1) {
+      width: 100px;
+      height: 60px;
+      top: 10%;
+      left: -100px;
+      animation-duration: 40s;
+    }
+    
+    .cloud:nth-child(2) {
+      width: 150px;
+      height: 80px;
+      top: 20%;
+      left: -150px;
+      animation-duration: 50s;
+      animation-delay: 10s;
+    }
+    
+    .cloud:nth-child(3) {
+      width: 80px;
+      height: 40px;
+      top: 30%;
+      left: -80px;
+      animation-duration: 35s;
+      animation-delay: 5s;
+    }
+
+    @keyframes floatUp {
+      from { background-position: 0 100%; }
+      to { background-position: 0 0; }
+    }
+    
+    @keyframes floatCloud {
+      from { transform: translateX(-100%); }
+      to { transform: translateX(100vw); }
+    }
+
+    .main-container {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      height: 100%;
+      max-width: 450px;
+      display: flex;
+      flex-direction: column;
+      padding: 30px 20px;
+      overflow-y: auto;
+    }
+
+    @media (min-width: 480px) {
+      .main-container {
+        height: 90vh;
+        background: var(--bg-overlay);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-radius: 24px;
+        border: 1px solid rgba(255,255,255,0.08);
+        box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        padding: 40px 30px;
+      }
+    }
+
+    .header-section {
+      text-align: center;
+      margin-bottom: 20px;
+      flex-shrink: 0;
+    }
+
+    .title-group {
+      display: inline-block;
+      position: relative;
+      padding-right: 35px;
+    }
+
+    .game-title-vertical {
+      font-family: 'SimSun', 'STSong', serif;
+      font-size: 3rem;
+      font-weight: 900;
+      color: var(--gold-primary);
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+      letter-spacing: 10px;
+      line-height: 1.2;
+      text-shadow: 0 0 20px rgba(230, 199, 73, 0.4);
+      margin: 0 auto;
+      height: 200px;
+    }
+
+    .title-seal {
+      position: absolute;
+      bottom: 5px;
+      right: -5px;
+      width: 42px;
+      height: 42px;
+      background: #b22222;
+      color: white;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      font-family: 'SimSun', serif;
+      transform: rotate(-15deg);
+      box-shadow: 2px 2px 10px rgba(0,0,0,0.4);
+      border: 2px solid rgba(255,255,255,0.2);
+    }
+
+    .step-bar {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .step-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      transition: all 0.5s ease;
+    }
+
+    .step-dot.active {
+      background: var(--gold-primary);
+      box-shadow: 0 0 10px var(--gold-primary);
+      transform: scale(1.3);
+    }
+
+    .step-line {
+      width: 25px;
+      height: 1px;
+      background: rgba(255,255,255,0.1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .step-line::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: var(--gold-primary);
+      transform: translateX(-100%);
+      transition: transform 0.6s ease;
+    }
+
+    .step-line.filled::after {
+      transform: translateX(0);
+    }
+
+    .step-text {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      text-align: center;
+      margin-top: 6px;
+      letter-spacing: 1px;
+    }
+
+    .content-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      overflow-y: auto;
+      padding-bottom: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      animation: fadeInUp 0.6s ease-out backwards;
+    }
+
+    .form-group:nth-child(1) { animation-delay: 0.1s; }
+    .form-group:nth-child(2) { animation-delay: 0.2s; }
+    .form-group:nth-child(3) { animation-delay: 0.3s; }
+    .form-group:nth-child(4) { animation-delay: 0.4s; }
+
+    .label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--gold-primary);
+      font-size: 0.95rem;
+      font-weight: bold;
+      padding-left: 5px;
+    }
+    
+    .label-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .label-row::before {
+      content: '✦';
+      font-size: 0.7rem;
+      color: var(--gold-primary);
+    }
+
+    /* 姓名输入区 */
+    .name-input-wrapper {
+      position: relative;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .scroll-input {
+      flex: 1;
+      background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.4), transparent);
+      border: none;
+      border-bottom: 2px solid var(--border-light);
+      padding: 15px 10px;
+      color: var(--text-main);
+      font-size: 1.1rem;
+      font-family: 'SimSun', serif;
+      text-align: center;
+      letter-spacing: 4px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .scroll-input::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(230, 199, 73, 0.2), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .scroll-input:focus::before {
+      left: 100%;
+    }
+
+    .scroll-input:focus {
+      outline: none;
+      border-bottom-color: var(--gold-primary);
+      background: linear-gradient(90deg, transparent, rgba(230, 199, 73, 0.1), transparent);
+      box-shadow: 0 0 15px rgba(230, 199, 73, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .btn-random {
+      background: linear-gradient(90deg, transparent, rgba(230, 199, 73, 0.2), transparent);
+      border: 1px solid var(--gold-primary);
+      color: var(--gold-primary);
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.3s ease;
+      font-family: 'SimSun', serif;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-random::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .btn-random:hover::before {
+      left: 100%;
+    }
+
+    .btn-random:hover {
+      background: linear-gradient(90deg, transparent, rgba(230, 199, 73, 0.4), transparent);
+      box-shadow: 0 0 15px rgba(230, 199, 73, 0.5);
+      transform: translateY(-2px);
+    }
+
+    .btn-random:active {
+      transform: scale(0.95);
+    }
+
+    /* 性别选择 */
+    .gender-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .token-card {
+      background: linear-gradient(135deg, rgba(30, 35, 50, 0.6), rgba(20, 25, 40, 0.8));
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 15px 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .token-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(230, 199, 73, 0.2), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .token-card:hover::before {
+      left: 100%;
+    }
+
+    .token-card.selected {
+      background: linear-gradient(135deg, rgba(230, 199, 73, 0.1), rgba(20, 25, 40, 0.8));
+      border-color: var(--gold-primary);
+      box-shadow: 0 0 20px rgba(230, 199, 73, 0.4);
+      transform: translateY(-5px) scale(1.05);
+    }
+
+    .token-card.selected::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border-radius: 12px;
+      border: 1px solid var(--gold-primary);
+      animation: pulse 2s infinite;
+    }
+
+    .token-icon {
+      font-size: 2rem;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+      transition: all 0.3s ease;
+    }
+
+    .token-card.selected .token-icon {
+      transform: scale(1.1);
+      filter: drop-shadow(0 0 10px var(--gold-primary));
+    }
+
+    .token-label {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      transition: all 0.3s ease;
+    }
+
+    .token-card.selected .token-label {
+      color: var(--gold-primary);
+      font-weight: bold;
+      text-shadow: 0 0 10px rgba(230, 199, 73, 0.5);
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(230, 199, 73, 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(230, 199, 73, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(230, 199, 73, 0); }
+    }
+
+    /* 头像选择触发区 */
+    .avatar-trigger {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      background: linear-gradient(135deg, rgba(30, 35, 50, 0.6), rgba(20, 25, 40, 0.8));
+      padding: 15px 20px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.05);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .avatar-trigger::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(230, 199, 73, 0.2), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .avatar-trigger:hover::before {
+      left: 100%;
+    }
+
+    .avatar-trigger:hover {
+      border-color: var(--gold-primary);
+      background: linear-gradient(135deg, rgba(230, 199, 73, 0.1), rgba(20, 25, 40, 0.8));
+      box-shadow: 0 0 15px rgba(230, 199, 73, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .avatar-preview {
+      font-size: 2.5rem;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, rgba(0,0,0,0.3), rgba(230, 199, 73, 0.1));
+      border-radius: 50%;
+      border: 2px solid var(--border-light);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .avatar-preview::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      animation: avatarPulse 2s infinite;
+    }
+
+    .avatar-trigger:hover .avatar-preview {
+      border-color: var(--gold-primary);
+      box-shadow: 0 0 20px rgba(230, 199, 73, 0.5);
+      transform: scale(1.05);
+    }
+
+    .avatar-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .avatar-info-title {
+      font-size: 1rem;
+      color: var(--text-main);
+      font-weight: bold;
+      transition: all 0.3s ease;
+    }
+
+    .avatar-trigger:hover .avatar-info-title {
+      color: var(--gold-primary);
+      text-shadow: 0 0 10px rgba(230, 199, 73, 0.5);
+    }
+
+    .avatar-info-desc {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      transition: all 0.3s ease;
+    }
+
+    .arrow-icon {
+      color: var(--gold-primary);
+      font-size: 1.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .avatar-trigger:hover .arrow-icon {
+      transform: translateX(5px);
+      filter: drop-shadow(0 0 10px var(--gold-primary));
+    }
+
+    @keyframes avatarPulse {
+      0% { border-color: transparent; }
+      50% { border-color: var(--gold-primary); box-shadow: 0 0 10px rgba(230, 199, 73, 0.5); }
+      100% { border-color: transparent; }
+    }
+
+    /* 转盘区域 */
+    .wheel-container {
+      position: relative;
+      width: 80vw;
+      max-width: 280px;
+      height: 80vw;
+      max-height: 280px;
+      margin: 0 auto;
+      border-radius: 50%;
+      border: 4px solid var(--gold-primary);
+      box-shadow: 0 0 40px rgba(230, 199, 73, 0.4), 0 0 80px rgba(230, 199, 73, 0.1);
+      background: linear-gradient(135deg, rgba(0,0,0,0.7), rgba(30, 35, 50, 0.9));
+      overflow: hidden;
+      position: relative;
+      backdrop-filter: blur(5px);
+    }
+
+    .wheel-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border-radius: 50%;
+      border: 1px solid var(--gold-primary);
+      animation: wheelPulse 2s infinite;
+      background: radial-gradient(circle at 30% 30%, rgba(230, 199, 73, 0.1) 0%, transparent 50%);
+    }
+
+    .wheel-container::after {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      border-radius: 50%;
+      background: linear-gradient(45deg, transparent, var(--gold-primary), transparent);
+      z-index: -1;
+      animation: wheelRotate 10s linear infinite;
+    }
+
+    .wheel {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      position: relative;
+      transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+      background: conic-gradient(
+        from 0deg,
+        #2c3e50 0deg 45deg,
+        #34495e 45deg 90deg,
+        #2c3e50 90deg 135deg,
+        #34495e 135deg 180deg,
+        #2c3e50 180deg 225deg,
+        #34495e 225deg 270deg,
+        #2c3e50 270deg 315deg,
+        #34495e 315deg 360deg
+      );
+    }
+
+    .wheel::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 80%;
+      height: 80%;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      background: radial-gradient(circle, transparent 0%, rgba(0,0,0,0.7) 100%);
+      border: 1px solid rgba(230, 199, 73, 0.2);
+    }
+
+    .wheel-item {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform-origin: 0 0;
+      width: 50%;
+      height: 2px;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      padding-right: 15%;
+      box-sizing: border-box;
+      z-index: 1;
+    }
+
+    .wheel-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, var(--gold-primary), transparent);
+      opacity: 0.6;
+    }
+
+    .wheel-item span {
+      transform: rotate(90deg) translateY(-50%);
+      font-size: clamp(0.7rem, 3vw, 0.9rem);
+      color: var(--gold-primary);
+      font-weight: bold;
+      white-space: nowrap;
+      text-shadow: 0 1px 3px #000, 0 0 10px rgba(230, 199, 73, 0.5);
+      font-family: 'SimSun', serif;
+      position: relative;
+      z-index: 2;
+      text-align: center;
+    }
+
+    .wheel-pointer {
+      position: absolute;
+      top: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 15px solid transparent;
+      border-right: 15px solid transparent;
+      border-top: 30px solid var(--gold-primary);
+      z-index: 20;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+      animation: pointerPulse 2s infinite;
+    }
+
+    .wheel-pointer::after {
+      content: '✦';
+      position: absolute;
+      top: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #fff;
+      font-size: 12px;
+      text-shadow: 0 0 10px var(--gold-primary);
+    }
+
+    .wheel-center {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 60px;
+      height: 60px;
+      background: radial-gradient(circle, #fff 0%, var(--gold-primary) 100%);
+      border-radius: 50%;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      color: #000;
+      box-shadow: 0 0 20px rgba(0,0,0,0.8), 0 0 30px rgba(230, 199, 73, 0.6);
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      border: 3px solid #fff;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .wheel-center::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .wheel-center:hover::before {
+      left: 100%;
+    }
+
+    .wheel-center:hover {
+      transform: translate(-50%, -50%) scale(1.15);
+      box-shadow: 0 0 25px rgba(230, 199, 73, 1), 0 0 40px rgba(230, 199, 73, 0.5);
+    }
+
+    .wheel-center:active {
+      transform: translate(-50%, -50%) scale(0.95);
+    }
+    
+    .wheel-result {
+      text-align: center;
+      font-size: 1rem;
+      color: var(--gold-primary);
+      margin-top: 20px;
+      min-height: 3em;
+      font-weight: bold;
+      padding: 20px;
+      background: linear-gradient(135deg, rgba(30, 35, 50, 0.8), rgba(20, 25, 40, 0.9));
+      border-radius: 15px;
+      border: 1px solid rgba(230, 199, 73, 0.4);
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .wheel-result::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(230, 199, 73, 0.1), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .wheel-result:hover::before {
+      left: 100%;
+    }
+
+    .wheel-result:hover {
+      box-shadow: 0 0 20px rgba(230, 199, 73, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .btn-spin {
+      width: 100%;
+      margin-top: 20px;
+      padding: 18px;
+      background: linear-gradient(90deg, transparent, rgba(230, 199, 73, 0.3), transparent);
+      border: 1px solid var(--gold-primary);
+      color: var(--gold-primary);
+      border-radius: 12px;
+      font-family: 'SimSun', serif;
+      font-size: 1.1rem;
+      letter-spacing: 4px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+
+    .btn-spin::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .btn-spin:hover::before {
+      left: 100%;
+    }
+
+    .btn-spin:hover {
+      background: linear-gradient(90deg, transparent, rgba(230, 199, 73, 0.5), transparent);
+      box-shadow: 0 0 25px rgba(230, 199, 73, 0.6);
+      transform: translateY(-3px);
+      letter-spacing: 6px;
+    }
+    
+    .btn-spin:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      filter: grayscale(1);
+      transform: none;
+      letter-spacing: 4px;
+    }
+
+    @keyframes wheelPulse {
+      0% { box-shadow: 0 0 0 0 rgba(230, 199, 73, 0.4); }
+      70% { box-shadow: 0 0 0 15px rgba(230, 199, 73, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(230, 199, 73, 0); }
+    }
+
+    @keyframes wheelRotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes pointerPulse {
+      0% { transform: translateX(-50%) scale(1); }
+      50% { transform: translateX(-50%) scale(1.15); }
+      100% { transform: translateX(-50%) scale(1); }
+    }
+
+    /* 底部按钮 */
+    .footer-section {
+      margin-top: 20px;
+      flex-shrink: 0;
+      animation: fadeInUp 0.6s ease-out 0.5s both;
+    }
+
+    .action-btn {
+      width: 100%;
+      padding: 18px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      font-family: 'SimSun', serif;
+      letter-spacing: 4px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      background: linear-gradient(90deg, transparent, rgba(230, 199, 73, 0.2), transparent);
+      border: 1px solid var(--gold-primary);
+      color: var(--gold-primary);
+      box-shadow: 0 0 15px rgba(230, 199, 73, 0.1);
+      transition: all 0.3s ease;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .action-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .action-btn:hover::before {
+      left: 100%;
+    }
+
+    .action-btn:hover {
+      background: linear-gradient(90deg, transparent, rgba(230, 199, 73, 0.4), transparent);
+      box-shadow: 0 0 25px rgba(230, 199, 73, 0.5);
+      letter-spacing: 6px;
+      transform: translateY(-3px);
+    }
+
+    .action-btn:active {
+      transform: translateY(0) scale(0.98);
+    }
+
+    .btn-secondary {
+      margin-top: 15px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.6);
+      font-size: 0.9rem;
+      letter-spacing: 2px;
+    }
+
+    .btn-secondary:hover {
+      border-color: rgba(255,255,255,0.3);
+      color: #fff;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* --- 弹窗样式 --- */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      z-index: 2000;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      transition: opacity 0.3s;
+      backdrop-filter: blur(5px);
+    }
+
+    .modal-overlay.active {
+      display: flex;
+      opacity: 1;
+    }
+
+    .modal-content {
+      background: #1a202c;
+      width: 90%;
+      max-width: 400px;
+      border-radius: 16px;
+      border: 1px solid var(--gold-primary);
+      box-shadow: 0 0 30px rgba(230, 199, 73, 0.3);
+      transform: scale(0.9);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      max-height: 80vh;
+    }
+
+    .modal-overlay.active .modal-content {
+      transform: scale(1);
+    }
+
+    .modal-header {
+      padding: 15px 20px;
+      border-bottom: 1px solid rgba(230, 199, 73, 0.2);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(0,0,0,0.2);
+    }
+
+    .modal-title {
+      color: var(--gold-primary);
+      font-size: 1.1rem;
+      font-weight: bold;
+      font-family: 'SimSun', serif;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      font-size: 1.5rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .modal-tabs {
+      display: flex;
+      overflow-x: auto;
+      padding: 10px 15px;
+      gap: 10px;
+      scrollbar-width: none;
+      background: rgba(0,0,0,0.2);
+    }
+    .modal-tabs::-webkit-scrollbar { display: none; }
+
+    .modal-tab {
+      padding: 6px 12px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 20px;
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      white-space: nowrap;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.3s;
+    }
+
+    .modal-tab.active {
+      background: rgba(230, 199, 73, 0.15);
+      color: var(--gold-primary);
+      border-color: var(--gold-primary);
+    }
+
+    .modal-body {
+      padding: 20px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .avatar-grid-modal {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+    }
+
+    .avatar-option {
+      aspect-ratio: 1;
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all 0.3s;
+    }
+
+    .avatar-option:hover {
+      background: rgba(255,255,255,0.1);
+      transform: scale(1.05);
+    }
+
+    .avatar-option.selected {
+      border-color: var(--gold-primary);
+      background: rgba(230, 199, 73, 0.1);
+      box-shadow: 0 0 15px rgba(230, 199, 73, 0.3);
+      transform: scale(1.1);
+    }
+
+    .modal-footer {
+      padding: 15px 20px;
+      border-top: 1px solid rgba(230, 199, 73, 0.2);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      background: rgba(0,0,0,0.2);
+    }
+
+    .modal-btn {
+      padding: 8px 20px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      border: none;
+      font-family: 'SimSun', serif;
+      transition: all 0.3s;
+    }
+
+    .modal-btn-cancel {
+      background: transparent;
+      color: var(--text-dim);
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .modal-btn-confirm {
+      background: var(--gold-primary);
+      color: #000;
+      font-weight: bold;
+      box-shadow: 0 0 10px rgba(230, 199, 73, 0.4);
+    }
+    
+    .modal-btn-confirm:hover {
+      background: #f4d03f;
+      transform: translateY(-2px);
+    }
+
+    ::-webkit-scrollbar { width: 0px; background: transparent; }
+
+  </style>
+
+  </head>
+<body>
+
+  <div class="bg-overlay"></div>
+  <div class="particles"></div>
+  <div class="clouds">
+    <div class="cloud"></div>
+    <div class="cloud"></div>
+    <div class="cloud"></div>
+  </div>
+
+  <div class="main-container">
+    
+    <!-- 头部 -->
+    <div class="header-section">
+      <div class="title-group">
+        <h1 class="game-title-vertical">
+          凝气塑形
+          <div class="title-seal">道</div>
+        </h1>
+      </div>
+      
+      <div class="step-bar">
+        <div class="step-dot active"></div>
+        <div class="step-line filled"></div>
+        <div class="step-dot"></div>
+        <div class="step-line"></div>
+        <div class="step-dot"></div>
+        <div class="step-line"></div>
+        <div class="step-dot"></div>
+      </div>
+      <div class="step-text">第一步：奠定根基</div>
+    </div>
+
+    <!-- 内容 -->
+    <div class="content-section">
+      
+      <!-- 姓名 (带随机) -->
+      <div class="form-group">
+        <div class="label-row">
+          <div class="label-left">道友名讳</div>
+        </div>
+        <div class="name-input-wrapper">
+          <input type="text" class="scroll-input" id="nameInput" placeholder="请输入您的名讳" maxlength="10" autocomplete="off">
+          <button class="btn-random" onclick="generateName()">
+            <i class="fas fa-dice"></i> 灵机一动
+          </button>
+        </div>
+      </div>
+
+      <!-- 性别 -->
+      <div class="form-group">
+        <div class="label-row">
+          <div class="label-left">阴阳性别</div>
+        </div>
+        <div class="gender-grid" id="genderGrid">
+          <div class="token-card selected" data-gender="male">
+            <div class="token-icon">👨‍</div>
+            <div class="token-label">纯阳</div>
+          </div>
+          <div class="token-card" data-gender="female">
+            <div class="token-icon">👩‍</div>
+            <div class="token-label">玄阴</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 头像 (弹窗选择) -->
+      <div class="form-group">
+        <div class="label-row">
+          <div class="label-left">命格意象</div>
+        </div>
+        <div class="avatar-trigger" onclick="openAvatarModal()">
+          <div class="avatar-preview" id="avatarPreview">👤</div>
+          <div class="avatar-info">
+            <div class="avatar-info-title" id="avatarTitle">凡人</div>
+            <div class="avatar-info-desc">点击更换命格意象</div>
+          </div>
+          <div class="arrow-icon">➜</div>
+        </div>
+      </div>
+
+      <!-- 出身 (转盘) -->
+      <div class="form-group">
+        <div class="label-row">
+          <div class="label-left">出身命格</div>
+        </div>
+        <div class="wheel-container">
+          <div class="wheel-pointer"></div>
+          <div class="wheel" id="wheel">
+            <!-- JS 动态生成扇区文字 -->
+          </div>
+          <div class="wheel-center" onclick="spinWheel()">
+            <i class="fas fa-sync-alt"></i>
+          </div>
+        </div>
+        <div class="wheel-result" id="wheelResult">点击中心或下方按钮抽取</div>
+        <button class="btn-spin" id="btnSpin" onclick="spinWheel()">抽取命格</button>
+      </div>
+
+    </div>
+
+    <!-- 底部 -->
+    <div class="footer-section">
+      <button class="action-btn" onclick="nextStep(event)">
+        <span>下一步：淬炼筋骨</span>
+        <span style="font-size: 1.1rem;">➜</span>
+      </button>
+      <button class="action-btn btn-secondary" onclick="window.location.href='../start.html'">
+        返回山门
+      </button>
+    </div>
+  </div>
+
+  <!-- 头像选择弹窗 -->
+  <div class="modal-overlay" id="avatarModal" onclick="closeAvatarModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title">选择命格意象</div>
+        <button class="modal-close" onclick="closeAvatarModalDirect()">&times;</button>
+      </div>
+      <div class="modal-tabs" id="avatarTabs">
+        <!-- JS 生成标签 -->
+      </div>
+      <div class="modal-body">
+        <div class="avatar-grid-modal" id="avatarGridModal">
+          <!-- JS 生成选项 -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn modal-btn-cancel" onclick="closeAvatarModalDirect()">取消</button>
+        <button class="modal-btn modal-btn-confirm" onclick="confirmAvatar()">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- 数据配置 ---
+    const surnames = ["李", "王", "张", "刘", "陈", "杨", "赵", "黄", "周", "吴", "徐", "孙", "胡", "朱", "高", "林", "何", "郭", "马", "罗", "梁", "宋", "郑", "谢", "韩", "唐", "冯", "于", "董", "萧", "程", "曹", "袁", "邓", "许", "傅", "沈", "曾", "彭", "吕", "苏", "卢", "蒋", "蔡", "贾", "丁", "魏", "薛", "叶", "阎", "余", "潘", "杜", "戴", "夏", "钟", "汪", "田", "任", "姜", "范", "方", "石", "姚", "谭", "廖", "邹", "熊", "金", "陆", "郝", "孔", "白", "崔", "康", "毛", "邱", "秦", "江", "尹", "史", "顾", "侯", "邵", "孟", "龙", "万", "段", "漕", "钱", "汤", "尹", "黎", "易", "常", "武", "乔", "贺", "赖", "龚", "文"];
+    const givenNamesMale = ["逍遥", "长风", "云逸", "子轩", "浩然", "天行", "凌峰", "绝尘", "无涯", "沧海", "青阳", "紫电", "孤城", "问天", "破军", "七杀", "贪狼", "玄机", "道陵", "长生", "未央", "墨尘", "流云", "飞羽", "惊鸿", "踏雪", "寻梅", "听雨", "观潮", "望月"];
+    const givenNamesFemale = ["灵儿", "婉儿", "清歌", "若雪", "梦璃", "紫萱", "雨萌", "思琪", "雅琴", "诗涵", "落霞", "孤鹜", "秋水", "长天", "碧瑶", "雪琪", "琉璃", "幻音", "轻舞", "飞扬", "凝霜", "寒烟", "疏影", "暗香", "明月", "清风", "流萤", "星河", "璀璨", "玲珑"];
+    
+    // 模拟数据库中已存在的名字 (用于去重演示)
+    const usedNamesDB = ["李逍遥", "张小凡", "林惊羽", "陆雪琪"];
+
+    const avatarCategories = {
+      "凡人": ["👤", "👨‍🌾", "👩‍🌾", "🧔", "👵", "👶"],
+      "剑修": ["⚔️", "🗡️", "🤺", "🛡️", "🏹", "🥷"],
+      "法修": ["🔮", "🧙‍♂️", "🧙‍♀️", "📜", "🕯️", "🪄"],
+      "丹修": ["💊", "🌿", "🍵", "🔥", "⚗️", "🍄"],
+      "器修": ["🔨", "⛏️", "⚒️", "🛠️", "💎", "🪨"],
+      "妖修": ["🐉", "🦊", "🐍", "🐯", "🦅", "🐺"]
+    };
+
+    const origins = [
+      { name: "世家子弟", desc: "出身修仙世家，资源丰富" },
+      { name: "散修孤儿", desc: "无依无靠，但心性坚韧" },
+      { name: "宗门弃徒", desc: "曾被逐出师门，怀恨在心" },
+      { name: "山野村夫", desc: "偶得奇遇，踏入仙途" },
+      { name: "皇室贵胄", desc: "拥有皇道龙气，气运加身" },
+      { name: "商贾之子", desc: "富可敌国，以财入道" },
+      { name: "书香门第", desc: "饱读诗书，悟性极高" },
+      { name: "异域来客", desc: "来自海外仙山，神秘莫测" }
+    ];
+
+    // --- 状态管理 ---
+    let selectedAvatar = "👤";
+    let selectedAvatarLabel = "凡人";
+    let selectedOrigin = null;
+    let isSpinning = false;
+
+    // --- 初始化 ---
+    document.addEventListener('DOMContentLoaded', () => {
+      initGenderSelection();
+      initWheel();
+      initAvatarModal();
+    });
+
+    // 性别选择
+    function initGenderSelection() {
+      const grid = document.getElementById('genderGrid');
+      const options = grid.querySelectorAll('.token-card');
+      options.forEach(opt => {
+        opt.addEventListener('click', function() {
+          options.forEach(o => o.classList.remove('selected'));
+          this.classList.add('selected');
+        });
+      });
+    }
+
+    // --- 随机取名逻辑 ---
+    function generateName() {
+      const input = document.getElementById('nameInput');
+      const gender = document.querySelector('#genderGrid .token-card.selected').dataset.gender;
+      
+      let newName = "";
+      let attempts = 0;
+      const maxAttempts = 50;
+
+      // 简单模拟去重
+      do {
+        const surname = surnames[Math.floor(Math.random() * surnames.length)];
+        const names = gender === 'male' ? givenNamesMale : givenNamesFemale;
+        const givenName = names[Math.floor(Math.random() * names.length)];
+        newName = surname + givenName;
+        attempts++;
+        
+        if (attempts > maxAttempts) break; // 防止死循环
+      } while (usedNamesDB.includes(newName) || newName === input.value);
+
+      if (attempts <= maxAttempts) {
+        input.value = newName;
+        input.style.borderBottomColor = 'var(--gold-primary)';
+        // 简单动画反馈
+        input.animate([
+          { transform: 'scale(1)' },
+          { transform: 'scale(1.05)' },
+          { transform: 'scale(1)' }
+        ], { duration: 200 });
+      } else {
+        showToast("今日灵气枯竭，未能生成独特名讳，请道友自行构思。");
+      }
+    }
+
+    // --- 头像弹窗逻辑 ---
+    function initAvatarModal() {
+      const tabsContainer = document.getElementById('avatarTabs');
+      const categories = Object.keys(avatarCategories);
+      
+      categories.forEach((cat, index) => {
+        const tab = document.createElement('div');
+        tab.className = `modal-tab ${index === 0 ? 'active' : ''}`;
+        tab.textContent = cat;
+        tab.onclick = () => switchAvatarTab(cat, tab);
+        tabsContainer.appendChild(tab);
+      });
+
+      // 默认加载第一个分类
+      switchAvatarTab(categories[0], tabsContainer.firstElementChild);
+    }
+
+    function switchAvatarTab(category, tabEl) {
+      document.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('active'));
+      tabEl.classList.add('active');
+
+      const grid = document.getElementById('avatarGridModal');
+      grid.innerHTML = '';
+      
+      avatarCategories[category].forEach(icon => {
+        const item = document.createElement('div');
+        item.className = 'avatar-option';
+        item.textContent = icon;
+        if (icon === selectedAvatar) item.classList.add('selected');
+        
+        item.onclick = () => {
+          document.querySelectorAll('.avatar-option').forEach(o => o.classList.remove('selected'));
+          item.classList.add('selected');
+          selectedAvatar = icon;
+          selectedAvatarLabel = category;
+        };
+        grid.appendChild(item);
+      });
+    }
+
+    function openAvatarModal() {
+      // 重置选中状态为当前选中的
+      const modal = document.getElementById('avatarModal');
+      modal.classList.add('active');
+      // 重新渲染当前选中的高亮
+      const currentCat = selectedAvatarLabel;
+      const tabs = document.querySelectorAll('.modal-tab');
+      tabs.forEach(t => {
+        if(t.textContent === currentCat) switchAvatarTab(currentCat, t);
+      });
+    }
+
+    function closeAvatarModal(e) {
+      if (e.target.id === 'avatarModal') closeAvatarModalDirect();
+    }
+
+    function closeAvatarModalDirect() {
+      document.getElementById('avatarModal').classList.remove('active');
+    }
+
+    function confirmAvatar() {
+      document.getElementById('avatarPreview').textContent = selectedAvatar;
+      document.getElementById('avatarTitle').textContent = selectedAvatarLabel;
+      closeAvatarModalDirect();
+    }
+
+    // --- 转盘逻辑 ---
+    function initWheel() {
+      const wheel = document.getElementById('wheel');
+      const segmentAngle = 360 / origins.length;
+      
+      origins.forEach((origin, index) => {
+        const item = document.createElement('div');
+        item.className = 'wheel-item';
+        // 计算旋转角度：每个扇区的中心线
+        const rotateAngle = (index * segmentAngle) + (segmentAngle / 2);
+        item.style.transform = `rotate(${rotateAngle}deg)`;
+        
+        const span = document.createElement('span');
+        span.textContent = origin.name;
+        item.appendChild(span);
+        wheel.appendChild(item);
+      });
+    }
+
+    function spinWheel() {
+      if (isSpinning) return;
+      isSpinning = true;
+      document.getElementById('btnSpin').disabled = true;
+      document.getElementById('wheelResult').textContent = "天机推演中...";
+
+      const wheel = document.getElementById('wheel');
+      const segmentAngle = 360 / origins.length;
+      
+      // 随机选择一个结果 (0 到 origins.length - 1)
+      const winningIndex = Math.floor(Math.random() * origins.length);
+      
+      // 计算旋转角度
+      // 基础旋转圈数 (5 圈) + 目标角度
+      // 注意：指针在顶部 (0 度)，所以要旋转到目标扇区在顶部
+      // 目标扇区中心角度是 (index * segmentAngle + segmentAngle/2)
+      // 要让这个角度转到 0 度 (顶部)，需要旋转 360 - 该角度
+      const targetAngle = (winningIndex * segmentAngle) + (segmentAngle / 2);
+      const extraSpins = 360 * 5; 
+      const totalRotate = extraSpins + (360 - targetAngle);
+
+      wheel.style.transform = `rotate(${totalRotate}deg)`;
+
+      setTimeout(() => {
+        isSpinning = false;
+        document.getElementById('btnSpin').disabled = false;
+        selectedOrigin = origins[winningIndex];
+        document.getElementById('wheelResult').innerHTML = 
+          `命格已定：<span style="color:#fff; font-size:1.1rem">${selectedOrigin.name}</span><br><span style="font-size:0.8rem; color:var(--text-dim)">${selectedOrigin.desc}</span>`;
+        
+        // 震动反馈
+        if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
+      }, 4000); // 与 CSS transition 时间一致
+    }
+
+    // --- 提交逻辑 ---
+    function nextStep(event) {
+      const nameInput = document.getElementById('nameInput');
+      const name = nameInput.value.trim();
+      
+      if (!name) {
+        nameInput.style.borderBottomColor = 'var(--danger)';
+        nameInput.placeholder = "名讳不可为空！";
+        setTimeout(() => {
+          nameInput.style.borderBottomColor = 'var(--border-light)';
+          nameInput.placeholder = "请输入您的名讳";
+        }, 2000);
+        return;
+      }
+
+      if (!selectedOrigin) {
+        showToast("请先抽取出身命格！");
+        document.querySelector('.wheel-container').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      const selectedGenderEl = document.querySelector('#genderGrid .token-card.selected');
+      const gender = selectedGenderEl ? selectedGenderEl.getAttribute('data-gender') : 'male';
+      
+      const tempCharacter = {
+        step: 1,
+        name: name,
+        gender: gender,
+        avatar: selectedAvatar,
+        avatarLabel: selectedAvatarLabel,
+        origin: selectedOrigin
+      };
+      
+      localStorage.setItem('tempCharacter', JSON.stringify(tempCharacter));
+      
+      const btn = event.currentTarget;
+      const originalContent = btn.innerHTML;
+      btn.innerHTML = "<span>灵气汇聚中...</span>";
+      btn.style.pointerEvents = 'none';
+      btn.style.opacity = '0.8';
+      
+      setTimeout(() => {
+        window.location.href = 'character-create-step2.html';
+      }, 800);
+    }
+
+    document.getElementById('nameInput').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') nextStep(e);
+    });
+  </script>
+  <script src="../../js/ui-components.js"></script>
+</body>
+</html>

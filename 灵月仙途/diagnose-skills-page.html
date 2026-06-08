@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="css/mobile-adapt.css">
+  <title>技能页面诊断工具</title>
+  <style>
+    body {
+      font-family: 'Microsoft YaHei', sans-serif;
+      background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+      min-height: 100vh;
+      padding: 20px;
+      color: #fff;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      padding: 30px;
+    }
+    h1 {
+      color: #f4d03f;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .section {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .section-title {
+      color: #f4d03f;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+    .info-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .info-label {
+      color: #aaa;
+    }
+    .info-value {
+      color: #f4d03f;
+      font-family: monospace;
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: bold;
+    }
+    .status-ok { background: #4CAF50; color: white; }
+    .status-error { background: #f44336; color: white; }
+    .status-warn { background: #ff9800; color: white; }
+    .btn {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(90deg, #f4d03f, #f1c40f);
+      border: none;
+      border-radius: 8px;
+      color: #333;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .log-container {
+      background: #000;
+      border-radius: 8px;
+      padding: 15px;
+      max-height: 400px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 0.85rem;
+      color: #0f0;
+      margin-top: 20px;
+    }
+    .log-entry { margin-bottom: 5px; }
+    .log-info { color: #0f0; }
+    .log-warn { color: #ff0; }
+    .log-error { color: #f44; }
+  </style>
+
+  </head>
+<body>
+  <div class="container">
+    <h1>🔍 技能页面诊断工具</h1>
+    
+    <div class="section">
+      <div class="section-title">📊 当前角色 ID 来源</div>
+      <div class="info-item">
+        <span class="info-label">localStorage.currentRoleId</span>
+        <span class="info-value" id="lsCurrentRoleId">检查中...</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">localStorage.roleId</span>
+        <span class="info-value" id="lsRoleId">检查中...</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">localStorage.selectedCharacterId</span>
+        <span class="info-value" id="lsSelectedId">检查中...</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">APP_CONFIG.currentRoleId</span>
+        <span class="info-value" id="appConfigRoleId">检查中...</span>
+      </div>
+    </div>
+    
+    <div class="section">
+      <div class="section-title">✅ 同步状态</div>
+      <div id="syncStatus"></div>
+    </div>
+    
+    <div class="section">
+      <div class="section-title">🧪 测试 API</div>
+      <button class="btn" onclick="testGetUserProfile()">测试 getUserProfile</button>
+      <button class="btn" onclick="testGetAllSkills()">测试 getAllSkills</button>
+      <button class="btn" onclick="testGetRoleSkills()">测试 getRoleSkills</button>
+    </div>
+    
+    <div class="log-container" id="logContainer">
+      <div class="log-entry log-info">诊断工具已启动...</div>
+    </div>
+  </div>
+  
+  <script src="js/role-sync.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/api-service.js"></script>
+  <script>
+    const logContainer = document.getElementById('logContainer');
+    
+    function log(message, type = 'info') {
+      const entry = document.createElement('div');
+      entry.className = 'log-entry log-' + type;
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      logContainer.appendChild(entry);
+      logContainer.scrollTop = logContainer.scrollHeight;
+      console.log(message);
+    }
+    
+    function checkSyncStatus() {
+      const lsCurrentRoleId = localStorage.getItem('currentRoleId');
+      const lsRoleId = localStorage.getItem('roleId');
+      const lsSelectedId = localStorage.getItem('selectedCharacterId');
+      const appConfigRoleId = window.APP_CONFIG ? window.APP_CONFIG.currentRoleId : null;
+      
+      document.getElementById('lsCurrentRoleId').innerHTML = lsCurrentRoleId ? 
+        `<span class="status-badge status-ok">${lsCurrentRoleId}</span>` : 
+        '<span class="status-badge status-error">不存在</span>';
+      
+      document.getElementById('lsRoleId').innerHTML = lsRoleId ? 
+        `<span class="status-badge status-ok">${lsRoleId}</span>` : 
+        '<span class="status-badge status-error">不存在</span>';
+      
+      document.getElementById('lsSelectedId').innerHTML = lsSelectedId ? 
+        `<span class="status-badge status-ok">${lsSelectedId}</span>` : 
+        '<span class="status-badge status-error">不存在</span>';
+      
+      document.getElementById('appConfigRoleId').innerHTML = appConfigRoleId ? 
+        `<span class="status-badge status-ok">${appConfigRoleId}</span>` : 
+        '<span class="status-badge status-warn">不存在</span>';
+      
+      // 检查同步
+      const values = [lsCurrentRoleId, lsRoleId, lsSelectedId].filter(v => v);
+      const allSame = values.length > 0 && values.every(v => v === values[0]);
+      
+      const statusDiv = document.getElementById('syncStatus');
+      if (values.length === 0) {
+        statusDiv.innerHTML = '<div class="status-badge status-error">❌ 未设置角色 ID</div>';
+        log('未检测到角色 ID', 'error');
+      } else if (allSame) {
+        statusDiv.innerHTML = '<div class="status-badge status-ok">✅ 所有角色 ID 已同步</div>';
+        log('角色 ID 同步检查通过', 'info');
+      } else {
+        statusDiv.innerHTML = '<div class="status-badge status-error">❌ 角色 ID 不一致</div>';
+        log('角色 ID 不同步！', 'error');
+      }
+    }
+    
+    async function testGetUserProfile() {
+      log('=== 测试 getUserProfile ===', 'info');
+      const roleId = localStorage.getItem('currentRoleId');
+      
+      if (!roleId) {
+        log('错误：没有角色 ID', 'error');
+        return;
+      }
+      
+      log(`使用角色 ID: ${roleId}`, 'info');
+      
+      try {
+        const result = await window.apiService.getUserProfile(roleId);
+        log('getUserProfile 成功:', 'info');
+        log(JSON.stringify(result, null, 2), 'info');
+        
+        if (result && result.roleName) {
+          log(`✅ 角色名称：${result.roleName}`, 'info');
+        } else {
+          log('❌ 返回数据中没有角色名称', 'error');
+        }
+      } catch (error) {
+        log(`❌ getUserProfile 失败：${error.message}`, 'error');
+      }
+    }
+    
+    async function testGetAllSkills() {
+      log('=== 测试 getAllSkills ===', 'info');
+      
+      try {
+        const result = await window.apiService.getAllSkills();
+        log('getAllSkills 成功:', 'info');
+        log(`技能数量：${Array.isArray(result) ? result.length : (result.data ? result.data.length : 0)}`, 'info');
+        
+        if (result && result.data && result.data.length > 0) {
+          log(`前 3 个技能：`, 'info');
+          result.data.slice(0, 3).forEach((skill, i) => {
+            log(`  ${i + 1}. ${skill.name}`, 'info');
+          });
+        } else if (Array.isArray(result) && result.length > 0) {
+          log(`前 3 个技能：`, 'info');
+          result.slice(0, 3).forEach((skill, i) => {
+            log(`  ${i + 1}. ${skill.name}`, 'info');
+          });
+        } else {
+          log('❌ 没有技能数据', 'warn');
+        }
+      } catch (error) {
+        log(`❌ getAllSkills 失败：${error.message}`, 'error');
+      }
+    }
+    
+    async function testGetRoleSkills() {
+      log('=== 测试 getRoleSkills ===', 'info');
+      const roleId = localStorage.getItem('currentRoleId');
+      
+      if (!roleId) {
+        log('错误：没有角色 ID', 'error');
+        return;
+      }
+      
+      log(`使用角色 ID: ${roleId}`, 'info');
+      
+      try {
+        const result = await window.apiService.getRoleSkills(roleId);
+        log('getRoleSkills 成功:', 'info');
+        log(`角色技能数量：${Array.isArray(result) ? result.length : (result.data ? result.data.length : 0)}`, 'info');
+        
+        if ((result && result.data && result.data.length > 0) || (Array.isArray(result) && result.length > 0)) {
+          const skills = result.data || result;
+          log('已装备的技能：', 'info');
+          skills.filter(s => s.equipped).forEach((skill, i) => {
+            log(`  ${i + 1}. 技能 ID: ${skill.skillId}`, 'info');
+          });
+        } else {
+          log('❌ 没有角色技能数据', 'warn');
+        }
+      } catch (error) {
+        log(`❌ getRoleSkills 失败：${error.message}`, 'error');
+      }
+    }
+    
+    // 页面加载时检查
+    window.addEventListener('DOMContentLoaded', () => {
+      log('=== 技能页面诊断工具 ===', 'info');
+      log('检查角色 ID 同步状态...', 'info');
+      checkSyncStatus();
+    });
+  </script>
+</body>
+</html>

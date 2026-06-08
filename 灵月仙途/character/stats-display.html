@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="../js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="../css/mobile-adapt.css">
+    <title>角色属性 - 灵月仙途</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .stats-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stats-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .stats-section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .stat-item {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .stat-label {
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            font-size: 18px;
+            color: #333;
+        }
+        
+        .realm-info {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .realm-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        
+        .realm-stage {
+            font-size: 16px;
+            color: #666;
+        }
+        
+        .exp-bar {
+            width: 100%;
+            height: 20px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .exp-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #45a049);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+        
+        .exp-text {
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .power-level {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .power-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #ff6b35;
+        }
+        
+        .power-label {
+            font-size: 16px;
+            color: #666;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        
+        .btn:hover {
+            background: #45a049;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+    </style>
+
+  </head>
+<body>
+    <div class="stats-container">
+        <h1>角色属性面板</h1>
+        
+        <!-- 境界信息 -->
+        <div class="stats-section">
+            <div class="realm-info">
+                <div class="realm-name" id="realmName">炼气</div>
+                <div class="realm-stage" id="realmStage">第1层</div>
+            </div>
+            
+            <!-- 经验条 -->
+            <div class="exp-bar">
+                <div class="exp-progress" id="expProgress" style="width: 0%"></div>
+            </div>
+            <div class="exp-text" id="expText">0/1000</div>
+        </div>
+        
+        <!-- 战力信息 -->
+        <div class="stats-section">
+            <div class="power-level">
+                <div class="power-label">战力</div>
+                <div class="power-value" id="powerLevel">0</div>
+            </div>
+        </div>
+        
+        <!-- 基础属性 -->
+        <div class="stats-section">
+            <h2>基础属性</h2>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-label">根骨 (VIT)</div>
+                    <div class="stat-value" id="vitValue">10</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">灵力 (SPI)</div>
+                    <div class="stat-value" id="spiValue">10</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">身法 (AGI)</div>
+                    <div class="stat-value" id="agiValue">10</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">悟性 (WIS)</div>
+                    <div class="stat-value" id="wisValue">10</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">气运 (LCK)</div>
+                    <div class="stat-value" id="lckValue">5</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 衍生属性 -->
+        <div class="stats-section">
+            <h2>衍生属性</h2>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-label">气血 (HP)</div>
+                    <div class="stat-value" id="hpValue">1000</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">攻击 (ATK)</div>
+                    <div class="stat-value" id="atkValue">35</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">防御 (DEF)</div>
+                    <div class="stat-value" id="defValue">23</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">速度 (SPEED)</div>
+                    <div class="stat-value" id="speedValue">100</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">暴击率</div>
+                    <div class="stat-value" id="critValue">5.00%</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">闪避率</div>
+                    <div class="stat-value" id="dodgeValue">3.00%</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">命中率</div>
+                    <div class="stat-value" id="hitValue">90.00%</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">经验加成</div>
+                    <div class="stat-value" id="expBonusValue">100%</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 操作按钮 -->
+        <div style="text-align: center; margin-top: 20px;">
+            <button class="btn" onclick="refreshStats()">刷新属性</button>
+            <button class="btn btn-secondary" onclick="addExperience()">增加经验</button>
+            <button class="btn btn-secondary" onclick="updateRealm()">提升境界</button>
+        </div>
+    </div>
+    
+    <script>
+        // 模拟玩家ID
+        const playerId = 1;
+        
+        // 境界名称映射
+        const realmNames = {
+            1: '炼气',
+            2: '筑基',
+            3: '金丹',
+            4: '元婴',
+            5: '化神',
+            6: '炼虚',
+            7: '合体',
+            8: '大乘',
+            9: '渡劫'
+        };
+        
+        // 刷新属性
+        async function refreshStats() {
+            try {
+                const attrResponse = await fetch(`/api/attributes/${playerId}`);
+                const attrResult = await attrResponse.json();
+                
+                const attrData = attrResult.data || attrResult;
+                
+                const baseResponse = await fetch(`/api/stats/player/${playerId}`);
+                const baseResult = await baseResponse.json();
+                const baseStats = baseResult.data || baseResult;
+                
+                updateUI(baseStats, attrData);
+            } catch (error) {
+                console.error('获取属性失败:', error);
+                alert('获取属性失败，请重试');
+            }
+        }
+        
+        function updateUI(baseStats, attrData) {
+            document.getElementById('realmName').textContent = attrData.realmName || realmNames[attrData.realmLevel] || '未知';
+            document.getElementById('realmStage').textContent = baseStats.realmStage ? `第${baseStats.realmStage}层` : '';
+            
+            const expPercent = baseStats.expCurr && baseStats.expMax ? (baseStats.expCurr / baseStats.expMax) * 100 : 0;
+            document.getElementById('expProgress').style.width = `${expPercent}%`;
+            document.getElementById('expText').textContent = `${baseStats.expCurr || 0}/${baseStats.expMax || 1000}`;
+            
+            document.getElementById('vitValue').textContent = attrData.totalVit || 0;
+            document.getElementById('spiValue').textContent = attrData.totalSpi || 0;
+            document.getElementById('agiValue').textContent = attrData.totalAgi || 0;
+            document.getElementById('wisValue').textContent = attrData.totalWis || 0;
+            document.getElementById('lckValue').textContent = attrData.totalLck || 0;
+            
+            document.getElementById('hpValue').textContent = attrData.hpMax || attrData.hp || 0;
+            document.getElementById('atkValue').textContent = attrData.atk || 0;
+            document.getElementById('defValue').textContent = attrData.def || 0;
+            document.getElementById('speedValue').textContent = attrData.speed || 0;
+            document.getElementById('critValue').textContent = attrData.critRate != null ? attrData.critRate.toFixed(2) + '%' : '0.00%';
+            document.getElementById('dodgeValue').textContent = attrData.dodgeRate != null ? attrData.dodgeRate.toFixed(2) + '%' : '0.00%';
+            document.getElementById('hitValue').textContent = attrData.hitRate != null ? attrData.hitRate.toFixed(2) + '%' : '100.00%';
+            document.getElementById('expBonusValue').textContent = attrData.expBonus != null ? ((attrData.expBonus - 1) * 100).toFixed(0) + '%' : '0%';
+            
+            document.getElementById('powerLevel').textContent = attrData.powerLevel || 0;
+        }
+        
+        // 增加经验
+        async function addExperience() {
+            const expAmount = 500;
+            try {
+                const response = await fetch(`/api/stats/player/${playerId}/exp`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        expAmount: expAmount,
+                        contextInfo: '{"source": "手动添加"}'
+                    })
+                });
+                
+                if (response.ok) {
+                    await refreshStats();
+                    alert(`成功增加 ${expAmount} 经验值`);
+                } else {
+                    throw new Error('添加经验失败');
+                }
+            } catch (error) {
+                console.error('添加经验失败:', error);
+                alert('添加经验失败，请重试');
+            }
+        }
+        
+        // 提升境界
+        async function updateRealm() {
+            try {
+                const response = await fetch(`/api/stats/player/${playerId}/realm`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        realmLevel: 2,
+                        realmStage: 1,
+                        contextInfo: '{"source": "手动提升"}'
+                    })
+                });
+                
+                if (response.ok) {
+                    await refreshStats();
+                    alert('成功提升到筑基境界');
+                } else {
+                    throw new Error('提升境界失败');
+                }
+            } catch (error) {
+                console.error('提升境界失败:', error);
+                alert('提升境界失败，请重试');
+            }
+        }
+        
+        // 页面加载时刷新属性
+        window.onload = refreshStats;
+    </script>
+</body>
+</html>

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+  <script src="js/viewport-adapt.js"></script>
+  <link rel="stylesheet" href="css/mobile-adapt.css">
+    <title>灵月仙途 - 登录</title>
+    <style>
+        /* 全局重置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden; /* 防止出现滚动条 */
+            font-family: 'Microsoft YaHei', sans-serif;
+            background-color: #0d1117; /* 深色背景兜底 */
+        }
+
+        /* --- 启动页 (Splash Screen) 样式 --- */
+        #splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1f2e 0%, #0d1117 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.8s ease-in-out; /* 淡出动画 */
+        }
+
+        /* 封面图容器 */
+        .cover-container {
+            width: 200px;
+            height: 200px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            margin-bottom: 30px;
+            animation: float 3s ease-in-out infinite; /* 轻微浮动动画 */
+        }
+
+        .cover-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            /* 这里使用了一个占位图，你可以替换成你的 app 封面图 URL */
+            background-image: url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=2568&auto=format&fit=crop'); 
+            background-size: cover;
+            background-position: center;
+        }
+
+        .app-title {
+            color: #fff;
+            font-size: 24px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        /* 加载指示器 */
+        .loader {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #8b9bb4;
+            font-size: 14px;
+        }
+
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #8b9bb4;
+            border-top: 2px solid #fff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        /* --- 登录弹窗 (Login Modal) 样式 --- */
+        #login-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6); /* 半透明遮罩 */
+            backdrop-filter: blur(5px); /* 毛玻璃效果 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.5s ease;
+        }
+
+        #login-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .login-box {
+            background: #fff;
+            width: 90%;
+            max-width: 400px;
+            padding: 40px 30px;
+            border-radius: 16px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            transform: translateY(20px);
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            text-align: center;
+        }
+
+        #login-modal.active .login-box {
+            transform: translateY(0);
+        }
+
+        .login-header h2 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .login-header p {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus {
+            border-color: #4a90e2;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(74, 144, 226, 0.4);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .footer-links {
+            margin-top: 20px;
+            font-size: 13px;
+            color: #888;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .footer-links a {
+            color: #4a90e2;
+            text-decoration: none;
+        }
+
+        /* 动画关键帧 */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+    </style>
+
+  </head>
+<body>
+
+    <!-- 1. 启动页 (Splash Screen) -->
+    <div id="splash-screen">
+        <div class="cover-container">
+            <img src="images/cover.jpg" alt="Cover Image" class="cover-image">
+            <div class="cover-image"></div>
+        </div>
+        <div class="app-title">灵月仙途</div>
+        <div class="loader">
+            <div class="spinner"></div>
+            <span id="loading-text">正在加载资源...</span>
+        </div>
+    </div>
+
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // 配置加载时间 (毫秒)
+            // 2000 = 2秒, 3000 = 3秒, 5000 = 5秒
+            const LOAD_TIME = 3000; 
+
+            const splashScreen = document.getElementById('splash-screen');
+            const loadingText = document.getElementById('loading-text');
+
+            // 模拟加载过程文字变化 (可选)
+            setTimeout(() => {
+                loadingText.textContent = "正在连接服务器...";
+            }, LOAD_TIME / 2);
+
+            // 加载完成后跳转到登录页面
+            setTimeout(() => {
+                // 淡出启动页
+                splashScreen.style.opacity = '0';
+                
+                // 等待动画完成后跳转到登录页面
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 800);
+            }, LOAD_TIME);
+        });
+    </script>
+  <script src="js/ui-components.js"></script>
+</body>
+</html>

@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>光的折射实验 | 物理互动演示</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(145deg, #e0f2fe 0%, #bae6fd 50%, #e0f2fe 100%);
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+            color: #1e3a5f;
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            color: #0369a1;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #075985;
+            font-size: 1rem;
+        }
+
+        .lab-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            align-items: flex-start;
+        }
+
+        .canvas-area {
+            flex: 2;
+            min-width: 320px;
+            background: white;
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        canvas {
+            width: 100%;
+            height: auto;
+            border-radius: 16px;
+            background: linear-gradient(180deg, #e0f7fa 0%, #80deea 50%, #4dd0e1 100%);
+        }
+
+        .control-area {
+            flex: 1;
+            min-width: 280px;
+            background: white;
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .param-card {
+            background: #f0f9ff;
+            border-radius: 16px;
+            padding: 18px;
+            margin-bottom: 20px;
+            border-left: 4px solid #0ea5e9;
+        }
+
+        .param-title {
+            font-weight: 600;
+            color: #0369a1;
+            margin-bottom: 15px;
+            font-size: 1rem;
+        }
+
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .slider-group label {
+            width: 80px;
+            font-size: 0.9rem;
+            color: #075985;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            height: 6px;
+            border-radius: 6px;
+            background: #7dd3fc;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            width: 18px;
+            height: 18px;
+            background: #0ea5e9;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 8px rgba(14, 165, 233, 0.4);
+        }
+
+        .param-value {
+            width: 60px;
+            text-align: right;
+            font-family: monospace;
+            font-weight: 600;
+            color: #0369a1;
+        }
+
+        .info-panel {
+            background: #fef3c7;
+            border-radius: 16px;
+            padding: 16px;
+            margin-top: 20px;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            font-size: 0.9rem;
+        }
+
+        .info-label {
+            color: #92400e;
+        }
+
+        .info-value {
+            font-weight: 600;
+            color: #d97706;
+            font-family: monospace;
+        }
+
+        .preset-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .preset-btn {
+            flex: 1;
+            background: #e0f2fe;
+            border: 2px solid #7dd3fc;
+            padding: 10px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+            color: #0369a1;
+        }
+
+        .preset-btn:hover {
+            background: #0ea5e9;
+            color: white;
+            border-color: #0ea5e9;
+        }
+
+        .hint-text {
+            font-size: 0.8rem;
+            color: #64748b;
+            text-align: center;
+            margin-top: 15px;
+            padding: 10px;
+            background: #f8fafc;
+            border-radius: 12px;
+        }
+
+        @media (max-width: 800px) {
+            .lab-row {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <header>
+            <h1>🔍 光的折射实验</h1>
+            <p class="subtitle">探索光从空气进入水中的奇妙变化</p>
+        </header>
+
+        <div class="lab-row">
+            <div class="canvas-area">
+                <canvas id="refractionCanvas" width="600" height="400" style="aspect-ratio: 600/400;"></canvas>
+            </div>
+
+            <div class="control-area">
+                <div class="param-card">
+                    <div class="param-title">🎛️ 调节入射角</div>
+                    <div class="slider-group">
+                        <label>入射角:</label>
+                        <input type="range" id="angleSlider" min="0" max="89" step="1" value="45">
+                        <span class="param-value" id="angleValue">45°</span>
+                    </div>
+                </div>
+
+                <div class="param-card">
+                    <div class="param-title">💧 介质选择</div>
+                    <div class="preset-buttons">
+                        <button class="preset-btn" onclick="setMedium('water')">水</button>
+                        <button class="preset-btn" onclick="setMedium('glass')">玻璃</button>
+                        <button class="preset-btn" onclick="setMedium('diamond')">钻石</button>
+                    </div>
+                </div>
+
+                <div class="info-panel">
+                    <div class="param-title">📊 实时数据</div>
+                    <div class="info-row">
+                        <span class="info-label">入射角:</span>
+                        <span class="info-value" id="infoIncident">45.0°</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">折射角:</span>
+                        <span class="info-value" id="infoRefracted">32.2°</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">折射率:</span>
+                        <span class="info-value" id="infoRefractive">1.33</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">偏折角:</span>
+                        <span class="info-value" id="infoDeviation">12.8°</span>
+                    </div>
+                </div>
+
+                <div class="hint-text">
+                    💡 提示：调整入射角，观察折射光线的变化。当入射角增大到一定程度时，会发生全反射！
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('refractionCanvas');
+        const ctx = canvas.getContext('2d');
+        let width = 600, height = 400;
+        canvas.width = width;
+        canvas.height = height;
+
+        let incidentAngle = 45;
+        let refractiveIndex = 1.33;
+        const mediums = {
+            water: { n: 1.33, name: '水' },
+            glass: { n: 1.5, name: '玻璃' },
+            diamond: { n: 2.42, name: '钻石' }
+        };
+
+        function draw() {
+            ctx.clearRect(0, 0, width, height);
+            
+            const centerX = width / 2;
+            const waterLine = height * 0.55;
+
+            ctx.fillStyle = '#e0f7fa';
+            ctx.fillRect(0, 0, width, waterLine);
+            
+            ctx.fillStyle = '#4dd0e1';
+            ctx.fillRect(0, waterLine, width, height - waterLine);
+
+            ctx.strokeStyle = '#0369a1';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([10, 5]);
+            ctx.beginPath();
+            ctx.moveTo(0, waterLine);
+            ctx.lineTo(width, waterLine);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.font = '14px sans-serif';
+            ctx.fillStyle = '#075985';
+            ctx.fillText('空气', 20, 30);
+            ctx.fillText('水', 20, waterLine + 25);
+
+            const incidentRad = (incidentAngle * Math.PI) / 180;
+            const sinRefracted = Math.sin(incidentRad) / refractiveIndex;
+            
+            if (sinRefracted > 1) {
+                drawTotalReflection(centerX, waterLine, incidentRad);
+                return;
+            }
+
+            const refractedRad = Math.asin(sinRefracted);
+            const refractedAngle = (refractedRad * 180) / Math.PI;
+
+            const rayLength = 180;
+            
+            const incidentStartX = centerX - rayLength * Math.sin(incidentRad);
+            const incidentStartY = waterLine - rayLength * Math.cos(incidentRad);
+            
+            const refractedEndX = centerX + rayLength * Math.sin(refractedRad);
+            const refractedEndY = waterLine + rayLength * Math.cos(refractedRad);
+
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(incidentStartX, incidentStartY);
+            ctx.lineTo(centerX, waterLine);
+            ctx.stroke();
+
+            drawArrow(ctx, incidentStartX, incidentStartY, centerX, waterLine);
+
+            ctx.strokeStyle = '#22c55e';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(centerX, waterLine);
+            ctx.lineTo(refractedEndX, refractedEndY);
+            ctx.stroke();
+
+            drawArrow(ctx, centerX, waterLine, refractedEndX, refractedEndY);
+
+            ctx.strokeStyle = '#0369a1';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([5, 3]);
+            ctx.beginPath();
+            ctx.moveTo(centerX, waterLine);
+            ctx.lineTo(centerX, waterLine - 80);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            drawAngleArc(ctx, centerX, waterLine, 50, -Math.PI/2, -Math.PI/2 + incidentRad, '#ef4444');
+            drawAngleArc(ctx, centerX, waterLine, 40, Math.PI/2 - refractedRad, Math.PI/2, '#22c55e');
+
+            ctx.font = 'bold 14px sans-serif';
+            ctx.fillStyle = '#dc2626';
+            ctx.fillText(`θ₁=${incidentAngle.toFixed(1)}°`, 
+                centerX + 60 * Math.cos(-Math.PI/2 + incidentRad/2) + 10,
+                waterLine + 60 * Math.sin(-Math.PI/2 + incidentRad/2));
+            
+            ctx.fillStyle = '#16a34a';
+            ctx.fillText(`θ₂=${refractedAngle.toFixed(1)}°`,
+                centerX + 50 * Math.cos(Math.PI/2 - refractedRad/2) + 10,
+                waterLine + 50 * Math.sin(Math.PI/2 - refractedRad/2));
+
+            updateInfo(refractedAngle);
+        }
+
+        function drawAngleArc(ctx, cx, cy, r, start, end, color) {
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(cx, cy, r, start, end);
+            ctx.stroke();
+        }
+
+        function drawArrow(ctx, fromX, fromY, toX, toY) {
+            const headLen = 12;
+            const dx = toX - fromX;
+            const dy = toY - fromY;
+            const angle = Math.atan2(dy, dx);
+            
+            ctx.fillStyle = ctx.strokeStyle;
+            ctx.beginPath();
+            ctx.moveTo(toX, toY);
+            ctx.lineTo(toX - headLen * Math.cos(angle - Math.PI/6),
+                       toY - headLen * Math.sin(angle - Math.PI/6));
+            ctx.lineTo(toX - headLen * Math.cos(angle + Math.PI/6),
+                       toY - headLen * Math.sin(angle + Math.PI/6));
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        function drawTotalReflection(centerX, waterLine, incidentRad) {
+            const rayLength = 180;
+            
+            const incidentStartX = centerX - rayLength * Math.sin(incidentRad);
+            const incidentStartY = waterLine - rayLength * Math.cos(incidentRad);
+            
+            const reflectedEndX = centerX + rayLength * Math.sin(incidentRad);
+            const reflectedEndY = waterLine - rayLength * Math.cos(incidentRad);
+
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(incidentStartX, incidentStartY);
+            ctx.lineTo(centerX, waterLine);
+            ctx.stroke();
+            drawArrow(ctx, incidentStartX, incidentStartY, centerX, waterLine);
+
+            ctx.strokeStyle = '#f59e0b';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(centerX, waterLine);
+            ctx.lineTo(reflectedEndX, reflectedEndY);
+            ctx.stroke();
+            drawArrow(ctx, centerX, waterLine, reflectedEndX, reflectedEndY);
+
+            drawAngleArc(ctx, centerX, waterLine, 50, -Math.PI/2, -Math.PI/2 + incidentRad, '#ef4444');
+            drawAngleArc(ctx, centerX, waterLine, 40, -Math.PI/2 - incidentRad, -Math.PI/2, '#f59e0b');
+
+            ctx.font = 'bold 16px sans-serif';
+            ctx.fillStyle = '#d97706';
+            ctx.fillText('全反射!', centerX + 80, waterLine - 60);
+
+            updateInfo(null);
+        }
+
+        function updateInfo(refractedAngle) {
+            document.getElementById('infoIncident').textContent = incidentAngle.toFixed(1) + '°';
+            
+            if (refractedAngle !== null) {
+                document.getElementById('infoRefracted').textContent = refractedAngle.toFixed(1) + '°';
+                document.getElementById('infoDeviation').textContent = (incidentAngle - refractedAngle).toFixed(1) + '°';
+            } else {
+                document.getElementById('infoRefracted').textContent = '---';
+                document.getElementById('infoDeviation').textContent = '全反射';
+            }
+            
+            document.getElementById('infoRefractive').textContent = refractiveIndex.toFixed(2);
+        }
+
+        function setMedium(medium) {
+            refractiveIndex = mediums[medium].n;
+            draw();
+        }
+
+        const slider = document.getElementById('angleSlider');
+        const angleValue = document.getElementById('angleValue');
+
+        slider.addEventListener('input', (e) => {
+            incidentAngle = parseFloat(e.target.value);
+            angleValue.textContent = incidentAngle + '°';
+            draw();
+        });
+
+        draw();
+    </script>
+</body>
+</html>

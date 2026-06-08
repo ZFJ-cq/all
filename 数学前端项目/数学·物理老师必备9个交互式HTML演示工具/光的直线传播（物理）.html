@@ -1,0 +1,653 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>光的直线传播 · 互动演示实验室 | 右侧控台 · 阴影模拟</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: radial-gradient(circle at 10% 20%, #0a1724, #030c14);
+            font-family: 'Segoe UI', 'Poppins', 'Roboto', system-ui, sans-serif;
+            min-height: 100vh;
+            padding: 24px 20px;
+            color: #eef4ff;
+        }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .title-area {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #fedb70, #ffaa33);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.3px;
+        }
+        .sub {
+            color: #9cc6e0;
+            font-size: 0.9rem;
+            border-bottom: 1px solid #2e6b8a;
+            display: inline-block;
+            padding-bottom: 5px;
+        }
+
+        /* 左右等高布局 */
+        .lab-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            align-items: stretch;
+        }
+
+        /* 左侧实验画布区 */
+        .canvas-area {
+            flex: 2;
+            min-width: 320px;
+            background: rgba(8, 28, 40, 0.6);
+            backdrop-filter: blur(8px);
+            border-radius: 36px;
+            border: 1px solid rgba(70, 170, 210, 0.45);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .canvas-wrapper {
+            background: #030f18;
+            border-radius: 28px;
+            padding: 6px;
+            box-shadow: inset 0 0 8px rgba(0,200,255,0.1), 0 8px 20px rgba(0,0,0,0.4);
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            background: radial-gradient(ellipse at 30% 40%, #112a36, #020e16);
+            border-radius: 24px;
+            cursor: crosshair;
+        }
+        .status-tips {
+            margin-top: 16px;
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .chip {
+            background: #0a293b;
+            padding: 6px 14px;
+            border-radius: 60px;
+            font-size: 0.75rem;
+            border: 1px solid #3490b0;
+        }
+
+        /* 右侧控制面板 (卡片+说明) */
+        .control-area {
+            flex: 1.2;
+            min-width: 290px;
+            background: rgba(15, 45, 60, 0.7);
+            backdrop-filter: blur(12px);
+            border-radius: 36px;
+            border: 1px solid rgba(80, 180, 220, 0.5);
+            padding: 22px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .param-card {
+            background: rgba(0, 25, 38, 0.7);
+            border-radius: 28px;
+            padding: 16px;
+            border: 1px solid #317e9e;
+        }
+        .param-label {
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: #c6edff;
+        }
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        input[type="range"] {
+            flex: 2;
+            min-width: 120px;
+            height: 4px;
+            border-radius: 6px;
+            background: #295e78;
+            -webkit-appearance: none;
+        }
+        input[type="range"]:focus {
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            width: 16px;
+            height: 16px;
+            background: #ffbc4a;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 4px #ffa600;
+            border: none;
+        }
+        .num-input {
+            width: 75px;
+            background: #07212f;
+            border: 1px solid #3990b0;
+            border-radius: 40px;
+            padding: 6px 8px;
+            color: white;
+            text-align: center;
+            font-family: monospace;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 14px;
+            margin: 10px 0;
+        }
+        button {
+            flex: 1;
+            background: linear-gradient(105deg, #267a9e, #135c7a);
+            border: none;
+            padding: 10px 0;
+            border-radius: 50px;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.85rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        button.sec {
+            background: linear-gradient(105deg, #4c6e84, #2a5570);
+        }
+        button:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.05);
+        }
+        .info-section {
+            background: rgba(0, 25, 38, 0.6);
+            border-radius: 24px;
+            padding: 14px;
+            font-size: 0.75rem;
+            border-left: 3px solid #ffbc4a;
+        }
+        .info-section p {
+            margin: 6px 0;
+        }
+        .examples {
+            margin-top: 8px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            font-size: 0.7rem;
+            color: #bde2ff;
+        }
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 0.7rem;
+            color: #6b9bbe;
+            border-top: 1px solid #28688a;
+            padding-top: 18px;
+        }
+        .inline-icon {
+            font-size: 1rem;
+            margin-right: 4px;
+        }
+        @media (max-width: 850px) {
+            .lab-row { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+<div class="main-container">
+    <div class="title-area">
+        <h1>✨ 光的直线传播 · 互动实验室</h1>
+        <div class="sub">同种均匀介质中光线沿直线传播 | 阴影实时模拟</div>
+    </div>
+
+    <div class="lab-row">
+        <!-- 左侧实验画布 -->
+        <div class="canvas-area">
+            <div class="canvas-wrapper">
+                <canvas id="lightCanvas" width="780" height="480" style="width:100%; height:auto; aspect-ratio:780/480"></canvas>
+            </div>
+            <div class="status-tips">
+                <div class="chip">🔆 光速 ≈ 3.0×10⁸ m/s  (真空/空气)</div>
+                <div class="chip" id="rayCountTip">📡 光线数: 8</div>
+                <div class="chip" id="shadowStat">🌑 阴影显示中</div>
+            </div>
+        </div>
+
+        <!-- 右侧控制面板 -->
+        <div class="control-area">
+            <!-- 光源控制组 -->
+            <div class="param-card">
+                <div class="param-label">💡 光源位置 (X, Y)</div>
+                <div class="slider-group">
+                    <span>X:</span>
+                    <input type="range" id="lightXSlider" min="20" max="760" step="2" value="100">
+                    <input type="number" id="lightXNum" class="num-input" step="5" value="100">
+                </div>
+                <div class="slider-group">
+                    <span>Y:</span>
+                    <input type="range" id="lightYSlider" min="20" max="460" step="2" value="300">
+                    <input type="number" id="lightYNum" class="num-input" step="5" value="300">
+                </div>
+                <div class="slider-group" style="margin-top: 10px;">
+                    <span>🌈 光线数量:</span>
+                    <input type="range" id="rayCountSlider" min="2" max="24" step="1" value="8">
+                    <input type="number" id="rayCountNum" class="num-input" min="2" max="24" step="1" value="8">
+                </div>
+            </div>
+
+            <!-- 阴影障碍物控制 -->
+            <div class="param-card">
+                <div class="param-label">📦 矩形障碍物 (模拟阴影区)</div>
+                <div class="slider-group">
+                    <span>X坐标:</span>
+                    <input type="range" id="shadowXSlider" min="-50" max="760" step="5" value="400">
+                    <input type="number" id="shadowXNum" class="num-input" step="10" value="400">
+                </div>
+                <div class="slider-group">
+                    <span>Y坐标:</span>
+                    <input type="range" id="shadowYSlider" min="-30" max="460" step="5" value="180">
+                    <input type="number" id="shadowYNum" class="num-input" step="10" value="180">
+                </div>
+                <div class="slider-group">
+                    <span>📏 宽度:</span>
+                    <input type="range" id="shadowWSlider" min="20" max="200" step="5" value="80">
+                    <input type="number" id="shadowWNum" class="num-input" step="5" value="80">
+                </div>
+                <div class="slider-group">
+                    <span>📐 高度:</span>
+                    <input type="range" id="shadowHSlider" min="20" max="200" step="5" value="100">
+                    <input type="number" id="shadowHNum" class="num-input" step="5" value="100">
+                </div>
+            </div>
+
+            <!-- 演示控制按钮 -->
+            <div class="btn-group">
+                <button id="playAnimBtn">▶ 播放动画</button>
+                <button id="pauseAnimBtn" class="sec">⏸️ 暂停</button>
+                <button id="showShadowBtn" class="sec">🌓 显示阴影</button>
+                <button id="geoVerifyBtn" class="sec">📐 几何验证</button>
+            </div>
+
+            <!-- 光速/说明 + 生活实例 -->
+            <div class="info-section">
+                <p>⚡ <strong>光速</strong> = 3.0 × 10⁸ m/s （真空中）</p>
+                <p>📖 <strong>实验原理</strong>：光在同种均匀介质中沿直线传播。遇到不透明障碍物时，光线被阻挡，后方形成阴影。</p>
+                <div class="examples">
+                    <span>🌞 日食：月球挡住太阳光</span>
+                    <span>🏢 建筑物阴影</span>
+                    <span>📷 小孔成像</span>
+                    <span>🤚 手影游戏</span>
+                </div>
+                <p style="margin-top:6px;">💡 几何验证: 检查光线与障碍物的交点，验证光的直线传播。</p>
+            </div>
+        </div>
+    </div>
+    <footer>
+        🔦 光源发射多条射线 → 遇障碍物形成阴影 | 右侧可调光源位置/光线数/障碍物尺寸 | 动画: 光源X轴往复运动
+    </footer>
+</div>
+
+<script>
+    (function() {
+        // --- DOM 元素绑定 ---
+        const canvas = document.getElementById('lightCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // 光源控件
+        const lightXSlider = document.getElementById('lightXSlider');
+        const lightXNum = document.getElementById('lightXNum');
+        const lightYSlider = document.getElementById('lightYSlider');
+        const lightYNum = document.getElementById('lightYNum');
+        const rayCountSlider = document.getElementById('rayCountSlider');
+        const rayCountNum = document.getElementById('rayCountNum');
+        // 障碍物控件
+        const shadowXSlider = document.getElementById('shadowXSlider');
+        const shadowXNum = document.getElementById('shadowXNum');
+        const shadowYSlider = document.getElementById('shadowYSlider');
+        const shadowYNum = document.getElementById('shadowYNum');
+        const shadowWSlider = document.getElementById('shadowWSlider');
+        const shadowWNum = document.getElementById('shadowWNum');
+        const shadowHSlider = document.getElementById('shadowHSlider');
+        const shadowHNum = document.getElementById('shadowHNum');
+        
+        // 按钮
+        const playBtn = document.getElementById('playAnimBtn');
+        const pauseBtn = document.getElementById('pauseAnimBtn');
+        const showShadowBtn = document.getElementById('showShadowBtn');
+        const geoVerifyBtn = document.getElementById('geoVerifyBtn');
+        
+        const rayCountTip = document.getElementById('rayCountTip');
+        const shadowStatSpan = document.getElementById('shadowStat');
+        
+        // 画布实际尺寸固定为 780x480 (避免缩放变形)
+        canvas.width = 780;
+        canvas.height = 480;
+        
+        // 状态变量
+        let lightX = 100, lightY = 300;
+        let rayCount = 8;
+        let shadowRect = { x: 400, y: 180, w: 80, h: 100 };
+        let showShadow = true;      // 显示遮罩区域
+        let animActive = false;
+        let animId = null;
+        let animOffset = 0;
+        
+        // 辅助: 线段与矩形相交检测 (用于射线截断)
+        // 对于每条射线: 从光源出发到画布边界方向，检测是否与矩形相交，如果有交点则返回交点参数t (0-1)
+        function intersectRayRect(originX, originY, dirX, dirY, rect) {
+            // 矩形四条边
+            const { x: rx, y: ry, w: rw, h: rh } = rect;
+            const left = rx, right = rx + rw;
+            const top = ry, bottom = ry + rh;
+            let tMin = Infinity;
+            // 与左边交点
+            if (dirX !== 0) {
+                let t = (left - originX) / dirX;
+                let y = originY + t * dirY;
+                if (t >= 0 && y >= top && y <= bottom) tMin = Math.min(tMin, t);
+            }
+            // 与右边
+            if (dirX !== 0) {
+                let t = (right - originX) / dirX;
+                let y = originY + t * dirY;
+                if (t >= 0 && y >= top && y <= bottom) tMin = Math.min(tMin, t);
+            }
+            // 与上边
+            if (dirY !== 0) {
+                let t = (top - originY) / dirY;
+                let x = originX + t * dirX;
+                if (t >= 0 && x >= left && x <= right) tMin = Math.min(tMin, t);
+            }
+            // 与下边
+            if (dirY !== 0) {
+                let t = (bottom - originY) / dirY;
+                let x = originX + t * dirX;
+                if (t >= 0 && x >= left && x <= right) tMin = Math.min(tMin, t);
+            }
+            if (tMin !== Infinity) return tMin;
+            return null;
+        }
+        
+        // 绘制所有光线 + 阴影区域 (光直线传播 + 遮挡)
+        function drawScene() {
+            if (!ctx) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 画网格背景 (科技感)
+            ctx.strokeStyle = "#1a6780";
+            ctx.lineWidth = 0.5;
+            for (let i = 0; i < canvas.width; i += 40) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, canvas.height);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(0, i % canvas.height);
+                ctx.lineTo(canvas.width, i % canvas.height);
+                ctx.stroke();
+            }
+            
+            // 绘制障碍物 (阴影区主体)
+            ctx.fillStyle = showShadow ? "rgba(30, 80, 100, 0.6)" : "rgba(90, 120, 140, 0.3)";
+            ctx.fillRect(shadowRect.x, shadowRect.y, shadowRect.w, shadowRect.h);
+            ctx.strokeStyle = "#f4b942";
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(shadowRect.x, shadowRect.y, shadowRect.w, shadowRect.h);
+            ctx.fillStyle = "#ffdd99";
+            ctx.font = "10px 'Segoe UI'";
+            ctx.fillText("⛔ 障碍物", shadowRect.x+5, shadowRect.y-4);
+            
+            // 光线: 从光源向四周发射扇形 (覆盖一定角度范围)
+            const angleTotal = Math.PI * 1.8;   // 约 180度扇形 (朝前辐射)
+            const startAngle = -angleTotal/2;
+            const step = angleTotal / (rayCount - 1);
+            
+            for (let i = 0; i < rayCount; i++) {
+                let angle = startAngle + i * step;
+                // 方向向量
+                let dirX = Math.cos(angle);
+                let dirY = Math.sin(angle);
+                // 射线的终点默认画到边界
+                const maxLen = 1200;
+                let endX = lightX + dirX * maxLen;
+                let endY = lightY + dirY * maxLen;
+                let hit = false;
+                // 检测是否与矩形相交
+                const rect = { x: shadowRect.x, y: shadowRect.y, w: shadowRect.w, h: shadowRect.h };
+                const t = intersectRayRect(lightX, lightY, dirX, dirY, rect);
+                if (t !== null && t > 0.01) {
+                    // 射线被矩形挡住，只画到交点
+                    endX = lightX + dirX * t * maxLen;
+                    endY = lightY + dirY * t * maxLen;
+                    hit = true;
+                }
+                // 绘制光线 (半透发光)
+                ctx.beginPath();
+                ctx.moveTo(lightX, lightY);
+                ctx.lineTo(endX, endY);
+                ctx.strokeStyle = hit ? "#ffc107" : "#ffdf80";
+                ctx.lineWidth = 2.2;
+                ctx.shadowBlur = 4;
+                ctx.shadowColor = "#ffcc44";
+                ctx.stroke();
+                // 如果碰到障碍物，在碰撞点做一个小光晕标记
+                if (hit) {
+                    ctx.beginPath();
+                    ctx.arc(endX, endY, 3, 0, 2*Math.PI);
+                    ctx.fillStyle = "#ffb347";
+                    ctx.shadowBlur = 6;
+                    ctx.fill();
+                }
+            }
+            ctx.shadowBlur = 0;
+            
+            // 绘制光源 (发光点)
+            ctx.beginPath();
+            ctx.arc(lightX, lightY, 12, 0, 2*Math.PI);
+            ctx.fillStyle = "#ffd966";
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = "#ffbb33";
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(lightX, lightY, 6, 0, 2*Math.PI);
+            ctx.fillStyle = "#ffffff";
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            
+            // 如果显示阴影的开关打开，再额外绘制半透明阴影区域 (障碍物后方光线缺失区)
+            if (showShadow) {
+                // 简单绘制一个从矩形下方向外扩散的暗区（增强视觉效果）
+                ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
+                ctx.beginPath();
+                ctx.moveTo(shadowRect.x, shadowRect.y + shadowRect.h);
+                ctx.lineTo(shadowRect.x + shadowRect.w, shadowRect.y + shadowRect.h);
+                ctx.lineTo(shadowRect.x + shadowRect.w + 40, canvas.height);
+                ctx.lineTo(shadowRect.x - 40, canvas.height);
+                ctx.fill();
+            }
+            
+            // 标注光源
+            ctx.fillStyle = "#ffe0a3";
+            ctx.font = "bold 12px 'Segoe UI'";
+            ctx.fillText("光源", lightX-15, lightY-8);
+            
+            // 几何验证提示 (额外显示一行)
+            if (window._geoValidMsg) {
+                ctx.fillStyle = "#aaffdd";
+                ctx.font = "italic 10px monospace";
+                ctx.fillText(window._geoValidMsg, 20, 40);
+            }
+            // 更新光线数提示
+            rayCountTip.innerHTML = `📡 光线数: ${rayCount}`;
+            shadowStatSpan.innerHTML = showShadow ? "🌑 阴影显示中" : "☀️ 阴影隐藏";
+        }
+        
+        // 刷新全部参数并重绘
+        function syncFromUIAndDraw() {
+            lightX = parseFloat(lightXSlider.value);
+            lightY = parseFloat(lightYSlider.value);
+            rayCount = parseInt(rayCountSlider.value);
+            shadowRect.x = parseFloat(shadowXSlider.value);
+            shadowRect.y = parseFloat(shadowYSlider.value);
+            shadowRect.w = parseFloat(shadowWSlider.value);
+            shadowRect.h = parseFloat(shadowHSlider.value);
+            
+            lightXNum.value = lightX;
+            lightYNum.value = lightY;
+            rayCountNum.value = rayCount;
+            shadowXNum.value = shadowRect.x;
+            shadowYNum.value = shadowRect.y;
+            shadowWNum.value = shadowRect.w;
+            shadowHNum.value = shadowRect.h;
+            
+            // 边界裁剪
+            lightX = Math.min(canvas.width-10, Math.max(10, lightX));
+            lightY = Math.min(canvas.height-10, Math.max(10, lightY));
+            shadowRect.x = Math.min(canvas.width-5, Math.max(-30, shadowRect.x));
+            shadowRect.y = Math.min(canvas.height-5, Math.max(-30, shadowRect.y));
+            
+            drawScene();
+        }
+        
+        // 几何验证: 显示光源到障碍物顶点的连线以及角度，说明直线传播
+        function geometryVerification() {
+            // 计算光源到障碍物四个顶点的方向，展示其直线特性
+            const corners = [
+                { x: shadowRect.x, y: shadowRect.y },
+                { x: shadowRect.x + shadowRect.w, y: shadowRect.y },
+                { x: shadowRect.x, y: shadowRect.y + shadowRect.h },
+                { x: shadowRect.x + shadowRect.w, y: shadowRect.y + shadowRect.h }
+            ];
+            let message = "✅ 几何验证: 光源→障碍物顶点直线；光在均匀介质中直线传播。";
+            // 额外绘制临时线段用于视觉验证 (临时显示3秒)
+            // 为了方便，不在主循环绘制临时线，而是直接重绘并附加绘制
+            drawScene();
+            ctx.save();
+            ctx.strokeStyle = "#ff6666";
+            ctx.lineWidth = 1.2;
+            ctx.setLineDash([6, 6]);
+            for (let i = 0; i < corners.length; i++) {
+                ctx.beginPath();
+                ctx.moveTo(lightX, lightY);
+                ctx.lineTo(corners[i].x, corners[i].y);
+                ctx.stroke();
+            }
+            ctx.setLineDash([]);
+            ctx.fillStyle = "#fff6cc";
+            ctx.font = "bold 10px monospace";
+            ctx.fillText("🔍 几何验证：光沿直线传播 (虚线为光源至障碍物边界)", 30, 70);
+            ctx.restore();
+            window._geoValidMsg = "验证: 光线直线到达障碍物边缘，符合直线传播";
+            setTimeout(() => {
+                window._geoValidMsg = null;
+                drawScene();
+            }, 2500);
+        }
+        
+        // 动画: 让光源在X轴有规律往返 (简单正弦运动)
+        let animXOffset = 0;
+        let animStep = 0;
+        function startAnimation() {
+            if (animActive) return;
+            animActive = true;
+            if (animId) cancelAnimationFrame(animId);
+            let startX = lightX;
+            let range = 200;
+            let time = 0;
+            function animateLoop() {
+                if (!animActive) return;
+                // 动态改变光源X位置：正弦摆动
+                let newX = parseFloat(lightXSlider.min) + (parseFloat(lightXSlider.max) - parseFloat(lightXSlider.min)) * (0.5 + 0.45 * Math.sin(Date.now() / 1200));
+                newX = Math.min(parseFloat(lightXSlider.max), Math.max(parseFloat(lightXSlider.min), newX));
+                lightXSlider.value = newX;
+                lightXNum.value = newX;
+                lightX = newX;
+                syncFromUIAndDraw();
+                animId = requestAnimationFrame(animateLoop);
+            }
+            animId = requestAnimationFrame(animateLoop);
+        }
+        
+        function stopAnimation() {
+            if (animId) {
+                cancelAnimationFrame(animId);
+                animId = null;
+            }
+            animActive = false;
+            // 确保动画停止后参数与UI一致
+            syncFromUIAndDraw();
+        }
+        
+        // 切换阴影显示开关 (按钮点击)
+        let shadowVisible = true;
+        function toggleShadowDisplay() {
+            showShadow = !showShadow;
+            shadowStatSpan.innerHTML = showShadow ? "🌑 阴影显示中" : "☀️ 阴影隐藏";
+            drawScene();
+        }
+        
+        // 事件绑定
+        function bindEvents() {
+            lightXSlider.addEventListener('input', syncFromUIAndDraw);
+            lightXNum.addEventListener('change', syncFromUIAndDraw);
+            lightYSlider.addEventListener('input', syncFromUIAndDraw);
+            lightYNum.addEventListener('change', syncFromUIAndDraw);
+            rayCountSlider.addEventListener('input', syncFromUIAndDraw);
+            rayCountNum.addEventListener('change', syncFromUIAndDraw);
+            shadowXSlider.addEventListener('input', syncFromUIAndDraw);
+            shadowXNum.addEventListener('change', syncFromUIAndDraw);
+            shadowYSlider.addEventListener('input', syncFromUIAndDraw);
+            shadowYNum.addEventListener('change', syncFromUIAndDraw);
+            shadowWSlider.addEventListener('input', syncFromUIAndDraw);
+            shadowWNum.addEventListener('change', syncFromUIAndDraw);
+            shadowHSlider.addEventListener('input', syncFromUIAndDraw);
+            shadowHNum.addEventListener('change', syncFromUIAndDraw);
+            
+            playBtn.addEventListener('click', startAnimation);
+            pauseBtn.addEventListener('click', stopAnimation);
+            showShadowBtn.addEventListener('click', toggleShadowDisplay);
+            geoVerifyBtn.addEventListener('click', geometryVerification);
+        }
+        
+        // 初始化
+        function init() {
+            bindEvents();
+            syncFromUIAndDraw();
+            // 初次显示阴影
+            showShadow = true;
+            shadowStatSpan.innerHTML = "🌑 阴影显示中";
+        }
+        
+        init();
+    })();
+</script>
+</body>
+</html>

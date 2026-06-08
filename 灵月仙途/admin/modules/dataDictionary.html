@@ -1,0 +1,292 @@
+<div class="section active">
+  <div class="status-message" id="dataDictMessage"></div>
+  <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+    <h2 class="section-title">数据字典配置</h2>
+    <button class="btn btn-primary" onclick="window.openAddDataDictModal()">新增配置</button>
+  </div>
+  <div style="margin-bottom: 15px;">
+    <input type="text" id="dataDictSearch" placeholder="搜索配置键" style="padding: 8px; width: 300px; margin-right: 10px;">
+    <button class="btn btn-secondary" onclick="window.searchDataDict()">搜索</button>
+    <button class="btn btn-secondary" onclick="window.loadDataDictionary()">重置</button>
+  </div>
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>配置键</th>
+        <th>版本</th>
+        <th>描述</th>
+        <th>更新时间</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody id="dataDictTableBody">
+      <!-- JS 生成 -->
+    </tbody>
+  </table>
+  <div id="dataDictPagination"></div>
+</div>
+
+<!-- 新增/编辑数据字典模态框 -->
+<div id="dataDictModal" class="modal">
+  <div class="modal-content" style="width: 600px;">
+    <div class="modal-header">
+      <h3 id="dataDictModalTitle">新增数据字典配置</h3>
+      <span class="close" onclick="closeModal()">&times;</span>
+    </div>
+    <form id="dataDictForm">
+      <input type="hidden" id="dataDictId">
+      <div class="form-group">
+        <label>配置键 <span style="color: red;">*</span></label>
+        <input type="text" id="dataDictKey" required placeholder="例如: realm_mult, formula_atk">
+      </div>
+      <div class="form-group">
+        <label>版本</label>
+        <input type="number" id="dataDictVersion" value="1" required>
+      </div>
+      <div class="form-group">
+        <label>配置内容 <span style="color: red;">*</span></label>
+        <textarea id="dataDictContent" rows="8" required placeholder='例如: {"1": {"hp_mul": 1.0, "atk_mul": 1.0, "def_mul": 1.0, "weight": 1}}'></textarea>
+        <small style="color: #999; display: block; margin-top: 5px;">请输入有效的 JSON 格式</small>
+      </div>
+      <div class="form-group">
+        <label>描述</label>
+        <input type="text" id="dataDictDescription" placeholder="配置描述">
+      </div>
+      <div style="text-align: right; margin-top: 20px;">
+        <button type="button" class="btn btn-secondary" onclick="closeModal()">取消</button>
+        <button type="submit" class="btn btn-primary">保存</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  (function() {
+    let dataDicts = [];
+
+    function initDataDictionary() {
+      loadDataDictionary();
+      bindDataDictFormEvents();
+    }
+
+    async function loadDataDictionary() {
+      const tableBody = document.getElementById('dataDictTableBody');
+      tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999;">加载中...</td></tr>';
+      
+      try {
+        // 这里应该调用实际的 API，现在使用模拟数据
+        // const result = await apiService.get('/api/config/data-dictionary');
+        // dataDicts = result.data || result;
+        
+        // 模拟数据
+        dataDicts = [
+          {
+            config_key: 'realm_mult',
+            config_version: 1,
+            content: '{"1": {"hp_mul": 1.0, "atk_mul": 1.0, "def_mul": 1.0, "weight": 1}, "2": {"hp_mul": 5.5, "atk_mul": 4.2, "def_mul": 3.5, "weight": 15}, "3": {"hp_mul": 22.0, "atk_mul": 16.0, "def_mul": 12.0, "weight": 150}}',
+            description: '境界倍率配置',
+            updated_at: '2026-03-25 10:00:00'
+          },
+          {
+            config_key: 'formula_atk',
+            config_version: 1,
+            content: '{"base": 10, "spi_coef": 0.7, "vit_coef": 0.3}',
+            description: '攻击计算公式',
+            updated_at: '2026-03-25 10:05:00'
+          },
+          {
+            config_key: 'formula_def',
+            config_version: 1,
+            content: '{"base": 5, "vit_coef": 0.6, "agi_coef": 0.4}',
+            description: '防御计算公式',
+            updated_at: '2026-03-25 10:10:00'
+          }
+        ];
+        
+        tableBody.innerHTML = '';
+        if (Array.isArray(dataDicts) && dataDicts.length > 0) {
+          dataDicts.forEach(dict => {
+            const row = document.createElement('tr');
+            row.id = `dict-${dict.config_key}`;
+            row.innerHTML = `
+              <td>${dict.config_key}</td>
+              <td>${dict.config_version}</td>
+              <td>${dict.description || '-'}</td>
+              <td>${dict.updated_at}</td>
+              <td>
+                <button class="btn btn-primary" onclick="window.editDataDict('${dict.config_key}')">编辑</button>
+                <button class="btn btn-danger" onclick="window.deleteDataDict('${dict.config_key}')">删除</button>
+              </td>
+            `;
+            tableBody.appendChild(row);
+          });
+        } else {
+          tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999;">暂无数据</td></tr>';
+        }
+      } catch (error) {
+        console.error('加载数据字典配置失败:', error);
+        tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#e74c3c;">加载失败</td></tr>';
+      }
+    }
+
+    function openAddDataDictModal() {
+      document.getElementById('dataDictModalTitle').textContent = '新增数据字典配置';
+      document.getElementById('dataDictForm').reset();
+      document.getElementById('dataDictId').value = '';
+      openModal('dataDictModal');
+    }
+
+    async function editDataDict(configKey) {
+      try {
+        // 这里应该调用实际的 API，现在使用模拟数据
+        // const dict = await apiService.get(`/api/config/data-dictionary/${configKey}`);
+        
+        // 从模拟数据中查找
+        const dict = dataDicts.find(d => d.config_key === configKey);
+        if (dict) {
+          document.getElementById('dataDictModalTitle').textContent = '编辑数据字典配置';
+          document.getElementById('dataDictId').value = dict.config_key;
+          document.getElementById('dataDictKey').value = dict.config_key;
+          document.getElementById('dataDictVersion').value = dict.config_version;
+          document.getElementById('dataDictContent').value = dict.content;
+          document.getElementById('dataDictDescription').value = dict.description || '';
+          openModal('dataDictModal');
+        } else {
+          showMessage('dataDictMessage', '配置不存在', 'error');
+        }
+      } catch (error) {
+        console.error('获取配置信息失败:', error);
+        showMessage('dataDictMessage', '获取配置信息失败', 'error');
+      }
+    }
+
+    async function deleteDataDict(configKey) {
+      if (confirm('确定要删除这个配置吗？')) {
+        try {
+          // 这里应该调用实际的 API
+          // await apiService.delete(`/api/config/data-dictionary/${configKey}`);
+          
+          // 模拟删除
+          dataDicts = dataDicts.filter(d => d.config_key !== configKey);
+          showMessage('dataDictMessage', '删除成功', 'success');
+          loadDataDictionary();
+        } catch (error) {
+          console.error('删除配置失败:', error);
+          showMessage('dataDictMessage', '删除失败: ' + error.message, 'error');
+        }
+      }
+    }
+
+    function searchDataDict() {
+      const searchKey = document.getElementById('dataDictSearch').value.toLowerCase();
+      const tableBody = document.getElementById('dataDictTableBody');
+      tableBody.innerHTML = '';
+      
+      const filteredDicts = dataDicts.filter(dict => 
+        dict.config_key.toLowerCase().includes(searchKey)
+      );
+      
+      if (filteredDicts.length > 0) {
+        filteredDicts.forEach(dict => {
+          const row = document.createElement('tr');
+          row.id = `dict-${dict.config_key}`;
+          row.innerHTML = `
+            <td>${dict.config_key}</td>
+            <td>${dict.config_version}</td>
+            <td>${dict.description || '-'}</td>
+            <td>${dict.updated_at}</td>
+            <td>
+              <button class="btn btn-primary" onclick="window.editDataDict('${dict.config_key}')">编辑</button>
+              <button class="btn btn-danger" onclick="window.deleteDataDict('${dict.config_key}')">删除</button>
+            </td>
+          `;
+          tableBody.appendChild(row);
+        });
+      } else {
+        tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999;">没有找到匹配的配置</td></tr>';
+      }
+    }
+
+    function bindDataDictFormEvents() {
+      const form = document.getElementById('dataDictForm');
+      if (form) {
+        form.addEventListener('submit', async function(e) {
+          e.preventDefault();
+          await saveDataDict();
+        });
+      }
+    }
+
+    async function saveDataDict() {
+      const configKey = document.getElementById('dataDictKey').value;
+      const version = parseInt(document.getElementById('dataDictVersion').value);
+      const content = document.getElementById('dataDictContent').value;
+      const description = document.getElementById('dataDictDescription').value;
+      
+      // 验证 JSON 格式
+      try {
+        JSON.parse(content);
+      } catch (error) {
+        showMessage('dataDictMessage', '配置内容必须是有效的 JSON 格式', 'error');
+        return;
+      }
+      
+      const dict = {
+        config_key: configKey,
+        config_version: version,
+        content: content,
+        description: description
+      };
+      
+      try {
+        // 这里应该调用实际的 API
+        // if (configKey) {
+        //   await apiService.put(`/api/config/data-dictionary/${configKey}`, dict);
+        // } else {
+        //   await apiService.post('/api/config/data-dictionary', dict);
+        // }
+        
+        // 模拟保存
+        const existingIndex = dataDicts.findIndex(d => d.config_key === configKey);
+        if (existingIndex >= 0) {
+          dataDicts[existingIndex] = {
+            ...dict,
+            updated_at: new Date().toLocaleString('zh-CN')
+          };
+        } else {
+          dataDicts.push({
+            ...dict,
+            updated_at: new Date().toLocaleString('zh-CN')
+          });
+        }
+        
+        showMessage('dataDictMessage', configKey ? '更新成功' : '新增成功', 'success');
+        closeModal();
+        loadDataDictionary();
+      } catch (error) {
+        console.error('保存配置失败:', error);
+        showMessage('dataDictMessage', '保存失败: ' + error.message, 'error');
+      }
+    }
+
+    function showMessage(elementId, message, type) {
+      const statusEl = document.getElementById(elementId);
+      if (statusEl) {
+        statusEl.textContent = message;
+        statusEl.className = `status-message ${type}`;
+        statusEl.style.display = 'block';
+        
+        setTimeout(() => {
+          statusEl.style.display = 'none';
+        }, 3000);
+      }
+    }
+
+    window.initDataDictionary = initDataDictionary;
+    window.loadDataDictionary = loadDataDictionary;
+    window.openAddDataDictModal = openAddDataDictModal;
+    window.editDataDict = editDataDict;
+    window.deleteDataDict = deleteDataDict;
+    window.searchDataDict = searchDataDict;
+  })();
+</script>

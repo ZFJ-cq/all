@@ -1,0 +1,176 @@
+{
+  "id": "case_007",
+  "title": "巧断争子案",
+  "subtitle": "第七案",
+  "difficulty": 1,
+  "description": "两妇人争夺一子，包拯巧用妙计辨真假，真母爱子之心感动天地！",
+  "background": "两名妇人争夺一个婴儿，都声称是自己的孩子。包拯利用母爱本能，巧妙分辨出谁是真正的母亲。",
+  "stages": {
+    "report": {
+      "id": "report",
+      "name": "报案",
+      "dialogues": [
+        {
+          "speaker": "系统",
+          "speakerTitle": "旁白",
+          "content": "开封府门前，两名妇人扭打在一起，都抱着同一个婴儿不放，口中还不停地争吵着。",
+          "emotion": "narrator"
+        },
+        {
+          "speaker": "妇人甲",
+          "speakerTitle": "告状人",
+          "content": "这是我的孩子！你这个疯婆子快放手！",
+          "emotion": "angry"
+        },
+        {
+          "speaker": "妇人乙",
+          "speakerTitle": "告状人",
+          "content": "胡说！这明明是我的孩儿！你才是疯婆子！",
+          "emotion": "angry"
+        },
+        {
+          "speaker": "包拯",
+          "speakerTitle": "包青天",
+          "content": "住手！光天化日之下，成何体统！有话慢慢说！",
+          "emotion": "serious"
+        },
+        {
+          "speaker": "妇人甲",
+          "speakerTitle": "告状人",
+          "content": "包大人明鉴！这孩子是民妇十月怀胎所生，被这个女人强行抢走！",
+          "emotion": "cry"
+        },
+        {
+          "speaker": "妇人乙",
+          "speakerTitle": "告状人",
+          "content": "大人！她胡说！这孩子明明是我的！",
+          "emotion": "cry"
+        }
+      ]
+    },
+    "investigation": {
+      "id": "investigation",
+      "name": "取证",
+      "scenes": [
+        {
+          "id": "court",
+          "name": "公堂",
+          "description": "开封府公堂之上，两名妇人各执一词，争执不下。",
+          "searchHints": ["观察妇人反应", "查验婴儿", "询问邻里"]
+        },
+        {
+          "id": "neighborhood",
+          "name": "邻里",
+          "description": "婴儿居住的街坊，了解两名妇人的情况。",
+          "searchHints": ["询问街坊", "调查背景", "寻找线索"]
+        }
+      ],
+      "evidences": [
+        {
+          "id": "ev_601",
+          "name": "邻里证词",
+          "icon": "witness",
+          "description": "街坊证实妇人甲是婴儿的生母，妇人乙是邻居，丈夫刚去世。",
+          "sceneId": "neighborhood",
+          "isKey": true,
+          "clue": "邻居证实孩子确实是妇人甲所生。"
+        },
+        {
+          "id": "ev_602",
+          "name": "婴儿胎记",
+          "icon": "cloth",
+          "description": "婴儿身上有一块独特的胎记，只有生母才知道。",
+          "sceneId": "court",
+          "isKey": true,
+          "clue": "妇人甲能准确说出胎记位置，妇人乙却不知道。"
+        },
+        {
+          "id": "ev_603",
+          "name": "乳母证词",
+          "icon": "witness",
+          "description": "乳母证实一直在给婴儿喂奶，认识孩子的母亲。",
+          "sceneId": "neighborhood",
+          "isKey": true,
+          "clue": "乳母确认妇人甲是孩子的母亲。"
+        }
+      ]
+    },
+    "interrogation": {
+      "id": "interrogation",
+      "name": "审讯",
+      "suspects": [
+        {
+          "id": "sus_601",
+          "name": "妇人甲",
+          "role": "生母",
+          "description": "孩子的亲生母亲，焦急万分，生怕孩子受到伤害。",
+          "dialogues": [
+            {
+              "speaker": "妇人甲",
+              "speakerTitle": "嫌疑人",
+              "content": "大人！孩子身上有块红色胎记，在左胳膊上！",
+              "emotion": "cry"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "你说的是真的？",
+              "emotion": "serious"
+            },
+            {
+              "speaker": "妇人甲",
+              "speakerTitle": "嫌疑人",
+              "content": "民妇怎敢欺瞒大人！这是民妇十月怀胎生下的孩儿！",
+              "emotion": "cry"
+            }
+          ],
+          "isGuilty": false,
+          "hint": "这是孩子的亲生母亲"
+        },
+        {
+          "id": "sus_602",
+          "name": "妇人乙",
+          "role": "邻居",
+          "description": "邻居妇人，丈夫去世后精神失常，想抢走孩子。",
+          "dialogues": [
+            {
+              "speaker": "妇人乙",
+              "speakerTitle": "嫌疑人",
+              "content": "我……我也不知道胎记……但孩子就是我的！",
+              "emotion": "confused"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "既然你不知道胎记，又如何证明孩子是你的？",
+              "emotion": "serious"
+            },
+            {
+              "speaker": "妇人乙",
+              "speakerTitle": "嫌疑人",
+              "content": "我……我就是想要个孩子……",
+              "emotion": "sad"
+            }
+          ],
+          "isGuilty": true
+        }
+      ]
+    },
+    "judgment": {
+      "id": "judgment",
+      "name": "断案",
+      "correctSuspectId": "sus_602",
+      "requiredEvidenceIds": ["ev_601", "ev_602", "ev_603"],
+      "judgmentText": {
+        "correct": "经查明，妇人甲是孩子的亲生母亲，妇人乙因丈夫去世，精神受刺激，想抢走别人的孩子。念其情有可原，判杖责二十，罚银十两给妇人甲作为补偿。此案彰显包拯智慧，巧用母爱本能辨真假，传为佳话！",
+        "wrong": "证据不足，请继续调查。",
+        "partial": "已掌握部分证据，但还需进一步查证。"
+      }
+    }
+  },
+  "hints": [
+    { "id": "hint_7_1", "content": "观察两位妇人对孩子的态度，真母会更关心孩子的安危。", "cost": 1 },
+    { "id": "hint_7_2", "content": "询问街坊邻居，了解两位妇人的背景。", "cost": 1 },
+    { "id": "hint_7_3", "content": "检查婴儿身上的特征，只有生母才知道的细节。", "cost": 1 }
+  ]
+}

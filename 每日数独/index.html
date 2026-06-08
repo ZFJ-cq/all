@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>每日数独 - 儿童版</title>
+<style>
+:root{
+  --bg:#FFF8F0;
+  --bg2:#FFF0F5;
+  --bg3:#F0FFF4;
+  --surface:#FFFFFF;
+  --surface2:#FFF5F8;
+  --surface3:#F5F0FF;
+  --surface4:#F0F8FF;
+  --pink:#FF8FAB;
+  --pink2:#FF6B9D;
+  --mint:#4ECDC4;
+  --mint2:#2DB5AA;
+  --lavender:#A78BFA;
+  --lavender2:#8B5CF6;
+  --peach:#FFB347;
+  --peach2:#FF9A3C;
+  --sky:#74C0FC;
+  --sky2:#4DABF7;
+  --lemon:#FFE066;
+  --lemon2:#FFD43B;
+  --green:#51CF66;
+  --green2:#40C057;
+  --red:#FF6B6B;
+  --orange:#FF922B;
+  --text:#5C4B3A;
+  --text2:#8B7355;
+  --text3:#BBA98C;
+  --shadow:0 6px 24px rgba(200,150,100,.12);
+  --shadow2:0 2px 8px rgba(200,150,100,.08);
+  --r:20px;
+  --r2:16px;
+  --r3:12px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;min-height:100dvh;overflow-x:hidden;-webkit-tap-highlight-color:transparent}
+
+/* ===== PAGE ===== */
+.page{display:none;min-height:100vh;min-height:100dvh;position:relative}
+.page.active{display:flex;flex-direction:column}
+
+/* ===== COVER ===== */
+.cover{background:linear-gradient(160deg,#FFF8F0 0%,#FFF0F5 30%,#F0E6FF 60%,#E6F5FF 100%);align-items:center;justify-content:center;padding:40px 20px;overflow:hidden}
+.cover::before{content:'';position:fixed;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(255,143,171,.15),transparent 70%);top:-60px;right:-60px;animation:fa 6s ease-in-out infinite}
+.cover::after{content:'';position:fixed;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(78,205,196,.12),transparent 70%);bottom:-40px;left:-40px;animation:fa 7s ease-in-out infinite 2s}
+@keyframes fa{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+
+.cover-stars{position:fixed;inset:0;pointer-events:none;z-index:0}
+.star{position:absolute;font-size:18px;animation:starIn 1s ease-out backwards}
+@keyframes starIn{from{transform:scale(0) rotate(0);opacity:0}to{transform:none;opacity:1}}
+
+.cover-content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;animation:pageIn .7s ease-out}
+
+.cover-mascot{font-size:80px;margin-bottom:16px;animation:bounce 2s ease-in-out infinite}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+
+.cover-title{font-size:38px;font-weight:800;letter-spacing:2px;background:linear-gradient(135deg,#FF8FAB,#A78BFA,#74C0FC);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px}
+.cover-sub{font-size:15px;color:var(--text2);letter-spacing:2px;margin-bottom:40px}
+
+.cover-grid{width:100px;height:100px;display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:32px}
+.cover-cell{border-radius:8px;animation:cellPop .5s ease-out backwards}
+.cover-cell:nth-child(1){background:#FF8FAB;animation-delay:.1s}
+.cover-cell:nth-child(2){background:#FFE066;animation-delay:.2s}
+.cover-cell:nth-child(3){background:#74C0FC;animation-delay:.3s}
+.cover-cell:nth-child(4){background:#4ECDC4;animation-delay:.4s}
+.cover-cell:nth-child(5){background:#A78BFA;animation-delay:.5s}
+.cover-cell:nth-child(6){background:#FFB347;animation-delay:.6s}
+.cover-cell:nth-child(7){background:#FF6B6B;animation-delay:.7s}
+.cover-cell:nth-child(8){background:#51CF66;animation-delay:.8s}
+.cover-cell:nth-child(9){background:#FF8FAB;animation-delay:.9s}
+@keyframes cellPop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+
+.cover-btn{background:linear-gradient(135deg,#FF8FAB,#FF6B9D);color:#fff;border:none;padding:16px 52px;border-radius:50px;font-size:18px;font-weight:700;cursor:pointer;box-shadow:0 8px 24px rgba(255,107,157,.3);letter-spacing:2px;transition:all .2s;animation:btnIn .6s ease-out .4s backwards}
+.cover-btn:active{transform:scale(.95);box-shadow:0 4px 12px rgba(255,107,157,.2)}
+@keyframes btnIn{from{transform:translateY(20px);opacity:0}to{transform:none;opacity:1}}
+@keyframes pageIn{from{transform:scale(.95);opacity:0}to{transform:scale(1);opacity:1}}
+
+.cover-date{margin-top:28px;font-size:13px;color:var(--text2);display:flex;align-items:center;gap:6px;animation:btnIn .6s ease-out .6s backwards}
+.cover-date .dot{width:7px;height:7px;border-radius:50%;background:var(--mint);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* ===== SELECT ===== */
+.select{background:linear-gradient(180deg,#FFF8F0,#F5F0FF);padding:0 16px 110px}
+.select-hd{display:flex;align-items:center;padding:16px 4px;gap:10px;position:sticky;top:0;background:linear-gradient(180deg,#FFF8F0 80%,transparent);z-index:10}
+.sb{width:42px;height:42px;border-radius:50%;background:#fff;border:none;color:var(--text);font-size:22px;cursor:pointer;box-shadow:var(--shadow2);display:flex;align-items:center;justify-content:center;transition:all .2s}
+.sb:active{transform:scale(.93)}
+.select-hd h2{font-size:22px;font-weight:800;flex:1;background:linear-gradient(135deg,#FF8FAB,#A78BFA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.sd{font-size:12px;color:var(--text2)}
+
+.section{margin-bottom:18px}
+.section-tl{font-size:13px;font-weight:700;color:var(--text2);margin-bottom:10px;padding-left:4px;display:flex;align-items:center;gap:6px}
+
+.diff-list{display:flex;flex-direction:column;gap:12px}
+.diff-card{background:#fff;border-radius:var(--r);padding:16px;box-shadow:var(--shadow2);display:flex;align-items:center;gap:14px;cursor:pointer;transition:all .25s;position:relative;overflow:hidden;border:2px solid transparent}
+.diff-card:active{transform:scale(.98)}
+.diff-card.easy{border-color:#FFE066;background:linear-gradient(135deg,#FFFDF5,#FFF8E6)}
+.diff-card.medium{border-color:#FFB347;background:linear-gradient(135deg,#FFF8F0,#FFF3E6)}
+.diff-card.hard{border-color:#A78BFA;background:linear-gradient(135deg,#FAF5FF,#F3F0FF)}
+
+.di{width:54px;height:54px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0}
+.diff-card.easy .di{background:linear-gradient(135deg,#FFE066,#FFD43B);box-shadow:0 4px 12px rgba(255,208,59,.3)}
+.diff-card.medium .di{background:linear-gradient(135deg,#FFB347,#FF922B);box-shadow:0 4px 12px rgba(255,179,71,.3)}
+.diff-card.hard .di{background:linear-gradient(135deg,#A78BFA,#8B5CF6);box-shadow:0 4px 12px rgba(167,139,250,.3)}
+
+.dinfo{flex:1;position:relative;z-index:1}
+.dname{font-size:18px;font-weight:800;margin-bottom:2px}
+.diff-card.easy .dname{color:#D69E00}
+.diff-card.medium .dname{color:#E65100}
+.diff-card.hard .dname{color:#6D28D9}
+.ddesc{font-size:12px;color:var(--text2)}
+.dstats{margin-top:5px;display:flex;gap:10px}
+.dstat{font-size:11px;color:var(--text2)}
+.dstat b{color:var(--text);font-weight:700}
+
+.dgo{width:38px;height:38px;border-radius:50%;background:#fff;border:none;color:var(--text2);font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:var(--shadow2);position:relative;z-index:1;transition:all .2s}
+.diff-card.has-prog .dgo{background:var(--mint);color:#fff;border:none}
+
+/* CHECKIN */
+.ck-card{background:#fff;border-radius:var(--r);padding:16px;box-shadow:var(--shadow2)}
+.ck-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.ck-stats{display:flex;gap:16px}
+.ck-stat{text-align:center}
+.ck-val{font-size:26px;font-weight:800;background:linear-gradient(135deg,#FF8FAB,#FF6B9D);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.ck-lbl{font-size:10px;color:var(--text2);margin-top:2px}
+.btn-ck{padding:9px 20px;border-radius:20px;border:none;background:linear-gradient(135deg,#FF8FAB,#FF6B9D);color:#fff;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(255,107,157,.25);transition:all .2s}
+.btn-ck:active{transform:scale(.95)}
+.btn-ck.done{background:linear-gradient(135deg,#4ECDC4,#2DB5AA);box-shadow:0 4px 12px rgba(78,205,196,.25)}
+.btn-ck:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-top:12px}
+.cal-l{font-size:9px;color:var(--text2);text-align:center;padding:2px 0}
+.cal-d{aspect-ratio:1;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--text2);background:#FFF5F8}
+.cal-d.ckd{background:var(--pink);color:#fff;font-weight:700}
+.cal-d.td{border:2px solid var(--peach);color:var(--peach2)}
+.cal-d.td.ckd{border-color:var(--pink)}
+
+/* RECORDS */
+.rec-card{background:#fff;border-radius:var(--r);padding:16px;box-shadow:var(--shadow2)}
+.rec-r{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px dashed #F0E0D0}
+.rec-r:last-child{border-bottom:none}
+.rec-l{font-size:13px;color:var(--text2)}
+.rec-v{font-size:14px;font-weight:700;color:var(--text)}
+
+/* API BADGE */
+.api-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:3px 10px;border-radius:20px;margin-left:6px}
+.api-badge.online{background:rgba(78,205,196,.12);color:var(--mint2)}
+.api-badge.offline{background:rgba(255,143,171,.12);color:var(--pink2)}
+.api-badge .dot{width:5px;height:5px;border-radius:50%;background:currentColor}
+
+/* ===== GAME ===== */
+.game{background:var(--bg)}
+.game-hd{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:linear-gradient(135deg,#FF8FAB,#A78BFA);position:sticky;top:0;z-index:10}
+.gb{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.25);border:none;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.gdiff{font-size:15px;font-weight:700;color:#fff}
+.gtimer{font-size:14px;color:rgba(255,255,255,.9);font-weight:600;font-variant-numeric:tabular-nums}
+
+.gstats{display:flex;gap:8px;padding:10px 16px;justify-content:center;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.gs{flex:1;max-width:130px;background:linear-gradient(135deg,#FFF5F8,#F0F8FF,#F0FFF4);border-radius:var(--r3);padding:8px 10px;text-align:center;border:1px solid #FFF0F5}
+.gs-l{font-size:10px;color:var(--text2)}
+.gs-v{font-size:18px;font-weight:800;font-variant-numeric:tabular-nums}
+.gs-v.err{color:var(--red)}
+.gs-v.rem{color:var(--lavender)}
+
+.board-wrap{display:flex;justify-content:center;padding:10px 12px}
+.board{display:grid;grid-template-columns:repeat(9,1fr);gap:1px;width:min(88vw,370px);aspect-ratio:1;background:linear-gradient(135deg,#E8D5C4,#D4C4B0);border-radius:12px;overflow:hidden;border:3px solid #D4C4B0;box-shadow:0 6px 24px rgba(0,0,0,.1)}
+
+.cell{background:#FFFDF8;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:min(5.5vw,22px);font-weight:700;color:var(--text);transition:background .1s;position:relative;user-select:none;-webkit-tap-highlight-color:transparent;font-family:system-ui}
+.cell.br3{border-right:2px solid #C4B49A}
+.cell.bb3{border-bottom:2px solid #C4B49A}
+.cell.given{color:var(--text);font-weight:800}
+.cell.sel{background:linear-gradient(135deg,#FFE8F0,#FFD0E8);box-shadow:inset 0 0 0 2px var(--pink)}
+.cell.hl{background:#FFF8E6}
+.cell.same{background:#F0FFF4}
+.cell.err{background:#FFE0E0;color:var(--red)}
+.cell.hf{animation:hf .6s ease-out}
+@keyframes hf{0%{background:var(--pink);transform:scale(1.06)}100%{background:#FFF8E6;transform:scale(1)}}
+
+.num-colors{color:var(--lavender2)}
+
+.cell .ng{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);width:100%;height:100%;padding:1px}
+.cell .nd{display:flex;align-items:center;justify-content:center;font-size:min(1.3vw,9px);color:var(--text2);font-weight:400}
+
+.npad{display:flex;gap:6px;justify-content:center;padding:8px 12px;flex-wrap:wrap}
+.nb{width:min(9.5vw,42px);height:min(11vw,48px);border-radius:var(--r3);border:none;background:#fff;color:var(--text);font-size:min(5vw,18px);font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow2);transition:all .12s;flex-direction:column}
+.nb:active{background:var(--pink);color:#fff;transform:scale(.92);box-shadow:0 2px 6px rgba(255,107,157,.2)}
+.nb.zz{opacity:.2;pointer-events:none}
+.nb .ncnt{font-size:8px;color:var(--text3);margin-top:1px;font-weight:400}
+
+.tools{display:flex;gap:6px;justify-content:center;padding:6px 12px 20px;flex-wrap:wrap}
+.tb{padding:9px 13px;border-radius:20px;border:none;background:#fff;color:var(--text2);cursor:pointer;font-size:12px;font-weight:600;display:flex;align-items:center;gap:4px;box-shadow:var(--shadow2);transition:all .2s;white-space:nowrap}
+.tb:active{transform:scale(.95)}
+.tb.on{background:linear-gradient(135deg,#FF8FAB,#FF6B9D);color:#fff;box-shadow:0 4px 12px rgba(255,107,157,.25)}
+.tb .ti{font-size:14px}
+
+/* ===== VICTORY ===== */
+.victory{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:100;padding:24px;backdrop-filter:blur(4px)}
+.victory.show{display:flex}
+.vcard{background:#fff;border-radius:24px;padding:32px 28px;text-align:center;max-width:340px;width:100%;animation:vIn .5s cubic-bezier(.34,1.56,.64,1);border:3px solid #FFE8F0}
+@keyframes vIn{from{transform:scale(.7) translateY(40px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+.vem{font-size:60px;margin-bottom:12px;animation:bounce 1s ease-in-out infinite}
+.vtitle{font-size:24px;font-weight:800;background:linear-gradient(135deg,#FF8FAB,#A78BFA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px}
+.vtime{font-size:15px;color:var(--text2);margin-bottom:16px}
+.vst{display:flex;gap:20px;justify-content:center;margin-bottom:20px}
+.vs{text-align:center}
+.vsv{font-size:20px;font-weight:800;color:var(--peach2)}
+.vsl{font-size:10px;color:var(--text2)}
+.vbtn{width:100%;padding:14px;border-radius:50px;border:none;background:linear-gradient(135deg,#FF8FAB,#FF6B9D);color:#fff;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 6px 20px rgba(255,107,157,.3);transition:all .2s}
+.vbtn:active{transform:scale(.97)}
+
+/* GAMEOVER */
+.go-card{border-color:#FFE0E0}
+.go-card .vtitle{background:linear-gradient(135deg,#FF6B6B,#FF922B);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+/* CONFETTI */
+.confetti{position:fixed;top:-10px;font-size:16px;z-index:150;pointer-events:none;animation:conf .6s ease-out forwards}
+@keyframes conf{0%{transform:translateY(0) rotate(0)}100%{transform:translateY(100vh) rotate(360deg)}}
+
+/* LOADING */
+.load{position:fixed;inset:0;background:rgba(255,248,240,.9);display:none;align-items:center;justify-content:center;z-index:150;flex-direction:column;gap:16px;backdrop-filter:blur(4px)}
+.load.show{display:flex}
+.spin{width:44px;height:44px;border:4px solid #FFE8F0;border-top-color:var(--pink);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.st{font-size:14px;color:var(--text2);font-weight:500}
+
+/* TOAST */
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);padding:10px 24px;border-radius:50px;background:#fff;border:2px solid #FFE8F0;color:var(--text);font-size:13px;font-weight:600;z-index:200;box-shadow:var(--shadow);animation:tIn .3s ease,tOut .3s ease 1.7s forwards;white-space:nowrap}
+@keyframes tIn{from{opacity:0;transform:translateX(-50%) translateY(-10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+@keyframes tOut{from{opacity:1}to{opacity:0}}
+
+@media(min-width:500px){
+  .diff-list{flex-direction:row;gap:12px}
+  .diff-card{flex:1;flex-direction:column;align-items:center;text-align:center;padding:20px 12px}
+  .dgo{margin-top:8px;width:40px;height:40px}
+}
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="page cover active" id="pCover">
+  <div class="cover-stars" id="coverStars"></div>
+  <div class="cover-content">
+    <div class="cover-mascot">🧩</div>
+    <div class="cover-title">每日数独</div>
+    <div class="cover-sub">SUDOKU FOR KIDS</div>
+    <div class="cover-grid">
+      <div class="cover-cell"></div><div class="cover-cell"></div><div class="cover-cell"></div>
+      <div class="cover-cell"></div><div class="cover-cell"></div><div class="cover-cell"></div>
+      <div class="cover-cell"></div><div class="cover-cell"></div><div class="cover-cell"></div>
+    </div>
+    <button class="cover-btn" id="btnStart">开始玩耍</button>
+    <div class="cover-date"><span class="dot"></span><span id="coverDate"></span></div>
+  </div>
+</div>
+
+<!-- SELECT -->
+<div class="page select" id="pSelect">
+  <div class="select-hd">
+    <button class="sb" id="btnBackCvr">‹</button>
+    <h2>选择难度</h2>
+    <span class="sd" id="selectDate"></span>
+  </div>
+
+  <div class="section">
+    <div class="section-tl">🎯 难度关卡 <span class="api-badge online" id="apiBadge"><span class="dot"></span>在线题库</span></div>
+    <div class="diff-list" id="diffList"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-tl">📅 每日打卡</div>
+    <div class="ck-card">
+      <div class="ck-top">
+        <div class="ck-stats">
+          <div class="ck-stat"><div class="ck-val" id="ckStreak">0</div><div class="ck-lbl">连续打卡</div></div>
+          <div class="ck-stat"><div class="ck-val" id="ckTotal">0</div><div class="ck-lbl">累计打卡</div></div>
+        </div>
+        <button class="btn-ck" id="btnCk">✅ 打卡</button>
+      </div>
+      <div class="cal" id="calGrid"></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-tl">🏆 完成记录</div>
+    <div class="rec-card">
+      <div class="rec-r"><span class="rec-l">☀️ 初级完成</span><span class="rec-v" id="rEasy">0 次</span></div>
+      <div class="rec-r"><span class="rec-l">🌤 中级完成</span><span class="rec-v" id="rMed">0 次</span></div>
+      <div class="rec-r"><span class="rec-l">⚡ 高级完成</span><span class="rec-v" id="rHard">0 次</span></div>
+      <div class="rec-r"><span class="rec-l">⏱ 最佳时间</span><span class="rec-v" id="rBest">--:--</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- GAME -->
+<div class="page game" id="pGame">
+  <div class="game-hd">
+    <button class="gb" id="btnBackSel">‹</button>
+    <span class="gdiff" id="gDiff"></span>
+    <span class="gtimer" id="gTimer">00:00</span>
+  </div>
+  <div class="gstats">
+    <div class="gs"><div class="gs-l">❌ 错误</div><div class="gs-v err" id="gErr">0/3</div></div>
+    <div class="gs"><div class="gs-l">📝 剩余</div><div class="gs-v rem" id="gRem">0</div></div>
+  </div>
+  <div class="board-wrap"><div class="board" id="gBoard"></div></div>
+  <div class="npad" id="gNpad"></div>
+  <div class="tools">
+    <button class="tb" id="tNotes"><span class="ti">✏️</span>笔记</button>
+    <button class="tb" id="tUndo"><span class="ti">↩️</span>撤销</button>
+    <button class="tb" id="tEr"><span class="ti">🧹</span>擦除</button>
+    <button class="tb" id="tHint"><span class="ti">💡</span>提示</button>
+    <button class="tb" id="tNew"><span class="ti">🔄</span>新题</button>
+  </div>
+</div>
+
+<!-- VICTORY -->
+<div class="victory" id="victoryOv">
+  <div class="vcard">
+    <div class="vem">🎉</div>
+    <div class="vtitle">太棒啦！</div>
+    <div class="vtime" id="vTime"></div>
+    <div class="vst">
+      <div class="vs"><div class="vsv" id="vDiff"></div><div class="vsl">难度</div></div>
+      <div class="vs"><div class="vsv" id="vErr"></div><div class="vsl">错误</div></div>
+    </div>
+    <button class="vbtn" id="vBtn">👍 继续加油</button>
+  </div>
+</div>
+
+<!-- GAMEOVER -->
+<div class="victory" id="goOv">
+  <div class="vcard go-card">
+    <div class="vem">💪</div>
+    <div class="vtitle">再接再厉！</div>
+    <div class="vtime">错误次数有点多哦，别灰心！</div>
+    <button class="vbtn" id="goBtn">🔄 再试一次</button>
+  </div>
+</div>
+
+<!-- LOADING -->
+<div class="load" id="loadOv">
+  <div class="spin"></div>
+  <div class="st" id="loadSt">正在获取题目...</div>
+</div>
+
+<div id="toastBox"></div>
+
+<script>
+// ============================================================
+//  SUDOKU API
+// ============================================================
+const API={
+  URL:'https://sudoku-api.vercel.app/api/dosuku',
+  online:false,
+  async fetch(){
+    try{
+      const c=new AbortController();
+      const t=setTimeout(()=>c.abort(),8000);
+      const r=await fetch(this.URL,{signal:c.signal});
+      clearTimeout(t);
+      if(!r.ok)throw '';
+      const d=await r.json();
+      let puz,sol;
+      if(d.newboard?.grids?.[0]){
+        puz=d.newboard.grids[0].value;
+        sol=d.newboard.grids[0].solution;
+        this.online=true;this.updBadge(true);
+        return{puzzle:puz,solution:sol,src:'api'};
+      }else if(d.puzzle&&d.solution){
+        puz=this.parse(d.puzzle);
+        sol=this.parse(d.solution);
+        this.online=true;this.updBadge(true);
+        return{puzzle,Solution:sol,src:'api'};
+      }
+    }catch(e){}
+    this.online=false;this.updBadge(false);
+    return null;
+  },
+  parse(s){
+    const b=[];
+    for(let r=0;r<9;r++){
+      const row=[];
+      for(let c=0;c<9;c++){
+        const ch=s[r*9+c];
+        row.push(ch==='.'||ch==='0'?0:parseInt(ch));
+      }
+      b.push(row);
+    }
+    return b;
+  },
+  updBadge(on){
+    const b=document.getElementById('apiBadge');
+    if(!b)return;
+    b.className=on?'api-badge online':'api-badge offline';
+    b.innerHTML=`<span class="dot"></span>${on?'在线题库':'本地生成'}`;
+  }
+};
+
+// ============================================================
+//  LOCAL GENERATOR
+// ============================================================
+const LG={
+  shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]]}return b},
+  generate(){
+    const b=Array.from({length:9},()=>Array(9).fill(0));
+    function ok(b,r,c,n){for(let x=0;x<9;x++)if(b[r][x]===n||b[x][c]===n)return false;const sr=(r/3|0)*3,sc=(c/3|0)*3;for(let rr=sr;rr<sr+3;rr++)for(let cc=sc;cc<sc+3;cc++)if(b[rr][cc]===n)return false;return true}
+    function diag(){for(let bx=0;bx<9;bx+=3){const ns=LG.shuffle([1,2,3,4,5,6,7,8,9]);let i=0;for(let r=bx;r<bx+3;r++)for(let c=bx;c<bx+3;c++)b[r][c]=ns[i++]}}
+    function solve(r,c){if(r===9)return true;if(c===9)return solve(r+1,0);if(b[r][c]!==0)return solve(r,c+1);for(const n of LG.shuffle([1,2,3,4,5,6,7,8,9])){if(ok(b,r,c,n)){b[r][c]=n;if(solve(r,c+1))return true;b[r][c]=0}}return false}
+    diag();solve(0,0);return b;
+  },
+  countSol(b){
+    const c=b.map(r=>[...r]);let n=0;
+    function ok(b,r,c,n){for(let x=0;x<9;x++)if(b[r][x]===n||b[x][c]===n)return false;const sr=(r/3|0)*3,sc=(c/3|0)*3;for(let rr=sr;rr<sr+3;rr++)for(let cc=sc;cc<sc+3;cc++)if(b[rr][cc]===n)return false;return true}
+    function s(b){for(let r=0;r<9;r++)for(let c=0;c<9;c++)if(b[r][c]===0){for(let v=1;v<=9;v++)if(ok(b,r,c,v)){b[r][c]=v;s(b);b[r][c]=0}return}n++}
+    s(c);return n;
+  },
+  make(diff){
+    const rm={easy:36,medium:45,hard:53};
+    const tgt=rm[diff]||40;
+    const sol=this.generate();
+    const puz=sol.map(r=>[...r]);
+    const cells=this.shuffle(Array.from({length:81},(_,i)=>({r:i/9|0,c:i%9})));
+    let rem=0;
+    for(const{r,c}of cells){
+      if(rem>=tgt)break;
+      const bk=puz[r][c];puz[r][c]=0;
+      if(this.countSol(puz)===1)rem++;else puz[r][c]=bk;
+    }
+    return{puzzle:puz,solution:sol};
+  }
+};
+
+// ============================================================
+//  GAME STATE
+// ============================================================
+class GS{
+  constructor(){
+    this.puz=[];this.sol=[];this.board=[];this.notes=Array.from({length:9},()=>Array.from({length:9},()=>new Set()));
+    this.given=new Set();this.selR=-1;this.selC=-1;
+    this.diff='easy';this.err=0;this.maxErr=3;this.secs=0;this.tid=null;this.done=false;this.note=false;this.hist=[];
+  }
+  init(puz,sol,diff){
+    this.puz=puz.map(r=>[...r]);this.sol=sol.map(r=>[...r]);this.diff=diff;
+    this.board=puz.map(r=>[...r]);
+    this.notes=Array.from({length:9},()=>Array.from({length:9},()=>new Set()));
+    this.given=new Set();this.selR=-1;this.selC=-1;
+    this.err=0;this.secs=0;this.done=false;this.note=false;this.hist=[];
+    this.stop();
+    for(let r=0;r<9;r++)for(let c=0;c<9;c++)if(puz[r][c]!==0)this.given.add(r*9+c);
+  }
+  isG(r,c){return this.given.has(r*9+c)}
+  get(r,c){return this.board[r][c]}
+  set(r,c,v){
+    if(this.isG(r,c)||this.done)return false;
+    if(this.note&&v!==0){this.tN(r,c,v);return true}
+    const pv=this.board[r][c];const pn=new Set(this.notes[r][c]);
+    this.board[r][c]=v;this.notes[r][c]=new Set();
+    if(v===0&&pv!==0)this.hist.push({t:'e',r,c,pv,pn});
+    else if(v!==0&&pv!==v)this.hist.push({t:'s',r,c,pv,nv:v,pn});
+    if(v!==0&&v!==this.sol[r][c]){this.err++;if(this.err>=this.maxErr){this.done=true;this.stop();return'over'}}
+    this.check();return true;
+  }
+  tN(r,c,n){if(this.isG(r,c)||this.board[r][c]!==0)return;const pn=new Set(this.notes[r][c]);this.notes[r][c].has(n)?this.notes[r][c].delete(n):this.notes[r][c].add(n);this.hist.push({t:'n',r,c,n,pn})}
+  undo(){if(!this.hist.length)return null;const a=this.hist.pop();if(a.t==='e'||a.t==='s'){this.board[a.r][a.c]=a.pv;this.notes[a.r][a.c]=a.pn}else if(a.t==='n'){this.notes[a.r][a.c]=a.pn}return{r:a.r,c:a.c}}
+  hint(){const e=[];for(let r=0;r<9;r++)for(let c=0;c<9;c++)if(this.board[r][c]===0||this.board[r][c]!==this.sol[r][c])e.push({r,c});if(!e.length)return null;const{r,c}=e[Math.random()*e.length|0];this.set(r,c,this.sol[r][c]);return{r,c,v:this.sol[r][c]}}
+  check(){for(let r=0;r<9;r++)for(let c=0;c<9;c++)if(this.board[r][c]!==this.sol[r][c])return false;this.done=true;this.stop();return true}
+  start(){this.stop();this.tid=setInterval(()=>this.secs++,1000)}
+  stop(){if(this.tid){clearInterval(this.tid);this.tid=null}}
+  time(){return`${String(this.secs/60|0).padStart(2,'0')}:${String(this.secs%60).padStart(2,'0')}`}
+  remain(){let n=0;for(let r=0;r<9;r++)for(let c=0;c<9;c++)if(this.board[r][c]===0)n++;return n}
+  cntN(n){let c=0;for(let r=0;r<9;r++)for(let j=0;j<9;j++)if(this.board[r][j]===n)c++;return 9-c}
+  toJSON(){return{puz:this.puz,sol:this.sol,board:this.board,notes:this.notes.map(r=>r.map(s=>[...s])),given:[...this.given],diff:this.diff,err:this.err,secs:this.secs,done:this.done,hist:this.hist}}
+  static from(d){const s=new GS();s.puz=d.puz;s.sol=d.sol;s.board=d.board;s.notes=d.notes.map(r=>r.map(n=>new Set(n)));s.given=new Set(d.given);s.diff=d.diff;s.err=d.err;s.secs=d.secs;s.done=d.done;s.hist=d.hist||[];if(!s.done)s.start();return s}
+}
+
+// ============================================================
+//  CHECKIN
+// ============================================================
+const CK={
+  K:'sdk_ck3',
+  get(){try{const r=localStorage.getItem(this.K);if(r)return JSON.parse(r)}catch(e){}return{dates:{},streak:0,total:0,comp:{easy:0,medium:0,hard:0},best:null,bestD:null}},
+  save(d){localStorage.setItem(this.K,JSON.stringify(d))},
+  today(){const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`},
+  yest(){const d=new Date();d.setDate(d.getDate()-1);return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`},
+  checked(){return!!this.get().dates[this.today()]},
+  do(){const d=this.get();const t=this.today();if(d.dates[t])return d;d.dates[t]=true;d.total++;d.streak=d.dates[this.yest()]?d.streak+1:1;this.save(d);return d},
+  record(diff,secs){const d=this.get();d.comp[diff]=(d.comp[diff]||0)+1;if(d.best===null||secs<d.best){d.best=secs;d.bestD=diff}this.save(d);return d},
+  calDays(y,m){const d=this.get();const t=this.today();const f=new Date(y,m,1);const sw=f.getDay();const dim=new Date(y,m+1,0).getDate();const days=[];for(let i=0;i<sw;i++)days.push({d:null,ck:false});for(let i=1;i<=dim;i++){const k=`${y}-${String(m+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;days.push({d:i,ck:!!d.dates[k],td:k===t})}return days}
+};
+
+// ============================================================
+//  APP
+// ============================================================
+const G=new GS();
+let curKey='';
+
+const NUM_COLORS=['#FF8FAB','#FF9A3C','#FFE066','#4ECDC4','#74C0FC','#A78BFA','#FF6B6B','#51CF66','#FF8FAB'];
+
+function pKey(d){const t=new Date();return`${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}-${d}`}
+function saveG(){const d=G.toJSON();d.pk=curKey;localStorage.setItem(`sdk2_${G.diff}`,JSON.stringify(d))}
+function loadG(d){try{const r=localStorage.getItem(`sdk2_${d}`);if(!r)return null;const data=JSON.parse(r);if(data.pk&&data.pk!==pKey(d))return null;return data}catch(e){return null}}
+
+function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active')}
+function showLoad(msg){document.getElementById('loadSt').textContent=msg||'加载中...';document.getElementById('loadOv').classList.add('show')}
+function hideLoad(){document.getElementById('loadOv').classList.remove('show')}
+function toast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.getElementById('toastBox').appendChild(t);setTimeout(()=>t.remove(),2000)}
+
+function spawnConfetti(){
+  const emojis=['⭐','🌟','💫','✨','🎉','🎊','💖','🌈'];
+  for(let i=0;i<18;i++){
+    const c=document.createElement('div');c.className='confetti';c.textContent=emojis[Math.random()*emojis.length|0];
+    c.style.left=Math.random()*100+'vw';
+    c.style.animationDelay=Math.random()*0.5+'s';
+    c.style.fontSize=(12+Math.random()*10)+'px';
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(),1500);
+  }
+}
+
+function makeStars(){
+  const container=document.getElementById('coverStars');
+  container.innerHTML='';
+  const emojis=['⭐','🌟','✨','💫','🌸','🌈'];
+  for(let i=0;i<12;i++){
+    const s=document.createElement('div');s.className='star';s.textContent=emojis[Math.random()*emojis.length|0];
+    s.style.left=Math.random()*90+'%';s.style.top=Math.random()*80+'%';
+    s.style.animationDelay=Math.random()*2+'s';
+    container.appendChild(s);
+  }
+}
+
+document.getElementById('btnStart').addEventListener('click',()=>{showPage('pSelect');renderSelect();makeStars()});
+document.getElementById('btnBackCvr').addEventListener('click',()=>showPage('pCover'));
+document.getElementById('btnBackSel').addEventListener('click',()=>{G.stop();showPage('pSelect');renderSelect()});
+
+function fmtDate(){const n=new Date();const w=['日','一','二','三','四','五','六'];return`${n.getFullYear()}年${n.getMonth()+1}月${n.getDate()}日 星期${w[n.getDay()]}`}
+document.getElementById('coverDate').textContent=fmtDate();
+document.getElementById('selectDate').textContent=fmtDate();
+
+function renderSelect(){
+  const diffs=[
+    {key:'easy',emoji:'🌱',name:'初级',desc:'适合入门 · 轻松好玩',color:'easy'},
+    {key:'medium',emoji:'🔥',name:'中级',desc:'需要动脑筋 · 小挑战',color:'medium'},
+    {key:'hard',emoji:'💎',name:'高级',desc:'开动大脑 · 小高手',color:'hard'}
+  ];
+  const data=CK.get();
+  const el=document.getElementById('diffList');
+  el.innerHTML='';
+
+  diffs.forEach(d=>{
+    const saved=loadG(d.key);
+    const hasProg=saved&&!saved.done;
+    const comp=data.comp[d.key]||0;
+    const card=document.createElement('div');
+    card.className=`diff-card ${d.color}${hasProg?' has-prog':''}`;
+    card.innerHTML=`
+      <div class="di">${d.emoji}</div>
+      <div class="dinfo">
+        <div class="dname">${d.name}</div>
+        <div class="ddesc">${d.desc}</div>
+        <div class="dstats">
+          <span class="dstat">完成 <b>${comp}</b> 次</span>
+          ${hasProg?'<span class="dstat" style="color:var(--pink2)">有进行中~</span>':''}
+        </div>
+      </div>
+      <div class="dgo">›</div>
+    `;
+    card.addEventListener('click',()=>startGame(d.key));
+    el.appendChild(card);
+  });
+
+  renderCK();
+  renderRec();
+}
+
+function renderCK(){
+  const d=CK.get();
+  document.getElementById('ckStreak').textContent=d.streak;
+  document.getElementById('ckTotal').textContent=d.total;
+  const btn=document.getElementById('btnCk');
+  if(CK.checked()){btn.textContent='✅ 已打卡';btn.className='btn-ck done';btn.disabled=true}
+  else{btn.textContent='✅ 打卡';btn.className='btn-ck';btn.disabled=false}
+
+  const now=new Date();
+  const days=CK.calDays(now.getFullYear(),now.getMonth());
+  const cal=document.getElementById('calGrid');
+  cal.innerHTML='';
+  ['日','一','二','三','四','五','六'].forEach(l=>{const e=document.createElement('div');e.className='cal-l';e.textContent=l;cal.appendChild(e)});
+  days.forEach(d=>{const e=document.createElement('div');e.className='cal-d';if(d.d){e.textContent=d.d;if(d.ck)e.classList.add('ckd');if(d.td)e.classList.add('td')}cal.appendChild(e)});
+}
+
+function renderRec(){
+  const d=CK.get();
+  document.getElementById('rEasy').textContent=`${d.comp.easy||0} 次`;
+  document.getElementById('rMed').textContent=`${d.comp.medium||0} 次`;
+  document.getElementById('rHard').textContent=`${d.comp.hard||0} 次`;
+  if(d.best!==null){
+    const m=d.best/60|0,s=d.best%60;
+    const dl={easy:'初',medium:'中',hard:'高'};
+    document.getElementById('rBest').textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')} (${dl[d.bestD]||''})`;
+  }else document.getElementById('rBest').textContent='--:--';
+}
+
+document.getElementById('btnCk').addEventListener('click',()=>{CK.do();renderCK();spawnConfetti();toast('🎉 打卡成功！')});
+
+async function startGame(diff){
+  showLoad('正在获取题目...');
+  const key=pKey(diff);
+  const saved=loadG(diff);
+  if(saved&&saved.pk===key){
+    const r=GS.from(saved);
+    Object.assign(G,r);
+    G.start();
+    curKey=key;
+    hideLoad();showPage('pGame');renderG();return;
+  }
+
+  let result=await API.fetch();
+  if(!result){
+    document.getElementById('loadSt').textContent='在线题库不可用，本地出题中...';
+    await new Promise(r=>setTimeout(r,400));
+    const local=LG.make(diff);
+    result={puzzle:local.puzzle,solution:local.solution,src:'local'};
+  }
+
+  G.init(result.puzzle,result.solution,diff);
+  G.start();
+  curKey=key;
+  saveG();
+  hideLoad();showPage('pGame');renderG();
+  toast(result.src==='api'?'🌐 题目来自网络':'📦 本地出题');
+}
+
+function renderG(){
+  const dn={easy:'☀️ 初级',medium:'🌤 中级',hard:'⚡ 高级'};
+  document.getElementById('gDiff').textContent=dn[G.diff];
+  renderBoard();renderNpad();renderGStats();renderTools();
+  if(G.done&&G.err<G.maxErr)showVictory();
+  if(G.done&&G.err>=G.maxErr)showGameover();
+}
+
+function renderBoard(){
+  const el=document.getElementById('gBoard');
+  el.innerHTML='';
+  for(let r=0;r<9;r++){
+    for(let c=0;c<9;c++){
+      const cell=document.createElement('div');
+      cell.className='cell';
+      if((c+1)%3===0&&c<8)cell.classList.add('br3');
+      if((r+1)%3===0&&r<8)cell.classList.add('bb3');
+
+      const v=G.get(r,c);
+      const isS=r===G.selR&&c===G.selC;
+      const isHL=G.selR===r||G.selC===c||(G.selR>=0&&(r/3|0)===(G.selR/3|0)&&(c/3|0)===(G.selC/3|0));
+      const selV=G.selR>=0?G.get(G.selR,G.selC):0;
+
+      if(G.isG(r,c))cell.classList.add('given');
+      if(isS)cell.classList.add('sel');
+      else if(isHL)cell.classList.add('hl');
+      if(selV>0&&v===selV&&!isS)cell.classList.add('same');
+      if(!G.isG(r,c)&&v!==0&&v!==G.sol[r][c])cell.classList.add('err');
+
+      if(v!==0){
+        cell.textContent=v;
+        cell.style.color=NUM_COLORS[(v-1)%9];
+        if(!G.isG(r,c))cell.classList.add('num-colors');
+      }else if(G.notes[r][c].size>0){
+        const ng=document.createElement('div');ng.className='ng';
+        for(let n=1;n<=9;n++){const nd=document.createElement('div');nd.className='nd';nd.textContent=G.notes[r][c].has(n)?n:'';ng.appendChild(nd)}
+        cell.appendChild(ng);
+      }
+
+      cell.addEventListener('click',()=>{if(G.done)return;G.selR=r;G.selC=c;renderG()});
+      el.appendChild(cell);
+    }
+  }
+}
+
+function renderNpad(){
+  const el=document.getElementById('gNpad');
+  el.innerHTML='';
+  for(let n=1;n<=9;n++){
+    const b=document.createElement('button');
+    b.className='nb';
+    b.style.color=NUM_COLORS[n-1];
+    const cnt=G.cntN(n);
+    b.innerHTML=`${n}<div class="ncnt">${cnt}/9</div>`;
+    if(cnt<=0)b.classList.add('zz');
+    b.addEventListener('click',()=>inputN(n));
+    el.appendChild(b);
+  }
+}
+
+function renderGStats(){
+  document.getElementById('gTimer').textContent=G.time();
+  document.getElementById('gErr').textContent=`${G.err}/${G.maxErr}`;
+  document.getElementById('gRem').textContent=G.remain();
+}
+
+function renderTools(){
+  const nb=document.getElementById('tNotes');
+  G.note?nb.classList.add('on'):nb.classList.remove('on');
+}
+
+function inputN(n){
+  if(G.done)return;
+  if(G.selR<0||G.selC<0){toast('点一下格子再填数字哦~');return}
+  if(G.note){G.tN(G.selR,G.selC,n)}
+  else{const r=G.set(G.selR,G.selC,n);if(r==='over'){renderG();showGameover();return}}
+  saveG();renderG();
+}
+
+document.getElementById('tNotes').addEventListener('click',()=>{G.note=!G.note;renderTools();toast(G.note?'✏️ 笔记模式开启':'✏️ 笔记模式关闭')});
+document.getElementById('tUndo').addEventListener('click',()=>{if(G.undo()){saveG();renderG()}else toast('没有可以撤销的啦~')});
+document.getElementById('tEr').addEventListener('click',()=>{if(G.done)return;if(G.selR<0){toast('先点一下格子~');return}G.set(G.selR,G.selC,0);saveG();renderG()});
+document.getElementById('tHint').addEventListener('click',()=>{
+  if(G.done)return;
+  const h=G.hint();
+  if(h){G.selR=h.r;G.selC=h.c;saveG();renderG();toast(`💡 第${h.r+1}行第${h.c+1}列填 ${h.v}`)}
+  else toast('没有需要提示的格子啦~');
+});
+document.getElementById('tNew').addEventListener('click',async()=>{G.stop();await startGame(G.diff)});
+
+function showVictory(){
+  const dn={easy:'初级',medium:'中级',hard:'高级'};
+  document.getElementById('vTime').textContent=`用时 ${G.time()}`;
+  document.getElementById('vDiff').textContent=dn[G.diff];
+  document.getElementById('vErr').textContent=G.err;
+  document.getElementById('victoryOv').classList.add('show');
+  CK.record(G.diff,G.secs);
+  const wasChecked=CK.checked();
+  if(!wasChecked){
+    CK.do();
+    toast('🎉 今日已自动打卡！');
+  }else{
+    toast('✅ 今日已打卡~');
+  }
+  spawnConfetti();spawnConfetti();
+}
+
+document.getElementById('vBtn').addEventListener('click',()=>{
+  document.getElementById('victoryOv').classList.remove('show');
+  G.stop();showPage('pSelect');renderSelect();
+});
+
+function showGameover(){document.getElementById('goOv').classList.add('show')}
+document.getElementById('goBtn').addEventListener('click',()=>{
+  document.getElementById('goOv').classList.remove('show');
+  G.stop();showPage('pSelect');renderSelect();
+});
+
+document.addEventListener('keydown',e=>{
+  if(!document.getElementById('pGame').classList.contains('active'))return;
+  if(G.done)return;
+  const k=e.key;
+  if(k>='1'&&k<='9'){inputN(parseInt(k));return}
+  if(k==='Backspace'||k==='Delete'||k==='0'){if(G.selR>=0){G.set(G.selR,G.selC,0);saveG();renderG()}return}
+  if(k==='ArrowUp'&&G.selR>0){G.selR--;renderG();return}
+  if(k==='ArrowDown'&&G.selR<8){G.selR++;renderG();return}
+  if(k==='ArrowLeft'&&G.selC>0){G.selC--;renderG();return}
+  if(k==='ArrowRight'&&G.selC<8){G.selC++;renderG();return}
+  if(k==='n'||k==='N'){G.note=!G.note;renderTools();return}
+  if((k==='z'||k==='Z')&&(e.ctrlKey||e.metaKey)){e.preventDefault();if(G.undo()){saveG();renderG()}}
+});
+
+setInterval(()=>{if(!G.done&&G.tid){document.getElementById('gTimer').textContent=G.time();document.getElementById('gRem').textContent=G.remain()}},500);
+setInterval(()=>{if(G.puz.length>0&&!G.done)saveG()},5000);
+
+(async()=>{try{const r=await fetch(API.URL,{signal:AbortSignal.timeout(5000)});API.online=r.ok;API.updBadge(r.ok)}catch(e){API.online=false;API.updBadge(false)}})();
+makeStars();
+</script>
+</body>
+</html>

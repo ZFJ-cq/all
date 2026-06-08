@@ -1,0 +1,278 @@
+{
+  "id": "case_003",
+  "title": "狸猫换太子",
+  "subtitle": "第三案",
+  "difficulty": 3,
+  "description": "宫中怪事频发，太子身世成谜。包拯奉命调查，竟牵扯出一桩尘封二十年的宫廷秘案……",
+  "background": "宋仁宗年间，宫中传言李宸妃所生之子被一只狸猫替换，真相扑朔迷离。包拯奉旨彻查，层层揭开当年宫廷争斗的内幕。",
+  "stages": {
+    "report": {
+      "id": "report",
+      "name": "报案",
+      "dialogues": [
+        {
+          "speaker": "系统",
+          "speakerTitle": "旁白",
+          "content": "一日，开封府接到密报：宫中李宸妃病重，临终前似有重大冤情要向包拯申诉。",
+          "emotion": "narrator"
+        },
+        {
+          "speaker": "包拯",
+          "speakerTitle": "包青天",
+          "content": "李宸妃乃先帝嫔妃，如今病重垂危。此案关系重大，必须谨慎行事！",
+          "emotion": "serious"
+        },
+        {
+          "speaker": "宫女",
+          "speakerTitle": "证人",
+          "content": "包大人，娘娘她……她想见您最后一面，说有天大的冤屈要向您诉说！",
+          "emotion": "cry"
+        },
+        {
+          "speaker": "系统",
+          "speakerTitle": "旁白",
+          "content": "包拯随宫女来到宫中，只见李宸妃气息奄奄，手中紧握着一块半块玉佩。",
+          "emotion": "narrator"
+        },
+        {
+          "speaker": "李宸妃",
+          "speakerTitle": "先帝嫔妃",
+          "content": "包……包大人……民妇有冤……二十年前……太子……狸猫……",
+          "emotion": "cry"
+        },
+        {
+          "speaker": "包拯",
+          "speakerTitle": "包青天",
+          "content": "娘娘放心，有本官在，定当为你查明真相！这块玉佩从何而来？",
+          "emotion": "serious"
+        },
+        {
+          "speaker": "李宸妃",
+          "speakerTitle": "先帝嫔妃",
+          "content": "这是……当年……与太子……一同……送出宫的……另一半……在……陈琳……手中……",
+          "emotion": "cry"
+        }
+      ]
+    },
+    "investigation": {
+      "id": "investigation",
+      "name": "取证",
+      "scenes": [
+        {
+          "id": "palace",
+          "name": "宫中",
+          "description": "深宫之中，处处暗藏玄机，李宸妃的居所已被封存。",
+          "searchHints": ["检查李宸妃遗物", "询问宫中旧人", "查找当年记录"]
+        },
+        {
+          "id": "chenlin_house",
+          "name": "陈琳府邸",
+          "description": "老太监陈琳的住所，此人在宫中服务多年，知晓不少秘闻。",
+          "searchHints": ["寻找玉佩另一半", "询问当年旧事", "检查书房"]
+        },
+        {
+          "id": "lanxi_temple",
+          "name": "兰溪庵",
+          "description": "当年宫女寇珠曾在此出家，后不幸身亡。",
+          "searchHints": ["查找寇珠遗物", "询问庵中尼姑", "检查墓地"]
+        }
+      ],
+      "evidences": [
+        {
+          "id": "ev_201",
+          "name": "半块龙凤玉佩",
+          "icon": "package",
+          "description": "李宸妃临终紧握的半块玉佩，上面刻有龙凤图案，明显还有另一半。",
+          "sceneId": "palace",
+          "isKey": true,
+          "clue": "玉佩分为两半，显然是当年故意分开作为信物，以便日后相认。"
+        },
+        {
+          "id": "ev_202",
+          "name": "陈琳的供词",
+          "icon": "note",
+          "description": "陈琳承认当年受先帝密令，将刚出生的太子送出宫，交由八王爷抚养。",
+          "sceneId": "chenlin_house",
+          "isKey": true,
+          "clue": "陈琳的证词证实了太子被送出宫的事实，但他声称不知换婴之事。"
+        },
+        {
+          "id": "ev_203",
+          "name": "玉佩的另一半",
+          "icon": "package",
+          "description": "在陈琳书房密室中找到的另一半玉佩，与李宸妃手中的可以完美拼接。",
+          "sceneId": "chenlin_house",
+          "isKey": true,
+          "clue": "两块玉佩合二为一，上面刻着'受命于天，既寿永昌'八字，乃皇家之物。"
+        },
+        {
+          "id": "ev_204",
+          "name": "寇珠的遗书",
+          "icon": "note",
+          "description": "在兰溪庵寇珠墓中发现的遗书，详细记录了当年狸猫换太子的全过程。",
+          "sceneId": "lanxi_temple",
+          "isKey": true,
+          "clue": "遗书揭露了刘妃与郭槐合谋，用剥了皮的狸猫换走太子，寇珠不忍加害，将太子托付陈琳送出宫。"
+        },
+        {
+          "id": "ev_205",
+          "name": "郭槐的贴身太监证词",
+          "icon": "witness",
+          "description": "郭槐的贴身太监供认，当年确实看到郭槐深夜抱一包裹出宫，形迹可疑。",
+          "sceneId": "palace",
+          "isKey": true,
+          "clue": "太监的证词与寇珠遗书相互印证，郭槐确有重大嫌疑。"
+        },
+        {
+          "id": "ev_206",
+          "name": "先帝手谕",
+          "icon": "seal",
+          "description": "在宫中档案中发现先帝密诏，命陈琳保护太子安全。",
+          "sceneId": "palace",
+          "isKey": false,
+          "clue": "先帝似乎早已察觉宫中阴谋，提前做好了安排。"
+        }
+      ]
+    },
+    "interrogation": {
+      "id": "interrogation",
+      "name": "审讯",
+      "suspects": [
+        {
+          "id": "sus_201",
+          "name": "刘太后",
+          "role": "太后",
+          "description": "当今太后，当年的刘妃，权势滔天，对案件百般阻挠。",
+          "dialogues": [
+            {
+              "speaker": "刘太后",
+              "speakerTitle": "嫌疑人",
+              "content": "包拯！你好大的胆子！竟敢调查哀家的旧事？",
+              "emotion": "angry"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "太后明鉴，臣只是奉旨查明李宸妃的冤情，还请太后明示。",
+              "emotion": "serious"
+            },
+            {
+              "speaker": "刘太后",
+              "speakerTitle": "嫌疑人",
+              "content": "哀家不知什么冤情！李宸妃当年诞下妖孽，先帝震怒将其贬入冷宫，与哀家无关！",
+              "emotion": "defensive"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "妖孽？太后可认得这半块玉佩？寇珠的遗书已经道出了真相！",
+              "emotion": "angry"
+            },
+            {
+              "speaker": "刘太后",
+              "speakerTitle": "嫌疑人",
+              "content": "你……你竟敢……",
+              "emotion": "panic"
+            }
+          ],
+          "isGuilty": true
+        },
+        {
+          "id": "sus_202",
+          "name": "郭槐",
+          "role": "总管太监",
+          "description": "刘太后的心腹太监，当年负责执行换婴计划的关键人物。",
+          "dialogues": [
+            {
+              "speaker": "郭槐",
+              "speakerTitle": "嫌疑人",
+              "content": "包大人，老奴只是个太监，能知道什么？",
+              "emotion": "fear"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "郭槐！你贴身太监已经招供，你还想抵赖吗？",
+              "emotion": "angry"
+            },
+            {
+              "speaker": "郭槐",
+              "speakerTitle": "嫌疑人",
+              "content": "他……他胡说！老奴……老奴只是按太后旨意办事……",
+              "emotion": "panic"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "这么说，你承认参与了换婴之事？",
+              "emotion": "serious"
+            },
+            {
+              "speaker": "郭槐",
+              "speakerTitle": "嫌疑人",
+              "content": "是……是太后娘娘让老奴……用狸猫换走了太子……",
+              "emotion": "surrender"
+            }
+          ],
+          "isGuilty": true
+        },
+        {
+          "id": "sus_203",
+          "name": "陈琳",
+          "role": "老太监",
+          "description": "宫中资历最深的太监，当年受先帝之托保护太子。",
+          "dialogues": [
+            {
+              "speaker": "陈琳",
+              "speakerTitle": "嫌疑人",
+              "content": "包大人明鉴，老奴当年确实受先帝密令，将太子送出宫交给八王爷。",
+              "emotion": "serious"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "你可知当年换婴之事？",
+              "emotion": "serious"
+            },
+            {
+              "speaker": "陈琳",
+              "speakerTitle": "嫌疑人",
+              "content": "老奴……老奴当时并不知情，只知道要保护太子安全。后来寇珠姑娘找到老奴，才道出真相……",
+              "emotion": "guilty"
+            },
+            {
+              "speaker": "包拯",
+              "speakerTitle": "包青天",
+              "content": "寇珠后来如何？",
+              "emotion": "serious"
+            },
+            {
+              "speaker": "陈琳",
+              "speakerTitle": "嫌疑人",
+              "content": "她……她被郭槐发现后，被逼自尽了……老奴无能，未能保护好她……",
+              "emotion": "cry"
+            }
+          ],
+          "isGuilty": false,
+          "hint": "陈琳虽知情不报，但并非主谋，且保护太子有功"
+        }
+      ]
+    },
+    "judgment": {
+      "id": "judgment",
+      "name": "断案",
+      "correctSuspectId": "sus_201",
+      "requiredEvidenceIds": ["ev_201", "ev_202", "ev_203", "ev_204", "ev_205"],
+      "judgmentText": {
+        "correct": "经查明，当年刘妃（今刘太后）为夺后位，与总管太监郭槐合谋，用剥了皮的狸猫替换李宸妃所生太子，企图置太子于死地。幸得宫女寇珠与太监陈琳舍命相救，将太子送出宫交由八王爷抚养，才保全太子性命。李宸妃因此被打入冷宫，苦熬二十年。寇珠遭郭槐逼迫自尽，含冤而死。此案真相大白！郭槐凌迟处死，刘太后虽贵为太后，亦难辞其咎，削去封号，打入冷宫反省。太子（当今皇帝）与生母李宸妃得以相认。陈琳护主有功，赏黄金百两。寇珠忠义可嘉，追封诰命夫人。",
+        "wrong": "案情错综复杂，大人所断未能命中要害，请重新梳理证据链。",
+        "partial": "大人已查明部分真相，但幕后主谋尚未水落石出，请继续深挖。"
+      }
+    }
+  },
+  "hints": [
+    { "id": "hint_3_1", "content": "玉佩是关键——找到另一半就能揭开太子身世之谜。", "cost": 1 },
+    { "id": "hint_3_2", "content": "陈琳知道的远比他最初透露的要多，需要耐心追问。", "cost": 1 },
+    { "id": "hint_3_3", "content": "兰溪庵藏有重要线索，寇珠的遗物可能藏着惊天秘密。", "cost": 1 }
+  ]
+}

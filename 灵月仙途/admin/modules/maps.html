@@ -1,0 +1,103 @@
+<script src="../js/api-service.js"></script>
+<div class="section active">
+  <h2 class="section-title">地图管理</h2>
+  
+  <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+    <div></div>
+    <button class="btn btn-primary" onclick="openAddMapModal()">新增地图</button>
+  </div>
+  
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>地图编码</th>
+        <th>地图名称</th>
+        <th>类型</th>
+        <th>层级</th>
+        <th>推荐等级</th>
+        <th>推荐战力</th>
+        <th>怪物密度</th>
+        <th>掉落权重</th>
+        <th>在线人数</th>
+        <th>状态</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody id="mapTableBody">
+      <!-- JS 生成 -->
+    </tbody>
+  </table>
+  <div id="mapPagination"></div>
+</div>
+
+<script>
+  // 初始化地图管理
+  function initMaps() {
+    loadMaps();
+  }
+
+  // 加载地图列表
+  async function loadMaps() {
+    const tableBody = document.getElementById('mapTableBody');
+    tableBody.innerHTML = '<tr><td colspan="12" style="text-align:center; color:#999;">加载中...</td></tr>';
+    
+    try {
+      const result = await apiService.get('/map');
+      const maps = result.data || result;
+      
+      tableBody.innerHTML = '';
+      if (Array.isArray(maps) && maps.length > 0) {
+        maps.forEach(map => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${map.id}</td>
+            <td>${map.code}</td>
+            <td>${map.name}</td>
+            <td>${map.type}</td>
+            <td>${map.level}</td>
+            <td>${map.recommendLevel}</td>
+            <td>${map.recommendPower}</td>
+            <td>${map.monsterDensity}</td>
+            <td>${map.dropWeight}</td>
+            <td>${map.onlineCount}</td>
+            <td>${map.status === 1 ? '启用' : '禁用'}</td>
+            <td>
+              <button class="btn btn-primary" onclick="editMap(${map.id})">编辑</button>
+              <button class="btn btn-danger" onclick="deleteMap(${map.id})">删除</button>
+            </td>
+          `;
+          tableBody.appendChild(row);
+        });
+      } else {
+        tableBody.innerHTML = '<tr><td colspan="12" style="text-align:center; color:#999;">暂无数据</td></tr>';
+      }
+    } catch (error) {
+      console.error('加载地图列表失败:', error);
+      tableBody.innerHTML = '<tr><td colspan="12" style="text-align:center; color:#e74c3c;">加载失败</td></tr>';
+    }
+  }
+
+  // 打开新增地图模态框
+  function openAddMapModal() {
+    console.log('打开新增地图模态框');
+  }
+
+  // 编辑地图
+  function editMap(id) {
+    console.log('编辑地图:', id);
+  }
+
+  // 删除地图
+  function deleteMap(id) {
+    if (confirm('确定要删除这个地图吗？')) {
+      console.log('删除地图:', id);
+      loadMaps();
+    }
+  }
+
+  // 页面加载完成后初始化
+  if (typeof window.initMaps === 'undefined') {
+    window.initMaps = initMaps;
+  }
+</script>
