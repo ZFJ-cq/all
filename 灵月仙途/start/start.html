@@ -824,6 +824,7 @@
       
       // 渲染角色列表
       characterList.forEach((character, index) => {
+        const roleId = character.id || character.roleId;
         const characterItem = document.createElement('div');
         characterItem.className = 'character-item';
         characterItem.style.position = 'relative';
@@ -831,14 +832,14 @@
         // 如果只有一个角色，自动选中
         if (characterList.length === 1) {
           characterItem.classList.add('selected');
-          localStorage.setItem('selectedCharacterId', character.id);
-          localStorage.setItem('currentRoleId', character.id);
+          localStorage.setItem('selectedCharacterId', roleId);
+          localStorage.setItem('currentRoleId', roleId);
           
           // 🔥 方案一补充：自动选中时也更新 token 备份
           const token = localStorage.getItem('token');
           const userId = localStorage.getItem('userId');
           if (token && userId) {
-            const saved = window.TokenUtils.save(token, userId, character.id);
+            const saved = window.TokenUtils.save(token, userId, roleId);
             console.log('✅ 自动选中角色，已更新 Token 备份:', saved ? '成功 ✓' : '失败 ✗');
           }
         }
@@ -851,15 +852,15 @@
           <div class="character-info">
             <span>${character.gender === 1 ? '男' : '女'}</span>
             <span class="character-realm">${realmInfo}</span>
-            <span>等级 ${character.level}</span>
+            <span>等级 ${character.level || 1}</span>
           </div>
-          <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=chinese%20xianxia%20style%20delete%20icon%20simple%20red%20design&image_size=square" alt="删除角色" class="delete-role-icon" data-role-id="${character.id}">
+          <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=chinese%20xianxia%20style%20delete%20icon%20simple%20red%20design&image_size=square" alt="删除角色" class="delete-role-icon" data-role-id="${roleId}">
         `;
         
         // 获取角色境界信息
         (async function() {
           try {
-            const realmData = await window.apiService.get(`/role-realm/role/${character.id}`);
+            const realmData = await window.apiService.get(`/role-realm/role/${roleId}`);
             if (realmData) {
               realmInfo = `${realmData.realmName} ${realmData.realmLevel}层`;
               const realmElement = characterItem.querySelector('.character-realm');
@@ -883,14 +884,14 @@
             // 添加当前角色的选中状态
             characterItem.classList.add('selected');
             // 存储选中的角色 ID
-            localStorage.setItem('selectedCharacterId', character.id);
-            localStorage.setItem('currentRoleId', character.id);
+            localStorage.setItem('selectedCharacterId', roleId);
+            localStorage.setItem('currentRoleId', roleId);
             
             // 🔥 方案一补充：手动选择时更新 token 备份
             const token = localStorage.getItem('token');
             const userId = localStorage.getItem('userId');
             if (token && userId) {
-              const saved = window.TokenUtils.save(token, userId, character.id);
+              const saved = window.TokenUtils.save(token, userId, roleId);
               console.log('✅ 手动选择角色，已更新 Token 备份:', saved ? '成功 ✓' : '失败 ✗');
             }
           }
